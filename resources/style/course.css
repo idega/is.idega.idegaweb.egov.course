@@ -1,0 +1,47 @@
+#course_step_1 div.info  {
+	padding-top :0px;
+	padding-bottom :13px;
+	height : 85px;
+}
+
+.courses {
+	width : 100%;
+}
+
+.courses thead tr td {
+	font-weight : bold;
+	padding-left : 4px;
+}
+
+.courses tbody tr td {
+	padding-left : 4px;
+}
+
+.courses tbody tr.even td {
+	background-color : #D6D6D6;
+}
+
+.courses .column0 {
+	width : 20px;
+}
+
+.courses .column0 .checkbox{
+	margin-top : 3px;
+}
+
+.formItem.formItemBig {
+	width : 100%;
+}
+
+.formItem.formItemBig select {
+	width : 100px;
+}
+
+.courses.courses_phase_7 .column0 {
+	width : 120px;
+}
+
+.courses.courses_phase_7 .column4,
+.courses.courses_phase_7 .column5{
+	width : 50px;
+}
