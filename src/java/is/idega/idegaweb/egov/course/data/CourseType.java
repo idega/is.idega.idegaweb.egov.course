@@ -1,10 +1,10 @@
 package is.idega.idegaweb.egov.course.data;
 
-
 import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOEntity;
 
 public interface CourseType extends IDOEntity {
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getName
 	 */
@@ -44,11 +44,6 @@ public interface CourseType extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setSchoolType
 	 */
 	public void setSchoolType(SchoolType type);
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setSchoolTypePK
-	 */
-	public void setSchoolTypePK(Object primaryKey);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getOrder

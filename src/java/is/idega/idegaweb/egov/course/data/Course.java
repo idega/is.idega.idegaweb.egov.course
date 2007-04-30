@@ -1,20 +1,16 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.block.school.data.SchoolType;
+import com.idega.block.school.data.School;
 import java.sql.Timestamp;
 import com.idega.data.IDOEntity;
 
 public interface Course extends IDOEntity {
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getName
 	 */
 	public String getName();
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setName
-	 */
-	public void setName(String name);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getDescription
@@ -22,44 +18,9 @@ public interface Course extends IDOEntity {
 	public String getDescription();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setDescription
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getProvider
 	 */
-	public void setDescription(String description);
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getStartDate
-	 */
-	public Timestamp getStartDate();
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setStartDate
-	 */
-	public void setStartDate(Timestamp startDate);
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getEndDate
-	 */
-	public Timestamp getEndDate();
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setEndDate
-	 */
-	public void setEndDate(Timestamp endDate);
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getSchoolType
-	 */
-	public SchoolType getSchoolType();
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setSchoolTypePK
-	 */
-	public void setSchoolTypePK(Object PK);
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setSchoolType
-	 */
-	public void setSchoolType(SchoolType schoolType);
+	public School getProvider();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCourseType
@@ -67,14 +28,9 @@ public interface Course extends IDOEntity {
 	public CourseType getCourseType();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseTypePK
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getPrice
 	 */
-	public void setCourseTypePK(Object PK);
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseType
-	 */
-	public void setCourseType(CourseType courseType);
+	public CoursePrice getPrice();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getAccountingKey
@@ -82,9 +38,14 @@ public interface Course extends IDOEntity {
 	public String getAccountingKey();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setAccountingKey
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getStartDate
 	 */
-	public void setAccountingKey(String key);
+	public Timestamp getStartDate();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getEndDate
+	 */
+	public Timestamp getEndDate();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getBirthyearFrom
@@ -92,19 +53,9 @@ public interface Course extends IDOEntity {
 	public int getBirthyearFrom();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setBirthyearFrom
-	 */
-	public void setBirthyearFrom(int from);
-
-	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getBirthyearTo
 	 */
 	public int getBirthyearTo();
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setBirthyearTo
-	 */
-	public void setBirthyearTo(int to);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getMax
@@ -112,17 +63,62 @@ public interface Course extends IDOEntity {
 	public int getMax();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setMax
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getFreePlaces
 	 */
-	public void setMax(int max);
+	public int getFreePlaces();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getPrice
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setName
 	 */
-	public CoursePrice getPrice();
+	public void setName(String name);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setDescription
+	 */
+	public void setDescription(String description);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setProvider
+	 */
+	public void setProvider(School provider);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseType
+	 */
+	public void setCourseType(CourseType courseType);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setPrice
 	 */
 	public void setPrice(CoursePrice price);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setAccountingKey
+	 */
+	public void setAccountingKey(String key);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setStartDate
+	 */
+	public void setStartDate(Timestamp startDate);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setEndDate
+	 */
+	public void setEndDate(Timestamp endDate);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setBirthyearFrom
+	 */
+	public void setBirthyearFrom(int from);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setBirthyearTo
+	 */
+	public void setBirthyearTo(int to);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setMax
+	 */
+	public void setMax(int max);
 }

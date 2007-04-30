@@ -1,134 +1,181 @@
 package is.idega.idegaweb.egov.course.data;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolType;
+import com.idega.block.school.data.SchoolArea;
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOCompositePrimaryKeyException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.query.Column;
 import com.idega.data.query.MatchCriteria;
+import com.idega.data.query.OR;
 import com.idega.data.query.Order;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 
 public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 
-	public static final String TABLE_NAME		= "COU_COURSE_PRICE";
-	public static final String NAME				= "NAME";
-	public static final String SCHOOL_TYPE_ID	= "SCH_SCHOOL_TYPE_ID";
-	public static final String COURSE_TYPE_ID	= "COU_COURSE_TYPE_ID";
-	public static final String VALID_FROM		= "VALID_FROM";
-	public static final String VALID_TO			= "VALID_TO";
-	public static final String NUMBER_OF_DAYS	= "NUMBER_OF_DAYS";
-	public static final String PRICE			= "PRICE";
-	
+	public static final String ENTITY_NAME = "COU_COURSE_PRICE";
+	public static final String COLUMN_NAME = "NAME";
+	public static final String COLUMN_SCHOOL_AREA = "SCHOOL_AREA";
+	public static final String COLUMN_COURSE_TYPE = "COU_COURSE_TYPE_ID";
+	public static final String COLUMN_VALID_FROM = "VALID_FROM";
+	public static final String COLUMN_VALID_TO = "VALID_TO";
+	public static final String COLUMN_VALID = "IS_VALID";
+	public static final String COLUMN_NUMBER_OF_DAYS = "NUMBER_OF_DAYS";
+	public static final String COLUMN_PRICE = "PRICE";
+	public static final String COLUMN_PRE_CARE_PRICE = "PRE_CARE_PRICE";
+	public static final String COLUMN_POST_CARE_PRICE = "POST_CARE_PRICE";
+
 	public String getEntityName() {
-		return TABLE_NAME;
+		return ENTITY_NAME;
 	}
 
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
-		addAttribute(NAME, "name", String.class, 50);
-		addAttribute(VALID_FROM, "valid from", Timestamp.class);
-		addAttribute(VALID_TO, "valid to", Timestamp.class);
-		addAttribute(NUMBER_OF_DAYS, "number of days", Integer.class);
-		addAttribute(PRICE, "price", Integer.class);
-		
-		addManyToOneRelationship(SCHOOL_TYPE_ID, SchoolType.class);
-		addManyToOneRelationship(COURSE_TYPE_ID, CourseType.class);
+		addAttribute(COLUMN_NAME, "Name", String.class, 50);
+		addAttribute(COLUMN_VALID_FROM, "Valid from", Timestamp.class);
+		addAttribute(COLUMN_VALID_TO, "Valid to", Timestamp.class);
+		addAttribute(COLUMN_VALID, "Is valid", Boolean.class);
+		addAttribute(COLUMN_NUMBER_OF_DAYS, "Number of days", Integer.class);
+		addAttribute(COLUMN_PRICE, "Price", Integer.class);
+		addAttribute(COLUMN_PRE_CARE_PRICE, "Pre care price", Integer.class);
+		addAttribute(COLUMN_POST_CARE_PRICE, "Post care price", Integer.class);
+
+		addManyToOneRelationship(COLUMN_SCHOOL_AREA, SchoolArea.class);
+		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
+		getEntityDefinition().setBeanCachingActiveByDefault(true);
 	}
 
+	// Getters
 	public String getName() {
-		return getStringColumnValue(NAME);
+		return getStringColumnValue(COLUMN_NAME);
 	}
 
-	public void setName(String name) {
-		setColumn(NAME, name);
-	}
-	
-	public SchoolType getSchoolTypeID() {
-		return (SchoolType) getColumnValue(SCHOOL_TYPE_ID);
-	}
-	
-	public void setSchoolTypeID(Integer pk) {
-		setColumn(SCHOOL_TYPE_ID, pk);
+	public SchoolArea getSchoolArea() {
+		return (SchoolArea) getColumnValue(COLUMN_SCHOOL_AREA);
 	}
 
-	public CourseType getCourseTypeID() {
-		return (CourseType) getColumnValue(COURSE_TYPE_ID);
-	}
-	
-	public void setCourseTypeID(Integer pk) {
-		setColumn(COURSE_TYPE_ID, pk);
+	public CourseType getCourseType() {
+		return (CourseType) getColumnValue(COLUMN_COURSE_TYPE);
 	}
 
 	public Timestamp getValidFrom() {
-		return getTimestampColumnValue(VALID_FROM);
-	}
-
-	public void setValidFrom(Timestamp stamp) {
-		setColumn(VALID_FROM, stamp);
+		return getTimestampColumnValue(COLUMN_VALID_FROM);
 	}
 
 	public Timestamp getValidTo() {
-		return getTimestampColumnValue(VALID_TO);
+		return getTimestampColumnValue(COLUMN_VALID_TO);
 	}
 
-	public void setValidTo(Timestamp stamp) {
-		setColumn(VALID_TO, stamp);
-	}
-	
 	public int getNumberOfDays() {
-		return getIntColumnValue(NUMBER_OF_DAYS);
-	}
-	
-	public void setNumberOfDays(int noDays) {
-		setColumn(NUMBER_OF_DAYS, noDays);
+		return getIntColumnValue(COLUMN_NUMBER_OF_DAYS);
 	}
 
 	public int getPrice() {
-		return getIntColumnValue(PRICE);
+		return getIntColumnValue(COLUMN_PRICE);
 	}
-	
+
+	public int getPreCarePrice() {
+		return getIntColumnValue(COLUMN_PRE_CARE_PRICE);
+	}
+
+	public int getPostCarePrice() {
+		return getIntColumnValue(COLUMN_POST_CARE_PRICE);
+	}
+
+	// Setters
+	public void setName(String name) {
+		setColumn(COLUMN_NAME, name);
+	}
+
+	public void setSchoolArea(SchoolArea area) {
+		setColumn(COLUMN_SCHOOL_AREA, area);
+	}
+
+	public void setCourseType(CourseType type) {
+		setColumn(COLUMN_COURSE_TYPE, type);
+	}
+
+	public void setValidFrom(Timestamp stamp) {
+		setColumn(COLUMN_VALID_FROM, stamp);
+	}
+
+	public void setValidTo(Timestamp stamp) {
+		setColumn(COLUMN_VALID_TO, stamp);
+	}
+
+	public void setValid(boolean valid) {
+		setColumn(COLUMN_VALID, valid);
+	}
+
+	public void setNumberOfDays(int noDays) {
+		setColumn(COLUMN_NUMBER_OF_DAYS, noDays);
+	}
+
 	public void setPrice(int price) {
-		setColumn(PRICE, price);
+		setColumn(COLUMN_PRICE, price);
 	}
-	
+
+	public void setPreCarePrice(int price) {
+		setColumn(COLUMN_PRE_CARE_PRICE, price);
+	}
+
+	public void setPostCarePrice(int price) {
+		setColumn(COLUMN_POST_CARE_PRICE, price);
+	}
+
+	// Finders
 	public Collection ejbFindAll() throws FinderException, IDORelationshipException {
-		return ejbFindAll(null, null);
+		return ejbFindAll(null, null, null, null);
 	}
-	
-	public Collection ejbFindAll(SchoolType sType, CourseType cType) throws FinderException, IDORelationshipException {
+
+	public Collection ejbFindAll(Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
+		return ejbFindAll(null, null, fromDate, toDate);
+	}
+
+	public Collection ejbFindAll(SchoolArea area, CourseType cType) throws FinderException, IDORelationshipException {
+		return ejbFindAll(area, cType, null, null);
+	}
+
+	public Collection ejbFindAll(SchoolArea area, CourseType cType, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
-		Table schoolTypeTable = new Table(SchoolType.class);
-		
+
 		Column courseTypeOrder = new Column(courseTypeTable, "TYPE_ORDER");
-		Column courseTypeId = new Column(courseTypeTable, "SCH_SCHOOL_TYPE_ID");
-		Column schoolTypeOrder = new Column(schoolTypeTable, "type_order");
-		Column schoolTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
-		
+		Column courseTypeId;
+		try {
+			courseTypeId = new Column(courseTypeTable, courseTypeTable.getPrimaryKeyColumnName());
+		}
+		catch (IDOCompositePrimaryKeyException e) {
+			throw new FinderException(e.getMessage());
+		}
+
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
-		
-		if (sType != null) {
-			query.addCriteria(new MatchCriteria(schoolTypeId, MatchCriteria.EQUALS, sType));
+
+		if (area != null) {
+			OR or = new OR(new MatchCriteria(table.getColumn(COLUMN_SCHOOL_AREA), MatchCriteria.EQUALS, area), new MatchCriteria(table.getColumn(COLUMN_SCHOOL_AREA)));
+			query.addCriteria(or);
 		}
 		if (cType != null) {
 			query.addCriteria(new MatchCriteria(courseTypeId, MatchCriteria.EQUALS, cType));
 		}
-		
-		query.addOrder(new Order(schoolTypeOrder, true));
+		if (fromDate != null) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_VALID_FROM), MatchCriteria.GREATEREQUAL, fromDate));
+		}
+		if (toDate != null) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_VALID_TO), MatchCriteria.LESSEQUAL, toDate));
+		}
+		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
+
 		query.addOrder(new Order(courseTypeId, true));
 		query.addOrder(new Order(courseTypeOrder, true));
-		query.addOrder(new Order(schoolTypeId, true));
 		query.addJoin(table, courseTypeTable);
-		query.addJoin(table, schoolTypeTable);
-//		System.out.println(query);
 		return this.idoFindPKsByQuery(query);
 	}
-
 }

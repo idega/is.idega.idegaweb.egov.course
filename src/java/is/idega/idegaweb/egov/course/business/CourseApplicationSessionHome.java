@@ -6,6 +6,6 @@ import com.idega.business.IBOHome;
 import java.rmi.RemoteException;
 
 public interface CourseApplicationSessionHome extends IBOHome {
-	public CourseApplicationSession create() throws CreateException,
-			RemoteException;
+
+	public CourseApplicationSession create() throws CreateException, RemoteException;
 }

@@ -1,0 +1,272 @@
+/*
+ * $Id$ Created on Apr 20, 2007
+ * 
+ * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
+ * 
+ * This software is the proprietary information of Idega hf. Use is subject to license terms.
+ */
+package is.idega.idegaweb.egov.course.presentation.statistics;
+
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.presentation.CourseBlock;
+
+import java.rmi.RemoteException;
+import java.sql.Date;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolArea;
+import com.idega.block.school.data.SchoolType;
+import com.idega.business.IBORuntimeException;
+import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.IWContext;
+import com.idega.presentation.Layer;
+import com.idega.presentation.Table2;
+import com.idega.presentation.TableCell2;
+import com.idega.presentation.TableColumn;
+import com.idega.presentation.TableColumnGroup;
+import com.idega.presentation.TableRow;
+import com.idega.presentation.TableRowGroup;
+import com.idega.presentation.text.Heading1;
+import com.idega.presentation.text.Heading2;
+import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.DatePicker;
+import com.idega.presentation.ui.Form;
+import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.Label;
+import com.idega.presentation.ui.SubmitButton;
+import com.idega.presentation.ui.TextInput;
+import com.idega.util.IWTimestamp;
+
+public class CourseStatistics extends CourseBlock {
+
+	private static final String PARAMETER_FROM = "prm_from";
+	private static final String PARAMETER_TO = "prm_to";
+
+	private Object schoolTypePK;
+
+	public void present(IWContext iwc) {
+		try {
+			if (schoolTypePK == null) {
+				add("No school type set");
+				return;
+			}
+
+			IWResourceBundle iwrb = getResourceBundle(iwc);
+
+			Form form = new Form();
+			form.setStyleClass("adminForm");
+			add(form);
+
+			form.add(getNavigation(iwc));
+
+			Layer section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			section.setStyleClass("statisticsLayer");
+			form.add(section);
+
+			Layer clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
+
+			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_statistics", "Course statistics"));
+			section.add(heading);
+
+			SchoolType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(schoolTypePK.toString()));
+			Collection areas = getBusiness().getSchoolAreas();
+
+			Iterator iter = areas.iterator();
+			while (iter.hasNext()) {
+				SchoolArea area = (SchoolArea) iter.next();
+
+				Collection providers = getBusiness().getProviders(area, type);
+
+				addResults(iwc, iwrb, type, providers, courseTypes, section, area.getName());
+				section.add(clearLayer);
+			}
+
+			if (getBackPage() != null) {
+				Layer buttonLayer = new Layer();
+				buttonLayer.setStyleClass("buttonLayer");
+				form.add(buttonLayer);
+
+				GenericButton back = new GenericButton(localize("back", "Back"));
+				back.setPageToOpen(getBackPage());
+				buttonLayer.add(back);
+			}
+		}
+		catch (RemoteException re) {
+			throw new IBORuntimeException(re);
+		}
+	}
+
+	private Layer getNavigation(IWContext iwc) throws RemoteException {
+		Layer layer = new Layer(Layer.DIV);
+		layer.setStyleClass("formSection");
+
+		IWTimestamp from = new IWTimestamp();
+		from.setDay(1);
+		from.setMonth(1);
+
+		IWTimestamp to = new IWTimestamp();
+		to.setDay(1);
+		to.setMonth(1);
+		to.addYears(1);
+		to.addDays(-1);
+
+		DatePicker fromDate = new DatePicker(PARAMETER_FROM);
+		fromDate.setDate(from.getDate());
+		fromDate.keepStatusOnAction(true);
+
+		DatePicker toDate = new DatePicker(PARAMETER_TO);
+		toDate.setDate(to.getDate());
+		toDate.keepStatusOnAction(true);
+
+		Layer formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		Label label = new Label(getResourceBundle().getLocalizedString("from_date", "From date"), (TextInput) fromDate.getPresentationObject(iwc));
+		formItem.add(label);
+		formItem.add(fromDate);
+		layer.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(getResourceBundle().getLocalizedString("to_date", "To date"), (TextInput) toDate.getPresentationObject(iwc));
+		formItem.add(label);
+		formItem.add(toDate);
+		layer.add(formItem);
+
+		SubmitButton fetch = new SubmitButton(getResourceBundle().getLocalizedString("get", "Get"));
+		fetch.setStyleClass("indentedButton");
+		fetch.setStyleClass("button");
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.add(fetch);
+		layer.add(formItem);
+
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
+		layer.add(clearLayer);
+
+		return layer;
+	}
+
+	private void addResults(IWContext iwc, IWResourceBundle iwrb, SchoolType type, Collection providers, Collection courseTypes, Layer section, String header) throws RemoteException {
+		Heading2 heading2 = new Heading2(header);
+		section.add(heading2);
+
+		Table2 table = new Table2();
+		table.setWidth("100%");
+		table.setCellpadding(0);
+		table.setCellspacing(0);
+		table.setStyleClass("adminTable");
+		table.setStyleClass("ruler");
+		section.add(table);
+
+		TableColumnGroup columnGroup = table.createColumnGroup();
+		TableColumn column = columnGroup.createColumn();
+		column.setSpan(3);
+		column = columnGroup.createColumn();
+		column.setSpan(2);
+		column.setWidth("12");
+
+		TableRowGroup group = table.createHeaderRowGroup();
+		TableRow row = group.createRow();
+		TableCell2 cell = row.createHeaderCell();
+		cell.setStyleClass("firstColumn");
+		cell.setStyleClass("provider");
+		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("provider", "Provider")));
+
+		Map typeTotals = new HashMap();
+		Iterator iterator = courseTypes.iterator();
+		while (iterator.hasNext()) {
+			CourseType courseType = (CourseType) iterator.next();
+			typeTotals.put(courseType, new Integer(0));
+
+			cell = row.createHeaderCell();
+			cell.setStyleClass(courseType.getPrimaryKey().toString());
+			cell.add(new Text(courseType.getName()));
+		}
+
+		cell = row.createHeaderCell();
+		cell.setStyleClass("lastColumn");
+		cell.setStyleClass("total");
+		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("total", "Total")));
+
+		group = table.createBodyRowGroup();
+
+		Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(iwc.getParameter(PARAMETER_FROM)).getDate() : null;
+		Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(iwc.getParameter(PARAMETER_TO)).getDate() : null;
+		int iRow = 1;
+
+		int total = 0;
+		Iterator iter = providers.iterator();
+		while (iter.hasNext()) {
+			School provider = (School) iter.next();
+
+			row = group.createRow();
+			cell = row.createCell();
+			cell.setStyleClass("firstColumn");
+			cell.setStyleClass("provider");
+			cell.add(new Text(provider.getName()));
+
+			int sum = 0;
+			iterator = courseTypes.iterator();
+			while (iterator.hasNext()) {
+				CourseType courseType = (CourseType) iterator.next();
+				int typeSum = getBusiness().getNumberOfCourses(provider, type, courseType, fromDate, toDate);
+				sum += typeSum;
+				typeTotals.put(courseType, new Integer(((Integer) typeTotals.get(courseType)).intValue() + typeSum));
+
+				cell = row.createCell();
+				cell.setStyleClass(courseType.getPrimaryKey().toString());
+				cell.add(new Text(String.valueOf(typeSum)));
+			}
+			total += sum;
+
+			cell = row.createCell();
+			cell.setStyleClass("lastColumn");
+			cell.setStyleClass("total");
+			cell.add(new Text(String.valueOf(sum)));
+
+			if (iRow % 2 == 0) {
+				row.setStyleClass("even");
+			}
+			else {
+				row.setStyleClass("odd");
+			}
+
+			iRow++;
+		}
+
+		group = table.createFooterRowGroup();
+		row = group.createRow();
+
+		cell = row.createCell();
+		cell.setStyleClass("firstColumn");
+		cell.setStyleClass("totals");
+		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("total", "Total")));
+
+		iterator = courseTypes.iterator();
+		while (iterator.hasNext()) {
+			CourseType courseType = (CourseType) iterator.next();
+			int typeSum = ((Integer) typeTotals.get(courseType)).intValue();
+
+			cell = row.createCell();
+			cell.setStyleClass(courseType.getPrimaryKey().toString());
+			cell.add(new Text(String.valueOf(typeSum)));
+		}
+
+		cell = row.createCell();
+		cell.setStyleClass("lastColumn");
+		cell.setStyleClass("total");
+		cell.add(new Text(String.valueOf(total)));
+	}
+
+	public void setSchoolTypePK(String schoolTypePK) {
+		this.schoolTypePK = schoolTypePK;
+	}
+}

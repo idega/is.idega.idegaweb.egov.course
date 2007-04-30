@@ -1,47 +1,74 @@
 #course_step_1 div.info  {
-	padding-top :0px;
-	padding-bottom :13px;
-	height : 85px;
+	padding-top: 0px;
+	padding-bottom: 13px;
+	height: 85px;
 }
 
 .courses {
-	width : 100%;
+	width: 542px;
 }
 
-.courses thead tr td {
-	font-weight : bold;
-	padding-left : 4px;
+.courses thead tr th, .courses tfoot tr td {
+	font-weight: bold;
+	padding-left: 4px;
+	text-align: left;
+	font-size: 11px;
 }
 
 .courses tbody tr td {
-	padding-left : 4px;
+	padding: 2px 4px;
+	font-size: 11px;
+	vertical-align: middle;
+	line-height: 12px;
+	height: auto;
 }
 
-.courses tbody tr.even td {
-	background-color : #D6D6D6;
+.choices thead tr th, .choices tfoot tr td {
+	font-weight: bold;
+	padding-left: 4px;
+	text-align: left;
+	font-size: 11px;
+}
+
+.choices tbody tr td {
+	padding: 2px 4px;
+	font-size: 11px;
+	vertical-align: middle;
+	line-height: 12px;
+	height: auto;
+}
+
+.choices {
+	width: 100%;
 }
 
 .courses .column0 {
-	width : 20px;
+	width: 12px;
 }
 
-.courses .column0 .checkbox{
-	margin-top : 3px;
+#prm_cou_course_table .column0 .checkbox{
+	width: 12px;
+	height: 12px;
+	margin: 0;
+	display: inline;
+	float: none;
 }
 
 .formItem.formItemBig {
-	width : 100%;
+	width: auto;
 }
 
 .formItem.formItemBig select {
-	width : 100px;
+	width: 65px;
+	margin: 0;
+	font-size: 10px;
 }
 
-.courses.courses_phase_7 .column0 {
-	width : 120px;
+.courses.coursesPhaseSix .column0 {
+	width: auto;
 }
 
-.courses.courses_phase_7 .column4,
-.courses.courses_phase_7 .column5{
-	width : 50px;
+.courses.coursesPhaseSix .column4, .courses.coursesPhaseSix .column5{
+	width: 50px;
 }
+

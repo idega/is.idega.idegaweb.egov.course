@@ -5,6 +5,12 @@
   </properties>
   <body>
   
+   	<release version="1.0.1" date="2007-04-30">
+      <action dev="laddi" type="update">
+      	First version of block
+      </action>
+    </release>
+
    	<release version="1.0.0" date="2007-03-02">
       <action dev="gimmi" type="add">
       	Initial version

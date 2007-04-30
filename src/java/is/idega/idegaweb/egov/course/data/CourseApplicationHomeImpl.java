@@ -5,8 +5,8 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import com.idega.data.IDOFactory;
 
-public class CourseApplicationHomeImpl extends IDOFactory implements
-		CourseApplicationHome {
+public class CourseApplicationHomeImpl extends IDOFactory implements CourseApplicationHome {
+
 	public Class getEntityInterfaceClass() {
 		return CourseApplication.class;
 	}

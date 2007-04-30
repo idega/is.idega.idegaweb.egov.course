@@ -5,43 +5,70 @@ import is.idega.idegaweb.egov.course.data.Course;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.idega.business.IBOSessionBean;
 import com.idega.user.data.User;
 
 public class CourseApplicationSessionBean extends IBOSessionBean implements CourseApplicationSession {
 
-	private ArrayList applications;
+	private Map applications;
 
-	private ArrayList getList() {
+	private Map getMap() {
 		if (applications == null) {
-			applications = new ArrayList();
+			applications = new HashMap();
 		}
-		
+
 		return applications;
 	}
-	
-	public Collection getApplications() {
-		return getList();
+
+	public Map getApplications() {
+		return getMap();
 	}
 
-	public void addApplication(ApplicationHolder holder) {
-		if (getList().contains(holder)) {
-			getList().remove(holder);
+	public Collection getUserApplications(User user) {
+		return (Collection) getMap().get(user);
+	}
+
+	public void addApplication(User user, ApplicationHolder holder) {
+		if (getMap().containsKey(user)) {
+			Collection applications = (Collection) getMap().get(user);
+			if (applications.contains(holder)) {
+				applications.remove(holder);
+			}
+			applications.add(holder);
+			getMap().put(user, applications);
 		}
-		getList().add(holder);
+		else {
+			Collection applications = new ArrayList();
+			applications.add(holder);
+			getMap().put(user, applications);
+		}
 	}
-	
-	public void removedApplication(ApplicationHolder holder) {
-		getList().remove(holder);
+
+	public void removeApplication(User user, ApplicationHolder holder) {
+		if (getMap().containsKey(user)) {
+			Collection applications = (Collection) getMap().get(user);
+			applications.remove(holder);
+			getMap().put(user, applications);
+		}
 	}
-	
+
 	public boolean contains(User user, Course course) {
-		ApplicationHolder holder = new ApplicationHolder();
-		holder.setUser(user);
-		holder.setCourse(course);
-		
-		return getList().contains(holder);
+		if (getMap().containsKey(user)) {
+			Collection applications = (Collection) getMap().get(user);
+
+			ApplicationHolder holder = new ApplicationHolder();
+			holder.setUser(user);
+			holder.setCourse(course);
+
+			return applications.contains(holder);
+		}
+		return false;
 	}
-	
+
+	public void clear() {
+		applications = null;
+	}
 }
