@@ -25,7 +25,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String ENTITY_NAME = "COU_COURSE";
 
 	private static final String COLUMN_NAME = "NAME";
-	private static final String COLUMN_USER = "USER";
+	private static final String COLUMN_USER = "USER_NAME";
 	private static final String COLUMN_DESCRIPTION = "DESCRIPTION";
 
 	private static final String COLUMN_COURSE_TYPE = "COU_COURSE_TYPE_ID";
