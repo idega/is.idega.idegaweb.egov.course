@@ -685,7 +685,7 @@ public class CourseApplication extends ApplicationForm {
 		script4.append("var getProvider = function(course) { return course.provider };\n");
 		script4.append("var getRadioButton = function(course) { return getRadio(course);};\n");
 
-		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tDWRUtil.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tDWRUtil.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays, getDescription]);\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tif (rowNum % 2 == 0) {\n").append("\t\t\tcurrentRow.className=\"even\";\n").append("\t\t} else {\n").append("\t\t\tcurrentRow.className=\"odd\";\n").append("\t\t}\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
+		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tDWRUtil.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tDWRUtil.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays]);\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tif (rowNum % 2 == 0) {\n").append("\t\t\tcurrentRow.className=\"even\";\n").append("\t\t} else {\n").append("\t\t\tcurrentRow.className=\"odd\";\n").append("\t\t}\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
 		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
@@ -808,9 +808,6 @@ public class CourseApplication extends ApplicationForm {
 		cell = row.createHeaderCell();
 		cell.setStyleClass("column4");
 		cell.add(new Text(iwrb.getLocalizedString("days", "Days")));
-		cell = row.createHeaderCell();
-		cell.setStyleClass("column5");
-		cell.add(new Text(iwrb.getLocalizedString("description", "Description")));
 
 		group = table.createBodyRowGroup();
 		group.setId(PARAMETER_COURSE_TABLE_ID);
@@ -838,19 +835,16 @@ public class CourseApplication extends ApplicationForm {
 				cell.add(checker);
 				cell = row.createCell();
 				cell.setStyleClass("column1");
-				cell.add(new Text(course.getName()));
+				cell.add(new Text(course.getProvider()));
 				cell = row.createCell();
 				cell.setStyleClass("column2");
-				cell.add(new Text(course.getTimeframe()));
+				cell.add(new Text(course.getName()));
 				cell = row.createCell();
 				cell.setStyleClass("column3");
-				cell.add(new Text(course.getDays()));
+				cell.add(new Text(course.getTimeframe()));
 				cell = row.createCell();
 				cell.setStyleClass("column4");
-				cell.add(new Text(course.getDescription()));
-				cell = row.createCell();
-				cell.setStyleClass("column5");
-				cell.add(new Text(course.getPrice()));
+				cell.add(new Text(course.getDays()));
 			}
 		}
 

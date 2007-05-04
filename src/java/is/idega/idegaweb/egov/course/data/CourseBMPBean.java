@@ -207,6 +207,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			query.addCriteria(new MatchCriteria(bFrom, MatchCriteria.LESSEQUAL, birthYear));
 			query.addCriteria(new MatchCriteria(yFrom, MatchCriteria.GREATEREQUAL, birthYear));
 		}
+		query.addOrder(table, COLUMN_START_DATE, true);
+		query.addOrder(table, COLUMN_NAME, true);
 
 		return this.idoFindPKsByQuery(query);
 	}
@@ -235,6 +237,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		if (courseTypePK != null) {
 			query.addCriteria(new MatchCriteria(courseTypeId, MatchCriteria.EQUALS, courseTypePK));
 		}
+		query.addOrder(table, COLUMN_START_DATE, true);
+		query.addOrder(table, COLUMN_NAME, true);
 
 		return this.idoFindPKsByQuery(query);
 	}
@@ -270,6 +274,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		if (toDate != null) {
 			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.LESSEQUAL, toDate));
 		}
+		query.addOrder(table, COLUMN_START_DATE, true);
+		query.addOrder(table, COLUMN_NAME, true);
 
 		return this.idoFindPKsByQuery(query);
 	}

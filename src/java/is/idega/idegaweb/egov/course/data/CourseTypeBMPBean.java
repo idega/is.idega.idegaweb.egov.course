@@ -81,20 +81,22 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 
 	// Finders
 	public Collection ejbFindAll() throws FinderException {
-		return super.idoFindAllIDsBySQL();
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new Column(table, getIDColumnName()));
+		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
+
+		return this.idoFindPKsByQuery(query);
 	}
 
 	public Collection ejbFindAllBySchoolType(Object schoolTypePK) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
-		Table schoolTypeTable = new Table(SchoolType.class);
-
-		Column schoolTypeOrder = new Column(schoolTypeTable, "type_order");
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_SCHOOL_TYPE), MatchCriteria.EQUALS, schoolTypePK));
-		query.addOrder(new Order(schoolTypeOrder, true));
-		query.addJoin(table, schoolTypeTable);
+		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
 
 		return this.idoFindPKsByQuery(query);
 	}

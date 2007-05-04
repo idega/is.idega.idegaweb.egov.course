@@ -1199,7 +1199,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public boolean hasAvailableCourses(User user, SchoolType type) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
-			return getCourseHome().getCountBySchoolTypeAndBirthYear(type != null ? type.getPrimaryKey() : null, stamp.getYear(), stamp.getDate()) > 0;
+			IWTimestamp stampNow = new IWTimestamp();
+			return getCourseHome().getCountBySchoolTypeAndBirthYear(type != null ? type.getPrimaryKey() : null, stamp.getYear(), stampNow.getDate()) > 0;
 		}
 		catch (IDOException e) {
 			e.printStackTrace();
@@ -1431,9 +1432,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		int days = price.getNumberOfDays() - 1;
 		while (days > 0) {
 			if (stamp.getDayOfWeek() != Calendar.SUNDAY && stamp.getDayOfWeek() != Calendar.SATURDAY) {
-				stamp.addDays(1);
+				days--;
 			}
-			days--;
+			stamp.addDays(1);
 		}
 
 		return stamp.getDate();
