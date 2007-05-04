@@ -267,7 +267,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
-	public void storeCourse(Object pk, String name, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer) throws FinderException, CreateException {
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -292,6 +292,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				e.printStackTrace();
 			}
 		}
+		course.setUser(user);
 
 		if (coursePricePK != null) {
 			course.setPrice(getCoursePrice(new Integer(coursePricePK.toString())));

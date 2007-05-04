@@ -25,6 +25,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String ENTITY_NAME = "COU_COURSE";
 
 	private static final String COLUMN_NAME = "NAME";
+	private static final String COLUMN_USER = "USER";
 	private static final String COLUMN_DESCRIPTION = "DESCRIPTION";
 
 	private static final String COLUMN_COURSE_TYPE = "COU_COURSE_TYPE_ID";
@@ -45,6 +46,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		addAttribute(COLUMN_NAME, "Name", String.class, 50);
+		addAttribute(COLUMN_USER, "User", String.class);
 		addAttribute(COLUMN_DESCRIPTION, "Description", String.class);
 		addAttribute(COLUMN_START_DATE, "Start date", Timestamp.class);
 		addAttribute(COLUMN_END_DATE, "End date", Timestamp.class);
@@ -61,6 +63,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	// Getters
 	public String getName() {
 		return getStringColumnValue(COLUMN_NAME);
+	}
+
+	public String getUser() {
+		return getStringColumnValue(COLUMN_USER);
 	}
 
 	public String getDescription() {
@@ -121,6 +127,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	// Setters
 	public void setName(String name) {
 		setColumn(COLUMN_NAME, name);
+	}
+
+	public void setUser(String user) {
+		setColumn(COLUMN_USER, user);
 	}
 
 	public void setDescription(String description) {

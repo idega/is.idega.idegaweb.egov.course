@@ -78,7 +78,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness {
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
 	 */
-	public void storeCourse(Object pk, String name, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer) throws FinderException, CreateException, RemoteException;
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer) throws FinderException, CreateException, RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#deleteCoursePrice

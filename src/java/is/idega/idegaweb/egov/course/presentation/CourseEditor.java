@@ -109,6 +109,7 @@ public class CourseEditor extends CourseBlock {
 	public boolean saveCourse(IWContext iwc) {
 		String pk = iwc.getParameter(PARAMETER_COURSE_PK);
 		String name = iwc.getParameter(PARAMETER_NAME);
+		String user = iwc.getParameter(PARAMETER_USER);
 		String courseTypePK = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
 		String coursePricePK = iwc.getParameter(PARAMETER_COURSE_PRICE_PK);
 		String accountingKey = iwc.getParameter(PARAMETER_ACCOUNTING_KEY);
@@ -122,7 +123,7 @@ public class CourseEditor extends CourseBlock {
 			int birthYearFrom = Integer.parseInt(yearFrom);
 			int birthYearTo = Integer.parseInt(yearTo);
 			int maxPer = Integer.parseInt(max);
-			getCourseBusiness(iwc).storeCourse(pk, name, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, accountingKey, birthYearFrom, birthYearTo, maxPer);
+			getCourseBusiness(iwc).storeCourse(pk, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, accountingKey, birthYearFrom, birthYearTo, maxPer);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

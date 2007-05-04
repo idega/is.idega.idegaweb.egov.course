@@ -13,6 +13,11 @@ public interface Course extends IDOEntity {
 	public String getName();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getUser
+	 */
+	public String getUser();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getDescription
 	 */
 	public String getDescription();
@@ -71,6 +76,11 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setName
 	 */
 	public void setName(String name);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setUser
+	 */
+	public void setUser(String user);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setDescription
