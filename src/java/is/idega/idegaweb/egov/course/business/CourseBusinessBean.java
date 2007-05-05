@@ -216,7 +216,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
-	public void storeCourseType(Object pk, String name, String description, String localizationKey, Object schoolTypePK) throws FinderException, CreateException {
+	public void storeCourseType(Object pk, String name, String description, String localizationKey, Object schoolTypePK, String accountingKey) throws FinderException, CreateException {
 		CourseType type = null;
 		if (pk == null) {
 			type = getCourseTypeHome().create();
@@ -236,6 +236,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (localizationKey != null && !"".equals(localizationKey)) {
 			type.setLocalizationKey(localizationKey);
 		}
+
+		type.setAccountingKey(accountingKey);
 
 		if (schoolTypePK != null) {
 			try {

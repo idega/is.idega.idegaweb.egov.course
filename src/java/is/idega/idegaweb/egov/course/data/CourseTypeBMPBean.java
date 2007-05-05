@@ -21,6 +21,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	private static final String COLUMN_LOCALIZATION_KEY = "LOCALIZATION_KEY";
 	private static final String COLUMN_SCHOOL_TYPE = "SCH_SCHOOL_TYPE_ID";
 	private static final String COLUMN_ORDER = "TYPE_ORDER";
+	private static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
 
 	public String getEntityName() {
 		return TABLE_NAME;
@@ -32,6 +33,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		addAttribute(COLUMN_DESCRIPTION, "Description", String.class);
 		addAttribute(COLUMN_LOCALIZATION_KEY, "Localization key", String.class, 50);
 		addAttribute(COLUMN_ORDER, "Type order", Integer.class);
+		addAttribute(COLUMN_ACCOUNTING_KEY, "Accounting key", String.class, 30);
 
 		addManyToOneRelationship(COLUMN_SCHOOL_TYPE, SchoolType.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
@@ -54,6 +56,10 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		return (SchoolType) getColumnValue(COLUMN_SCHOOL_TYPE);
 	}
 
+	public String getAccountingKey() {
+		return getStringColumnValue(COLUMN_ACCOUNTING_KEY);
+	}
+
 	public int getOrder() {
 		return getIntColumnValue(COLUMN_ORDER);
 	}
@@ -73,6 +79,10 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 
 	public void setSchoolType(SchoolType type) {
 		setColumn(COLUMN_SCHOOL_TYPE, type);
+	}
+
+	public void setAccountingKey(String key) {
+		setColumn(COLUMN_ACCOUNTING_KEY, key);
 	}
 
 	public void setOrder(int order) {

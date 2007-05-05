@@ -9,6 +9,7 @@ import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
 
 public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
+
 	public Class getEntityInterfaceClass() {
 		return CourseType.class;
 	}
@@ -28,11 +29,9 @@ public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
-	public Collection findAllBySchoolType(Object schoolTypePK)
-			throws FinderException, IDORelationshipException {
+	public Collection findAllBySchoolType(Object schoolTypePK) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseTypeBMPBean) entity)
-				.ejbFindAllBySchoolType(schoolTypePK);
+		Collection ids = ((CourseTypeBMPBean) entity).ejbFindAllBySchoolType(schoolTypePK);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

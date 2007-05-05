@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.course.data;
 
+
 import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOEntity;
 
@@ -11,19 +12,9 @@ public interface CourseType extends IDOEntity {
 	public String getName();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setName
-	 */
-	public void setName(String name);
-
-	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getDescription
 	 */
 	public String getDescription();
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setDescription
-	 */
-	public void setDescription(String description);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getLocalizationKey
@@ -31,14 +22,34 @@ public interface CourseType extends IDOEntity {
 	public String getLocalizationKey();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setLocalizationKey
-	 */
-	public void setLocalizationKey(String localizationKey);
-
-	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getSchoolType
 	 */
 	public SchoolType getSchoolType();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getAccountingKey
+	 */
+	public String getAccountingKey();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getOrder
+	 */
+	public int getOrder();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setName
+	 */
+	public void setName(String name);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setDescription
+	 */
+	public void setDescription(String description);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setLocalizationKey
+	 */
+	public void setLocalizationKey(String localizationKey);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setSchoolType
@@ -46,9 +57,9 @@ public interface CourseType extends IDOEntity {
 	public void setSchoolType(SchoolType type);
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getOrder
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setAccountingKey
 	 */
-	public int getOrder();
+	public void setAccountingKey(String key);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setOrder

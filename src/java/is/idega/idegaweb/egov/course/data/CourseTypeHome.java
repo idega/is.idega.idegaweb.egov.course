@@ -8,12 +8,12 @@ import com.idega.data.IDOHome;
 import javax.ejb.FinderException;
 
 public interface CourseTypeHome extends IDOHome {
+
 	public CourseType create() throws CreateException;
 
 	public CourseType findByPrimaryKey(Object pk) throws FinderException;
 
 	public Collection findAll() throws FinderException;
 
-	public Collection findAllBySchoolType(Object schoolTypePK)
-			throws FinderException, IDORelationshipException;
+	public Collection findAllBySchoolType(Object schoolTypePK) throws FinderException, IDORelationshipException;
 }

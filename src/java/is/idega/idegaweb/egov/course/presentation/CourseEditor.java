@@ -490,6 +490,9 @@ public class CourseEditor extends CourseBlock {
 			CoursePrice coursePrice = course.getPrice();
 
 			inputName.setContent(course.getName());
+			if (course.getUser() != null) {
+				inputUser.setContent(course.getUser());
+			}
 			inputFrom.setDate(course.getStartDate());
 			String stID = type.getSchoolType().getPrimaryKey().toString();
 			schoolTypeID.setSelectedElement(stID);

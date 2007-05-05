@@ -39,6 +39,7 @@ public class CourseTypeEditor extends CourseBlock {
 	private static final String PARAMETER_NAME = "CTE_n";
 	private static final String PARAMETER_DESCRIPTION = "CTE_d";
 	private static final String PARAMETER_LOCALIZATION_KEY = "CTE_l";
+	private static final String PARAMETER_ACCOUNTING_KEY = "prm_accounting_key";
 
 	private static final int ACTION_VIEW = 1;
 	private static final int ACTION_EDIT = 2;
@@ -93,10 +94,11 @@ public class CourseTypeEditor extends CourseBlock {
 		String description = iwc.getParameter(PARAMETER_DESCRIPTION);
 		String localizationKey = iwc.getParameter(PARAMETER_LOCALIZATION_KEY);
 		String schoolTypePK = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
+		String accountingKey = iwc.getParameter(PARAMETER_ACCOUNTING_KEY);
 
 		if (name != null && !"".equals(name.trim())) {
 			try {
-				getCourseBusiness(iwc).storeCourseType(pk, name, description, localizationKey, schoolTypePK);
+				getCourseBusiness(iwc).storeCourseType(pk, name, description, localizationKey, schoolTypePK, accountingKey);
 			}
 			catch (CreateException ce) {
 				add(ce.getMessage());
@@ -130,6 +132,7 @@ public class CourseTypeEditor extends CourseBlock {
 		TextArea inputDesc = new TextArea(PARAMETER_DESCRIPTION);
 		Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
 		DropdownMenu inputSchoolTypes = new DropdownMenu(schoolTypes, PARAMETER_SCHOOL_TYPE_PK);
+		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
 
 		if (type != null) {
 			inputName.setContent(type.getName());
@@ -138,6 +141,9 @@ public class CourseTypeEditor extends CourseBlock {
 			SchoolType sType = type.getSchoolType();
 			if (sType != null) {
 				inputSchoolTypes.setSelectedElement(sType.getPrimaryKey().toString());
+			}
+			if (type.getAccountingKey() != null) {
+				inputAccounting.setValue(type.getAccountingKey());
 			}
 
 			form.add(new HiddenInput(PARAMETER_COURSE_TYPE_PK, courseTypePK.toString()));
@@ -176,6 +182,14 @@ public class CourseTypeEditor extends CourseBlock {
 		label = new Label(localize("category", "Category"), inputSchoolTypes);
 		layer.add(label);
 		layer.add(inputSchoolTypes);
+		section.add(layer);
+
+		layer = new Layer(Layer.DIV);
+		layer.setID("accountingKey");
+		layer.setStyleClass("formItem");
+		label = new Label(localize("accounting_key", "Accounting key"), inputAccounting);
+		layer.add(label);
+		layer.add(inputAccounting);
 		section.add(layer);
 
 		Layer clearLayer = new Layer(Layer.DIV);
@@ -237,6 +251,10 @@ public class CourseTypeEditor extends CourseBlock {
 		cell.add(new Text(localize("category", "Category")));
 
 		cell = row.createHeaderCell();
+		cell.setId("accountingKey");
+		cell.add(new Text(localize("accounting_key", "Accounting key")));
+
+		cell = row.createHeaderCell();
 		cell.setId("edit");
 		cell.add(new Text(localize("edit", "Edit")));
 
@@ -285,6 +303,15 @@ public class CourseTypeEditor extends CourseBlock {
 					else {
 						cell.add(new Text(sType.getName()));
 					}
+				}
+
+				cell = row.createCell();
+				cell.setId("accountingKey");
+				if (cType.getAccountingKey() != null) {
+					cell.add(new Text(cType.getAccountingKey()));
+				}
+				else {
+					cell.add(new Text("-"));
 				}
 
 				cell = row.createCell();
