@@ -16,7 +16,6 @@ import com.idega.data.query.Column;
 import com.idega.data.query.CountColumn;
 import com.idega.data.query.InCriteria;
 import com.idega.data.query.MatchCriteria;
-import com.idega.data.query.Order;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 
@@ -189,16 +188,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public Collection ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
-		Column courseTypeOrder = new Column(courseTypeTable, "TYPE_ORDER");
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
 		Column schoolTypeId = new Column(courseTypeTable, "SCH_SCHOOL_TYPE_ID");
 		Column providerId = new Column(table, COLUMN_PROVIDER);
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
-		query.addOrder(table, COLUMN_NAME, true);
-		query.addOrder(new Order(courseTypeId, true));
-		query.addOrder(new Order(courseTypeOrder, true));
 		query.addJoin(table, courseTypeTable);
 
 		if (providerPK != null) {
@@ -226,16 +221,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public Collection ejbFindAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
-		Column courseTypeOrder = new Column(courseTypeTable, "TYPE_ORDER");
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
 		Column schoolTypeId = new Column(courseTypeTable, "SCH_SCHOOL_TYPE_ID");
 		Column providerId = new Column(table, COLUMN_PROVIDER);
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
-		query.addOrder(table, COLUMN_NAME, true);
-		query.addOrder(new Order(courseTypeId, true));
-		query.addOrder(new Order(courseTypeOrder, true));
 		query.addJoin(table, courseTypeTable);
 
 		if (providers != null) {
