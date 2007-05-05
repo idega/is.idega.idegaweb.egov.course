@@ -537,7 +537,7 @@ public class CourseApplication extends ApplicationForm {
 			addParentToForm(form, iwc, child, element, false, number++, false, false, hasRelation);
 		}
 
-		boolean hasRelation = isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
+		boolean hasRelation = custodian != null && (isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey()));
 		addParentToForm(form, iwc, child, custodian, true, number, true, false, hasRelation);
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -2275,13 +2275,13 @@ public class CourseApplication extends ApplicationForm {
 						if (storeMaritalStatus && (maritalStatus == null || maritalStatus.length() == 0)) {
 							setError(PARAMETER_MARITAL_STATUS, this.iwrb.getLocalizedString("application_error.marital_status_empty", "Please select marital status."));
 						}
-						if ((iUseSessionUser || hasRelation) && (homePhones[index] == null || homePhones[index].length() == 0)) {
+						if (homePhones != null && (iUseSessionUser || hasRelation) && (homePhones[index] == null || homePhones[index].length() == 0)) {
 							setError(PARAMETER_HOME_PHONE, this.iwrb.getLocalizedString("must_enter_home_phone", "You must enter a home phone for relative."));
 						}
 						if (hasErrors()) {
 							return false;
 						}
-						if (iUseSessionUser || hasRelation) {
+						if ((iUseSessionUser || hasRelation) && homePhones != null) {
 							custodian.setHomePhone(homePhones[index]);
 							custodian.setWorkPhone(workPhones[index]);
 							custodian.setMobilePhone(mobilePhones[index]);
