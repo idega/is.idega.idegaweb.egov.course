@@ -532,12 +532,12 @@ public class CourseApplication extends ApplicationForm {
 		Iterator iter = custodians.iterator();
 		while (iter.hasNext()) {
 			Custodian element = (Custodian) iter.next();
-			boolean hasRelation = getMemberFamilyLogic(iwc).isRelatedTo(element, currentUser) || currentUser.getPrimaryKey().equals(element.getPrimaryKey());
+			boolean hasRelation = isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(element, currentUser) || currentUser.getPrimaryKey().equals(element.getPrimaryKey());
 
 			addParentToForm(form, iwc, child, element, false, number++, false, false, hasRelation);
 		}
 
-		boolean hasRelation = getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
+		boolean hasRelation = isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
 		addParentToForm(form, iwc, child, custodian, true, number, true, false, hasRelation);
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -1255,7 +1255,7 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(zip);
 		section.add(formItem);
 
-		if (!isExtraCustodian || iUseSessionUser) {
+		if (hasRelation || iUseSessionUser) {
 			TextInput homePhone = new TextInput(PARAMETER_HOME_PHONE, null);
 			if (phone != null) {
 				homePhone.setContent(phone.getNumber());
@@ -2265,7 +2265,7 @@ public class CourseApplication extends ApplicationForm {
 					else {
 						Custodian custodian = getMemberFamilyLogic(iwc).getCustodian(getUserBusiness(iwc).getUser(new Integer(userPK)));
 						User currentUser = getUser(iwc);
-						boolean hasRelation = getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
+						boolean hasRelation = isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
 
 						if (relation == null || relation.length() == 0) {
 							setError(PARAMETER_RELATION, this.iwrb.getLocalizedString("must_select_relation", "You must select a relation to the child."));
@@ -2388,6 +2388,10 @@ public class CourseApplication extends ApplicationForm {
 	}
 
 	protected boolean isSchoolAdministrator(IWContext iwc) {
+		return isSchoolSuperAdministrator(iwc) || isSchoolUser(iwc);
+	}
+
+	protected boolean isSchoolSuperAdministrator(IWContext iwc) {
 		return iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) || iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc) || isSchoolUser(iwc);
 	}
 

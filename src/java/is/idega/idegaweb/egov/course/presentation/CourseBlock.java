@@ -443,7 +443,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		Iterator iter = custodians.iterator();
 		while (iter.hasNext()) {
 			Custodian custodian = (Custodian) iter.next();
-			boolean hasRelation = !owner.equals(iwc.getCurrentUser()) || getFamilyLogic(iwc).isRelatedTo(custodian, owner) || owner.getPrimaryKey().equals(custodian.getPrimaryKey());
+			boolean hasRelation = isSchoolAdministrator(iwc) || getFamilyLogic(iwc).isRelatedTo(custodian, owner) || owner.getPrimaryKey().equals(custodian.getPrimaryKey());
 
 			Address userAddress = getUserBusiness(iwc).getUsersMainAddress(custodian);
 			Phone userPhone = null;
