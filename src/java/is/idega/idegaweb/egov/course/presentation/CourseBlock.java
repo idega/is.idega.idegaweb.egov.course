@@ -359,7 +359,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		section.add(formItem);
 	}
 
-	protected Layer getCustodians(IWContext iwc, IWResourceBundle iwrb, Child child, Collection custodians) throws RemoteException {
+	protected Layer getCustodians(IWContext iwc, IWResourceBundle iwrb, User owner, Child child, Collection custodians) throws RemoteException {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -443,6 +443,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		Iterator iter = custodians.iterator();
 		while (iter.hasNext()) {
 			Custodian custodian = (Custodian) iter.next();
+			boolean hasRelation = !owner.equals(iwc.getCurrentUser()) || getFamilyLogic(iwc).isRelatedTo(custodian, owner) || owner.getPrimaryKey().equals(custodian.getPrimaryKey());
 
 			Address userAddress = getUserBusiness(iwc).getUsersMainAddress(custodian);
 			Phone userPhone = null;
@@ -500,7 +501,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 			postal.add(span);
 
 			span = new Layer(Layer.SPAN);
-			if (userPhone != null && userPhone.getNumber() != null) {
+			if (userPhone != null && userPhone.getNumber() != null && hasRelation) {
 				span.add(new Text(userPhone.getNumber()));
 			}
 			else {
@@ -509,7 +510,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 			homePhone.add(span);
 
 			span = new Layer(Layer.SPAN);
-			if (userWork != null && userWork.getNumber() != null) {
+			if (userWork != null && userWork.getNumber() != null && hasRelation) {
 				span.add(new Text(userWork.getNumber()));
 			}
 			else {
@@ -518,7 +519,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 			workPhone.add(span);
 
 			span = new Layer(Layer.SPAN);
-			if (userMobile != null && userMobile.getNumber() != null) {
+			if (userMobile != null && userMobile.getNumber() != null && hasRelation) {
 				span.add(new Text(userMobile.getNumber()));
 			}
 			else {
@@ -527,7 +528,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 			mobile.add(span);
 
 			span = new Layer(Layer.SPAN);
-			if (userEmail != null && userEmail.getEmailAddress() != null) {
+			if (userEmail != null && userEmail.getEmailAddress() != null && hasRelation) {
 				span.add(new Text(userEmail.getEmailAddress()));
 			}
 			else {

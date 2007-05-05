@@ -527,14 +527,18 @@ public class CourseApplication extends ApplicationForm {
 			custodians = new ArrayList();
 		}
 
+		User currentUser = getUser(iwc);
 		int number = 1;
 		Iterator iter = custodians.iterator();
 		while (iter.hasNext()) {
 			Custodian element = (Custodian) iter.next();
-			addParentToForm(form, iwc, child, element, false, number++, false, false);
+			boolean hasRelation = getMemberFamilyLogic(iwc).isRelatedTo(element, currentUser) || currentUser.getPrimaryKey().equals(element.getPrimaryKey());
+
+			addParentToForm(form, iwc, child, element, false, number++, false, false, hasRelation);
 		}
 
-		addParentToForm(form, iwc, child, custodian, true, number, true, false);
+		boolean hasRelation = getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
+		addParentToForm(form, iwc, child, custodian, true, number, true, false, hasRelation);
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
@@ -1076,7 +1080,7 @@ public class CourseApplication extends ApplicationForm {
 		bottom.add(back);
 	}
 
-	private void addParentToForm(Form form, IWContext iwc, Child child, Custodian custodian, boolean isExtraCustodian, int number, boolean editable, boolean showMaritalStatus) throws RemoteException {
+	private void addParentToForm(Form form, IWContext iwc, Child child, Custodian custodian, boolean isExtraCustodian, int number, boolean editable, boolean showMaritalStatus, boolean hasRelation) throws RemoteException {
 		Address address = null;
 		Phone phone = null;
 		Phone work = null;
@@ -2260,7 +2264,8 @@ public class CourseApplication extends ApplicationForm {
 					}
 					else {
 						Custodian custodian = getMemberFamilyLogic(iwc).getCustodian(getUserBusiness(iwc).getUser(new Integer(userPK)));
-						boolean isCustodian = custodian.isCustodianOf(child);
+						User currentUser = getUser(iwc);
+						boolean hasRelation = getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
 
 						if (relation == null || relation.length() == 0) {
 							setError(PARAMETER_RELATION, this.iwrb.getLocalizedString("must_select_relation", "You must select a relation to the child."));
@@ -2268,13 +2273,13 @@ public class CourseApplication extends ApplicationForm {
 						if (storeMaritalStatus && (maritalStatus == null || maritalStatus.length() == 0)) {
 							setError(PARAMETER_MARITAL_STATUS, this.iwrb.getLocalizedString("application_error.marital_status_empty", "Please select marital status."));
 						}
-						if ((iUseSessionUser || isCustodian) && (homePhones[a] == null || homePhones[a].length() == 0)) {
+						if ((iUseSessionUser || hasRelation) && (homePhones[a] == null || homePhones[a].length() == 0)) {
 							setError(PARAMETER_HOME_PHONE, this.iwrb.getLocalizedString("must_enter_home_phone", "You must enter a home phone for relative."));
 						}
 						if (hasErrors()) {
 							return false;
 						}
-						if (iUseSessionUser || isCustodian) {
+						if (iUseSessionUser || hasRelation) {
 							custodian.setHomePhone(homePhones[a]);
 							custodian.setWorkPhone(workPhones[a]);
 							custodian.setMobilePhone(mobilePhones[a]);
@@ -2285,7 +2290,7 @@ public class CourseApplication extends ApplicationForm {
 						}
 						custodian.store();
 
-						if (isCustodian) {
+						if (hasRelation) {
 							child.setRelation(custodian, relation);
 							child.store();
 						}

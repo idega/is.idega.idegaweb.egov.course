@@ -257,7 +257,7 @@ public class CourseChoiceOverview extends CourseBlock {
 			heading.setStyleClass("subHeader");
 			form.add(heading);
 
-			form.add(getCustodians(iwc, getResourceBundle(), child, custodians));
+			form.add(getCustodians(iwc, getResourceBundle(), application.getOwner(), child, custodians));
 		}
 
 		List relatives = new ArrayList();
