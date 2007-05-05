@@ -2241,6 +2241,7 @@ public class CourseApplication extends ApplicationForm {
 		if (userPKs != null) {
 			Child child = getMemberFamilyLogic(iwc).getChild(getApplicant(iwc));
 
+			int index = 0;
 			for (int a = 0; a < userPKs.length; a++) {
 				String userPK = userPKs[a];
 				if (userPK.length() > 0) {
@@ -2266,6 +2267,7 @@ public class CourseApplication extends ApplicationForm {
 						Custodian custodian = getMemberFamilyLogic(iwc).getCustodian(getUserBusiness(iwc).getUser(new Integer(userPK)));
 						User currentUser = getUser(iwc);
 						boolean hasRelation = isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(custodian, currentUser) || currentUser.getPrimaryKey().equals(custodian.getPrimaryKey());
+						boolean isCustodian = getMemberFamilyLogic(iwc).isCustodianOf(custodian, child);
 
 						if (relation == null || relation.length() == 0) {
 							setError(PARAMETER_RELATION, this.iwrb.getLocalizedString("must_select_relation", "You must select a relation to the child."));
@@ -2273,30 +2275,34 @@ public class CourseApplication extends ApplicationForm {
 						if (storeMaritalStatus && (maritalStatus == null || maritalStatus.length() == 0)) {
 							setError(PARAMETER_MARITAL_STATUS, this.iwrb.getLocalizedString("application_error.marital_status_empty", "Please select marital status."));
 						}
-						if ((iUseSessionUser || hasRelation) && (homePhones[a] == null || homePhones[a].length() == 0)) {
+						if ((iUseSessionUser || hasRelation) && (homePhones[index] == null || homePhones[index].length() == 0)) {
 							setError(PARAMETER_HOME_PHONE, this.iwrb.getLocalizedString("must_enter_home_phone", "You must enter a home phone for relative."));
 						}
 						if (hasErrors()) {
 							return false;
 						}
 						if (iUseSessionUser || hasRelation) {
-							custodian.setHomePhone(homePhones[a]);
-							custodian.setWorkPhone(workPhones[a]);
-							custodian.setMobilePhone(mobilePhones[a]);
-							custodian.setEmail(emails[a]);
+							custodian.setHomePhone(homePhones[index]);
+							custodian.setWorkPhone(workPhones[index]);
+							custodian.setMobilePhone(mobilePhones[index]);
+							custodian.setEmail(emails[index]);
 						}
 						if (storeMaritalStatus) {
 							custodian.setMaritalStatus(maritalStatus);
 						}
 						custodian.store();
 
-						if (hasRelation) {
+						if (isCustodian) {
 							child.setRelation(custodian, relation);
 							child.store();
 						}
 						else {
 							child.setExtraCustodian(custodian, relation);
 							child.store();
+						}
+
+						if (hasRelation) {
+							index++;
 						}
 					}
 				}
