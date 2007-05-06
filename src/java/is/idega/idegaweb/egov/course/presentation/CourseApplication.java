@@ -751,6 +751,7 @@ public class CourseApplication extends ApplicationForm {
 			catMenu.addMenuElementFirst("", iwrb.getLocalizedString("select_school_type", "Select school type"));
 			catMenu.setOnChange("changeValues();");
 			catMenu.setId(PARAMETER_CATEGORY);
+			catMenu.keepStatusOnAction(true);
 
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -767,6 +768,7 @@ public class CourseApplication extends ApplicationForm {
 		typeMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("select_course_type", "Select course type"));
 		// typeMenu.setOnChange("getCourses();");
 		typeMenu.setToSubmit();
+		typeMenu.keepStatusOnAction(true);
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -781,6 +783,7 @@ public class CourseApplication extends ApplicationForm {
 		// providerMenu.setOnChange("getCourses();");
 		providerMenu.setToSubmit();
 		providerMenu.setId(PARAMETER_PROVIDER);
+		providerMenu.keepStatusOnAction(true);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -814,8 +817,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Collection courses = null;
 		if (courseTypePK != null) {
-			IWTimestamp dateOfBirth = new IWTimestamp(getApplicant(iwc).getDateOfBirth());
-			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK != null ? schoolTypePK.intValue() : -1, courseTypePK != null ? courseTypePK.intValue() : -1, dateOfBirth.getYear(), iwc.getCurrentLocale().getCountry());
+			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK != null ? schoolTypePK.intValue() : -1, courseTypePK != null ? courseTypePK.intValue() : -1, ((Integer) getApplicant(iwc).getPrimaryKey()).intValue(), iwc.getCurrentLocale().getCountry());
 		}
 
 		Table2 table = new Table2();
