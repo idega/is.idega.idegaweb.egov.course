@@ -786,17 +786,28 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	public Collection getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country) {
 		try {
+			System.out.println("[CourseBusinessBean : getCoursesDWR] ============= DEBUG STARTS ================");
+			System.out.println("[CourseBusinessBean : getCoursesDWR] providerPK = "+providerPK);
+			System.out.println("[CourseBusinessBean : getCoursesDWR] schoolTypePK = "+schoolTypePK);
+			System.out.println("[CourseBusinessBean : getCoursesDWR] courseTypePK = "+courseTypePK);
+			System.out.println("[CourseBusinessBean : getCoursesDWR] applicantPK = "+applicantPK);
+			System.out.println("[CourseBusinessBean : getCoursesDWR] country = "+country);
+			
 			User applicant = getUserBusiness().getUser(applicantPK);
 			IWTimestamp birth = new IWTimestamp(applicant.getDateOfBirth());
+			System.out.println("[CourseBusinessBean : getCoursesDWR] applicant = "+applicant);
+			System.out.println("[CourseBusinessBean : getCoursesDWR] birth = "+birth);
 
 			Integer iP = null;
 			if (providerPK > -1) {
 				iP = new Integer(providerPK);
 			}
+			System.out.println("[CourseBusinessBean : getCoursesDWR] iP = "+iP);
 			Integer iST = null;
 			if (schoolTypePK > -1) {
 				iST = new Integer(schoolTypePK);
 			}
+			System.out.println("[CourseBusinessBean : getCoursesDWR] iST = "+iST);
 			Integer iCT = null;
 			if (courseTypePK > -1) {
 				iCT = new Integer(courseTypePK);
@@ -804,7 +815,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			else {
 				return new ArrayList();
 			}
+			System.out.println("[CourseBusinessBean : getCoursesDWR] iCT = "+iCT);
+			
 			Locale locale = new Locale(country, country.toUpperCase());
+			System.out.println("[CourseBusinessBean : getCoursesDWR] locale = "+locale);
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map map = new LinkedHashMap();
@@ -813,18 +827,30 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				Iterator iter = courses.iterator();
 				while (iter.hasNext()) {
 					Course course = (Course) iter.next();
+					System.out.println("[CourseBusinessBean : getCoursesDWR] checking course : "+course.getName());
 					IWTimestamp start = new IWTimestamp(course.getStartDate());
+					System.out.println("[CourseBusinessBean : getCoursesDWR]       date         : "+start.toSQLDateString());
+					System.out.println("[CourseBusinessBean : getCoursesDWR]       isLater      : "+start.isLaterThan(stamp));
+					System.out.println("[CourseBusinessBean : getCoursesDWR]       isRegistered : "+isRegistered(applicant, course));
+					System.out.println("[CourseBusinessBean : getCoursesDWR]       isFull       : "+isFull(course));
 
 					if (start.isLaterThan(stamp) && !isRegistered(applicant, course) && !isFull(course)) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
+						System.out.println("[CourseBusinessBean : getCoursesDWR]       adding to map");
+					} else {
+						System.out.println("[CourseBusinessBean : getCoursesDWR]       NOT adding to map");
 					}
 				}
+			} else {
+				System.out.println("[CourseBusinessBean : getCoursesDWR] found no courses.");
 			}
-
+			System.out.println("[CourseBusinessBean : getCoursesDWR] returning map values = "+map.values());
+			System.out.println("[CourseBusinessBean : getCoursesDWR] ============= DEBUG ENDS ================");
 			return map.values();
 		}
 		catch (RemoteException re) {
+			System.out.println("[CourseBusinessBean : getCoursesDWR] ============= DEBUG ERROR ================");
 			throw new IBORuntimeException(re);
 		}
 	}
