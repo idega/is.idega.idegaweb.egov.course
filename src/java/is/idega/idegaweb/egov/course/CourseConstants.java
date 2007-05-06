@@ -33,6 +33,9 @@ public class CourseConstants {
 	public static final String PAYMENT_TYPE_CARD = "credit_card";
 	public static final String PAYMENT_TYPE_GIRO = "giro";
 
+	public static final String PRODUCT_CODE_CARE = "CARE";
+	public static final String PRODUCT_CODE_COURSE = "COURSE";
+
 	public static final String DISCOUNT_SIBLING = "sibling";
 	public static final String DISCOUNT_QUANTITY = "quantity";
 

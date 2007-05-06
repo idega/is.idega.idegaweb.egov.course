@@ -2,8 +2,18 @@ package is.idega.idegaweb.egov.course.data;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 
+import java.sql.Date;
+import java.util.Collection;
+
+import javax.ejb.FinderException;
+
 import com.idega.block.process.data.AbstractCaseBMPBean;
 import com.idega.block.process.data.Case;
+import com.idega.block.process.data.CaseStatus;
+import com.idega.data.IDORelationshipException;
+import com.idega.data.query.MatchCriteria;
+import com.idega.data.query.SelectQuery;
+import com.idega.data.query.Table;
 
 public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Case, CourseApplication {
 
@@ -16,6 +26,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 	private static final String COLUMN_PAID = "paid";
 	private final static String COLUMN_PAYER_NAME = "payer_name";
 	private final static String COLUMN_PAYER_PERSONAL_ID = "payer_personal_id";
+	private static final String COLUMN_AMOUNT = "amount";
 
 	public String getCaseCodeDescription() {
 		return "Case for courses";
@@ -37,6 +48,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		addAttribute(COLUMN_REFERENCE_NUMBER, "Reference number", String.class, 255);
 		addAttribute(COLUMN_PAYMENT_TYPE, "Payment type", String.class, 20);
 		addAttribute(COLUMN_PAID, "Paid", Boolean.class);
+		addAttribute(COLUMN_AMOUNT, "Amount", Float.class);
 	}
 
 	// Getters
@@ -68,6 +80,10 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		return getStringColumnValue(COLUMN_PAYER_PERSONAL_ID);
 	}
 
+	public float getAmount() {
+		return getFloatColumnValue(COLUMN_AMOUNT);
+	}
+
 	// Setters
 	public void setCreditCardMerchantID(int merchantID) {
 		setColumn(COLUMN_CREDITCARD_MERCHANT_ID, merchantID);
@@ -95,5 +111,34 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public void setPayerPersonalID(String personalID) {
 		setColumn(COLUMN_PAYER_PERSONAL_ID, personalID);
+	}
+
+	public void setAmount(float amount) {
+		setColumn(COLUMN_AMOUNT, amount);
+	}
+
+	// Finders
+	public Collection ejbFindAll(CaseStatus caseStatus, Date fromDate, Date toDate) throws FinderException {
+		Table table = new Table(this);
+		Table process = new Table(Case.class);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(table.getColumn(getIDColumnName()));
+		try {
+			query.addJoin(table, process);
+		}
+		catch (IDORelationshipException e) {
+			throw new FinderException(e.getMessage());
+		}
+		query.addCriteria(new MatchCriteria(process.getColumn(getSQLGeneralCaseCaseStatusColumnName()), MatchCriteria.EQUALS, caseStatus));
+		if (fromDate != null) {
+			query.addCriteria(new MatchCriteria(process.getColumn(getSQLGeneralCaseCreatedColumnName()), MatchCriteria.GREATEREQUAL, fromDate));
+		}
+		if (toDate != null) {
+			query.addCriteria(new MatchCriteria(process.getColumn(getSQLGeneralCaseCreatedColumnName()), MatchCriteria.LESSEQUAL, toDate));
+		}
+		query.addOrder(process, getSQLGeneralCaseCreatedColumnName(), true);
+
+		return idoFindPKsByQuery(query);
 	}
 }

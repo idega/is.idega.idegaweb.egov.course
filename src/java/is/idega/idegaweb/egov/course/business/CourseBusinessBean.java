@@ -4,7 +4,11 @@ import is.idega.block.family.business.FamilyLogic;
 import is.idega.block.family.business.NoCustodianFound;
 import is.idega.block.family.data.Child;
 import is.idega.block.family.data.Custodian;
+import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
+import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
+import is.idega.idegaweb.egov.accounting.business.AccountingKeyBusiness;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
+import is.idega.idegaweb.egov.accounting.data.SchoolCode;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
@@ -69,6 +73,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
+import com.idega.repository.data.ImplementorRepository;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.Gender;
@@ -76,15 +81,152 @@ import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.StringHandler;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 
-public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness {
+public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness, AccountingBusiness {
 
 	public static final String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.course";
 
 	protected String getBundleIdentifier() {
 		return IW_BUNDLE_IDENTIFIER;
+	}
+
+	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {
+		Collection entries = new ArrayList();
+
+		try {
+			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
+
+			Collection applications = getCourseApplicationHome().findAll(getCaseStatusOpen(), fromDate, toDate);
+			Iterator iterator = applications.iterator();
+			while (iterator.hasNext()) {
+				CourseApplication application = (CourseApplication) iterator.next();
+
+				Map applicationMap = getApplicationMap(application);
+				SortedSet prices = calculatePrices(applicationMap);
+				Map discounts = getDiscounts(prices, applicationMap);
+
+				User owner = application.getOwner();
+				Collection choices = getCourseChoices(application);
+				Iterator iter = choices.iterator();
+				while (iter.hasNext()) {
+					CourseChoice choice = (CourseChoice) iter.next();
+					Course course = choice.getCourse();
+					School provider = course.getProvider();
+					SchoolArea area = provider.getSchoolArea();
+					CourseType courseType = course.getCourseType();
+					SchoolType schoolType = courseType.getSchoolType();
+					User student = choice.getUser();
+					CoursePrice price = course.getPrice();
+					IWTimestamp startDate = new IWTimestamp(course.getStartDate());
+					IWTimestamp endDate = new IWTimestamp(getEndDate(price, startDate.getDate()));
+
+					float coursePrice = price.getPrice() * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
+
+					String payerPId;
+					if (application.getPayerPersonalID() != null && application.getPayerPersonalID().length() > 0) {
+						payerPId = application.getPayerPersonalID();
+					}
+					else {
+						payerPId = owner.getPersonalID();
+					}
+					if (payerPId.length() > 10) {
+						payerPId = payerPId.trim();
+						payerPId = StringHandler.replace(payerPId, "-", "");
+						if (payerPId.length() > 10) {
+							payerPId = payerPId.substring(0, 10);
+						}
+					}
+
+					String studentPId = student.getPersonalID();
+					if (studentPId.length() > 10) {
+						studentPId = studentPId.trim();
+						studentPId = StringHandler.replace(studentPId, "-", "");
+						if (studentPId.length() > 10) {
+							studentPId = studentPId.substring(0, 10);
+						}
+					}
+
+					SchoolCode schoolCode = getAccountingBusiness().getSchoolCode(provider, schoolType);
+					providerCode = schoolCode != null ? schoolCode.getSchoolCode() : provider.getOrganizationNumber();
+
+					String typeCode = courseType.getAccountingKey() != null ? courseType.getAccountingKey() : "NOTSET";
+					String areaCode = area.getAccountingKey() != null ? area.getAccountingKey() : "NOTSET";
+
+					try {
+						Object o = implementor.newInstance();
+						AccountingEntry entry = (AccountingEntry) o;
+						entry.setProductCode(CourseConstants.PRODUCT_CODE_COURSE);
+						entry.setProviderCode(providerCode);
+						entry.setProjectCode(typeCode);
+						entry.setExtraInformation(areaCode);
+						entry.setPayerPersonalId(payerPId);
+						entry.setPersonalId(studentPId);
+						entry.setPaymentMethod(application.getPaymentType());
+						entry.setAmount((int) coursePrice);
+						entry.setUnits(1);
+						entry.setStartDate(startDate.getDate());
+						entry.setEndDate(endDate.getDate());
+
+						entries.add(entry);
+					}
+					catch (InstantiationException e) {
+						e.printStackTrace();
+					}
+					catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+
+					if (choice.getDayCare() != CourseConstants.DAY_CARE_NONE) {
+						float carePrice = 0;
+						if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
+							carePrice = price.getPreCarePrice();
+						}
+						else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
+							carePrice = price.getPostCarePrice();
+						}
+						else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+							carePrice = price.getPreCarePrice() + price.getPostCarePrice();
+						}
+						carePrice = carePrice * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
+
+						try {
+							Object o = implementor.newInstance();
+							AccountingEntry entry = (AccountingEntry) o;
+							entry.setProductCode(CourseConstants.PRODUCT_CODE_CARE);
+							entry.setProviderCode(providerCode);
+							entry.setProjectCode(typeCode);
+							entry.setExtraInformation(areaCode);
+							entry.setPayerPersonalId(payerPId);
+							entry.setPersonalId(studentPId);
+							entry.setPaymentMethod(application.getPaymentType());
+							entry.setAmount((int) carePrice);
+							entry.setUnits(1);
+							entry.setStartDate(startDate.getDate());
+							entry.setEndDate(endDate.getDate());
+
+							entries.add(entry);
+						}
+						catch (InstantiationException e) {
+							e.printStackTrace();
+						}
+						catch (IllegalAccessException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+		catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		return (AccountingEntry[]) entries.toArray(new AccountingEntry[0]);
 	}
 
 	public String getLocalizedCaseDescription(Case theCase, Locale locale) {
@@ -1167,7 +1309,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			if (!first) {
 				if (hasSiblingInSet(applications.keySet(), applicant)) {
-					priceHolder.setPrice(price * 0.8f);
+					priceHolder.setPrice(price * 0.2f);
+					priceHolder.setDiscount(0.2f);
 				}
 			}
 			else {
@@ -1310,7 +1453,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		sendMessageToParents(application, choice, subject, body);
 	}
 
-	public CourseApplication saveApplication(Map applications, int merchantID, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
 			application.setCreditCardMerchantID(merchantID);
@@ -1321,6 +1464,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			application.setPayerName(payerName);
 			application.setPayerPersonalID(payerPersonalID);
 			application.setOwner(performer);
+			application.setAmount(amount);
 			changeCaseStatus(application, getCaseStatusOpen(), performer);
 
 			String subject = getLocalizedString("course_choice.registration_received", "Your registration for course has been received", locale);
@@ -1539,6 +1683,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		catch (RemoteException e) {
 			throw new IBORuntimeException(e.getMessage());
+		}
+	}
+
+	private AccountingKeyBusiness getAccountingBusiness() {
+		try {
+			return (AccountingKeyBusiness) IBOLookup.getServiceInstance(getIWApplicationContext(), AccountingKeyBusiness.class);
+		}
+		catch (IBOLookupException e) {
+			throw new IBORuntimeException(e);
 		}
 	}
 }

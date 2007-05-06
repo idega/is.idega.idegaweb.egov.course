@@ -1,6 +1,5 @@
 package is.idega.idegaweb.egov.course.business;
 
-
 import com.idega.block.process.business.CaseBusiness;
 import com.idega.block.school.data.School;
 import com.idega.block.process.data.Case;
@@ -14,26 +13,33 @@ import com.idega.user.data.Gender;
 import is.idega.idegaweb.egov.course.data.CoursePriceHome;
 import com.idega.business.IBOService;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import com.idega.block.school.data.SchoolArea;
 import java.util.SortedSet;
 import java.util.Map;
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
 import java.sql.Date;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
 import com.idega.user.data.User;
+import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
 import java.rmi.RemoteException;
 import is.idega.idegaweb.egov.course.data.Course;
 import java.sql.Timestamp;
 import java.util.Locale;
 import java.util.Collection;
-import com.idega.util.IWTimestamp;
-import javax.ejb.FinderException;
 import com.idega.block.school.data.SchoolType;
+import javax.ejb.FinderException;
+import com.idega.util.IWTimestamp;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
 
-public interface CourseBusiness extends IBOService, CaseBusiness {
+public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusiness {
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAccountingEntries
+	 */
+	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getLocalizedCaseDescription
@@ -333,7 +339,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness {
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
 	 */
-	public CourseApplication saveApplication(Map applications, int merchantID, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) throws RemoteException;
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getNumberOfCourses

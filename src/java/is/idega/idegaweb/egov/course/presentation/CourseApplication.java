@@ -1926,6 +1926,7 @@ public class CourseApplication extends ApplicationForm {
 
 		String payerPersonalID = iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID) : "";
 		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : "";
+		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
 
 		boolean creditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		IWTimestamp paymentStamp = new IWTimestamp();
@@ -1936,7 +1937,6 @@ public class CourseApplication extends ApplicationForm {
 			String expiresMonth = iwc.getParameter(PARAMETER_VALID_MONTH);
 			String expiresYear = iwc.getParameter(PARAMETER_VALID_YEAR);
 			String ccVerifyNumber = iwc.getParameter(PARAMETER_CCV);
-			double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
 			String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
 
 			try {
@@ -1952,7 +1952,7 @@ public class CourseApplication extends ApplicationForm {
 			return;
 		}
 
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), -1, null, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, authorizationCode, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), -1, (float) amount, null, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, authorizationCode, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
 		if (application != null && creditCardPayment) {
 			try {
 				getCourseBusiness(iwc).finishPayment(authorizationCode);
