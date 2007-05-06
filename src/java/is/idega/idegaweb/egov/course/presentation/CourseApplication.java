@@ -747,6 +747,13 @@ public class CourseApplication extends ApplicationForm {
 
 		Integer schoolTypePK = getSchoolTypePK() != null ? new Integer(getSchoolTypePK().toString()) : null;
 		if (schoolTypePK == null) {
+			if (iwc.isParameterSet(PARAMETER_CATEGORY)) {
+				schoolTypePK = new Integer(iwc.getParameter(PARAMETER_CATEGORY));
+				if (schoolTypePK.intValue() < 0) {
+					schoolTypePK = null;
+				}
+			}
+
 			Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
 			schoolTypePK = (Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey();
 			DropdownMenu catMenu = new DropdownMenu(schoolTypes, PARAMETER_CATEGORY);
@@ -802,13 +809,6 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(providerMenu);
 		section.add(formItem);
 
-		if (schoolTypePK == null && iwc.isParameterSet(PARAMETER_CATEGORY)) {
-			schoolTypePK = new Integer(iwc.getParameter(PARAMETER_CATEGORY));
-			if (schoolTypePK.intValue() < 0) {
-				schoolTypePK = null;
-			}
-		}
-
 		Integer courseTypePK = null;
 		if (iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
 			courseTypePK = new Integer(iwc.getParameter(PARAMETER_COURSE_TYPE));
@@ -827,7 +827,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Collection courses = null;
 		if (courseTypePK != null) {
-			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK != null ? schoolTypePK.intValue() : -1, courseTypePK != null ? courseTypePK.intValue() : -1, ((Integer) getApplicant(iwc).getPrimaryKey()).intValue(), iwc.getCurrentLocale().getCountry());
+			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK.intValue(), courseTypePK.intValue(), ((Integer) getApplicant(iwc).getPrimaryKey()).intValue(), iwc.getCurrentLocale().getCountry());
 		}
 
 		Table2 table = new Table2();
@@ -1981,7 +1981,7 @@ public class CourseApplication extends ApplicationForm {
 			String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
 
 			try {
-				authorizationCode = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, referenceNumber, referenceNumber);
+				authorizationCode = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
 			}
 			catch (CreditCardAuthorizationException e) {
 				setError("", e.getLocalizedMessage());
