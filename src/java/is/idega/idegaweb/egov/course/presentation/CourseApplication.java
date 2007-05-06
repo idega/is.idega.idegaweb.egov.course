@@ -765,7 +765,8 @@ public class CourseApplication extends ApplicationForm {
 		Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK);
 		typeMenu.addMenuElements(courseTypes);
 		typeMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("select_course_type", "Select course type"));
-		typeMenu.setOnChange("getCourses();");
+		// typeMenu.setOnChange("getCourses();");
+		typeMenu.setToSubmit();
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -777,7 +778,8 @@ public class CourseApplication extends ApplicationForm {
 		Collection providers = getCourseBusiness(iwc).getProviders();
 		DropdownMenu providerMenu = new DropdownMenu(providers, PARAMETER_PROVIDER);
 		providerMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("all_providers", "All providers"));
-		providerMenu.setOnChange("getCourses();");
+		// providerMenu.setOnChange("getCourses();");
+		providerMenu.setToSubmit();
 		providerMenu.setId(PARAMETER_PROVIDER);
 
 		formItem = new Layer(Layer.DIV);
@@ -787,7 +789,34 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(providerMenu);
 		section.add(formItem);
 
+		if (schoolTypePK == null && iwc.isParameterSet(PARAMETER_CATEGORY)) {
+			schoolTypePK = new Integer(iwc.getParameter(PARAMETER_CATEGORY));
+			if (schoolTypePK.intValue() < 0) {
+				schoolTypePK = null;
+			}
+		}
+
+		Integer courseTypePK = null;
+		if (iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
+			courseTypePK = new Integer(iwc.getParameter(PARAMETER_COURSE_TYPE));
+			if (courseTypePK.intValue() < 0) {
+				courseTypePK = null;
+			}
+		}
+
+		Integer providerPK = null;
+		if (iwc.isParameterSet(PARAMETER_PROVIDER)) {
+			providerPK = new Integer(iwc.getParameter(PARAMETER_PROVIDER));
+			if (providerPK.intValue() < 0) {
+				providerPK = null;
+			}
+		}
+
 		Collection courses = null;
+		if (courseTypePK != null) {
+			IWTimestamp dateOfBirth = new IWTimestamp(getApplicant(iwc).getDateOfBirth());
+			courses = getCourseBusiness(iwc).getCourses(dateOfBirth.getYear(), providerPK, schoolTypePK, courseTypePK);
+		}
 
 		Table2 table = new Table2();
 		table.setStyleClass("courses");
