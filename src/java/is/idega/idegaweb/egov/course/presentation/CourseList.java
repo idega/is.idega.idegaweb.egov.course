@@ -262,12 +262,12 @@ public class CourseList extends CourseBlock {
 		int iRow = 1;
 
 		List courses = new ArrayList();
-		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
+		if (true/* iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) */) {
 			if (isSchoolUser() || getSession().getProvider() != null) {
-				courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(PARAMETER_COURSE_TYPE_PK)));
+				courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : null, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null));
 			}
 			else {
-				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(PARAMETER_COURSE_TYPE_PK)));
+				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : null, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null));
 			}
 			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), Integer.parseInt(iwc.getParameter(PARAMETER_SORTING))));
 		}
