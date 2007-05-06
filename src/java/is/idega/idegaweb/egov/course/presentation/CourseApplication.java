@@ -815,7 +815,7 @@ public class CourseApplication extends ApplicationForm {
 		Collection courses = null;
 		if (courseTypePK != null) {
 			IWTimestamp dateOfBirth = new IWTimestamp(getApplicant(iwc).getDateOfBirth());
-			courses = getCourseBusiness(iwc).getCourses(dateOfBirth.getYear(), providerPK, schoolTypePK, courseTypePK);
+			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK != null ? schoolTypePK.intValue() : -1, courseTypePK != null ? courseTypePK.intValue() : -1, dateOfBirth.getYear(), iwc.getCurrentLocale().getCountry());
 		}
 
 		Table2 table = new Table2();
