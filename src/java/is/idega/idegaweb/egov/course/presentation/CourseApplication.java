@@ -743,15 +743,17 @@ public class CourseApplication extends ApplicationForm {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.course_navigation_help", "Select a school type and a course type.  You can also select a specific provider.")));
 		section.add(helpLayer);
 
+		boolean useDWR = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DWR, true);
+
 		Integer schoolTypePK = getSchoolTypePK() != null ? new Integer(getSchoolTypePK().toString()) : null;
 		if (schoolTypePK == null) {
 			Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
 			schoolTypePK = (Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey();
 			DropdownMenu catMenu = new DropdownMenu(schoolTypes, PARAMETER_CATEGORY);
 			catMenu.addMenuElementFirst("", iwrb.getLocalizedString("select_school_type", "Select school type"));
-			catMenu.setOnChange("changeValues();");
 			catMenu.setId(PARAMETER_CATEGORY);
 			catMenu.keepStatusOnAction(true);
+			catMenu.setOnChange("changeValues();");
 
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -766,8 +768,12 @@ public class CourseApplication extends ApplicationForm {
 		Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK);
 		typeMenu.addMenuElements(courseTypes);
 		typeMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("select_course_type", "Select course type"));
-		// typeMenu.setOnChange("getCourses();");
-		typeMenu.setToSubmit();
+		if (useDWR) {
+			typeMenu.setOnChange("getCourses();");
+		}
+		else {
+			typeMenu.setToSubmit();
+		}
 		typeMenu.keepStatusOnAction(true);
 
 		Layer formItem = new Layer(Layer.DIV);
@@ -780,8 +786,12 @@ public class CourseApplication extends ApplicationForm {
 		Collection providers = getCourseBusiness(iwc).getProviders();
 		DropdownMenu providerMenu = new DropdownMenu(providers, PARAMETER_PROVIDER);
 		providerMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("all_providers", "All providers"));
-		// providerMenu.setOnChange("getCourses();");
-		providerMenu.setToSubmit();
+		if (useDWR) {
+			providerMenu.setOnChange("getCourses();");
+		}
+		else {
+			providerMenu.setToSubmit();
+		}
 		providerMenu.setId(PARAMETER_PROVIDER);
 		providerMenu.keepStatusOnAction(true);
 

@@ -26,6 +26,7 @@ public class CourseConstants {
 	public static final String PROPERTY_MERCHANT_PK = "egov.course.merchant.pk";
 	public static final String PROPERTY_MERCHANT_TYPE = "egov.course.merchant.type";
 	public static final String PROPERTY_INVALIDATE_INTERVAL = "egov.course.invalidate.interval";
+	public static final String PROPERTY_USE_DWR = "egov.course.use.dwr";
 
 	public static final String CARD_TYPE_EUROCARD = "eurocard";
 	public static final String CARD_TYPE_VISA = "visa";
