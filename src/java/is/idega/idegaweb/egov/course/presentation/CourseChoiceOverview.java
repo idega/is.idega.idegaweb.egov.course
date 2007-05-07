@@ -377,7 +377,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		validYear.keepStatusOnAction(true);
 		int year = stamp.getYear();
 		for (int a = year; a <= year + 10; a++) {
-			validYear.addMenuElement(stamp.getYear(), String.valueOf(stamp.getYear()));
+			validYear.addMenuElement(String.valueOf(stamp.getYear()).substring(2), String.valueOf(stamp.getYear()));
 			stamp.addYears(1);
 		}
 
