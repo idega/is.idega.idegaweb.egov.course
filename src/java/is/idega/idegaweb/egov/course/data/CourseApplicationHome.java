@@ -9,10 +9,12 @@ import javax.ejb.FinderException;
 import java.sql.Date;
 
 public interface CourseApplicationHome extends IDOHome {
-
 	public CourseApplication create() throws CreateException;
 
 	public CourseApplication findByPrimaryKey(Object pk) throws FinderException;
 
-	public Collection findAll(CaseStatus caseStatus, Date fromDate, Date toDate) throws FinderException;
+	public Collection findAll(CaseStatus caseStatus, Date fromDate, Date toDate)
+			throws FinderException;
+
+	public Collection findAll() throws FinderException;
 }

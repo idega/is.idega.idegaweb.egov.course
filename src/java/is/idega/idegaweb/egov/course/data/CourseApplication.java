@@ -5,7 +5,6 @@ import com.idega.block.process.data.Case;
 import com.idega.data.IDOEntity;
 
 public interface CourseApplication extends IDOEntity, Case {
-
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getCaseCodeDescription
 	 */

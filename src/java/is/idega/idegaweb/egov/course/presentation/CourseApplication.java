@@ -1971,7 +1971,7 @@ public class CourseApplication extends ApplicationForm {
 
 		boolean creditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		IWTimestamp paymentStamp = new IWTimestamp();
-		String authorizationCode = null;
+		String properties = null;
 		if (creditCardPayment) {
 			String nameOnCard = iwc.getParameter(PARAMETER_NAME_ON_CARD);
 			String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
@@ -1981,7 +1981,7 @@ public class CourseApplication extends ApplicationForm {
 			String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
 
 			try {
-				authorizationCode = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
+				properties = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
 			}
 			catch (CreditCardAuthorizationException e) {
 				setError("", e.getLocalizedMessage(iwrb));
@@ -1995,10 +1995,12 @@ public class CourseApplication extends ApplicationForm {
 
 		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
 		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, authorizationCode, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
 		if (application != null && creditCardPayment) {
 			try {
-				getCourseBusiness(iwc).finishPayment(authorizationCode);
+				String authorizationCode = getCourseBusiness(iwc).finishPayment(properties);
+				application.setReferenceNumber(authorizationCode);
+				application.store();
 			}
 			catch (CreditCardAuthorizationException e) {
 				setError("", e.getLocalizedMessage());

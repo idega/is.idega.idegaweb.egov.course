@@ -143,4 +143,8 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 		return idoFindPKsByQuery(query);
 	}
+	
+	public Collection ejbFindAll() throws FinderException {
+		return super.idoFindAllIDsBySQL();
+	}
 }
