@@ -551,6 +551,7 @@ public class CourseApplicationOverview extends CourseBlock {
 
 		Link submit = getButtonLink(getResourceBundle().getLocalizedString("refund", "Refund"));
 		submit.setToFormSubmit(form);
+		bottom.add(submit);
 
 		add(form);
 	}
