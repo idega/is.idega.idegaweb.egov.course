@@ -1993,7 +1993,9 @@ public class CourseApplication extends ApplicationForm {
 			return;
 		}
 
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), -1, (float) amount, null, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, authorizationCode, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
+		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
+		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, authorizationCode, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
 		if (application != null && creditCardPayment) {
 			try {
 				getCourseBusiness(iwc).finishPayment(authorizationCode);
