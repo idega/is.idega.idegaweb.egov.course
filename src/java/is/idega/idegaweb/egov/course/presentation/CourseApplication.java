@@ -1984,7 +1984,7 @@ public class CourseApplication extends ApplicationForm {
 				authorizationCode = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
 			}
 			catch (CreditCardAuthorizationException e) {
-				setError("", e.getLocalizedMessage());
+				setError("", e.getLocalizedMessage(iwrb));
 			}
 		}
 
