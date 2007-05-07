@@ -285,7 +285,7 @@ public class CourseList extends CourseBlock {
 			else {
 				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK));
 			}
-			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), Integer.parseInt(iwc.getParameter(PARAMETER_SORTING))));
+			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : CourseComparator.NAME_SORT));
 		}
 
 		Iterator iter = courses.iterator();
