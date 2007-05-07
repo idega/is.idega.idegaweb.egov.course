@@ -804,7 +804,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			else {
 				return new ArrayList();
 			}
-			
+
 			Locale locale = new Locale(country, country.toUpperCase());
 
 			IWTimestamp stamp = new IWTimestamp();
@@ -821,7 +821,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						map.put(course.getPrimaryKey(), cDWR);
 					}
 				}
-			}			return map.values();
+			}
+			return map.values();
 		}
 		catch (RemoteException re) {
 			throw new IBORuntimeException(re);
@@ -1308,8 +1309,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			if (!first) {
 				if (hasSiblingInSet(applications.keySet(), applicant)) {
-					priceHolder.setPrice(price * 0.2f);
-					priceHolder.setDiscount(0.2f);
+					discountHolder.setPrice(price * 0.2f);
+					discountHolder.setDiscount(0.2f);
 				}
 			}
 			else {
