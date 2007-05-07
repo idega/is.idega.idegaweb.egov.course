@@ -249,10 +249,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
-	public void finishPayment(String properties) throws CreditCardAuthorizationException {
+	public String finishPayment(String properties) throws CreditCardAuthorizationException {
 		try {
 			CreditCardClient client = getCreditCardBusiness().getCreditCardClient(getCreditCardMerchant());
-			client.finishTransaction(properties);
+			return client.finishTransaction(properties);
 		}
 		catch (CreditCardAuthorizationException ccae) {
 			throw ccae;

@@ -49,7 +49,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#finishPayment
 	 */
-	public void finishPayment(String properties) throws CreditCardAuthorizationException, RemoteException;
+	public String finishPayment(String properties) throws CreditCardAuthorizationException, RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#authorizePayment

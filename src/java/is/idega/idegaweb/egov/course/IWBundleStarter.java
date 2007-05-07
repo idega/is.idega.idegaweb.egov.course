@@ -13,7 +13,6 @@ import javax.ejb.FinderException;
 import com.idega.block.process.business.CaseCodeManager;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
-import com.idega.data.IDORelationshipException;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
 import com.idega.idegaweb.include.ExternalLink;
@@ -56,9 +55,6 @@ public class IWBundleStarter implements IWBundleStartable {
 			}
 			System.out.println("****Course Statup end**************************");
 		} catch (IDOLookupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IDORelationshipException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FinderException e) {
