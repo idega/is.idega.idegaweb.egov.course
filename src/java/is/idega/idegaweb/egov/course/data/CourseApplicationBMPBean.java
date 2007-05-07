@@ -49,6 +49,8 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		addAttribute(COLUMN_PAYMENT_TYPE, "Payment type", String.class, 20);
 		addAttribute(COLUMN_PAID, "Paid", Boolean.class);
 		addAttribute(COLUMN_AMOUNT, "Amount", Float.class);
+		addAttribute(COLUMN_PAYER_PERSONAL_ID, "Payer personal ID", String.class);
+		addAttribute(COLUMN_PAYER_NAME, "Payer name", String.class);
 	}
 
 	// Getters
