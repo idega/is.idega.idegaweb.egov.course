@@ -1823,7 +1823,7 @@ public class CourseApplication extends ApplicationForm {
 		validMonth.setWidth("45px");
 		validMonth.keepStatusOnAction(true);
 		for (int a = 1; a <= 12; a++) {
-			validMonth.addMenuElement(a, TextSoap.addZero(a));
+			validMonth.addMenuElement(TextSoap.addZero(a), TextSoap.addZero(a));
 		}
 		validMonth.setDisabled(!creditcardPayment);
 
