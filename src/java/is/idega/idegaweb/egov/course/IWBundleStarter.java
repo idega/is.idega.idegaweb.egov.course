@@ -49,7 +49,9 @@ public class IWBundleStarter implements IWBundleStartable {
 						System.out.println("==============================");
 						System.out.println("found String = "+ref);
 						System.out.println("    authCode = "+authCode);
-						System.out.println("******************************");
+						apppl.setReferenceNumber(authCode);
+						apppl.store();
+						System.out.println("    updated!");
 					}
 				}
 			}
