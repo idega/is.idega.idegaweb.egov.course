@@ -453,7 +453,7 @@ public class CourseChoiceOverview extends CourseBlock {
 				return false;
 			}
 		}
-		else if (application.isPaid()) {
+		else {
 			getBusiness().sendRefundMessage(application, choice, iwc.getCurrentLocale());
 		}
 

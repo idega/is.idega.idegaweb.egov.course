@@ -572,7 +572,7 @@ public class CourseApplicationOverview extends CourseBlock {
 				return false;
 			}
 		}
-		else if (application.isPaid()) {
+		else {
 			getBusiness().sendRefundMessage(application, null, iwc.getCurrentLocale());
 		}
 
