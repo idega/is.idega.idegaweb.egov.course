@@ -311,7 +311,7 @@ public class CourseChoiceOverview extends CourseBlock {
 			}
 			else {
 				invalidate.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_REFUND));
-				invalidate.maintainParameter(getBusiness().getSelectedCaseParameter(), iwc);
+				invalidate.maintainParameter(PARAMETER_CHOICE_PK, iwc);
 				invalidate.setClickConfirmation(getResourceBundle().getLocalizedString("confirm_invalidation", "Are you sure you want to invalidate this registration?"));
 			}
 			bottom.add(invalidate);
