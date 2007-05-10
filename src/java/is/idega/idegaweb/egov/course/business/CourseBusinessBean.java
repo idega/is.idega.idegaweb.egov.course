@@ -93,6 +93,56 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return IW_BUNDLE_IDENTIFIER;
 	}
 
+	public void reserveCourse(Course course) {
+		Map courseMap = (Map) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		if (courseMap == null) {
+			courseMap = new HashMap();
+		}
+
+		if (courseMap.containsKey(course)) {
+			Integer numberOfChoices = (Integer) courseMap.get(course);
+			numberOfChoices = new Integer(numberOfChoices.intValue() + 1);
+			courseMap.put(course, numberOfChoices);
+		}
+		else {
+			courseMap.put(course, new Integer(1));
+		}
+		System.out.println("Reserving course '" + course.getName() + "'");
+
+		getIWApplicationContext().setApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
+	}
+
+	public void removeReservation(Course course) {
+		Map courseMap = (Map) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+
+		if (courseMap != null && courseMap.containsKey(course)) {
+			Integer numberOfChoices = (Integer) courseMap.get(course);
+			numberOfChoices = new Integer(numberOfChoices.intValue() - 1);
+			if (numberOfChoices.intValue() > 0) {
+				courseMap.put(course, numberOfChoices);
+				System.out.println("Removing reservation for course '" + course.getName() + "'.  Remaining = " + numberOfChoices);
+			}
+			else {
+				courseMap.remove(course);
+				System.out.println("Removing reservation for course '" + course.getName() + "'");
+			}
+		}
+
+		getIWApplicationContext().setApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
+	}
+
+	public int getNumberOfReservations(Course course) {
+		Map courseMap = (Map) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+
+		if (courseMap != null && courseMap.containsKey(course)) {
+			Integer numberOfChoices = (Integer) courseMap.get(course);
+			System.out.println("Total reservations for course '" + course.getName() + "' = " + numberOfChoices);
+			return numberOfChoices.intValue();
+		}
+
+		return 0;
+	}
+
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {
 		Collection entries = new ArrayList();
 
@@ -829,8 +879,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
-	private boolean isFull(Course course) {
-		return course.getFreePlaces() <= 0;
+	public boolean isFull(Course course) {
+		return course.getFreePlaces() - getNumberOfReservations(course) <= 0;
 	}
 
 	private boolean isRegistered(User user, Course course) {
