@@ -107,7 +107,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		else {
 			courseMap.put(course, new Integer(1));
 		}
-		System.out.println("Reserving course '" + course.getName() + "'");
 
 		getIWApplicationContext().setApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
 	}
@@ -120,11 +119,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			numberOfChoices = new Integer(numberOfChoices.intValue() - 1);
 			if (numberOfChoices.intValue() > 0) {
 				courseMap.put(course, numberOfChoices);
-				System.out.println("Removing reservation for course '" + course.getName() + "'.  Remaining = " + numberOfChoices);
 			}
 			else {
 				courseMap.remove(course);
-				System.out.println("Removing reservation for course '" + course.getName() + "'");
 			}
 		}
 
@@ -136,7 +133,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		if (courseMap != null && courseMap.containsKey(course)) {
 			Integer numberOfChoices = (Integer) courseMap.get(course);
-			System.out.println("Total reservations for course '" + course.getName() + "' = " + numberOfChoices);
 			return numberOfChoices.intValue();
 		}
 
@@ -881,7 +877,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	public boolean isFull(Course course) {
 		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
-		System.out.println("Free places for course '" + course.getName() + "' = " + freePlaces);
 		return freePlaces <= 0;
 	}
 

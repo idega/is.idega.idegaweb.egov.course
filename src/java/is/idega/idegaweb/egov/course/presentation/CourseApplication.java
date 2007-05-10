@@ -2053,6 +2053,11 @@ public class CourseApplication extends ApplicationForm {
 	}
 
 	private boolean addApplications(IWContext iwc) throws RemoteException {
+		int action = ACTION_PHASE_1;
+		if (iwc.isParameterSet(PARAMETER_ACTION)) {
+			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
+		}
+
 		String[] pks = iwc.getParameterValues(PARAMETER_COURSE);
 		String[] daycare = iwc.getParameterValues(PARAMETER_DAYCARE);
 		String[] pickedUp = iwc.getParameterValues(PARAMETER_TRIPHOME);
@@ -2066,14 +2071,14 @@ public class CourseApplication extends ApplicationForm {
 				if (pickedUp[i].length() > 0) {
 					holder.setDaycare(Integer.parseInt(daycare[i]));
 				}
-				else {
+				else if (action != ACTION_PHASE_5) {
 					setError(PARAMETER_TRIPHOME, iwrb.getLocalizedString("application_error.must_select_picked_up_option", "You must select all picked up options."));
 					addApplication = false;
 				}
 				if (daycare[i].length() > 0) {
 					holder.setPickedUp(new Boolean(pickedUp[i]));
 				}
-				else {
+				else if (action != ACTION_PHASE_5) {
 					setError(PARAMETER_TRIPHOME, iwrb.getLocalizedString("application_error.must_select_daycare_option", "You must select all daycare options."));
 					addApplication = false;
 				}
