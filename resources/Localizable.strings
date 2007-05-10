@@ -57,6 +57,7 @@ application.relative_information=Relative information
 application.select_child=Select child
 application.select_child_help=Please select if you want to register your own child or another child.
 application.total_price=Total price
+application_error.full_course_selected=You have selected a course that is already full: 
 application_error.must_select_daycare_option=You must select all daycare options.
 application_error.must_select_picked_up_option=You must select all picked up options.
 application_error.no_courses_available=There are no courses available for the user you have selected.

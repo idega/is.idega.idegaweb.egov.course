@@ -880,7 +880,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public boolean isFull(Course course) {
-		return course.getFreePlaces() - getNumberOfReservations(course) <= 0;
+		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
+		System.out.println("Free places for course '" + course.getName() + "' = " + freePlaces);
+		return freePlaces <= 0;
 	}
 
 	private boolean isRegistered(User user, Course course) {

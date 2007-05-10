@@ -940,12 +940,18 @@ public class CourseApplication extends ApplicationForm {
 		String[] courses = iwc.getParameterValues(PARAMETER_COURSE);
 		for (int i = 0; courses != null && i < courses.length; i++) {
 			ApplicationHolder h = new ApplicationHolder();
-			h.setUser(applicant);
-			h.setCourse(getCourseBusiness(iwc).getCourse(new Integer(courses[i])));
-			getCourseApplicationSession(iwc).addApplication(applicant, h);
+			Course course = getCourseBusiness(iwc).getCourse(new Integer(courses[i]));
+			if (!getCourseBusiness(iwc).isFull(course)) {
+				h.setUser(applicant);
+				h.setCourse(course);
+				getCourseApplicationSession(iwc).addApplication(applicant, h);
+			}
+			else {
+				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.full_course_selected", "You have selected a course that is already full: ") + course.getName());
+			}
 		}
 		Collection applications = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
-		if (applications == null || applications.isEmpty()) {
+		if (applications == null || applications.isEmpty() || hasErrors()) {
 			showPhaseFive(iwc);
 			return;
 		}
@@ -2053,7 +2059,8 @@ public class CourseApplication extends ApplicationForm {
 		if (pks != null) {
 			for (int i = 0; i < pks.length; i++) {
 				ApplicationHolder holder = new ApplicationHolder();
-				holder.setCourse(getCourseBusiness(iwc).getCourse(new Integer(pks[i])));
+				Course course = getCourseBusiness(iwc).getCourse(new Integer(pks[i]));
+				holder.setCourse(course);
 				holder.setUser(getApplicant(iwc));
 				boolean addApplication = true;
 				if (pickedUp[i].length() > 0) {
@@ -2320,7 +2327,7 @@ public class CourseApplication extends ApplicationForm {
 						if (storeMaritalStatus && (maritalStatus == null || maritalStatus.length() == 0)) {
 							setError(PARAMETER_MARITAL_STATUS, this.iwrb.getLocalizedString("application_error.marital_status_empty", "Please select marital status."));
 						}
-						if (homePhones != null && (iUseSessionUser || hasRelation) && (homePhones[index] == null || homePhones[index].length() == 0)) {
+						if (homePhones != null && index < homePhones.length && (iUseSessionUser || hasRelation) && (homePhones[index] == null || homePhones[index].length() == 0)) {
 							setError(PARAMETER_HOME_PHONE, this.iwrb.getLocalizedString("must_enter_home_phone", "You must enter a home phone for relative."));
 						}
 						if (hasErrors()) {

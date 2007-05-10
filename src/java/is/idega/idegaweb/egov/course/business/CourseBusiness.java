@@ -37,6 +37,21 @@ import is.idega.idegaweb.egov.course.data.CourseDiscount;
 public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusiness {
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#reserveCourse
+	 */
+	public void reserveCourse(Course course) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#removeReservation
+	 */
+	public void removeReservation(Course course) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getNumberOfReservations
+	 */
+	public int getNumberOfReservations(Course course) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAccountingEntries
 	 */
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate);
@@ -145,6 +160,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCoursesDWR
 	 */
 	public Collection getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#isFull
+	 */
+	public boolean isFull(Course course) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseDWR

@@ -57,6 +57,7 @@ application.relative_information=Tengili\u00F0ir
 application.select_child=Veldu barn
 application.select_child_help=Byrji\u00F0 \u00E1 a\u00F0 velja anna\u00F0hvort barn me\u00F0 sama l\u00F6gheimili og skr\u00E1ningara\u00F0ili, e\u00D0A anna\u00F0 l\u00F6gheimili\r\n
 application.total_price=Heildarupph\u00E6\u00F0
+application_error.full_course_selected=N\u00E1mskei\u00F0 sem \u00FE\u00FA valdir er \u00FEegar or\u00F0i\u00F0 fullb\u00F3ka\u00F0: 
 application_error.must_select_daycare_option=\u00DE\u00FA ver\u00F0ur a\u00F0 velja g\u00E6slum\u00F6guleika
 application_error.must_select_picked_up_option=\u00DE\u00FA ver\u00F0ur a\u00F0 velja hvort barni\u00F0 labbar heim e\u00F0a er s\u00F3tt fyrir \u00F6ll n\u00E1mskei\u00F0in sem \u00FE\u00FA hefur vali\u00F0.
 application_error.no_courses_available=\u00DEa\u00F0 eru engin n\u00E1mskei\u00F0 \u00ED bo\u00F0i fyrir barni\u00F0 sem \u00FE\u00FA valdir
