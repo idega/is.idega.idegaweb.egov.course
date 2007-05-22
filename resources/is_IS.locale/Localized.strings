@@ -8,7 +8,7 @@ another_applicant=Skr\u00E1 anna\u00F0 barn
 another_course=Fleiri n\u00E1mskei\u00F0
 applicant=Ums\u00E6kjandi
 application.agree_terms=J\u00E1, \u00E9g sam\u00FEykki skilam\u00E1lana
-application.agreement=Ums\u00E6kjandi hefur lesi\u00F0 og kynnt s\u00E9r skilm\u00E1la \u00CDTR og sam\u00FEykkir innihald ums\u00F3knarinnar \u00E1samt grei\u00F0slufyrirkomulagi.
+application.agreement=Ums\u00E6kjandi hefur lesi\u00F0 og kynnt s\u00E9r skilm\u00E1la \u00CDTR og sam\u00FEykkir innihald ums\u00F3knarinnar \u00E1samt grei\u00F0slufyrirkomulagi.  <a href\="/idegaweb/bundles/is.idega.idegaweb.egov.course.bundle/resources/is_IS.locale/skilmalar.pdf">S\u00E6kja skilm\u00E1la</a>
 application.agreement_info=Skilm\u00E1lar
 application.amount=Upph\u00E6\u00F0
 application.amount_due=Heildarupph\u00E6\u00F0
