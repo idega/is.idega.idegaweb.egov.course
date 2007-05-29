@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
 
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -21,7 +20,7 @@ import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.User;
 
-public class CourseApplicationSessionBean extends IBOSessionBean implements CourseApplicationSession, HttpSessionBindingListener {
+public class CourseApplicationSessionBean extends IBOSessionBean implements CourseApplicationSession {
 
 	private Map applications;
 
@@ -31,25 +30,7 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 	public void valueUnbound(HttpSessionBindingEvent arg0) {
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(arg0.getSession().getServletContext());
 		IWApplicationContext iwac = iwma.getIWApplicationContext();
-
-		if (applications != null) {
-			Iterator iter = applications.values().iterator();
-			while (iter.hasNext()) {
-				Collection holders = (Collection) iter.next();
-				Iterator iterator = holders.iterator();
-				while (iterator.hasNext()) {
-					ApplicationHolder holder = (ApplicationHolder) iterator.next();
-					try {
-						getCourseBusiness(iwac).removeReservation(holder.getCourse());
-					}
-					catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-
-		clear();
+		clear(iwac);
 	}
 
 	private Map getMap() {
@@ -119,7 +100,23 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 		return false;
 	}
 
-	public void clear() {
+	public void clear(IWApplicationContext iwac) {
+		if (applications != null) {
+			Iterator iter = applications.values().iterator();
+			while (iter.hasNext()) {
+				Collection holders = (Collection) iter.next();
+				Iterator iterator = holders.iterator();
+				while (iterator.hasNext()) {
+					ApplicationHolder holder = (ApplicationHolder) iterator.next();
+					try {
+						getCourseBusiness(iwac).removeReservation(holder.getCourse());
+					}
+					catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 		applications = null;
 	}
 

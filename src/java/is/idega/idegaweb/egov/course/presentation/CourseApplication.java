@@ -2020,7 +2020,7 @@ public class CourseApplication extends ApplicationForm {
 		}
 
 		if (application != null) {
-			getCourseApplicationSession(iwc).clear();
+			getCourseApplicationSession(iwc).clear(iwc);
 			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation", "Your course application has been received and will be processed."), 8, numberOfPhases);
 
 			Layer clearLayer = new Layer(Layer.DIV);
