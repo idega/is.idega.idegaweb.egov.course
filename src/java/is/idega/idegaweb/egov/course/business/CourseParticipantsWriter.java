@@ -267,21 +267,21 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				row.createCell((short) 4).setCellValue(phone.getNumber());
 			}
 
-			if (child.hasGrowthDeviation() != null && child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			if (child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX) != null && child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX).booleanValue()) {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 			}
 
-			if (child.hasAllergies() != null && child.hasAllergies(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			if (child.hasAllergies(CourseConstants.COURSE_PREFIX) != null && child.hasAllergies(CourseConstants.COURSE_PREFIX).booleanValue()) {
 				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
 				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 			}
 
-			if (child.getOtherInformation() != null) {
+			if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
 				row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
 			}
 

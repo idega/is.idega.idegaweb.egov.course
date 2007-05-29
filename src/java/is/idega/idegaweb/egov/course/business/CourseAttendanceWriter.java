@@ -184,14 +184,14 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 			row.createCell((short) 3).setCellValue(postCare ? iwrb.getLocalizedString("yes", "Yes") : iwrb.getLocalizedString("no", "No"));
 			row.createCell((short) 4).setCellValue(choice.isPickedUp() ? iwrb.getLocalizedString("yes", "Yes") : iwrb.getLocalizedString("no", "No"));
 
-			if (child.hasGrowthDeviation() != null && child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			if (child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX) != null && child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX).booleanValue()) {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 			}
 
-			if (child.hasAllergies() != null && child.hasAllergies(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			if (child.hasAllergies(CourseConstants.COURSE_PREFIX) != null && child.hasAllergies(CourseConstants.COURSE_PREFIX).booleanValue()) {
 				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
