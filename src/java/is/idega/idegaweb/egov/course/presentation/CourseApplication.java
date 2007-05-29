@@ -1919,6 +1919,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
+		next.setOnClick("this.style.display='none';");
 		next.setToFormSubmit(form);
 		bottom.add(next);
 
