@@ -55,6 +55,12 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 			Collection applications = (Collection) getMap().get(user);
 			if (applications.contains(holder)) {
 				applications.remove(holder);
+				try {
+					getCourseBusiness(getIWApplicationContext()).removeReservation(holder.getCourse());
+				}
+				catch (RemoteException e) {
+					e.printStackTrace();
+				}
 			}
 			applications.add(holder);
 			getMap().put(user, applications);
@@ -113,7 +119,7 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 
 	public void clear(IWApplicationContext iwac) {
 		if (applications != null) {
-			System.out.println("Removing reserved courses...");
+			// System.out.println("Removing reserved courses...");
 			Iterator iter = applications.values().iterator();
 			while (iter.hasNext()) {
 				Collection holders = (Collection) iter.next();
@@ -121,7 +127,7 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 				while (iterator.hasNext()) {
 					ApplicationHolder holder = (ApplicationHolder) iterator.next();
 					try {
-						System.out.println("Removing course: " + holder.getCourse().getName());
+						// System.out.println("Removing course: " + holder.getCourse().getName());
 						getCourseBusiness(iwac).removeReservation(holder.getCourse());
 					}
 					catch (RemoteException e) {
@@ -129,7 +135,7 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 					}
 				}
 			}
-			System.out.println("Done removing reserved courses...");
+			// System.out.println("Done removing reserved courses...");
 		}
 
 		try {

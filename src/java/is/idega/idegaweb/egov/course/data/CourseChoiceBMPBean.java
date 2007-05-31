@@ -232,7 +232,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		query.addJoin(course, courseType);
 		query.addJoin(table, user);
 		query.addCriteria(new MatchCriteria(course.getColumn("PROVIDER_ID"), MatchCriteria.EQUALS, provider));
-		query.addCriteria(new MatchCriteria(course.getColumn("SCH_SCHOOL_TYPE_ID"), MatchCriteria.EQUALS, type));
+		query.addCriteria(new MatchCriteria(courseType.getColumn("SCH_SCHOOL_TYPE_ID"), MatchCriteria.EQUALS, type));
 		query.addCriteria(new MatchCriteria(user.getColumn("IC_GENDER_ID"), MatchCriteria.EQUALS, gender));
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
 		if (fromDate != null) {
