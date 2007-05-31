@@ -52,6 +52,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public int getNumberOfReservations(Course course) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#printReservations
+	 */
+	public void printReservations() throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAccountingEntries
 	 */
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate);

@@ -103,9 +103,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			Integer numberOfChoices = (Integer) courseMap.get(course);
 			numberOfChoices = new Integer(numberOfChoices.intValue() + 1);
 			courseMap.put(course, numberOfChoices);
+			System.out.println("Reserving course " + course.getName() + " (" + course.getPrimaryKey() + "): " + numberOfChoices);
 		}
 		else {
 			courseMap.put(course, new Integer(1));
+			System.out.println("Reserving course " + course.getName() + " (" + course.getPrimaryKey() + "): " + 1);
 		}
 
 		getIWApplicationContext().setApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
@@ -119,9 +121,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			numberOfChoices = new Integer(numberOfChoices.intValue() - 1);
 			if (numberOfChoices.intValue() > 0) {
 				courseMap.put(course, numberOfChoices);
+				System.out.println("Removing reservation for course " + course.getName() + " (" + course.getPrimaryKey() + "): " + numberOfChoices);
 			}
 			else {
 				courseMap.remove(course);
+				System.out.println("Removing reservation for course " + course.getName() + " (" + course.getPrimaryKey() + ")");
 			}
 		}
 
@@ -133,10 +137,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		if (courseMap != null && courseMap.containsKey(course)) {
 			Integer numberOfChoices = (Integer) courseMap.get(course);
+			System.out.println("Number of reservations for course " + course.getName() + " (" + course.getPrimaryKey() + "): " + numberOfChoices);
 			return numberOfChoices.intValue();
 		}
 
 		return 0;
+	}
+
+	public void printReservations() {
+		Map courseMap = (Map) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		if (courseMap != null) {
+			System.out.println(courseMap);
+		}
 	}
 
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.ejb.EJBException;
 import javax.servlet.http.HttpSessionBindingEvent;
 
 import com.idega.business.IBOLookup;
@@ -100,8 +101,19 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 		return false;
 	}
 
+	public void ejbRemove() {
+		clear(getIWApplicationContext());
+		super.ejbRemove();
+	}
+
+	public void ejbPassivate() throws EJBException, RemoteException {
+		clear(getIWApplicationContext());
+		super.ejbPassivate();
+	}
+
 	public void clear(IWApplicationContext iwac) {
 		if (applications != null) {
+			System.out.println("Removing reserved courses...");
 			Iterator iter = applications.values().iterator();
 			while (iter.hasNext()) {
 				Collection holders = (Collection) iter.next();
@@ -109,6 +121,7 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 				while (iterator.hasNext()) {
 					ApplicationHolder holder = (ApplicationHolder) iterator.next();
 					try {
+						System.out.println("Removing course: " + holder.getCourse().getName());
 						getCourseBusiness(iwac).removeReservation(holder.getCourse());
 					}
 					catch (RemoteException e) {
@@ -116,7 +129,16 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 					}
 				}
 			}
+			System.out.println("Done removing reserved courses...");
 		}
+
+		try {
+			getCourseBusiness(iwac).printReservations();
+		}
+		catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
 		applications = null;
 	}
 
