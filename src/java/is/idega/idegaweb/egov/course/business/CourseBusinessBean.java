@@ -51,6 +51,7 @@ import com.idega.block.creditcard.business.CreditCardBusiness;
 import com.idega.block.creditcard.business.CreditCardClient;
 import com.idega.block.creditcard.data.CreditCardAuthorizationEntry;
 import com.idega.block.creditcard.data.CreditCardMerchant;
+import com.idega.block.creditcard.data.TPosAuthorisationEntriesBean;
 import com.idega.block.process.business.CaseBusiness;
 import com.idega.block.process.business.CaseBusinessBean;
 import com.idega.block.process.data.Case;
@@ -161,6 +162,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			Iterator iterator = applications.iterator();
 			while (iterator.hasNext()) {
 				CourseApplication application = (CourseApplication) iterator.next();
+				TPosAuthorisationEntriesBean ccAuthEntry = null;
+				if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
+					ccAuthEntry = (TPosAuthorisationEntriesBean) getCreditCardBusiness().getAuthorizationEntry(getCreditCardInformation(), application.getReferenceNumber(), new IWTimestamp(application.getCreated()));
+				}
 
 				Map applicationMap = getApplicationMap(application);
 				SortedSet prices = calculatePrices(applicationMap);
@@ -178,8 +183,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					SchoolType schoolType = courseType.getSchoolType();
 					User student = choice.getUser();
 					CoursePrice price = course.getPrice();
-					IWTimestamp startDate = new IWTimestamp(course.getStartDate());
-					IWTimestamp endDate = new IWTimestamp(getEndDate(price, startDate.getDate()));
+					String paymentType = application.getPaymentType();
+					String batchNumber = ccAuthEntry != null ? ccAuthEntry.getBatchNumber() : null;
+					String cardName = ccAuthEntry != null ? ccAuthEntry.getBrandName().substring(0, 4) : null;
+					String courseName = course.getName();
+					String uniqueID = application.getPrimaryKey().toString() + "-" + choice.getPrimaryKey() + "-";
 
 					float coursePrice = price.getPrice() * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
 
@@ -219,14 +227,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						entry.setProductCode(CourseConstants.PRODUCT_CODE_COURSE);
 						entry.setProviderCode(providerCode);
 						entry.setProjectCode(typeCode);
-						entry.setExtraInformation(areaCode);
 						entry.setPayerPersonalId(payerPId);
 						entry.setPersonalId(studentPId);
-						entry.setPaymentMethod(application.getPaymentType());
+						entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? cardName : "GIRO");
 						entry.setAmount((int) coursePrice);
 						entry.setUnits(1);
-						entry.setStartDate(startDate.getDate());
-						entry.setEndDate(endDate.getDate());
+						entry.setStartDate(application.getCreated());
+
+						AccountingEntry extraEntry = (AccountingEntry) implementor.newInstance();
+						extraEntry.setProductCode(courseName);
+						extraEntry.setProjectCode(batchNumber);
+						extraEntry.setProviderCode(areaCode);
+						extraEntry.setExtraInformation(uniqueID + "1");
+						entry.setExtraInformation(extraEntry);
 
 						entries.add(entry);
 					}
@@ -256,14 +269,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							entry.setProductCode(CourseConstants.PRODUCT_CODE_CARE);
 							entry.setProviderCode(providerCode);
 							entry.setProjectCode(typeCode);
-							entry.setExtraInformation(areaCode);
 							entry.setPayerPersonalId(payerPId);
 							entry.setPersonalId(studentPId);
-							entry.setPaymentMethod(application.getPaymentType());
+							entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? cardName : "GIRO");
 							entry.setAmount((int) carePrice);
 							entry.setUnits(1);
-							entry.setStartDate(startDate.getDate());
-							entry.setEndDate(endDate.getDate());
+							entry.setStartDate(application.getCreated());
+
+							AccountingEntry extraEntry = (AccountingEntry) implementor.newInstance();
+							extraEntry.setProductCode(courseName);
+							extraEntry.setProjectCode(batchNumber);
+							extraEntry.setProviderCode(areaCode);
+							extraEntry.setExtraInformation(uniqueID + "1");
+							entry.setExtraInformation(extraEntry);
 
 							entries.add(entry);
 						}
