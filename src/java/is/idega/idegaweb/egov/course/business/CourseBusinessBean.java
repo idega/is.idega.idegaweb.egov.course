@@ -280,7 +280,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							extraEntry.setProductCode(courseName);
 							extraEntry.setProjectCode(batchNumber);
 							extraEntry.setProviderCode(areaCode);
-							extraEntry.setExtraInformation(uniqueID + "1");
+							extraEntry.setExtraInformation(uniqueID + "2");
 							entry.setExtraInformation(extraEntry);
 
 							entries.add(entry);
