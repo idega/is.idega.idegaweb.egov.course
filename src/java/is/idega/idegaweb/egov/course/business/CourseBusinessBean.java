@@ -188,6 +188,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					String cardName = ccAuthEntry != null ? ccAuthEntry.getBrandName().substring(0, 4) : null;
 					String courseName = course.getName();
 					String uniqueID = application.getPrimaryKey().toString() + "-" + choice.getPrimaryKey() + "-";
+					Date startDate = new IWTimestamp(course.getStartDate()).getDate();
+					Date endDate = getEndDate(price, startDate);
 
 					float coursePrice = price.getPrice() * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
 
@@ -232,9 +234,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? cardName : "GIRO");
 						entry.setAmount((int) coursePrice);
 						entry.setUnits(1);
-						entry.setStartDate(application.getCreated());
+						entry.setStartDate(startDate);
+						entry.setEndDate(endDate);
 
 						AccountingEntry extraEntry = (AccountingEntry) implementor.newInstance();
+						extraEntry.setStartDate(application.getCreated());
 						extraEntry.setProductCode(courseName);
 						extraEntry.setProjectCode(batchNumber);
 						extraEntry.setProviderCode(areaCode);
@@ -274,9 +278,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? cardName : "GIRO");
 							entry.setAmount((int) carePrice);
 							entry.setUnits(1);
-							entry.setStartDate(application.getCreated());
+							entry.setStartDate(startDate);
+							entry.setEndDate(endDate);
 
 							AccountingEntry extraEntry = (AccountingEntry) implementor.newInstance();
+							extraEntry.setStartDate(application.getCreated());
 							extraEntry.setProductCode(courseName);
 							extraEntry.setProjectCode(batchNumber);
 							extraEntry.setProviderCode(areaCode);
