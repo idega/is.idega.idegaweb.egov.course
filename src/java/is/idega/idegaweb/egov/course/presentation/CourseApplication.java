@@ -1025,7 +1025,7 @@ public class CourseApplication extends ApplicationForm {
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, iwrb.getLocalizedString("morning", "Morning"));
 			}
 			if (provider.hasPostCare()) {
-				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, iwrb.getLocalizedString("afternoon", "Afternoon"));
+				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, iwrb.getLocalizedString("afternoon", "Afternoon"));
 			}
 			if (provider.hasPreCare() && provider.hasPostCare()) {
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, iwrb.getLocalizedString("whole_day", "Whole day"));
