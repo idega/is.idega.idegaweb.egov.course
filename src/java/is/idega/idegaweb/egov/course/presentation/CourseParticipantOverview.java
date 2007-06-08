@@ -210,8 +210,7 @@ public class CourseParticipantOverview extends CourseBlock {
 				CourseType type = course.getCourseType();
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
-				IWTimestamp endDate = startDate;
-				endDate.addDays(coursePrice.getNumberOfDays() - 1);
+				IWTimestamp endDate = new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
 
 				cell = row.createCell();
 				cell.setStyleClass("course");
