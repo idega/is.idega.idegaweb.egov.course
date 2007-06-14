@@ -866,7 +866,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
-	public Collection getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country) {
+	public Collection getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country, boolean isAdmin) {
 		try {
 			User applicant = getUserBusiness().getUser(applicantPK);
 			IWTimestamp birth = new IWTimestamp(applicant.getDateOfBirth());
@@ -898,7 +898,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					Course course = (Course) iter.next();
 					IWTimestamp start = new IWTimestamp(course.getStartDate());
 
-					if (start.isLaterThan(stamp) && !isRegistered(applicant, course) && !isFull(course)) {
+					if ((!isAdmin ? start.isLaterThan(stamp) : true) && !isRegistered(applicant, course) && !isFull(course)) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
 					}

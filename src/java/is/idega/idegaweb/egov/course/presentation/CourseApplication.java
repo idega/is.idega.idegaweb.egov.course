@@ -675,7 +675,7 @@ public class CourseApplication extends ApplicationForm {
 		script.append("function changeValues() {\n").append(getSchoolTypePK() != null ? "\tvar val = '" + getSchoolTypePK() + "';\n" : "\tvar val = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(setOptions, val, '" + iwc.getCurrentLocale().getCountry() + "');\n").append("\tgetCourses();\n").append("}");
 
 		StringBuffer script3 = new StringBuffer();
-		script3.append("function getCourses() {\n").append("\tvar val = +$(\"" + PARAMETER_PROVIDER + "\") != null ? +$(\"" + PARAMETER_PROVIDER + "\").value : -1;\n").append(getSchoolTypePK() != null ? "\tvar val2 = '" + getSchoolTypePK() + "';\n" : "\tvar val2 = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar val3 = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getCoursesDWR(setCourses, val, val2, val3, " + applicantPK.intValue() + ", '" + iwc.getCurrentLocale().getCountry() + "');\n").append("}");
+		script3.append("function getCourses() {\n").append("\tvar val = +$(\"" + PARAMETER_PROVIDER + "\") != null ? +$(\"" + PARAMETER_PROVIDER + "\").value : -1;\n").append(getSchoolTypePK() != null ? "\tvar val2 = '" + getSchoolTypePK() + "';\n" : "\tvar val2 = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar val3 = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getCoursesDWR(setCourses, val, val2, val3, " + applicantPK.intValue() + ", '" + iwc.getCurrentLocale().getCountry() + "', " + String.valueOf(this.iUseSessionUser) + ");\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
 		script4.append("var getName = function(course) { return course.name };\n");
@@ -827,7 +827,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Collection courses = null;
 		if (courseTypePK != null) {
-			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK.intValue(), courseTypePK.intValue(), ((Integer) getApplicant(iwc).getPrimaryKey()).intValue(), iwc.getCurrentLocale().getCountry());
+			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK.intValue(), courseTypePK.intValue(), ((Integer) getApplicant(iwc).getPrimaryKey()).intValue(), iwc.getCurrentLocale().getCountry(), this.iUseSessionUser);
 		}
 
 		Table2 table = new Table2();

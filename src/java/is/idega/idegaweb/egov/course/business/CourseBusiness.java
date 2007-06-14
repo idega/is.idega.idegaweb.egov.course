@@ -164,7 +164,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCoursesDWR
 	 */
-	public Collection getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country) throws RemoteException;
+	public Collection getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country, boolean isAdmin) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#isFull

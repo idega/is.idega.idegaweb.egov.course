@@ -397,7 +397,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			receipt.addParameter(getBusiness().getSelectedCaseParameter(), application.getPrimaryKey().toString());
 			bottom.add(receipt);
 
-			if (isSchoolAdministrator(iwc) && getBusiness().canInvalidate(application)) {
+			if (isSchoolAdministrator(iwc) /*&& getBusiness().canInvalidate(application)*/) {
 				Link invalidate = getButtonLink(getResourceBundle().getLocalizedString("invalidate", "Invalidate"));
 				if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
 					invalidate.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_REFUND_FORM));
