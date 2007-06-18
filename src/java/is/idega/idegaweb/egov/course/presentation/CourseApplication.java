@@ -672,10 +672,10 @@ public class CourseApplication extends ApplicationForm {
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
-		script.append("function changeValues() {\n").append(getSchoolTypePK() != null ? "\tvar val = '" + getSchoolTypePK() + "';\n" : "\tvar val = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(setOptions, val, '" + iwc.getCurrentLocale().getCountry() + "');\n").append("\tgetCourses();\n").append("}");
+		script.append("function changeValues() {\n").append(getSchoolTypePK() != null ? "\tvar val = '" + getSchoolTypePK() + "';\n" : "\tvar val = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("\tgetCourses();\n").append("}");
 
 		StringBuffer script3 = new StringBuffer();
-		script3.append("function getCourses() {\n").append("\tvar val = +$(\"" + PARAMETER_PROVIDER + "\") != null ? +$(\"" + PARAMETER_PROVIDER + "\").value : -1;\n").append(getSchoolTypePK() != null ? "\tvar val2 = '" + getSchoolTypePK() + "';\n" : "\tvar val2 = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar val3 = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getCoursesDWR(setCourses, val, val2, val3, " + applicantPK.intValue() + ", '" + iwc.getCurrentLocale().getCountry() + "', " + String.valueOf(this.iUseSessionUser) + ");\n").append("}");
+		script3.append("function getCourses() {\n").append("\tvar val = +$(\"" + PARAMETER_PROVIDER + "\") != null ? +$(\"" + PARAMETER_PROVIDER + "\").value : -1;\n").append(getSchoolTypePK() != null ? "\tvar val2 = '" + getSchoolTypePK() + "';\n" : "\tvar val2 = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar val3 = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getCoursesDWR(val, val2, val3, " + applicantPK.intValue() + ", '" + iwc.getCurrentLocale().getCountry() + "', " + String.valueOf(this.iUseSessionUser) + ", setCourses);\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
 		script4.append("var getName = function(course) { return course.name };\n");
@@ -1518,7 +1518,7 @@ public class CourseApplication extends ApplicationForm {
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
 		StringBuffer script = new StringBuffer();
-		script.append("function readUser() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_PAYER_PERSONAL_ID + "\");\n\tvar child = '" + getUser(iwc).getPrimaryKey().toString() + "';\n\tCourseDWRUtil.getUserDWR(fillUser, id, child, '1', '" + iwc.getCurrentLocale().getCountry() + "');\n}");
+		script.append("function readUser() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_PAYER_PERSONAL_ID + "\");\n\tvar child = '" + getUser(iwc).getPrimaryKey().toString() + "';\n\tCourseDWRUtil.getUserDWR(id, child, '1', '" + iwc.getCurrentLocale().getCountry() + "', fillUser);\n}");
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function fillUser(auser) {\n\tuser = auser;\n\tDWRUtil.setValues(user);\n}");

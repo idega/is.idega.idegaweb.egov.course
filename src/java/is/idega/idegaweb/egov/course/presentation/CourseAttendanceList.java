@@ -82,13 +82,13 @@ public class CourseAttendanceList extends CourseBlock {
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
-		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(setOptions, val, '" + iwc.getCurrentLocale().getCountry() + "');\n").append("}");
+		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
 		StringBuffer script3 = new StringBuffer();
 		script3.append("function setCourseOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
-		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR(setCourseOptions, '" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', DWRUtil.getValue('" + PARAMETER_SCHOOL_TYPE + "'), DWRUtil.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "');\n").append("}");
+		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', DWRUtil.getValue('" + PARAMETER_SCHOOL_TYPE + "'), DWRUtil.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
 
 		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
 		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
