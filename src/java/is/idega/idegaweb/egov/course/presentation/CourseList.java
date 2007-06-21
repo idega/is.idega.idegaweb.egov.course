@@ -83,7 +83,7 @@ public class CourseList extends CourseBlock {
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");

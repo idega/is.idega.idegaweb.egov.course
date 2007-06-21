@@ -141,7 +141,7 @@ public class CourseEditor extends CourseBlock {
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
@@ -414,22 +414,22 @@ public class CourseEditor extends CourseBlock {
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
-		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions, );\n").append("}");
+		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
 		StringBuffer script3 = new StringBuffer();
-		script3.append("function setOptionsPrice(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\", data);\n").append("\tvar savebtn = $(\"SAVE_BTN_ID\");\n").append("\tif (isEmpty == true) {\n").append("\t\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\",['" + localize("try_another_date", "Try another date") + "...']);\n").append("\t\tsavebtn.disabled=true;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=true;\n").append("\t} else {\n").append("\t\tsavebtn.disabled=false;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=false;\n").append("\t}\n").append("}");
+		script3.append("function setOptionsPrice(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\", data);\n").append("\tvar savebtn = $(\"SAVE_BTN_ID\");\n").append("\tif (isEmpty == true) {\n").append("\t\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\",['" + localize("try_another_date", "Try another date") + "...']);\n").append("\t\tsavebtn.disabled=true;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=true;\n").append("\t} else {\n").append("\t\tsavebtn.disabled=false;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=false;\n").append("\t}\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
-		script4.append("function changeValuesPrice() {\n").append("\tvar date = DWRUtil.getValue(\"" + PARAMETER_VALID_FROM_ID + "\");\n").append("\tvar val = " + getSession().getProvider().getPrimaryKey().toString() + ";\n").append("\tvar val2 = DWRUtil.getValue(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tCourseDWRUtil.getCoursePricesDWR(date, val, val2, '" + iwc.getCurrentLocale().getCountry() + "', setOptionsPrice);").append("}");
+		script4.append("function changeValuesPrice() {\n").append("\tvar date = dwr.util.getValue(\"" + PARAMETER_VALID_FROM_ID + "\");\n").append("\tvar val = " + getSession().getProvider().getPrimaryKey().toString() + ";\n").append("\tvar val2 = dwr.util.getValue(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tCourseDWRUtil.getCoursePricesDWR(date, val, val2, '" + iwc.getCurrentLocale().getCountry() + "', setOptionsPrice);").append("}");
 
 		StringBuffer script5 = new StringBuffer();
-		script5.append("function readPrice() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n\tCourseDWRUtil.getPriceDWR(id, fillPrice);\n}");
+		script5.append("function readPrice() {\n\tvar id = dwr.util.getValue(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n\tCourseDWRUtil.getPriceDWR(id, fillPrice);\n}");
 
 		StringBuffer script6 = new StringBuffer();
-		script6.append("function fillPrice(aprice) {\n\tprice = aprice;\n\tDWRUtil.setValues(price);\n}");
+		script6.append("function fillPrice(aprice) {\n\tprice = aprice;\n\tdwr.util.setValues(price);\n}");
 
 		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
 		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
