@@ -297,12 +297,31 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		}
 	}
 
-	protected void addChildInformationOverview(IWContext iwc, Layer section, IWResourceBundle iwrb, Child child) throws RemoteException {
-		Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
-		String growthDeviation = child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX);
-		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
-		String allergies = child.getAllergiesDetails(CourseConstants.COURSE_PREFIX);
-		String otherInformation = child.getOtherInformation(CourseConstants.COURSE_PREFIX);
+	protected void addChildInformationOverview(IWContext iwc, Layer section, IWResourceBundle iwrb, User owner, Child child) throws RemoteException {
+		Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+		if (hasGrowthDeviation == null && isSchoolUser()) {
+			hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
+		}
+
+		String growthDeviation = child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+		if (growthDeviation == null && isSchoolUser()) {
+			growthDeviation = child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX);
+		}
+
+		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+		if (hasAllergies == null && isSchoolUser()) {
+			hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
+		}
+
+		String allergies = child.getAllergiesDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+		if (allergies == null && isSchoolUser()) {
+			allergies = child.getAllergiesDetails(CourseConstants.COURSE_PREFIX);
+		}
+
+		String otherInformation = child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+		if (otherInformation == null && isSchoolUser()) {
+			otherInformation = child.getOtherInformation(CourseConstants.COURSE_PREFIX);
+		}
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");

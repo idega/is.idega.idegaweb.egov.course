@@ -11,6 +11,7 @@ import is.idega.block.family.data.Child;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
@@ -166,12 +167,16 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 		cell.setCellStyle(style);
 
 		User user;
+		User owner;
 		CourseChoice choice;
+		CourseApplication application;
 
 		Iterator iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = sheet.createRow(cellRow++);
 			choice = (CourseChoice) iter.next();
+			application = choice.getApplication();
+			owner = application.getOwner();
 			user = choice.getUser();
 			Child child = this.userBusiness.getMemberFamilyLogic().getChild(user);
 			boolean preCare = choice.getDayCare() == CourseConstants.DAY_CARE_PRE || choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST;
@@ -184,21 +189,32 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 			row.createCell((short) 3).setCellValue(postCare ? iwrb.getLocalizedString("yes", "Yes") : iwrb.getLocalizedString("no", "No"));
 			row.createCell((short) 4).setCellValue(choice.isPickedUp() ? iwrb.getLocalizedString("yes", "Yes") : iwrb.getLocalizedString("no", "No"));
 
-			if (child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX) != null && child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasGrowthDeviation == null) {
+				hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
+			}
+			if (hasGrowthDeviation != null && hasGrowthDeviation.booleanValue()) {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 			}
 
-			if (child.hasAllergies(CourseConstants.COURSE_PREFIX) != null && child.hasAllergies(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasAllergies == null) {
+				hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
+			}
+			if (hasAllergies != null && hasAllergies.booleanValue()) {
 				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
 				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 			}
 
-			if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
+			if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
+				row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
+			}
+			else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
 				row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
 			}
 		}

@@ -567,6 +567,8 @@ public class CourseApplication extends ApplicationForm {
 			saveChildInfo(iwc, getApplicant(iwc));
 		}
 
+		User owner = getUser(iwc);
+
 		Form form = getForm(ACTION_PHASE_3);
 		form.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
 
@@ -583,8 +585,8 @@ public class CourseApplication extends ApplicationForm {
 		clearLayer.setStyleClass("Clear");
 
 		List relatives = new ArrayList();
-		relatives.add(child.getMainRelative(CourseConstants.COURSE_PREFIX));
-		relatives.addAll(child.getRelatives(CourseConstants.COURSE_PREFIX));
+		relatives.add(child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
+		relatives.addAll(child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		for (int a = 1; a <= 3; a++) {
 			Relative relative = null;
 			if (relatives.size() >= a) {
@@ -2112,6 +2114,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private void addChildInformation(IWContext iwc, User user, Form form) throws RemoteException {
 		Child child = getMemberFamilyLogic(iwc).getChild(user);
+		User owner = getUser(iwc);
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -2139,7 +2142,7 @@ public class CourseApplication extends ApplicationForm {
 		RadioButton noAnswer = new RadioButton(PARAMETER_GROWTH_DEVIATION, "");
 		noAnswer.setStyleClass("radiobutton");
 		noAnswer.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
-		Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
+		Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (hasGrowthDeviation != null) {
 			if (hasGrowthDeviation.booleanValue()) {
 				yes.setSelected(true);
@@ -2181,7 +2184,7 @@ public class CourseApplication extends ApplicationForm {
 		paragraph.add(new Text(this.iwrb.getLocalizedString("details", "Details")));
 		section.add(paragraph);
 
-		TextArea details = new TextArea(PARAMETER_GROWTH_DEVIATION_DETAILS, child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX));
+		TextArea details = new TextArea(PARAMETER_GROWTH_DEVIATION_DETAILS, child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		details.setStyleClass("details");
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
@@ -2208,7 +2211,7 @@ public class CourseApplication extends ApplicationForm {
 		noAnswer = new RadioButton(PARAMETER_ALLERGIES, "");
 		noAnswer.setStyleClass("radiobutton");
 		noAnswer.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
-		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
+		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (hasAllergies != null) {
 			if (hasAllergies.booleanValue()) {
 				yes.setSelected(true);
@@ -2250,7 +2253,7 @@ public class CourseApplication extends ApplicationForm {
 		paragraph.add(new Text(this.iwrb.getLocalizedString("details", "Details")));
 		section.add(paragraph);
 
-		details = new TextArea(PARAMETER_ALLERGIES_DETAILS, child.getAllergiesDetails(CourseConstants.COURSE_PREFIX));
+		details = new TextArea(PARAMETER_ALLERGIES_DETAILS, child.getAllergiesDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		details.setStyleClass("details");
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
@@ -2268,7 +2271,7 @@ public class CourseApplication extends ApplicationForm {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("child.other_information_help", "If there is anything else that you feel the school should know about the child, please fill in the details.")));
 		section.add(helpLayer);
 
-		details = new TextArea(PARAMETER_OTHER_INFORMATION, child.getOtherInformation(CourseConstants.COURSE_PREFIX));
+		details = new TextArea(PARAMETER_OTHER_INFORMATION, child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		details.setStyleClass("details");
 		section.add(details);
 	}
@@ -2278,6 +2281,7 @@ public class CourseApplication extends ApplicationForm {
 		maritalStatus.addMenuElement("", this.iwrb.getLocalizedString("select_marital_status", "Select marital status"));
 		maritalStatus.addMenuElement(FamilyConstants.MARITAL_STATUS_MARRIED, this.iwrb.getLocalizedString("marital_status.married", "Married"));
 		maritalStatus.addMenuElement(FamilyConstants.MARITAL_STATUS_SINGLE, this.iwrb.getLocalizedString("marital_status.single", "Single"));
+		maritalStatus.keepStatusOnAction(true);
 
 		return maritalStatus;
 	}
@@ -2293,6 +2297,7 @@ public class CourseApplication extends ApplicationForm {
 		relations.addMenuElement(FamilyConstants.RELATION_GRANDFATHER, this.iwrb.getLocalizedString("relation.grandfather", "Grandfather"));
 		relations.addMenuElement(FamilyConstants.RELATION_SIBLING, this.iwrb.getLocalizedString("relation.sibling", "Sibling"));
 		relations.addMenuElement(FamilyConstants.RELATION_OTHER, this.iwrb.getLocalizedString("relation.other", "Other"));
+		relations.keepStatusOnAction(true);
 
 		return relations;
 	}
@@ -2304,6 +2309,7 @@ public class CourseApplication extends ApplicationForm {
 		String[] mobilePhones = !storeRelatives ? iwc.getParameterValues(PARAMETER_MOBILE_PHONE) : iwc.getParameterValues(PARAMETER_RELATIVE_MOBILE_PHONE);
 		String[] emails = !storeRelatives ? iwc.getParameterValues(PARAMETER_EMAIL) : iwc.getParameterValues(PARAMETER_RELATIVE_EMAIL);
 		String[] relations = iwc.getParameterValues(storeRelatives ? PARAMETER_RELATIVE_RELATION : PARAMETER_RELATION);
+		User owner = getUser(iwc);
 
 		if (userPKs != null) {
 			Child child = getMemberFamilyLogic(iwc).getChild(getApplicant(iwc));
@@ -2323,10 +2329,10 @@ public class CourseApplication extends ApplicationForm {
 								return false;
 							}
 							if (a == 0) {
-								child.storeMainRelative(CourseConstants.COURSE_PREFIX, userPK, relations[a], homePhones[a], workPhones[a], mobilePhones[a], emails[a]);
+								child.storeMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey(), userPK, relations[a], homePhones[a], workPhones[a], mobilePhones[a], emails[a]);
 							}
 							else {
-								child.storeRelative(CourseConstants.COURSE_PREFIX, userPK, relations[a], a + 1, homePhones[a], workPhones[a], mobilePhones[a], emails[a]);
+								child.storeRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey(), userPK, relations[a], a + 1, homePhones[a], workPhones[a], mobilePhones[a], emails[a]);
 							}
 						}
 					}
@@ -2379,6 +2385,8 @@ public class CourseApplication extends ApplicationForm {
 	}
 
 	private boolean saveChildInfo(IWContext iwc, User user) throws RemoteException {
+		User owner = getUser(iwc);
+
 		Boolean growthDeviation = iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION) ? new Boolean(iwc.getParameter(PARAMETER_GROWTH_DEVIATION)) : null;
 		Boolean allergies = iwc.isParameterSet(PARAMETER_ALLERGIES) ? new Boolean(iwc.getParameter(PARAMETER_ALLERGIES)) : null;
 
@@ -2387,11 +2395,11 @@ public class CourseApplication extends ApplicationForm {
 		String otherInformation = iwc.getParameter(PARAMETER_OTHER_INFORMATION);
 
 		Child child = getMemberFamilyLogic(iwc).getChild(user);
-		child.setHasGrowthDeviation(CourseConstants.COURSE_PREFIX, growthDeviation);
-		child.setGrowthDeviationDetails(CourseConstants.COURSE_PREFIX, growthDeviationDetails);
-		child.setHasAllergies(CourseConstants.COURSE_PREFIX, allergies);
-		child.setAllergiesDetails(CourseConstants.COURSE_PREFIX, allergiesDetails);
-		child.setOtherInformation(CourseConstants.COURSE_PREFIX, otherInformation);
+		child.setHasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey(), growthDeviation);
+		child.setGrowthDeviationDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey(), growthDeviationDetails);
+		child.setHasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey(), allergies);
+		child.setAllergiesDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey(), allergiesDetails);
+		child.setOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey(), otherInformation);
 		child.store();
 
 		return true;

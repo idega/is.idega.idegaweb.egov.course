@@ -121,6 +121,7 @@ public class CourseChoiceOverview extends CourseBlock {
 
 		// User user = iwc.getCurrentUser();
 		User applicant = choice.getUser();
+		User owner = application.getOwner();
 		Child child = getUserBusiness().getMemberFamilyLogic().getChild(applicant);
 		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
 
@@ -261,11 +262,20 @@ public class CourseChoiceOverview extends CourseBlock {
 		}
 
 		List relatives = new ArrayList();
-		Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+		Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+		if (mainRelative == null && isSchoolUser()) {
+			mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+		}
 		if (mainRelative != null) {
 			relatives.add(mainRelative);
 		}
-		relatives.addAll(child.getRelatives(CourseConstants.COURSE_PREFIX));
+
+		Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+		if (otherRelatives.isEmpty() && isSchoolUser()) {
+			otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
+		}
+
+		relatives.addAll(otherRelatives);
 		if (!relatives.isEmpty()) {
 			heading = new Heading1(getResourceBundle().getLocalizedString("application.relative_information", "Relative information"));
 			heading.setStyleClass("subHeader");
@@ -282,7 +292,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		addChildInformationOverview(iwc, section, getResourceBundle(), child);
+		addChildInformationOverview(iwc, section, getResourceBundle(), owner, child);
 
 		section.add(clearLayer);
 

@@ -13,6 +13,7 @@ import is.idega.block.family.data.Relative;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
@@ -237,16 +238,20 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		}
 
 		User user;
+		User owner;
 		Address address;
 		PostalCode postalCode = null;
 		Phone phone;
 		CourseChoice choice;
+		CourseApplication application;
 
 		Iterator iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = sheet.createRow(cellRow++);
 			choice = (CourseChoice) iter.next();
+			application = choice.getApplication();
 			user = choice.getUser();
+			owner = application.getOwner();
 			Child child = this.userBusiness.getMemberFamilyLogic().getChild(user);
 			address = this.userBusiness.getUsersMainAddress(user);
 			if (address != null) {
@@ -267,21 +272,32 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				row.createCell((short) 4).setCellValue(phone.getNumber());
 			}
 
-			if (child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX) != null && child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasGrowthDeviation == null) {
+				hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
+			}
+			if (hasGrowthDeviation != null && hasGrowthDeviation.booleanValue()) {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
 				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 			}
 
-			if (child.hasAllergies(CourseConstants.COURSE_PREFIX) != null && child.hasAllergies(CourseConstants.COURSE_PREFIX).booleanValue()) {
+			Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasAllergies == null) {
+				hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
+			}
+			if (hasAllergies != null && hasAllergies.booleanValue()) {
 				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 			}
 			else {
 				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 			}
 
-			if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
+			if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
+				row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
+			}
+			else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
 				row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
 			}
 
@@ -382,11 +398,18 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			iCell = 38;
 
 			List relatives = new ArrayList();
-			Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+			Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (mainRelative == null) {
+				mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+			}
 			if (mainRelative != null) {
 				relatives.add(mainRelative);
 			}
-			relatives.addAll(child.getRelatives(CourseConstants.COURSE_PREFIX));
+			Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (otherRelatives.isEmpty()) {
+				otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
+			}
+			relatives.addAll(otherRelatives);
 			iterator = relatives.iterator();
 			while (iterator.hasNext()) {
 				Relative element = (Relative) iterator.next();
