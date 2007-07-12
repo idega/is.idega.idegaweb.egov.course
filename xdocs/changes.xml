@@ -5,6 +5,12 @@
   </properties>
   <body>
   
+   	<release version="1.0.5" date="2007-07-12">
+      <action dev="palli" type="update">
+      	Updated because of changes in DWR.
+      </action>
+    </release>
+
    	<release version="1.0.4" date="2007-06-21">
       <action dev="laddi" type="update">
       	Updated because of changes in DWR.
