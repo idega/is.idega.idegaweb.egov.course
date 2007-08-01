@@ -31,8 +31,6 @@ import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
-import com.idega.presentation.TableColumn;
-import com.idega.presentation.TableColumnGroup;
 import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
@@ -196,19 +194,12 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		section.add(heading2);
 
 		Table2 table = new Table2();
-		table.setWidth("100%");
 		table.setCellpadding(0);
 		table.setCellspacing(0);
+		table.setWidth("100%");
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
 		section.add(table);
-
-		TableColumnGroup columnGroup = table.createColumnGroup();
-		TableColumn column = columnGroup.createColumn();
-		column.setSpan(3);
-		column = columnGroup.createColumn();
-		column.setSpan(2);
-		column.setWidth("12");
 
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
@@ -299,6 +290,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		cell = row.createCell();
 		cell.setStyleClass("firstColumn");
 		cell.setStyleClass("totals");
+		cell.setColumnSpan(2);
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("total", "Total")));
 
 		int maleSum = ((Integer) genderTotals.get(male)).intValue();

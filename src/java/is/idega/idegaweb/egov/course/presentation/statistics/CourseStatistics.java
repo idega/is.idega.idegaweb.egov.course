@@ -26,8 +26,6 @@ import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
-import com.idega.presentation.TableColumn;
-import com.idega.presentation.TableColumnGroup;
 import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
@@ -166,29 +164,21 @@ public class CourseStatistics extends CourseBlock {
 		table.setStyleClass("ruler");
 		section.add(table);
 
-		TableColumnGroup columnGroup = table.createColumnGroup();
-		TableColumn column = columnGroup.createColumn();
-		column.setSpan(3);
-		column = columnGroup.createColumn();
-		column.setSpan(2);
-		column.setWidth("12");
-
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
-		cell.setStyleClass("provider");
-		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("provider", "Provider")));
+		cell.setStyleClass("type");
+		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("type", "Type")));
 
 		Map typeTotals = new HashMap();
 		Iterator iterator = courseTypes.iterator();
 		while (iterator.hasNext()) {
-			CourseType courseType = (CourseType) iterator.next();
-			typeTotals.put(courseType, new Integer(0));
+			School provider = (School) iterator.next();
 
 			cell = row.createHeaderCell();
-			cell.setStyleClass(courseType.getPrimaryKey().toString());
-			cell.add(new Text(courseType.getName()));
+			cell.setStyleClass(provider.getPrimaryKey().toString());
+			cell.add(new Text(provider.getName()));
 		}
 
 		cell = row.createHeaderCell();
@@ -203,20 +193,21 @@ public class CourseStatistics extends CourseBlock {
 		int iRow = 1;
 
 		int total = 0;
-		Iterator iter = providers.iterator();
+		Iterator iter = courseTypes.iterator();
 		while (iter.hasNext()) {
-			School provider = (School) iter.next();
+			CourseType courseType = (CourseType) iter.next();
+			typeTotals.put(courseType, new Integer(0));
 
 			row = group.createRow();
 			cell = row.createCell();
 			cell.setStyleClass("firstColumn");
-			cell.setStyleClass("provider");
-			cell.add(new Text(provider.getName()));
+			cell.setStyleClass("type");
+			cell.add(new Text(courseType.getName()));
 
 			int sum = 0;
-			iterator = courseTypes.iterator();
+			iterator = providers.iterator();
 			while (iterator.hasNext()) {
-				CourseType courseType = (CourseType) iterator.next();
+				School provider = (School) iterator.next();
 				int typeSum = getBusiness().getNumberOfCourses(provider, type, courseType, fromDate, toDate);
 				sum += typeSum;
 				typeTotals.put(courseType, new Integer(((Integer) typeTotals.get(courseType)).intValue() + typeSum));

@@ -29,8 +29,6 @@ import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
-import com.idega.presentation.TableColumn;
-import com.idega.presentation.TableColumnGroup;
 import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
@@ -180,13 +178,6 @@ public class CourseParticipantsStatistics extends CourseBlock {
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
 		section.add(table);
-
-		TableColumnGroup columnGroup = table.createColumnGroup();
-		TableColumn column = columnGroup.createColumn();
-		column.setSpan(3);
-		column = columnGroup.createColumn();
-		column.setSpan(2);
-		column.setWidth("12");
 
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
