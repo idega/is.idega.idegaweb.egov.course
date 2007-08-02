@@ -540,7 +540,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			course.setBirthyearTo(birthYearTo);
 		}
 
-		if (maxPer > 0) {
+		if (maxPer >= 0) {
 			course.setMax(maxPer);
 		}
 
