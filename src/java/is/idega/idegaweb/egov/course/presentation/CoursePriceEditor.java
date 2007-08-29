@@ -406,7 +406,7 @@ public class CoursePriceEditor extends CourseBlock {
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_VIEW)));
 
 		DropdownMenu schoolArea = new DropdownMenu(PARAMETER_SCHOOL_AREA_PK);
-		schoolArea.addMenuElementFirst("", localize("select_school_area", "Select school area"));
+		schoolArea.addMenuElementFirst("", localize("all_school_areas", "All school areas"));
 		Collection areas = getCourseBusiness(iwc).getSchoolAreas();
 		schoolArea.addMenuElements(areas);
 
