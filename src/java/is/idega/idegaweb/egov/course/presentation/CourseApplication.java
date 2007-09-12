@@ -681,7 +681,7 @@ public class CourseApplication extends ApplicationForm {
 
 		StringBuffer script4 = new StringBuffer();
 		script4.append("var getName = function(course) { return course.name };\n");
-		script4.append("var getPk = function(course) { return course.pk \n};");
+		script4.append("var getPk = function(course) { return course.pk };");
 		script4.append("var getFrom = function(course) { return course.from };\n");
 		script4.append("var getTo = function(course) { return course.to };\n");
 		script4.append("var getDescription = function(course) { return course.description };\n");
@@ -689,9 +689,9 @@ public class CourseApplication extends ApplicationForm {
 		script4.append("var getDays = function(course) { return course.days };\n");
 		script4.append("var getPrice = function(course) { return course.price };\n");
 		script4.append("var getProvider = function(course) { return course.provider };\n");
-		script4.append("var getRadioButton = function(course) { return getRadio(course);};\n");
+		script4.append("var getRadioButton = function(course) { return getRadio(course); };\n");
 
-		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tDWRUtil.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tDWRUtil.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays]);\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tif (rowNum % 2 == 0) {\n").append("\t\t\tcurrentRow.className=\"even\";\n").append("\t\t} else {\n").append("\t\t\tcurrentRow.className=\"odd\";\n").append("\t\t}\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
+		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tDWRUtil.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tDWRUtil.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
 		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
@@ -716,6 +716,7 @@ public class CourseApplication extends ApplicationForm {
 		script5.append("\n\t").append("var radio = document.createElement(\"input\");");
 		script5.append("\n\t").append("radio.id = course.pk;");
 		script5.append("\n\t").append("radio.type = \"checkbox\";");
+		script5.append("\n\t").append("if (course.isfull) { radio.disabled = true; }");
 		script5.append("\n\t").append("radio.className = \"checkbox\";");
 		script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
 		script5.append("\n\t").append("radio.value = course.pk;");

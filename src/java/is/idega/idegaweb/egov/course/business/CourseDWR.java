@@ -11,6 +11,7 @@ public class CourseDWR {
 	private String description;
 	private String price;
 	private String provider;
+	private boolean isfull = false;
 
 	public String getName() {
 		return name;
@@ -82,5 +83,13 @@ public class CourseDWR {
 
 	public void setProvider(String provider) {
 		this.provider = provider;
+	}
+
+	public boolean getIsfull() {
+		return this.isfull;
+	}
+
+	public void setFull(boolean isFull) {
+		this.isfull = isFull;
 	}
 }
