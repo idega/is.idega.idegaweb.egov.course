@@ -56,7 +56,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.1.55</version>
+      <version>3.1.65</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.user</artifactId>
-      <version>3.1.4</version>
+      <version>3.1.16</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -90,7 +90,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.block.process</artifactId>
-      <version>3.1.11</version>
+      <version>3.1.14</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -100,7 +100,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.block.school</artifactId>
-      <version>3.1.14</version>
+      <version>3.1.15</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -117,7 +117,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>is.idega.block.family</artifactId>
-      <version>1.0.4</version>
+      <version>1.0.5</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -127,7 +127,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>is.idega.idegaweb.egov</artifactId>
-      <version>1.0.9</version>
+      <version>1.0.12</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -147,7 +147,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>is.idega.idegaweb.egov.application</artifactId>
-      <version>1.0.12</version>
+      <version>1.0.14</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -157,7 +157,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>is.idega.idegaweb.egov.citizen</artifactId>
-      <version>1.0.15</version>
+      <version>1.0.21</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
