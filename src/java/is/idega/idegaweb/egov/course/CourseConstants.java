@@ -27,6 +27,7 @@ public class CourseConstants {
 	public static final String PROPERTY_MERCHANT_TYPE = "egov.course.merchant.type";
 	public static final String PROPERTY_INVALIDATE_INTERVAL = "egov.course.invalidate.interval";
 	public static final String PROPERTY_USE_DWR = "egov.course.use.dwr";
+	public static final String PROPERTY_USE_FIXED_PRICES = "egov.course.use.fixed.prices";
 
 	public static final String APPLICATION_PROPERTY_COURSE_MAP = "egov.course.map";
 

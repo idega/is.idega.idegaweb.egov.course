@@ -9,8 +9,8 @@ import java.sql.Date;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
 
-public class CourseApplicationHomeImpl extends IDOFactory implements
-		CourseApplicationHome {
+public class CourseApplicationHomeImpl extends IDOFactory implements CourseApplicationHome {
+
 	public Class getEntityInterfaceClass() {
 		return CourseApplication.class;
 	}
@@ -23,11 +23,9 @@ public class CourseApplicationHomeImpl extends IDOFactory implements
 		return (CourseApplication) super.findByPrimaryKeyIDO(pk);
 	}
 
-	public Collection findAll(CaseStatus caseStatus, Date fromDate, Date toDate)
-			throws FinderException {
+	public Collection findAll(CaseStatus caseStatus, Date fromDate, Date toDate) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseApplicationBMPBean) entity).ejbFindAll(
-				caseStatus, fromDate, toDate);
+		Collection ids = ((CourseApplicationBMPBean) entity).ejbFindAll(caseStatus, fromDate, toDate);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

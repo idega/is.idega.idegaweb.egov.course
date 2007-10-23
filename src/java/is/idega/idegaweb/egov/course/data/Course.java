@@ -38,6 +38,11 @@ public interface Course extends IDOEntity {
 	public CoursePrice getPrice();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCoursePrice
+	 */
+	public float getCoursePrice();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getAccountingKey
 	 */
 	public String getAccountingKey();
@@ -101,6 +106,11 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setPrice
 	 */
 	public void setPrice(CoursePrice price);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCoursePrice
+	 */
+	public void setCoursePrice(float price);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setAccountingKey

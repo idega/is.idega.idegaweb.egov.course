@@ -2,17 +2,8 @@ package is.idega.idegaweb.egov.course;
 
 import is.idega.idegaweb.egov.accounting.business.AccountingBusinessManager;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
-import is.idega.idegaweb.egov.course.data.CourseApplication;
-import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
-
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.ejb.FinderException;
 
 import com.idega.block.process.business.CaseCodeManager;
-import com.idega.data.IDOLookup;
-import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
 import com.idega.idegaweb.include.ExternalLink;
@@ -24,14 +15,14 @@ public class IWBundleStarter implements IWBundleStartable {
 		GlobalIncludeManager.getInstance().addBundleStyleSheet("is.idega.idegaweb.egov.course", "/style/course.css", ExternalLink.MEDIA_SCREEN);
 		CaseCodeManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 		AccountingBusinessManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
-		
-		fixCourseApplicationReferenceStrings();
+
+		//fixCourseApplicationReferenceStrings();
 	}
 
 	public void stop(IWBundle starterBundle) {
 	}
-	
-	private void fixCourseApplicationReferenceStrings() {
+
+	/*private void fixCourseApplicationReferenceStrings() {
 		try {
 			System.out.println("====Course Statup start==========================");
 			CourseApplicationHome courseHome = (CourseApplicationHome) IDOLookup.getHome(CourseApplication.class);
@@ -56,13 +47,12 @@ public class IWBundleStarter implements IWBundleStartable {
 				}
 			}
 			System.out.println("****Course Statup end**************************");
-		} catch (IDOLookupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FinderException e) {
-			// TODO Auto-generated catch block
+		}
+		catch (IDOLookupException e) {
 			e.printStackTrace();
 		}
-	}
-
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+	}*/
 }

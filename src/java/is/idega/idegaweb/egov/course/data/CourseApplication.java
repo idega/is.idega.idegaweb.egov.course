@@ -2,9 +2,11 @@ package is.idega.idegaweb.egov.course.data;
 
 
 import com.idega.block.process.data.Case;
+import java.sql.Timestamp;
 import com.idega.data.IDOEntity;
 
 public interface CourseApplication extends IDOEntity, Case {
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getCaseCodeDescription
 	 */
@@ -39,6 +41,11 @@ public interface CourseApplication extends IDOEntity, Case {
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#isPaid
 	 */
 	public boolean isPaid();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getPaymentTimestap
+	 */
+	public Timestamp getPaymentTimestap();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getPayerName
@@ -79,6 +86,11 @@ public interface CourseApplication extends IDOEntity, Case {
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setPaid
 	 */
 	public void setPaid(boolean paid);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setPaymentTimestamp
+	 */
+	public void setPaymentTimestamp(Timestamp timestamp);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setPayerName

@@ -30,6 +30,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -493,7 +494,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
-	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer) throws FinderException, CreateException {
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -528,6 +529,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			course.setStartDate(startDate.getTimestamp());
 		}
 
+		if (endDate != null) {
+			course.setEndDate(endDate.getTimestamp());
+		}
+
 		if (accountingKey != null) {
 			course.setAccountingKey(accountingKey);
 		}
@@ -542,6 +547,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		if (maxPer >= 0) {
 			course.setMax(maxPer);
+		}
+
+		if (price > 0) {
+			course.setCoursePrice(price);
 		}
 
 		course.store();
@@ -868,8 +877,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	public Collection getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country, boolean isAdmin) {
 		try {
-			User applicant = getUserBusiness().getUser(applicantPK);
-			IWTimestamp birth = new IWTimestamp(applicant.getDateOfBirth());
+			User applicant = applicantPK != -1 ? getUserBusiness().getUser(applicantPK) : null;
+			IWTimestamp birth = applicant != null ? new IWTimestamp(applicant.getDateOfBirth()) : null;
 
 			Integer iP = null;
 			if (providerPK > -1) {
@@ -891,14 +900,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map map = new LinkedHashMap();
-			Collection courses = getCourses(birth.getYear(), iP, iST, iCT);
+			Collection courses = getCourses(birth != null ? birth.getYear() : 0, iP, iST, iCT);
 			if (courses != null) {
 				Iterator iter = courses.iterator();
 				while (iter.hasNext()) {
 					Course course = (Course) iter.next();
 					IWTimestamp start = new IWTimestamp(course.getStartDate());
 
-					if ((!isAdmin ? start.isLaterThan(stamp) : true) && !isRegistered(applicant, course)) {
+					if ((!isAdmin ? start.isLaterThan(stamp) : true) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
 					}
@@ -946,8 +955,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			dayS = Integer.toString(price.getNumberOfDays());
 			toS = toDate.getDateString("dd.MM.yyyy", locale);
 			cDWR.setPrice(price.getPrice() + " ISK");
+			cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
 		}
-		cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
+		else if (from != null && course.getEndDate() != null) {
+			IWTimestamp toDate = new IWTimestamp(course.getEndDate());
+			toS = toDate.getDateString("d. MMMM yyyy", locale);
+
+			NumberFormat format = NumberFormat.getCurrencyInstance(locale);
+			format.setMaximumFractionDigits(0);
+			cDWR.setPrice(format.format(course.getCoursePrice()));
+			cDWR.setTimeframe(from.getDateString("d. MMMM yyyy", locale) + (from.equals(toDate) ? "" : " - " + toS));
+		}
 		cDWR.setDays(dayS);
 		return cDWR;
 	}
@@ -1544,6 +1562,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			application.setCreditCardMerchantType(merchantType);
 			application.setPaymentType(paymentType);
 			application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));
+			if (application.isPaid()) {
+				application.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
+			}
 			application.setReferenceNumber(referenceNumber);
 			application.setPayerName(payerName);
 			application.setPayerPersonalID(payerPersonalID);

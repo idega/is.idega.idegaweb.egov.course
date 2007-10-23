@@ -40,6 +40,7 @@ import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.data.User;
+import com.idega.util.Age;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
@@ -241,60 +242,63 @@ public class CourseChoiceOverview extends CourseBlock {
 
 		section.add(clearLayer);
 
-		Collection custodians = null;
-		try {
-			custodians = child.getCustodians();
-		}
-		catch (NoCustodianFound ncf) {
-			custodians = new ArrayList();
-		}
-		Custodian custodian = child.getExtraCustodian();
-		if (custodian != null) {
-			custodians.add(custodian);
-		}
+		Age age = new Age(child.getDateOfBirth());
+		if (age.getYears() < 18) {
+			Collection custodians = null;
+			try {
+				custodians = child.getCustodians();
+			}
+			catch (NoCustodianFound ncf) {
+				custodians = new ArrayList();
+			}
+			Custodian custodian = child.getExtraCustodian();
+			if (custodian != null) {
+				custodians.add(custodian);
+			}
 
-		if (!custodians.isEmpty()) {
-			heading = new Heading1(getResourceBundle().getLocalizedString("application.custodian_information", "Custodian information"));
+			if (!custodians.isEmpty()) {
+				heading = new Heading1(getResourceBundle().getLocalizedString("application.custodian_information", "Custodian information"));
+				heading.setStyleClass("subHeader");
+				form.add(heading);
+
+				form.add(getCustodians(iwc, getResourceBundle(), application.getOwner(), child, custodians));
+			}
+
+			List relatives = new ArrayList();
+			Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (mainRelative == null && isSchoolUser()) {
+				mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+			}
+			if (mainRelative != null) {
+				relatives.add(mainRelative);
+			}
+
+			Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (otherRelatives.isEmpty() && isSchoolUser()) {
+				otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
+			}
+
+			relatives.addAll(otherRelatives);
+			if (!relatives.isEmpty()) {
+				heading = new Heading1(getResourceBundle().getLocalizedString("application.relative_information", "Relative information"));
+				heading.setStyleClass("subHeader");
+				form.add(heading);
+
+				form.add(getRelatives(iwc, getResourceBundle(), relatives));
+			}
+
+			heading = new Heading1(getResourceBundle().getLocalizedString("child.child_information", "Child information"));
 			heading.setStyleClass("subHeader");
 			form.add(heading);
 
-			form.add(getCustodians(iwc, getResourceBundle(), application.getOwner(), child, custodians));
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+
+			addChildInformationOverview(iwc, section, getResourceBundle(), owner, child);
+
+			section.add(clearLayer);
 		}
-
-		List relatives = new ArrayList();
-		Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-		if (mainRelative == null && isSchoolUser()) {
-			mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
-		}
-		if (mainRelative != null) {
-			relatives.add(mainRelative);
-		}
-
-		Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-		if (otherRelatives.isEmpty() && isSchoolUser()) {
-			otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
-		}
-
-		relatives.addAll(otherRelatives);
-		if (!relatives.isEmpty()) {
-			heading = new Heading1(getResourceBundle().getLocalizedString("application.relative_information", "Relative information"));
-			heading.setStyleClass("subHeader");
-			form.add(heading);
-
-			form.add(getRelatives(iwc, getResourceBundle(), relatives));
-		}
-
-		heading = new Heading1(getResourceBundle().getLocalizedString("child.child_information", "Child information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		addChildInformationOverview(iwc, section, getResourceBundle(), owner, child);
-
-		section.add(clearLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");

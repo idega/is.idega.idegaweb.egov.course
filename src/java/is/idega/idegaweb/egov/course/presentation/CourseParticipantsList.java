@@ -9,6 +9,7 @@ package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
+import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 
 import java.rmi.RemoteException;
@@ -242,9 +243,11 @@ public class CourseParticipantsList extends CourseBlock {
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 
+		Course course = null;
 		Collection choices = new ArrayList();
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK));
+			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 		}
 
 		Iterator iter = choices.iterator();
@@ -259,6 +262,17 @@ public class CourseParticipantsList extends CourseBlock {
 				postalCode = address.getPostalCode();
 			}
 			Phone phone = getUserBusiness().getChildHomePhone(user);
+
+			if (iRow == course.getMax()) {
+				row.setStyleClass("lastAvailable");
+			}
+			else if (iRow == (course.getMax() + 1)) {
+				row.setStyleClass("firstExceedingParticipant");
+			}
+
+			if (iRow > course.getMax()) {
+				row.setStyleClass("exceedingParticipant");
+			}
 
 			cell = row.createCell();
 			cell.setStyleClass("firstColumn");

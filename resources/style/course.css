@@ -72,3 +72,12 @@
 	width: 50px;
 }
 
+table tbody tr.isfull td {
+	text-decoration: line-through;
+	color: #a0a0a0;
+}
+
+p.infoHelp {
+	margin: 0;
+	padding-top: 13px;
+}

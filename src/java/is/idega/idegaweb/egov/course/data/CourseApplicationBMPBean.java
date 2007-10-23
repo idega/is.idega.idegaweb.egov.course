@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.course.data;
 import is.idega.idegaweb.egov.course.CourseConstants;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Collection;
 
 import javax.ejb.FinderException;
@@ -24,6 +25,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 	private static final String COLUMN_REFERENCE_NUMBER = "reference_number";
 	private static final String COLUMN_PAYMENT_TYPE = "payment_type";
 	private static final String COLUMN_PAID = "paid";
+	private static final String COLUMN_PAYMENT_TIMESTAMP = "payment_timestamp";
 	private final static String COLUMN_PAYER_NAME = "payer_name";
 	private final static String COLUMN_PAYER_PERSONAL_ID = "payer_personal_id";
 	private static final String COLUMN_AMOUNT = "amount";
@@ -48,6 +50,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		addAttribute(COLUMN_REFERENCE_NUMBER, "Reference number", String.class, 255);
 		addAttribute(COLUMN_PAYMENT_TYPE, "Payment type", String.class, 20);
 		addAttribute(COLUMN_PAID, "Paid", Boolean.class);
+		addAttribute(COLUMN_PAYMENT_TIMESTAMP, "Payment timestamp", Timestamp.class);
 		addAttribute(COLUMN_AMOUNT, "Amount", Float.class);
 		addAttribute(COLUMN_PAYER_PERSONAL_ID, "Payer personal ID", String.class);
 		addAttribute(COLUMN_PAYER_NAME, "Payer name", String.class);
@@ -72,6 +75,10 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public boolean isPaid() {
 		return getBooleanColumnValue(COLUMN_PAID, false);
+	}
+
+	public Timestamp getPaymentTimestap() {
+		return getTimestampColumnValue(COLUMN_PAYMENT_TIMESTAMP);
 	}
 
 	public String getPayerName() {
@@ -105,6 +112,10 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public void setPaid(boolean paid) {
 		setColumn(COLUMN_PAID, paid);
+	}
+
+	public void setPaymentTimestamp(Timestamp timestamp) {
+		setColumn(COLUMN_PAYMENT_TIMESTAMP, timestamp);
 	}
 
 	public void setPayerName(String name) {
@@ -143,7 +154,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 		return idoFindPKsByQuery(query);
 	}
-	
+
 	public Collection ejbFindAll() throws FinderException {
 		return super.idoFindAllIDsBySQL();
 	}

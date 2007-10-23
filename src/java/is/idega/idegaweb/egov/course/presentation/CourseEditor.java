@@ -47,11 +47,13 @@ public class CourseEditor extends CourseBlock {
 	private static final String PARAMETER_COURSE_PRICE_PK = "prm_course_price";
 	private static final String PARAMETER_NAME = "prm_name";
 	private static final String PARAMETER_VALID_FROM = "prm_valid_from";
+	private static final String PARAMETER_VALID_TO = "prm_valid_to";
 	private static final String PARAMETER_ACCOUNTING_KEY = "prm_accounting_key";
 	private static final String PARAMETER_USER = "prm_user";
 	private static final String PARAMETER_YEAR_FROM = "prm_year_from";
 	private static final String PARAMETER_YEAR_TO = "prm_year_to";
 	private static final String PARAMETER_MAX_PER = "prm_max_participants";
+	private static final String PARAMETER_PRICE = "prm_price";
 
 	private static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
 
@@ -114,16 +116,19 @@ public class CourseEditor extends CourseBlock {
 		String coursePricePK = iwc.getParameter(PARAMETER_COURSE_PRICE_PK);
 		String accountingKey = iwc.getParameter(PARAMETER_ACCOUNTING_KEY);
 		String sStartDate = iwc.getParameter(PARAMETER_VALID_FROM);
+		String sEndDate = iwc.isParameterSet(PARAMETER_VALID_TO) ? iwc.getParameter(PARAMETER_VALID_TO) : null;
 		String yearFrom = iwc.getParameter(PARAMETER_YEAR_FROM);
 		String yearTo = iwc.getParameter(PARAMETER_YEAR_TO);
 		String max = iwc.getParameter(PARAMETER_MAX_PER);
 
 		try {
 			IWTimestamp startDate = new IWTimestamp(sStartDate);
-			int birthYearFrom = Integer.parseInt(yearFrom);
-			int birthYearTo = Integer.parseInt(yearTo);
+			IWTimestamp endDate = sEndDate != null ? new IWTimestamp(sEndDate) : null;
+			int birthYearFrom = yearFrom != null ? Integer.parseInt(yearFrom) : -1;
+			int birthYearTo = yearTo != null ? Integer.parseInt(yearTo) : -1;
 			int maxPer = Integer.parseInt(max);
-			getCourseBusiness(iwc).storeCourse(pk, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, accountingKey, birthYearFrom, birthYearTo, maxPer);
+			float price = iwc.isParameterSet(PARAMETER_PRICE) ? Float.parseFloat(iwc.getParameter(PARAMETER_PRICE)) : 0;
+			getCourseBusiness(iwc).storeCourse(pk, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -251,6 +256,8 @@ public class CourseEditor extends CourseBlock {
 			}
 		}
 
+		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
+
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
 
@@ -267,13 +274,15 @@ public class CourseEditor extends CourseBlock {
 		cell.setStyleClass("type");
 		cell.add(new Text(localize("type", "Type")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("yearFrom");
-		cell.add(new Text(localize("from", "From")));
+		if (!useFixedPrices) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("yearFrom");
+			cell.add(new Text(localize("from", "From")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("yearTo");
-		cell.add(new Text(localize("to", "To")));
+			cell = row.createHeaderCell();
+			cell.setStyleClass("yearTo");
+			cell.add(new Text(localize("to", "To")));
+		}
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("startDate");
@@ -340,13 +349,15 @@ public class CourseEditor extends CourseBlock {
 					cell.add(new Text(cType.getName()));
 				}
 
-				cell = row.createCell();
-				cell.setStyleClass("yearFrom");
-				cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
+				if (!useFixedPrices) {
+					cell = row.createCell();
+					cell.setStyleClass("yearFrom");
+					cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
 
-				cell = row.createCell();
-				cell.setStyleClass("yearTo");
-				cell.add(new Text(String.valueOf(course.getBirthyearTo())));
+					cell = row.createCell();
+					cell.setStyleClass("yearTo");
+					cell.add(new Text(String.valueOf(course.getBirthyearTo())));
+				}
 
 				cell = row.createCell();
 				cell.setStyleClass("startDate");
@@ -357,10 +368,15 @@ public class CourseEditor extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("endDate");
-				CoursePrice price = course.getPrice();
-				if (start != null && price != null) {
-					IWTimestamp toDate = new IWTimestamp(getBusiness().getEndDate(price, new IWTimestamp(start).getDate()));
-					cell.add(new Text(toDate.getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
+				if (useFixedPrices && course.getEndDate() != null) {
+					cell.add(new Text(new IWTimestamp(course.getEndDate()).getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
+				}
+				else {
+					CoursePrice price = course.getPrice();
+					if (start != null && price != null) {
+						IWTimestamp toDate = new IWTimestamp(getBusiness().getEndDate(price, new IWTimestamp(start).getDate()));
+						cell.add(new Text(toDate.getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
+					}
 				}
 
 				cell = row.createCell();
@@ -409,34 +425,38 @@ public class CourseEditor extends CourseBlock {
 	}
 
 	public void showEditor(IWContext iwc, Object coursePK) throws java.rmi.RemoteException {
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
 
-		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
+		if (!useFixedPrices) {
+			super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
+			super.getParentPage().addJavascriptURL("/dwr/engine.js");
+			super.getParentPage().addJavascriptURL("/dwr/util.js");
 
-		StringBuffer script = new StringBuffer();
-		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
+			StringBuffer script2 = new StringBuffer();
+			script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
 
-		StringBuffer script3 = new StringBuffer();
-		script3.append("function setOptionsPrice(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\", data);\n").append("\tvar savebtn = $(\"SAVE_BTN_ID\");\n").append("\tif (isEmpty == true) {\n").append("\t\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\",['" + localize("try_another_date", "Try another date") + "...']);\n").append("\t\tsavebtn.disabled=true;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=true;\n").append("\t} else {\n").append("\t\tsavebtn.disabled=false;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=false;\n").append("\t}\n").append("}");
+			StringBuffer script = new StringBuffer();
+			script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
-		StringBuffer script4 = new StringBuffer();
-		script4.append("function changeValuesPrice() {\n").append("\tvar date = DWRUtil.getValue(\"" + PARAMETER_VALID_FROM_ID + "\");\n").append("\tvar val = " + getSession().getProvider().getPrimaryKey().toString() + ";\n").append("\tvar val2 = DWRUtil.getValue(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tCourseDWRUtil.getCoursePricesDWR(date, val, val2, '" + iwc.getCurrentLocale().getCountry() + "', setOptionsPrice);").append("}");
+			StringBuffer script3 = new StringBuffer();
+			script3.append("function setOptionsPrice(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\", data);\n").append("\tvar savebtn = $(\"SAVE_BTN_ID\");\n").append("\tif (isEmpty == true) {\n").append("\t\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\",['" + localize("try_another_date", "Try another date") + "...']);\n").append("\t\tsavebtn.disabled=true;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=true;\n").append("\t} else {\n").append("\t\tsavebtn.disabled=false;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=false;\n").append("\t}\n").append("}");
 
-		StringBuffer script5 = new StringBuffer();
-		script5.append("function readPrice() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n\tCourseDWRUtil.getPriceDWR(id, fillPrice);\n}");
+			StringBuffer script4 = new StringBuffer();
+			script4.append("function changeValuesPrice() {\n").append("\tvar date = DWRUtil.getValue(\"" + PARAMETER_VALID_FROM_ID + "\");\n").append("\tvar val = " + getSession().getProvider().getPrimaryKey().toString() + ";\n").append("\tvar val2 = DWRUtil.getValue(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tCourseDWRUtil.getCoursePricesDWR(date, val, val2, '" + iwc.getCurrentLocale().getCountry() + "', setOptionsPrice);").append("}");
 
-		StringBuffer script6 = new StringBuffer();
-		script6.append("function fillPrice(aprice) {\n\tprice = aprice;\n\tDWRUtil.setValues(price);\n}");
+			StringBuffer script5 = new StringBuffer();
+			script5.append("function readPrice() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n\tCourseDWRUtil.getPriceDWR(id, fillPrice);\n}");
 
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setOptionsPrice", script3.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValuesPrice", script4.toString());
-		super.getParentPage().getAssociatedScript().addFunction("readPrice", script5.toString());
-		super.getParentPage().getAssociatedScript().addFunction("fillPrice", script6.toString());
+			StringBuffer script6 = new StringBuffer();
+			script6.append("function fillPrice(aprice) {\n\tprice = aprice;\n\tDWRUtil.setValues(price);\n}");
+
+			super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
+			super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
+			super.getParentPage().getAssociatedScript().addFunction("setOptionsPrice", script3.toString());
+			super.getParentPage().getAssociatedScript().addFunction("changeValuesPrice", script4.toString());
+			super.getParentPage().getAssociatedScript().addFunction("readPrice", script5.toString());
+			super.getParentPage().getAssociatedScript().addFunction("fillPrice", script6.toString());
+		}
 
 		Form form = new Form();
 		form.setID("courseEditor");
@@ -447,6 +467,7 @@ public class CourseEditor extends CourseBlock {
 
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		DatePicker inputFrom = new DatePicker(PARAMETER_VALID_FROM);
+		DatePicker inputTo = new DatePicker(PARAMETER_VALID_TO);
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
 		IntegerInput inputYearFrom = new IntegerInput(PARAMETER_YEAR_FROM);
 		inputYearFrom.setMaxlength(4);
@@ -455,9 +476,9 @@ public class CourseEditor extends CourseBlock {
 		IntegerInput inputMaxPer = new IntegerInput(PARAMETER_MAX_PER);
 		TextInput inputUser = new TextInput(PARAMETER_USER);
 
-		TextInput price = new TextInput("price");
+		TextInput price = new TextInput(PARAMETER_PRICE);
 		price.setId("price");
-		price.setDisabled(true);
+		price.setDisabled(!useFixedPrices);
 
 		TextInput preCarePrice = new TextInput("preCarePrice");
 		preCarePrice.setId("preCarePrice");
@@ -494,6 +515,9 @@ public class CourseEditor extends CourseBlock {
 				inputUser.setContent(course.getUser());
 			}
 			inputFrom.setDate(course.getStartDate());
+			if (course.getEndDate() != null) {
+				inputTo.setDate(course.getEndDate());
+			}
 			String stID = type.getSchoolType().getPrimaryKey().toString();
 			schoolTypeID.setSelectedElement(stID);
 			inputAccounting.setValue(course.getAccountingKey());
@@ -505,24 +529,25 @@ public class CourseEditor extends CourseBlock {
 			courseTypeID.addMenuElements(cargoTypes);
 			courseTypeID.setSelectedElement(course.getCourseType().getPrimaryKey().toString());
 
-			price.setContent(Integer.toString(coursePrice.getPrice()));
-			preCarePrice.setContent(coursePrice.getPreCarePrice() > 0 ? Integer.toString(coursePrice.getPreCarePrice()) : "0");
-			postCarePrice.setContent(coursePrice.getPostCarePrice() > 0 ? Integer.toString(coursePrice.getPostCarePrice()) : "0");
+			if (!useFixedPrices) {
+				price.setContent(Integer.toString(coursePrice.getPrice()));
+				preCarePrice.setContent(coursePrice.getPreCarePrice() > 0 ? Integer.toString(coursePrice.getPreCarePrice()) : "0");
+				postCarePrice.setContent(coursePrice.getPostCarePrice() > 0 ? Integer.toString(coursePrice.getPostCarePrice()) : "0");
+
+				try {
+					Collection prices = getCourseBusiness(iwc).getCoursePriceHome().findAll(provider.getSchoolArea(), type);
+					priceDrop.addMenuElements(prices);
+					priceDrop.setSelectedElement(course.getPrice().getPrimaryKey().toString());
+				}
+				catch (IDORelationshipException e) {
+					e.printStackTrace();
+				}
+				catch (FinderException e) {
+					e.printStackTrace();
+				}
+			}
 
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
-
-			try {
-				Collection prices = getCourseBusiness(iwc).getCoursePriceHome().findAll(provider.getSchoolArea(), type);
-				priceDrop.addMenuElements(prices);
-				priceDrop.setSelectedElement(course.getPrice().getPrimaryKey().toString());
-			}
-			catch (IDORelationshipException e) {
-				e.printStackTrace();
-			}
-			catch (FinderException e) {
-				e.printStackTrace();
-			}
-
 		}
 		else {
 			if (schoolTypes.iterator().hasNext()) {
@@ -614,39 +639,51 @@ public class CourseEditor extends CourseBlock {
 		layer.add(inputFrom);
 		section.add(layer);
 
-		layer = new Layer();
-		layer.setID("search");
-		layer.setStyleClass("formItem");
-		GenericButton search = new GenericButton(localize("search_for_length", "Search for length"));
-		search.setOnClick("changeValuesPrice();");
-		label = new Label(Text.getNonBrakingSpace(), search);
-		layer.add(label);
-		layer.add(search);
-		section.add(layer);
+		if (useFixedPrices) {
+			layer = new Layer(Layer.DIV);
+			layer.setID("end_date");
+			layer.setStyleClass("formItem");
+			label = new Label();
+			label.setLabel(localize("end_date", "End date"));
+			layer.add(label);
+			layer.add(inputTo);
+			section.add(layer);
+		}
+		else {
+			layer = new Layer();
+			layer.setID("search");
+			layer.setStyleClass("formItem");
+			GenericButton search = new GenericButton(localize("search_for_length", "Search for length"));
+			search.setOnClick("changeValuesPrice();");
+			label = new Label(Text.getNonBrakingSpace(), search);
+			layer.add(label);
+			layer.add(search);
+			section.add(layer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("length");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("length", "Length"), priceDrop);
-		layer.add(label);
-		layer.add(priceDrop);
-		section.add(layer);
+			layer = new Layer(Layer.DIV);
+			layer.setID("length");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("length", "Length"), priceDrop);
+			layer.add(label);
+			layer.add(priceDrop);
+			section.add(layer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("year_from");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
-		layer.add(label);
-		layer.add(inputYearFrom);
-		section.add(layer);
+			layer = new Layer(Layer.DIV);
+			layer.setID("year_from");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
+			layer.add(label);
+			layer.add(inputYearFrom);
+			section.add(layer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("year_to");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
-		layer.add(label);
-		layer.add(inputYearTo);
-		section.add(layer);
+			layer = new Layer(Layer.DIV);
+			layer.setID("year_to");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
+			layer.add(label);
+			layer.add(inputYearTo);
+			section.add(layer);
+		}
 
 		layer = new Layer(Layer.DIV);
 		layer.setID("max");
@@ -671,7 +708,12 @@ public class CourseEditor extends CourseBlock {
 
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(localize("course.price_explanation", "Select a start date and click \"Search for length\" to populate" + " the length dropdown. If nothing is found you will be prompted to search again. If a length is found you can select one and" + " proceed with the form.")));
+		if (useFixedPrices) {
+			helpLayer.add(new Text(localize("course.price_help", "Insert the price for the course")));
+		}
+		else {
+			helpLayer.add(new Text(localize("course.price_explanation", "Select a start date and click \"Search for length\" to populate" + " the length dropdown. If nothing is found you will be prompted to search again. If a length is found you can select one and" + " proceed with the form.")));
+		}
 		section.add(helpLayer);
 
 		layer = new Layer(Layer.DIV);
@@ -682,21 +724,23 @@ public class CourseEditor extends CourseBlock {
 		layer.add(price);
 		section.add(layer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("coursePeCarePrice");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("pre_care_price", "Pre care price"), preCarePrice);
-		layer.add(label);
-		layer.add(preCarePrice);
-		section.add(layer);
+		if (!useFixedPrices) {
+			layer = new Layer(Layer.DIV);
+			layer.setID("coursePeCarePrice");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("pre_care_price", "Pre care price"), preCarePrice);
+			layer.add(label);
+			layer.add(preCarePrice);
+			section.add(layer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("coursePostCarePrice");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("post_care_price", "Post care price"), postCarePrice);
-		layer.add(label);
-		layer.add(postCarePrice);
-		section.add(layer);
+			layer = new Layer(Layer.DIV);
+			layer.setID("coursePostCarePrice");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("post_care_price", "Post care price"), postCarePrice);
+			layer.add(label);
+			layer.add(postCarePrice);
+			section.add(layer);
+		}
 
 		section.add(clearLayer);
 
@@ -710,9 +754,11 @@ public class CourseEditor extends CourseBlock {
 
 		SubmitButton save = new SubmitButton(localize("save", "Save"));
 		save.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
-		save.setId("SAVE_BTN_ID");
-		if (course == null) {
-			save.setDisabled(true);
+		if (!useFixedPrices) {
+			save.setId("SAVE_BTN_ID");
+			if (course == null) {
+				save.setDisabled(true);
+			}
 		}
 		buttonLayer.add(save);
 

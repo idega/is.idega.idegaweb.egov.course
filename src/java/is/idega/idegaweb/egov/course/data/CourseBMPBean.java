@@ -31,6 +31,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_PROVIDER = "PROVIDER_ID";
 	private static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
 	private static final String COLUMN_COURSE_PRICE = "COU_COURSE_PRICE_ID";
+	private static final String COLUMN_PRICE = "COURSE_PRICE";
 
 	private static final String COLUMN_START_DATE = "START_DATE";
 	private static final String COLUMN_END_DATE = "END_DATE";
@@ -53,6 +54,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_BIRTHYEAR_FROM, "Birthyear from", Integer.class);
 		addAttribute(COLUMN_BIRTHYEAR_TO, "Birthyear from", Integer.class);
 		addAttribute(COLUMN_MAX_PARTICIPANTS, "Max", Integer.class);
+		addAttribute(COLUMN_PRICE, "Price", Float.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
@@ -82,6 +84,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public CoursePrice getPrice() {
 		return (CoursePrice) getColumnValue(COLUMN_COURSE_PRICE);
+	}
+
+	public float getCoursePrice() {
+		return getFloatColumnValue(COLUMN_PRICE, 0);
 	}
 
 	public String getAccountingKey() {
@@ -146,6 +152,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public void setPrice(CoursePrice price) {
 		setColumn(COLUMN_COURSE_PRICE, price);
+	}
+
+	public void setCoursePrice(float price) {
+		setColumn(COLUMN_PRICE, price);
 	}
 
 	public void setAccountingKey(String key) {
