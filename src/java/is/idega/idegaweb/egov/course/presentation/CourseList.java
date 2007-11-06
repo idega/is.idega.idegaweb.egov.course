@@ -297,7 +297,7 @@ public class CourseList extends CourseBlock {
 			SchoolType schoolType = type.getSchoolType();
 			CoursePrice price = course.getPrice();
 			IWTimestamp dateFrom = new IWTimestamp(course.getStartDate());
-			IWTimestamp dateTo = new IWTimestamp(getBusiness().getEndDate(price, dateFrom.getDate()));
+			IWTimestamp dateTo = course.getEndDate() != null ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(price, dateFrom.getDate()));
 
 			cell = row.createCell();
 			cell.setStyleClass("firstColumn");

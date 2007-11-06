@@ -263,6 +263,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+		heading.setStyleClass("applicationHeading");
+		form.add(heading);
+
 		form.add(getPhasesHeader(iwrb.getLocalizedString("course", "Course"), 1, numberOfPhases, true));
 
 		Layer info = new Layer(Layer.DIV);
@@ -274,7 +278,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		infoHelp.add(new Text(this.iwrb.getLocalizedString("application.application_help", "Below you can select the type of courses you want to register to if there are any available.<br />The courses are held at the main office unless otherwise stated.<br /><br />Please select the courses you want to register to and click 'Next'.")));
 		info.add(infoHelp);
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_course_type", "Select course type"));
+		heading = new Heading1(this.iwrb.getLocalizedString("application.select_course_type", "Select course type"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
 		form.add(heading);
@@ -472,13 +476,17 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+		heading.setStyleClass("applicationHeading");
+		form.add(heading);
+
 		form.add(getPhasesHeader(iwrb.getLocalizedString("applicant", "Applicant"), 2, numberOfPhases, true));
 
 		Layer info = new Layer(Layer.DIV);
 		info.setStyleClass("info");
 		form.add(info);
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_course_type", "Select course type"));
+		heading = new Heading1(this.iwrb.getLocalizedString("application.select_course_type", "Select course type"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
 		form.add(heading);
@@ -587,11 +595,15 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+		heading.setStyleClass("applicationHeading");
+		form.add(heading);
+
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.applicant_information", "Applicant information"), 3, numberOfPhases));
 
 		form.add(getPersonInfo(iwc, applicant, true));
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.contact_information", "Contact information"));
+		heading = new Heading1(this.iwrb.getLocalizedString("application.contact_information", "Contact information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
 		form.add(heading);
@@ -714,11 +726,15 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+		heading.setStyleClass("applicationHeading");
+		form.add(heading);
+
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.company_information", "Company information"), 4, numberOfPhases));
 
 		form.add(getPersonInfo(iwc, applicant, true));
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.contact_information", "Contact information"));
+		heading = new Heading1(this.iwrb.getLocalizedString("application.contact_information", "Contact information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
 		form.add(heading);
@@ -761,11 +777,15 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+		heading.setStyleClass("applicationHeading");
+		form.add(heading);
+
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.applicant_information", "Applicant information"), 5, numberOfPhases));
 
 		form.add(getPersonInfo(iwc, applicant, true));
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.student_help_information", "Student help information"));
+		heading = new Heading1(this.iwrb.getLocalizedString("application.student_help_information", "Student help information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
 		form.add(heading);
@@ -869,11 +889,15 @@ public class SimpleCourseApplication extends ApplicationForm {
 		super.getParentPage().getAssociatedScript().addFunction("readUser", script.toString());
 		super.getParentPage().getAssociatedScript().addFunction("fillUser", script2.toString());
 
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+		heading.setStyleClass("applicationHeading");
+		form.add(heading);
+
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.payment_information", "Payment information"), 6, numberOfPhases));
 
 		form.add(getPersonInfo(iwc, null));
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.amount_information", "Amount information"));
+		heading = new Heading1(this.iwrb.getLocalizedString("application.amount_information", "Amount information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
 		form.add(heading);
@@ -1299,6 +1323,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		if (application != null) {
 			getCourseApplicationSession(iwc).clear(iwc);
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+			heading.setStyleClass("applicationHeading");
+			add(heading);
+
 			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation", "Your course application has been received and will be processed."), 7, numberOfPhases);
 
 			Layer clearLayer = new Layer(Layer.DIV);
@@ -1326,6 +1354,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 			bottom.add(receipt);
 		}
 		else {
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
+			heading.setStyleClass("applicationHeading");
+			add(heading);
+
 			add(getPhasesHeader(this.iwrb.getLocalizedString("application.submit_failed", "Application submit failed"), 7, numberOfPhases));
 			add(getStopLayer(this.iwrb.getLocalizedString("application.submit_failed", "Application submit failed"), this.iwrb.getLocalizedString("application.submit_failed_info", "Application submit failed")));
 		}

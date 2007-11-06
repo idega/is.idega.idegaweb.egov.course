@@ -1,0 +1,16 @@
+already_registered_to_course=\u00DE\u00E1tttakandinn sem \u00FE\u00FA valdir er \u00FEegar skr\u00E1\u00F0ur \u00E1 vali\u00F0 n\u00E1mskei\u00F0.
+application.agreement=Ums\u00E6kjandi hefur lesi\u00F0 og kynnt s\u00E9r skilm\u00E1la \u00FE\u00E1 er gilda um l\u00F6ggildingu vigtarmanna
+application.application_send_confirmation=Skr\u00E1ning \u00FE\u00EDn \u00E1 n\u00E1mskei\u00F0 vigtarmanna hj\u00E1 Neytendastofu veri\u00F0 m\u00F3ttekin og sta\u00F0fest.  Vinsamlega m\u00E6ti\u00F0 \u00E1 tilsettum t\u00EDma.  N\u00E1nari uppl\u00FDsingar er a\u00F0 finna \u00E1 heimas\u00ED\u00F0u Neytendastofu fyrsta daginn.<br /><br />\r\nEf \u00FE\u00FA hefur vali\u00F0 a\u00F0 a\u00F0 grei\u00F0a me\u00F0 millif\u00E6rslu \u00FE\u00E1 ertu vinsamlegast be\u00F0inn um a\u00F0 gera \u00FEa\u00F0 sem allra fyrst \u00E1 reikning xxxx-xx-xxxxxx.<br /><br />\r\nVinsamlegast athugi\u00F0 a\u00F0 ef skr\u00E1\u00F0ur \u00FE\u00E1tttakandi h\u00E6ttir vi\u00F0 a\u00F0 sitja n\u00E1mskei\u00F0, en hefur ekki tilkynnt forf\u00F6ll me\u00F0 formlegum h\u00E6tti til Neytendastofu \u00E1 mi\u00F0vikudegi fyrir upphaf n\u00E1mskei\u00F0s \u00FE\u00E1 mun n\u00E1mskei\u00F0sgjald vera innheimt a\u00F0 fullu.<br /><br />\r\nH\u00E6gt er a\u00F0 prenta \u00FAt sta\u00F0festingu me\u00F0 \u00FEv\u00ED a\u00F0 smella \u00E1 hnappinn h\u00E9r fyrir ne\u00F0an, sta\u00F0festingin berst l\u00EDka me\u00F0 netp\u00F3sti \u00E1 skr\u00E1\u00F0 netfang.
+application.company_information=Uppl\u00FDsingar um fyrirt\u00E6ki
+application.payment_giro=\u00C9g vil grei\u00F0a me\u00F0 millif\u00E6rslu \u00ED banka
+application.payment_information_help=Vinsamlegast veldu grei\u00F0sluform.<br /><br />\r\nH\u00E6gt er a\u00F0 velja um a\u00F0 grei\u00F0a me\u00F0 millif\u00E6rslu \u00ED banka e\u00F0a sta\u00F0grei\u00F0a me\u00F0 grei\u00F0slukorti.
+application.select_course=Veldu n\u00E1mskei\u00F0
+course.course_editor_help=Veldu flokk og tegund \u00ED fellilistunum.  Fylltu s\u00ED\u00F0an \u00ED Nafn \u00E1 n\u00E1mskei\u00F0i\u00F0, t.d. N\u00E1mskei\u00F0 1, N\u00E1mskei\u00F0 2 osfrv. skv. venju.<br /><br />\r\nSkr\u00E1\u00F0u nafn starfsmannsins sem er \u00E1byrg\u00F0arma\u00F0ur n\u00E1mskei\u00F0sins.<br /><br />\r\nSkr\u00E1\u00F0u inn verk\u00FE\u00E1ttan\u00FAmer vegna b\u00F3khalds.
+course.length_search_explanation=Veldu byrjunar- og endadagsetningu n\u00E1mskei\u00F0sins.  Ef n\u00E1mskei\u00F0i\u00F0 er a\u00F0eins einn dagur \u00FE\u00E1 velur\u00F0u sama dag \u00ED b\u00E1\u00F0a reitina.  Settu einnig inn h\u00E1marksfj\u00F6lda \u00FE\u00E1tttakenda.
+course.price_help=Fylltu inn ver\u00F0 n\u00E1mskei\u00F0sins.
+course_choice.giro_registration_body=\u00DE\u00E1tttakandi\: {0}, {1}\r\nN\u00E1mskei\u00F0ssta\u00F0ur\: {3}\r\nN\u00E1mskei\u00F0\: {2}\r\n\r\nSkr\u00E1ning \u00FE\u00EDn \u00E1 n\u00E1mskei\u00F0i\u00F0 hefur veri\u00F0 m\u00F3ttekin.  Vinsamlegast mundu a\u00F0 grei\u00F0a \u00FE\u00E1ttt\u00F6kugjaldi\u00F0 me\u00F0 millif\u00E6rslu sem allra fyrst.
+date=Dagsetning
+end_date=Lokadagsetning
+must_select_course=\u00DE\u00FA ver\u00F0ur a\u00F0 velja n\u00E1mskei\u00F0
+no_user_found_with_personal_id=Enginn notandi fannst me\u00F0 \u00FEessa kennit\u00F6lu
+payment_type.giro=Millif\u00E6rsla \u00ED banka
