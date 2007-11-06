@@ -192,6 +192,8 @@ public class CourseChoiceOverview extends CourseBlock {
 		section.setStyleClass("formSection");
 		form.add(section);
 
+		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
+
 		User payer = null;
 		if (application.getPayerPersonalID() != null) {
 			try {
@@ -204,6 +206,9 @@ public class CourseChoiceOverview extends CourseBlock {
 			catch (RemoteException re) {
 				throw new IBORuntimeException(re);
 			}
+		}
+		else if (useFixedPrices) {
+			payer = applicant;
 		}
 		else {
 			payer = application.getOwner();
@@ -239,6 +244,18 @@ public class CourseChoiceOverview extends CourseBlock {
 		formItem.add(label);
 		formItem.add(span);
 		section.add(formItem);
+
+		if (application.isPaid()) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label();
+			label.add(new Text(getResourceBundle().getLocalizedString("application.paid", "Paid")));
+			span = new Layer(Layer.SPAN);
+			span.add(new Text(new IWTimestamp(application.getPaymentTimestamp()).getLocaleDateAndTime(iwc.getCurrentLocale(), IWTimestamp.SHORT, IWTimestamp.SHORT)));
+			formItem.add(label);
+			formItem.add(span);
+			section.add(formItem);
+		}
 
 		section.add(clearLayer);
 

@@ -8,6 +8,7 @@
 package is.idega.idegaweb.egov.course.data;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Collection;
 
 import javax.ejb.FinderException;
@@ -34,9 +35,11 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_APPLICATION = "application_id";
 	private static final String COLUMN_COURSE = "course_id";
 	private static final String COLUMN_USER = "user_id";
+	private static final String COLUMN_PAYMENT_TIMESTAMP = "payment_timestamp";
 	private static final String COLUMN_DAY_CARE = "day_care";
 	private static final String COLUMN_PICKED_UP = "picked_up";
 	private static final String COLUMN_VALID = "is_valid";
+	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
 
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -44,9 +47,11 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
+		addAttribute(COLUMN_PAYMENT_TIMESTAMP, "Payment timestamp", Timestamp.class);
 		addAttribute(COLUMN_DAY_CARE, "Day care", Integer.class);
 		addAttribute(COLUMN_PICKED_UP, "Picked up", Boolean.class);
 		addAttribute(COLUMN_VALID, "Valid", Boolean.class);
+		addAttribute(COLUMN_DYSLEXIA, "Has dyslexia", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
 		addManyToOneRelationship(COLUMN_COURSE, Course.class);
@@ -70,12 +75,20 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return getIntColumnValue(COLUMN_DAY_CARE);
 	}
 
+	public Timestamp getPaymentTimestamp() {
+		return getTimestampColumnValue(COLUMN_PAYMENT_TIMESTAMP);
+	}
+
 	public boolean isPickedUp() {
 		return getBooleanColumnValue(COLUMN_PICKED_UP, false);
 	}
 
 	public boolean isValid() {
 		return getBooleanColumnValue(COLUMN_PICKED_UP, true);
+	}
+
+	public boolean hasDyslexia() {
+		return getBooleanColumnValue(COLUMN_DYSLEXIA, false);
 	}
 
 	// Setters
@@ -91,6 +104,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		setColumn(COLUMN_USER, user);
 	}
 
+	public void setPaymentTimestamp(Timestamp timestamp) {
+		setColumn(COLUMN_PAYMENT_TIMESTAMP, timestamp);
+	}
+
 	public void setDayCare(int dayCare) {
 		setColumn(COLUMN_DAY_CARE, dayCare);
 	}
@@ -101,6 +118,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 	public void setValid(boolean valid) {
 		setColumn(COLUMN_VALID, valid);
+	}
+
+	public void setHasDyslexia(boolean dyslexia) {
+		setColumn(COLUMN_DYSLEXIA, dyslexia);
 	}
 
 	// Finders
@@ -149,6 +170,8 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		query.addColumn(table.getColumn(getIDColumnName()));
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE), MatchCriteria.EQUALS, course));
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
+		query.addOrder(new Order(table.getColumn(COLUMN_PAYMENT_TIMESTAMP), true));
+		query.addOrder(new Order(table.getColumn(getIDColumnName()), true));
 
 		return idoFindPKsByQuery(query);
 	}

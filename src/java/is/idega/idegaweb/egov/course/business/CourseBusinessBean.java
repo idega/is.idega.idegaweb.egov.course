@@ -400,6 +400,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			catch (RemoteException re) {
 				throw new IBORuntimeException(re);
 			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -792,8 +795,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				return new UserDWR();
 			}
 
-			User childUser = getUserBusiness().getUser(childPK);
-			Child child = getFamilyLogic().getChild(childUser);
+			User childUser = null;
+			Child child = null;
+			if (childPK != -1) {
+				childUser = getUserBusiness().getUser(childPK);
+				child = getFamilyLogic().getChild(childUser);
+			}
 
 			Custodian custodian = getFamilyLogic().getCustodian(user);
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
@@ -854,7 +861,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			if (email != null) {
 				dwr.setUserEmail(email.getEmailAddress());
 			}
-			if (child.getRelation(custodian) != null) {
+			if (child != null && child.getRelation(custodian) != null) {
 				dwr.setUserRelation(child.getRelation(custodian));
 			}
 			else if (selectedRelation != null) {
@@ -925,7 +932,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return freePlaces <= 0;
 	}
 
-	private boolean isRegistered(User user, Course course) {
+	public boolean isRegistered(User user, Course course) {
 		try {
 			return getCourseChoiceHome().getCountByUserAndCourse(user, course) > 0;
 		}
@@ -1592,8 +1599,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					choice.setApplication(application);
 					choice.setCourse(holder.getCourse());
 					choice.setDayCare(holder.getDaycare());
-					choice.setPickedUp(holder.getPickedUp().booleanValue());
+					if (holder.getPickedUp() != null) {
+						choice.setPickedUp(holder.getPickedUp().booleanValue());
+					}
 					choice.setUser(holder.getUser());
+					choice.setHasDyslexia(holder.hasDyslexia());
+					if (application.isPaid()) {
+						choice.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
+					}
 					choice.store();
 
 					sendMessageToParents(application, choice, subject, body);

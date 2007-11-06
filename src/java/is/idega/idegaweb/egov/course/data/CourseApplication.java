@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.data;
 
 
 import com.idega.block.process.data.Case;
+import com.idega.company.data.Company;
 import java.sql.Timestamp;
 import com.idega.data.IDOEntity;
 
@@ -43,9 +44,9 @@ public interface CourseApplication extends IDOEntity, Case {
 	public boolean isPaid();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getPaymentTimestap
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getPaymentTimestamp
 	 */
-	public Timestamp getPaymentTimestap();
+	public Timestamp getPaymentTimestamp();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getPayerName
@@ -61,6 +62,11 @@ public interface CourseApplication extends IDOEntity, Case {
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getAmount
 	 */
 	public float getAmount();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getCompany
+	 */
+	public Company getCompany();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCreditCardMerchantID
@@ -106,4 +112,9 @@ public interface CourseApplication extends IDOEntity, Case {
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setAmount
 	 */
 	public void setAmount(float amount);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCompany
+	 */
+	public void setCompany(Company company);
 }

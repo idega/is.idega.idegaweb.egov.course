@@ -11,6 +11,7 @@ import javax.ejb.FinderException;
 import com.idega.block.process.data.AbstractCaseBMPBean;
 import com.idega.block.process.data.Case;
 import com.idega.block.process.data.CaseStatus;
+import com.idega.company.data.Company;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.SelectQuery;
@@ -29,6 +30,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 	private final static String COLUMN_PAYER_NAME = "payer_name";
 	private final static String COLUMN_PAYER_PERSONAL_ID = "payer_personal_id";
 	private static final String COLUMN_AMOUNT = "amount";
+	private static final String COLUMN_COMPANY = "company_id";
 
 	public String getCaseCodeDescription() {
 		return "Case for courses";
@@ -54,6 +56,8 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		addAttribute(COLUMN_AMOUNT, "Amount", Float.class);
 		addAttribute(COLUMN_PAYER_PERSONAL_ID, "Payer personal ID", String.class);
 		addAttribute(COLUMN_PAYER_NAME, "Payer name", String.class);
+
+		addManyToOneRelationship(COLUMN_COMPANY, Company.class);
 	}
 
 	// Getters
@@ -77,7 +81,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		return getBooleanColumnValue(COLUMN_PAID, false);
 	}
 
-	public Timestamp getPaymentTimestap() {
+	public Timestamp getPaymentTimestamp() {
 		return getTimestampColumnValue(COLUMN_PAYMENT_TIMESTAMP);
 	}
 
@@ -91,6 +95,10 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public float getAmount() {
 		return getFloatColumnValue(COLUMN_AMOUNT);
+	}
+
+	public Company getCompany() {
+		return (Company) getColumnValue(COLUMN_COMPANY);
 	}
 
 	// Setters
@@ -128,6 +136,10 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public void setAmount(float amount) {
 		setColumn(COLUMN_AMOUNT, amount);
+	}
+
+	public void setCompany(Company company) {
+		setColumn(COLUMN_COMPANY, company);
 	}
 
 	// Finders

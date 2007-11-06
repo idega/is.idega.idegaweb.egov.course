@@ -279,7 +279,7 @@ public class CourseApplicationOverview extends CourseBlock {
 				CourseType type = course.getCourseType();
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
-				IWTimestamp endDate = new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
+				IWTimestamp endDate = course.getCoursePrice() > 0 ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
 
 				cell = row.createCell();
 				cell.setStyleClass("course");
@@ -308,7 +308,12 @@ public class CourseApplicationOverview extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("days");
-				cell.add(new Text(String.valueOf(coursePrice.getNumberOfDays())));
+				if (course.getCoursePrice() > 0) {
+					cell.add(new Text(String.valueOf(IWTimestamp.getDaysBetween(startDate, endDate) + 1)));
+				}
+				else {
+					cell.add(new Text(String.valueOf(coursePrice.getNumberOfDays())));
+				}
 
 				cell = row.createCell();
 				cell.setStyleClass("amount");

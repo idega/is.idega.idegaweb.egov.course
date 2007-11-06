@@ -12,6 +12,7 @@ public class ApplicationHolder {
 	private int daycare = -1;
 	private Boolean pickedUp = null;
 	private float price = 0;
+	private boolean hasDyslexia = false;
 	private Object choicePK = null;
 
 	public Object getChoicePK() {
@@ -39,6 +40,10 @@ public class ApplicationHolder {
 	}
 
 	public int getPrice() {
+		if (course.getCoursePrice() > 0) {
+			return (int) course.getCoursePrice();
+		}
+
 		CoursePrice price = course.getPrice();
 		int totalPrice = price.getPrice();
 		if (getDaycare() == CourseConstants.DAY_CARE_POST) {
@@ -79,6 +84,14 @@ public class ApplicationHolder {
 
 	public void setPickedUp(Boolean pickedUp) {
 		this.pickedUp = pickedUp;
+	}
+
+	public boolean hasDyslexia() {
+		return hasDyslexia;
+	}
+
+	public void setHasDyslexia(boolean hasDyslexia) {
+		this.hasDyslexia = hasDyslexia;
 	}
 
 	public boolean equals(Object obj) {
