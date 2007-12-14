@@ -514,7 +514,7 @@ public class CourseApplication extends ApplicationForm {
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.custodian_information", "Custodian information"), 2, numberOfPhases));
 
 		// User user = iwc.getCurrentUser();
-		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
+		form.add(getPersonInfo(iwc, applicant));
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -579,7 +579,7 @@ public class CourseApplication extends ApplicationForm {
 		User applicant = getApplicant(iwc);
 		Child child = getMemberFamilyLogic(iwc).getChild(applicant);
 		// User user = iwc.getCurrentUser();
-		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
+		form.add(getPersonInfo(iwc, applicant));
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -630,7 +630,7 @@ public class CourseApplication extends ApplicationForm {
 
 		User applicant = getApplicant(iwc);
 		// User user = iwc.getCurrentUser();
-		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
+		form.add(getPersonInfo(iwc, applicant));
 
 		addChildInformation(iwc, getApplicant(iwc), form);
 
@@ -739,7 +739,7 @@ public class CourseApplication extends ApplicationForm {
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 5, numberOfPhases));
 
 		// User user = iwc.getCurrentUser();
-		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
+		form.add(getPersonInfo(iwc, applicant));
 
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("select_a_course", "Select a course"));
 		heading.setStyleClass("subHeader");
@@ -978,7 +978,7 @@ public class CourseApplication extends ApplicationForm {
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 6, numberOfPhases));
 
 		// User user = iwc.getCurrentUser();
-		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
+		form.add(getPersonInfo(iwc, applicant));
 
 		Table2 table = new Table2();
 		table.setStyleClass("courses");

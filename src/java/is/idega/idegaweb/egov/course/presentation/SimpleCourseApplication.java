@@ -458,10 +458,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private void showPhaseTwo(IWContext iwc) throws RemoteException {
 		if (!iwc.isParameterSet(PARAMETER_COURSE)) {
-			setError(ACTION_PHASE_1, PARAMETER_COURSE, this.iwrb.getLocalizedString("must_select_course", "You have to select a course"));
+			setError(PARAMETER_COURSE, this.iwrb.getLocalizedString("must_select_course", "You have to select a course"));
 		}
 
-		if (hasErrors(ACTION_PHASE_1)) {
+		if (hasErrors()) {
 			showPhaseOne(iwc);
 			return;
 		}
@@ -572,20 +572,20 @@ public class SimpleCourseApplication extends ApplicationForm {
 		if (applicant == null) {
 			String personalID = iwc.isParameterSet(PARAMETER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PERSONAL_ID) : null;
 			if (personalID != null) {
-				setError(ACTION_PHASE_2, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user found with personal ID") + ": " + personalID);
+				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user found with personal ID") + ": " + personalID);
 			}
 			else {
-				setError(ACTION_PHASE_2, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("must_enter_personal_id", "You have to enter a personal ID"));
+				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("must_enter_personal_id", "You have to enter a personal ID"));
 			}
 		}
 		else {
 			Course course = getCourseBusiness(iwc).getCourse(iwc.getParameter(PARAMETER_COURSE));
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
-				setError(ACTION_PHASE_2, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("already_registered_to_course", "The selected applicant is already registered to the course you selected."));
+				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("already_registered_to_course", "The selected applicant is already registered to the course you selected."));
 			}
 		}
 
-		if (hasErrors(ACTION_PHASE_2)) {
+		if (hasErrors()) {
 			showPhaseTwo(iwc);
 			return;
 		}
@@ -601,7 +601,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.applicant_information", "Applicant information"), 3, numberOfPhases));
 
-		form.add(getPersonInfo(iwc, applicant, true));
+		form.add(getPersonInfo(iwc, applicant));
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.contact_information", "Contact information"));
 		heading.setStyleClass("subHeader");
@@ -732,7 +732,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.company_information", "Company information"), 4, numberOfPhases));
 
-		form.add(getPersonInfo(iwc, applicant, true));
+		form.add(getPersonInfo(iwc, applicant));
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.contact_information", "Contact information"));
 		heading.setStyleClass("subHeader");
@@ -783,7 +783,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.applicant_information", "Applicant information"), 5, numberOfPhases));
 
-		form.add(getPersonInfo(iwc, applicant, true));
+		form.add(getPersonInfo(iwc, applicant));
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.student_help_information", "Student help information"));
 		heading.setStyleClass("subHeader");
@@ -860,10 +860,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private void showPhaseSix(IWContext iwc) throws RemoteException {
 		if (!iwc.isParameterSet(PARAMETER_AGREEMENT)) {
-			setError(ACTION_PHASE_5, PARAMETER_AGREEMENT, this.iwrb.getLocalizedString("must_agree_terms", "You have to agree to the terms."));
+			setError(PARAMETER_AGREEMENT, this.iwrb.getLocalizedString("must_agree_terms", "You have to agree to the terms."));
 		}
 
-		if (hasErrors(ACTION_PHASE_5)) {
+		if (hasErrors()) {
 			showPhaseFive(iwc);
 			return;
 		}
@@ -1417,7 +1417,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		String email = iwc.isParameterSet(PARAMETER_EMAIL) ? iwc.getParameter(PARAMETER_EMAIL) : null;
 		if (email != null) {
 			if (!EmailValidator.getInstance().validateEmail(email)) {
-				setError(ACTION_PHASE_3, PARAMETER_EMAIL, iwrb.getLocalizedString("invalid_email", "Email is not valid"));
+				setError(PARAMETER_EMAIL, iwrb.getLocalizedString("invalid_email", "Email is not valid"));
 				return false;
 			}
 		}
