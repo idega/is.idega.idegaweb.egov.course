@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseComparator;
 import is.idega.idegaweb.egov.course.business.CourseWriter;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
@@ -22,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -294,7 +294,7 @@ public class CourseList extends CourseBlock {
 
 			Course course = (Course) iter.next();
 			CourseType type = course.getCourseType();
-			SchoolType schoolType = type.getSchoolType();
+			CourseCategory courseCategory = type.getCourseCategory();
 			CoursePrice price = course.getPrice();
 			IWTimestamp dateFrom = new IWTimestamp(course.getStartDate());
 			IWTimestamp dateTo = course.getEndDate() != null ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(price, dateFrom.getDate()));
@@ -307,7 +307,7 @@ public class CourseList extends CourseBlock {
 				link.setPage(getResponsePage());
 				link.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
 				link.addParameter(PARAMETER_COURSE_TYPE_PK, type.getPrimaryKey().toString());
-				link.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolType.getPrimaryKey().toString());
+				link.addParameter(PARAMETER_SCHOOL_TYPE_PK, courseCategory.getPrimaryKey().toString());
 				cell.add(link);
 			}
 			else {

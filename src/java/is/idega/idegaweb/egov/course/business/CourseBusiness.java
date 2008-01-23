@@ -5,6 +5,8 @@ import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
@@ -250,6 +252,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public CourseType getCourseType(Object pk) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCategory
+	 */
+	public CourseCategory getCourseCategory(Object pk) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseApplication
 	 */
 	public CourseApplication getCourseApplication(Object courseApplicationPK) throws RemoteException;
@@ -408,6 +415,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseDiscountHome
 	 */
 	public CourseDiscountHome getCourseDiscountHome() throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCategoryHome
+	 */
+	public CourseCategoryHome getCourseCategoryHome() throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseTypeHome

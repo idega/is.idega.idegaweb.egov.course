@@ -14,6 +14,8 @@ import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
@@ -181,7 +183,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					School provider = course.getProvider();
 					SchoolArea area = provider.getSchoolArea();
 					CourseType courseType = course.getCourseType();
-					SchoolType schoolType = courseType.getSchoolType();
+					CourseCategory schoolType = courseType.getCourseCategory();
 					User student = choice.getUser();
 					CoursePrice price = course.getPrice();
 					String paymentType = application.getPaymentType();
@@ -468,13 +470,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		type.setAccountingKey(accountingKey);
 
 		if (schoolTypePK != null) {
-			try {
-				SchoolType schoolType = getSchoolBusiness().getSchoolType(schoolTypePK);
-				type.setSchoolType(schoolType);
-			}
-			catch (RemoteException e) {
-				e.printStackTrace();
-			}
+			CourseCategory courseCategory = getCourseCategory(schoolTypePK);
+			type.setCourseCategory(courseCategory);
 		}
 
 		type.store();
@@ -1109,9 +1106,24 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			try {
 				return getCourseTypeHome().findByPrimaryKey(new Integer(pk.toString()));
 			}
-			catch (javax.ejb.FinderException fe) {
+			catch (FinderException fe) {
+				log(fe);
 			}
 		}
+
+		return null;
+	}
+
+	public CourseCategory getCourseCategory(Object pk) {
+		if (pk != null) {
+			try {
+				return getCourseCategoryHome().findByPrimaryKey(new Integer(pk.toString()));
+			}
+			catch (FinderException fe) {
+				log(fe);
+			}
+		}
+
 		return null;
 	}
 
@@ -1720,6 +1732,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		catch (IDOLookupException e) {
 			throw new IDORuntimeException(e);
+		}
+	}
+
+	public CourseCategoryHome getCourseCategoryHome() {
+		try {
+			return (CourseCategoryHome) IDOLookup.getHome(CourseCategory.class);
+		}
+		catch (IDOLookupException ile) {
+			throw new IDORuntimeException(ile);
 		}
 	}
 

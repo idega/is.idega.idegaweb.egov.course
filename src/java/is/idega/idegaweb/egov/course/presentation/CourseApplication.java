@@ -15,6 +15,8 @@ import is.idega.idegaweb.egov.course.business.CourseDWR;
 import is.idega.idegaweb.egov.course.business.CourseSession;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 
 import java.rmi.RemoteException;
@@ -150,11 +152,13 @@ public class CourseApplication extends ApplicationForm {
 
 	private boolean iUseSessionUser = false;
 	private Object iSchoolTypePK = null;
+	private Object iApplicationPK = null;
+	private CourseCategory iCategory;
+	private boolean hasCare = true;
+	private boolean allowsAllChildren = true;
 
 	private IWBundle iwb = null;
 	private IWResourceBundle iwrb = null;
-
-	private int numberOfPhases = 8;
 
 	protected String getCaseCode() {
 		return CourseConstants.CASE_CODE_KEY;
@@ -255,13 +259,31 @@ public class CourseApplication extends ApplicationForm {
 		return true;
 	}
 
-	private int parseAction(IWContext iwc) {
+	private int parseAction(IWContext iwc) throws RemoteException {
+		if (getSchoolTypePK() != null) {
+			iCategory = this.getCourseBusiness(iwc).getCourseCategory(getSchoolTypePK());
+			hasCare = iCategory != null ? iCategory.hasCare() : true;
+			allowsAllChildren = iCategory != null ? iCategory.allowsAllChildren() : true;
+		}
+
 		int action = ACTION_PHASE_1;
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
 
 		return action;
+	}
+
+	private int getNumberOfPhases(IWContext iwc) {
+		int numberOfPhases = 8;
+		if (hasCare) {
+			numberOfPhases--;
+		}
+		if (allowsAllChildren) {
+			numberOfPhases--;
+		}
+
+		return numberOfPhases;
 	}
 
 	private User getApplicant(IWContext iwc) {
@@ -347,121 +369,220 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		form.add(getPhasesHeader(iwrb.getLocalizedString("applicant", "Applicant"), 1, numberOfPhases, true));
+		form.add(getPhasesHeader(iwrb.getLocalizedString("applicant", "Applicant"), 1, getNumberOfPhases(iwc), true));
 
 		Layer info = new Layer(Layer.DIV);
 		info.setStyleClass("info");
 
 		form.add(info);
 
-		Lists lists = new Lists();
-		lists.add(iwrb.getLocalizedString("help.one_applicant_is_registered_at_a_time", "One applicant is registered at a time."));
-		lists.add(iwrb.getLocalizedString("help.select_an_applicant_from_the_dropdown_OR_type_in_a_social_security_number", "Select an applicant from the dropdown OR type in a social security number."));
-		lists.add(iwrb.getLocalizedString("help.when_a_registration_is_complete_you_can_then_register_another_child", "When registration is complete you can go back and register another."));
-		lists.add(iwrb.getLocalizedString("help.when_all_applicants_have_been_registered_you_pay_for_them_all_at_the_same_time", "When all applicants have been registered you pay for them all at the same time."));
-		info.add(lists);
+		if (allowsAllChildren) {
+			Lists lists = new Lists();
+			lists.add(iwrb.getLocalizedString("help.one_applicant_is_registered_at_a_time", "One applicant is registered at a time."));
+			lists.add(iwrb.getLocalizedString("help.select_an_applicant_from_the_dropdown_OR_type_in_a_social_security_number", "Select an applicant from the dropdown OR type in a social security number."));
+			lists.add(iwrb.getLocalizedString("help.when_a_registration_is_complete_you_can_then_register_another_child", "When registration is complete you can go back and register another."));
+			lists.add(iwrb.getLocalizedString("help.when_all_applicants_have_been_registered_you_pay_for_them_all_at_the_same_time", "When all applicants have been registered you pay for them all at the same time."));
+			info.add(lists);
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_child", "Select child"));
-		heading.setStyleClass("subHeader");
-		heading.setStyleClass("topSubHeader");
-		form.add(heading);
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_child", "Select child"));
+			heading.setStyleClass("subHeader");
+			heading.setStyleClass("topSubHeader");
+			form.add(heading);
 
-		Layer section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
+			Layer section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
 
-		Layer helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.select_child_help", "Please select if you want to register your own child or another child.")));
-		section.add(helpLayer);
+			Layer helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.select_child_help", "Please select if you want to register your own child or another child.")));
+			section.add(helpLayer);
 
-		RadioButton ownChild = new RadioButton(PARAMETER_CHILD_OPTION, Boolean.TRUE.toString());
-		ownChild.setStyleClass("radiobutton");
-		ownChild.keepStatusOnAction(true);
-		ownChild.setToDisableOnClick(PARAMETER_CHILD_PERSONAL_ID, true);
-		ownChild.setToDisableOnClick(PARAMETER_CHILD_PK, false, false);
+			RadioButton ownChild = new RadioButton(PARAMETER_CHILD_OPTION, Boolean.TRUE.toString());
+			ownChild.setStyleClass("radiobutton");
+			ownChild.keepStatusOnAction(true);
+			ownChild.setToDisableOnClick(PARAMETER_CHILD_PERSONAL_ID, true);
+			ownChild.setToDisableOnClick(PARAMETER_CHILD_PK, false, false);
 
-		RadioButton otherChild = new RadioButton(PARAMETER_CHILD_OPTION, Boolean.FALSE.toString());
-		otherChild.setStyleClass("radiobutton");
-		otherChild.keepStatusOnAction(true);
-		otherChild.setToDisableOnClick(PARAMETER_CHILD_PK, true, false);
-		otherChild.setToDisableOnClick(PARAMETER_CHILD_PERSONAL_ID, false);
+			RadioButton otherChild = new RadioButton(PARAMETER_CHILD_OPTION, Boolean.FALSE.toString());
+			otherChild.setStyleClass("radiobutton");
+			otherChild.keepStatusOnAction(true);
+			otherChild.setToDisableOnClick(PARAMETER_CHILD_PK, true, false);
+			otherChild.setToDisableOnClick(PARAMETER_CHILD_PERSONAL_ID, false);
 
-		if (iwc.isParameterSet(PARAMETER_CHILD_OPTION)) {
-			boolean currentPayer = new Boolean(iwc.getParameter(PARAMETER_CHILD_OPTION)).booleanValue();
-			ownChild.setSelected(currentPayer);
-			otherChild.setSelected(!currentPayer);
-		}
-		else {
-			ownChild.setSelected(true);
-		}
+			if (iwc.isParameterSet(PARAMETER_CHILD_OPTION)) {
+				boolean currentPayer = new Boolean(iwc.getParameter(PARAMETER_CHILD_OPTION)).booleanValue();
+				ownChild.setSelected(currentPayer);
+				otherChild.setSelected(!currentPayer);
+			}
+			else {
+				ownChild.setSelected(true);
+			}
 
-		Layer formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		Label label = new Label(this.iwrb.getLocalizedString("application.own_child", "Own child"), ownChild);
-		formItem.add(ownChild);
-		formItem.add(label);
-		section.add(formItem);
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			Label label = new Label(this.iwrb.getLocalizedString("application.own_child", "Own child"), ownChild);
+			formItem.add(ownChild);
+			formItem.add(label);
+			section.add(formItem);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("application.other_child", "Other child"), otherChild);
-		formItem.add(otherChild);
-		formItem.add(label);
-		section.add(formItem);
-
-		heading = new Heading1(iwrb.getLocalizedString("select_an_applicant", "Select an applicant"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_applicant_helper_text", "Please select the applicant from the drop down list.")));
-		section.add(helpLayer);
-
-		try {
-			DropdownMenu chooser = getUserChooser(iwc, user, chosenUser, PARAMETER_CHILD_PK, iwrb);
-			chooser.setDisabled(!ownChild.getSelected());
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
-			label = new Label(this.iwrb.getLocalizedString("name", "Name"), chooser);
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("application.other_child", "Other child"), otherChild);
+			formItem.add(otherChild);
+			formItem.add(label);
+			section.add(formItem);
+
+			heading = new Heading1(iwrb.getLocalizedString("select_an_applicant", "Select an applicant"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
+
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+
+			helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("select_applicant_helper_text", "Please select the applicant from the drop down list.")));
+			section.add(helpLayer);
+
+			try {
+				DropdownMenu chooser = getUserChooser(iwc, user, chosenUser, PARAMETER_CHILD_PK, iwrb);
+				chooser.setDisabled(!ownChild.getSelected());
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				label = new Label(this.iwrb.getLocalizedString("name", "Name"), chooser);
+				formItem.add(label);
+				formItem.add(chooser);
+				section.add(formItem);
+			}
+			catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+			heading = new Heading1(iwrb.getLocalizedString("type_social_security_number", "Type in social security number"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
+
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+
+			TextInput ssn = new TextInput(PARAMETER_CHILD_PERSONAL_ID);
+			ssn.setMaxlength(10);
+			ssn.setDisabled(!otherChild.getSelected());
+
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn);
+			formItem.add(label);
+			formItem.add(ssn);
+			section.add(formItem);
+
+			helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("select_other_applicant_helper_text", "Please select an applicant by writing in the personal ID in the field to the left.")));
+			section.add(helpLayer);
+		}
+		else {
+			User applicant = getApplicant(iwc);
+
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("select_applicant", "Select applicant"));
+			info.add(heading);
+
+			DropdownMenu chooser = getUserChooser(iwc, iApplicationPK, getUser(iwc), applicant, PARAMETER_CHILD_PK, this.iwrb);
+			chooser.setToSubmit();
+
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(this.iwrb.getLocalizedString("name", "Name"), chooser);
 			formItem.add(label);
 			formItem.add(chooser);
+			info.add(formItem);
+
+			Layer helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("select_applicant_helper_text", "Please select the applicant from the drop down list.")));
+			info.add(helpLayer);
+
+			Layer clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
+			info.add(clearLayer);
+
+			heading = new Heading1(this.iwrb.getLocalizedString("applicant", "Applicant"));
+			heading.setStyleClass("subHeader");
+			heading.setStyleClass("topSubHeader");
+			form.add(heading);
+
+			Layer section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+
+			Address address = null;
+			PostalCode code = null;
+			if (applicant != null) {
+				address = getUserBusiness(iwc).getUsersMainAddress(applicant);
+				if (address != null) {
+					code = address.getPostalCode();
+				}
+			}
+
+			TextInput name = new TextInput("name");
+			if (applicant != null) {
+				name.setContent(applicant.getName());
+			}
+			name.setDisabled(true);
+
+			TextInput personalID = new TextInput("personalID");
+			if (applicant != null) {
+				personalID.setContent(PersonalIDFormatter.format(applicant.getPersonalID(), iwc.getCurrentLocale()));
+			}
+			personalID.setDisabled(true);
+
+			TextInput addr = new TextInput("address");
+			if (address != null) {
+				addr.setContent(address.getStreetAddress());
+			}
+			addr.setDisabled(true);
+
+			TextInput postal = new TextInput("postal");
+			if (code != null) {
+				postal.setContent(code.getPostalAddress());
+			}
+			postal.setDisabled(true);
+
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(this.iwrb.getLocalizedString("name", "Name"), name);
+			formItem.add(label);
+			formItem.add(name);
 			section.add(formItem);
+
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(this.iwrb.getLocalizedString("personalID", "Personal ID"), personalID);
+			formItem.add(label);
+			formItem.add(personalID);
+			section.add(formItem);
+
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(this.iwrb.getLocalizedString("address", "Address"), addr);
+			formItem.add(label);
+			formItem.add(addr);
+			section.add(formItem);
+
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(this.iwrb.getLocalizedString("zip_code", "Zip code"), postal);
+			formItem.add(label);
+			formItem.add(postal);
+			section.add(formItem);
+
+			section.add(clearLayer);
 		}
-		catch (RemoteException e) {
-			e.printStackTrace();
-		}
-
-		heading = new Heading1(iwrb.getLocalizedString("type_social_security_number", "Type in social security number"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		TextInput ssn = new TextInput(PARAMETER_CHILD_PERSONAL_ID);
-		ssn.setMaxlength(10);
-		ssn.setDisabled(!otherChild.getSelected());
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn);
-		formItem.add(label);
-		formItem.add(ssn);
-		section.add(formItem);
-
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_other_applicant_helper_text", "Please select an applicant by writing in the personal ID in the field to the left.")));
-		section.add(helpLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
@@ -511,7 +632,7 @@ public class CourseApplication extends ApplicationForm {
 		super.getParentPage().getAssociatedScript().addFunction("readUser", script.toString());
 		super.getParentPage().getAssociatedScript().addFunction("fillUser", script2.toString());
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.custodian_information", "Custodian information"), 2, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.custodian_information", "Custodian information"), 2, getNumberOfPhases(iwc)));
 
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
@@ -574,7 +695,7 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.relative_information", "Relative information"), 3, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.relative_information", "Relative information"), 3, getNumberOfPhases(iwc)));
 
 		User applicant = getApplicant(iwc);
 		Child child = getMemberFamilyLogic(iwc).getChild(applicant);
@@ -626,7 +747,7 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.child_information", "Child information"), 4, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.child_information", "Child information"), 4, getNumberOfPhases(iwc)));
 
 		User applicant = getApplicant(iwc);
 		// User user = iwc.getCurrentUser();
@@ -736,7 +857,7 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 5, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 5, getNumberOfPhases(iwc)));
 
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
@@ -863,8 +984,10 @@ public class CourseApplication extends ApplicationForm {
 		cell.setStyleClass("column3");
 		cell.add(new Text(iwrb.getLocalizedString("timeframe_date", "Timeframe/Dates")));
 		cell = row.createHeaderCell();
-		cell.setStyleClass("column4");
-		cell.add(new Text(iwrb.getLocalizedString("days", "Days")));
+		if (hasCare) {
+			cell.setStyleClass("column4");
+			cell.add(new Text(iwrb.getLocalizedString("days", "Days")));
+		}
 
 		group = table.createBodyRowGroup();
 		group.setId(PARAMETER_COURSE_TABLE_ID);
@@ -899,9 +1022,11 @@ public class CourseApplication extends ApplicationForm {
 				cell = row.createCell();
 				cell.setStyleClass("column3");
 				cell.add(new Text(course.getTimeframe()));
-				cell = row.createCell();
-				cell.setStyleClass("column4");
-				cell.add(new Text(course.getDays()));
+				if (hasCare) {
+					cell = row.createCell();
+					cell.setStyleClass("column4");
+					cell.add(new Text(course.getDays()));
+				}
 			}
 		}
 
@@ -975,7 +1100,7 @@ public class CourseApplication extends ApplicationForm {
 		add(form);
 		addErrors(iwc, form);
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 6, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 6, getNumberOfPhases(iwc)));
 
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
@@ -1001,12 +1126,14 @@ public class CourseApplication extends ApplicationForm {
 		cell = row.createHeaderCell();
 		cell.setStyleClass("column3");
 		cell.add(new Text(iwrb.getLocalizedString("date_short", "Date")));
-		cell = row.createHeaderCell();
-		cell.setStyleClass("column4");
-		cell.add(new Text(iwrb.getLocalizedString("daycare", "Daycare")));
-		cell = row.createHeaderCell();
-		cell.setStyleClass("column5");
-		cell.add(new Text(iwrb.getLocalizedString("trip_home", "Trip home")));
+		if (hasCare) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("column4");
+			cell.add(new Text(iwrb.getLocalizedString("daycare", "Daycare")));
+			cell = row.createHeaderCell();
+			cell.setStyleClass("column5");
+			cell.add(new Text(iwrb.getLocalizedString("trip_home", "Trip home")));
+		}
 		cell = row.createHeaderCell();
 		cell.setStyleClass("column6");
 		cell.add(Text.getNonBrakingSpace());
@@ -1028,6 +1155,7 @@ public class CourseApplication extends ApplicationForm {
 			}
 			ApplicationHolder holder = (ApplicationHolder) iter.next();
 			Course course = holder.getCourse();
+			CourseType type = course.getCourseType();
 			School provider = course.getProvider();
 			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course);
 
@@ -1067,7 +1195,7 @@ public class CourseApplication extends ApplicationForm {
 			cell = row.createCell();
 			cell.setStyleClass("column1");
 			cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
-			cell.add(new Text(iwrb.getLocalizedString(course.getCourseType().getLocalizationKey(), course.getCourseType().getName())));
+			cell.add(new Text(type.getLocalizationKey() != null ? iwrb.getLocalizedString(type.getLocalizationKey(), course.getCourseType().getName()) : type.getName()));
 
 			cell = row.createCell();
 			cell.setStyleClass("column2");
@@ -1076,16 +1204,18 @@ public class CourseApplication extends ApplicationForm {
 			cell.setStyleClass("column3");
 			cell.add(new Text(courseDWR.getTimeframe()));
 			cell = row.createCell();
-			cell.setStyleClass("column4");
 
-			if (holder.getDaycare() > 0) {
-				daycare.setSelectedElement(holder.getDaycare());
+			if (hasCare) {
+				cell.setStyleClass("column4");
+				if (holder.getDaycare() > 0) {
+					daycare.setSelectedElement(holder.getDaycare());
+				}
+				cell.add(daycare);
+
+				cell = row.createCell();
+				cell.setStyleClass("column5");
+				cell.add(trip);
 			}
-			cell.add(daycare);
-
-			cell = row.createCell();
-			cell.setStyleClass("column5");
-			cell.add(trip);
 
 			cell = row.createCell();
 			cell.setStyleClass("column6");
@@ -1110,7 +1240,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_daycare_and_trip_home_options", "Select daycare and trip home options.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_daycare_and_trip_home_options_nocare", "Select daycare and trip home options.")));
 		section.add(helpLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -1538,7 +1668,7 @@ public class CourseApplication extends ApplicationForm {
 		super.getParentPage().getAssociatedScript().addFunction("readUser", script.toString());
 		super.getParentPage().getAssociatedScript().addFunction("fillUser", script2.toString());
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.payment_information", "Payment information"), 7, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.payment_information", "Payment information"), 7, getNumberOfPhases(iwc)));
 
 		form.add(getPersonInfo(iwc, null));
 
@@ -2033,7 +2163,7 @@ public class CourseApplication extends ApplicationForm {
 
 		if (application != null) {
 			getCourseApplicationSession(iwc).clear(iwc);
-			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation", "Your course application has been received and will be processed."), 8, numberOfPhases);
+			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation" + (hasCare ? "" : "_nocare"), "Your course application has been received and will be processed."), 8, getNumberOfPhases(iwc));
 
 			Layer clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
@@ -2081,19 +2211,21 @@ public class CourseApplication extends ApplicationForm {
 				holder.setCourse(course);
 				holder.setUser(getApplicant(iwc));
 				boolean addApplication = true;
-				if (pickedUp[i].length() > 0) {
-					holder.setDaycare(Integer.parseInt(daycare[i]));
-				}
-				else if (action != ACTION_PHASE_5) {
-					setError(PARAMETER_TRIPHOME, iwrb.getLocalizedString("application_error.must_select_picked_up_option", "You must select all picked up options."));
-					addApplication = false;
-				}
-				if (daycare[i].length() > 0) {
-					holder.setPickedUp(new Boolean(pickedUp[i]));
-				}
-				else if (action != ACTION_PHASE_5) {
-					setError(PARAMETER_TRIPHOME, iwrb.getLocalizedString("application_error.must_select_daycare_option", "You must select all daycare options."));
-					addApplication = false;
+				if (hasCare) {
+					if (pickedUp[i].length() > 0) {
+						holder.setDaycare(Integer.parseInt(daycare[i]));
+					}
+					else if (action != ACTION_PHASE_5) {
+						setError(PARAMETER_TRIPHOME, iwrb.getLocalizedString("application_error.must_select_picked_up_option", "You must select all picked up options."));
+						addApplication = false;
+					}
+					if (daycare[i].length() > 0) {
+						holder.setPickedUp(new Boolean(pickedUp[i]));
+					}
+					else if (action != ACTION_PHASE_5) {
+						setError(PARAMETER_TRIPHOME, iwrb.getLocalizedString("application_error.must_select_daycare_option", "You must select all daycare options."));
+						addApplication = false;
+					}
 				}
 
 				if (!addApplication) {
@@ -2487,5 +2619,9 @@ public class CourseApplication extends ApplicationForm {
 
 	public void setSchoolTypePK(String schoolTypePK) {
 		this.iSchoolTypePK = schoolTypePK;
+	}
+
+	public void setApplicationPK(String applicationPK) {
+		this.iApplicationPK = applicationPK;
 	}
 }

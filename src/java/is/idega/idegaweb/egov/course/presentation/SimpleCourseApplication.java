@@ -806,7 +806,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
-		formItem.setStyleClass("required");
 		Label label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.has_dyslexia", "Has dyslexia"))), hasDyslexia);
 		formItem.add(hasDyslexia);
 		formItem.add(label);
