@@ -211,7 +211,7 @@ public class CourseParticipantOverview extends CourseBlock {
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 				IWTimestamp endDate = new IWTimestamp(coursePrice != null ? getBusiness().getEndDate(coursePrice, startDate.getDate()) : new IWTimestamp(course.getEndDate()).getDate());
-				int numberOfDays = coursePrice != null ? coursePrice.getNumberOfDays() : 0;
+				int numberOfDays = coursePrice != null ? coursePrice.getNumberOfDays() : IWTimestamp.getDaysBetween(startDate, endDate);
 
 				cell = row.createCell();
 				cell.setStyleClass("course");
@@ -240,12 +240,7 @@ public class CourseParticipantOverview extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("days");
-				if (numberOfDays > 0) {
-					cell.add(new Text(String.valueOf(numberOfDays)));
-				}
-				else {
-					cell.add(new Text("-"));
-				}
+				cell.add(new Text(String.valueOf(numberOfDays)));
 
 				if (counter++ % 2 == 0) {
 					row.setStyleClass("even");
