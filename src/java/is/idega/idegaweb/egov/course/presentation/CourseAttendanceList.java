@@ -233,7 +233,6 @@ public class CourseAttendanceList extends CourseBlock {
 		cell.add(Text.getNonBrakingSpace());
 
 		cell = row.createHeaderCell();
-		cell.setStyleClass("firstColumn");
 		cell.setStyleClass("name");
 		cell.add(new Text(getResourceBundle().getLocalizedString("name", "Name")));
 
