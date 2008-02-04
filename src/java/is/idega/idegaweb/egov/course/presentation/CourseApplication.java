@@ -276,12 +276,6 @@ public class CourseApplication extends ApplicationForm {
 
 	private int getNumberOfPhases(IWContext iwc) {
 		int numberOfPhases = 8;
-		if (hasCare) {
-			numberOfPhases--;
-		}
-		if (allowsAllChildren) {
-			numberOfPhases--;
-		}
 
 		return numberOfPhases;
 	}
@@ -1045,7 +1039,7 @@ public class CourseApplication extends ApplicationForm {
 
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.available_courses_help", "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString(hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare", "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
 		section.add(helpLayer);
 
 		Layer clearLayer = new Layer(Layer.DIV);

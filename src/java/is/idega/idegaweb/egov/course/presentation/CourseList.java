@@ -353,7 +353,7 @@ public class CourseList extends CourseBlock {
 			cell = row.createCell();
 			cell.setStyleClass("lastColumn");
 			cell.setStyleClass("employee");
-			cell.add(new Text("-"));
+			cell.add(new Text(course.getUser() != null && course.getUser().length() > 0 ? course.getUser() : "-"));
 
 			if (iRow % 2 == 0) {
 				row.setStyleClass("evenRow");

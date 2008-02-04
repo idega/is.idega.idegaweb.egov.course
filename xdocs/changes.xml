@@ -5,6 +5,12 @@
   </properties>
   <body>
   
+   	<release version="1.0.8" date="2008-02-04">
+      <action dev="laddi" type="update">
+      	Text changes.
+      </action>
+    </release>
+
    	<release version="1.0.7" date="2008-01-23">
       <action dev="laddi" type="update">
       	Changes so system can be used for other types of courses (winter courses).
