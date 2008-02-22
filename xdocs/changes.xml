@@ -5,6 +5,12 @@
   </properties>
   <body>
   
+  	<release version="1.0.8" date="2008-02-22">
+			<action dev="alexis" type="update">
+				Updated core version to 3.1.82
+			</action>
+		</release>
+  
    	<release version="1.0.6" date="2007-11-06">
       <action dev="laddi" type="update">
       	Changes so system can be used for other types of courses (mainly for Neytendastofa).
