@@ -40,6 +40,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_PICKED_UP = "picked_up";
 	private static final String COLUMN_VALID = "is_valid";
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
+	private static final String COLUMN_PASSED = "passed_course";
 
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -52,6 +53,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_PICKED_UP, "Picked up", Boolean.class);
 		addAttribute(COLUMN_VALID, "Valid", Boolean.class);
 		addAttribute(COLUMN_DYSLEXIA, "Has dyslexia", Boolean.class);
+		addAttribute(COLUMN_PASSED, "Has passed course", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
 		addManyToOneRelationship(COLUMN_COURSE, Course.class);
@@ -292,5 +294,13 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
 
 		return idoGetNumberOfRecords(query);
+	}
+	
+	public void setPassed(boolean passed) {
+		setColumn(COLUMN_PASSED, passed);
+	}
+	
+	public boolean hasPassed() {
+		return getBooleanColumnValue(COLUMN_PASSED);
 	}
 }

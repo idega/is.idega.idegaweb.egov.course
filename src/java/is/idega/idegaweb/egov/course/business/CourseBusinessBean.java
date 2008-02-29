@@ -16,6 +16,8 @@ import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificateType;
+import is.idega.idegaweb.egov.course.data.CourseCertificateTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
@@ -494,7 +496,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
-	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -554,6 +556,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 
 		course.store();
+		
+		return course;
+	}
+	
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
@@ -1832,5 +1840,35 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
 		}
+	}
+	
+	public CourseCertificateType getCourseCertificateType(String id) {
+		if (id == null) {
+			return null;
+		}
+		
+		try {
+			return (CourseCertificateType) getIDOHome(CourseCertificateType.class).findByPrimaryKeyIDO(id);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (FinderException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public CourseCertificateType getCourseCertificateTypeByType(String type) {
+		if (type == null) {
+			return null;
+		}
+		
+		try {
+			return (CourseCertificateType) ((CourseCertificateTypeHome) getIDOHome(CourseCertificateType.class)).findByType(Integer.valueOf(type));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }

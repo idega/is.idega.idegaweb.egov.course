@@ -7,6 +7,7 @@ import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificateType;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
@@ -440,4 +441,10 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseApplicationHome
 	 */
 	public CourseApplicationHome getCourseApplicationHome() throws RemoteException;
+	
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException;
+	
+	public CourseCertificateType getCourseCertificateType(String id);
+	
+	public CourseCertificateType getCourseCertificateTypeByType(String type);
 }

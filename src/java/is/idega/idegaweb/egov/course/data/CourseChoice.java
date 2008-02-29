@@ -86,4 +86,8 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setHasDyslexia
 	 */
 	public void setHasDyslexia(boolean dyslexia);
+	
+	public void setPassed(boolean passed);
+	
+	public boolean hasPassed();
 }
