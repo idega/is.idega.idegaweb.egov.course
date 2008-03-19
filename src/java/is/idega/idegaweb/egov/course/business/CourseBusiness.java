@@ -22,6 +22,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
@@ -447,4 +448,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public CourseCertificateType getCourseCertificateType(String id);
 	
 	public CourseCertificateType getCourseCertificateTypeByType(String type);
+	
+	public List getUserCertificates(User user);
 }
