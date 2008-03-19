@@ -1,7 +1,6 @@
 package is.idega.idegaweb.egov.course.data;
 
 import java.sql.SQLException;
-import java.util.Collection;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;

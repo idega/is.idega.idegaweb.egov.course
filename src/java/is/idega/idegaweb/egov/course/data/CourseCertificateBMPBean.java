@@ -1,9 +1,13 @@
 package is.idega.idegaweb.egov.course.data;
 
 import java.sql.Timestamp;
+import java.util.Collection;
+
+import javax.ejb.FinderException;
 
 import com.idega.company.data.Company;
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOQuery;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
 
@@ -86,5 +90,11 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	
 	private IWTimestamp getIWTimestamp(Timestamp time) {
 		return time == null ? null : new IWTimestamp(time);
+	}
+	
+	public Collection ejbFindAllByUser(User user) throws FinderException {
+		IDOQuery query = idoQueryGetSelect();
+		query.appendWhereEquals(COLUMN_PARTICIPANT_ID, user.getId());
+		return super.idoFindPKsByQuery(query);
 	}
 }
