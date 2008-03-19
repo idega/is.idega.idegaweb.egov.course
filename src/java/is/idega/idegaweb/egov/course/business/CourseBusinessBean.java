@@ -16,6 +16,8 @@ import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
+import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
 import is.idega.idegaweb.egov.course.data.CourseCertificateType;
 import is.idega.idegaweb.egov.course.data.CourseCertificateTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
@@ -41,6 +43,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -1588,7 +1591,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			application.setCreditCardMerchantID(merchantID);
 			application.setCreditCardMerchantType(merchantType);
 			application.setPaymentType(paymentType);
-			application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));
+			if (paymentType != null) {
+				application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));
+			}
 			if (application.isPaid()) {
 				application.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
 			}
@@ -1601,35 +1606,39 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			String subject = getLocalizedString("course_choice.registration_received", "Your registration for course has been received", locale);
 			String body = "";
-			if (paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD)) {
-				body = getLocalizedString("course_choice.card_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card", locale);
+			if (paymentType != null) {
+				if (paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD)) {
+					body = getLocalizedString("course_choice.card_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card", locale);
+				}
+				else if (paymentType.equals(CourseConstants.PAYMENT_TYPE_GIRO)) {
+					body = getLocalizedString("course_choice.giro_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received.  You will receive an invoice in a few days for the total amount of the registration.", locale);
+				}
 			}
-			else if (paymentType.equals(CourseConstants.PAYMENT_TYPE_GIRO)) {
-				body = getLocalizedString("course_choice.giro_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received.  You will receive an invoice in a few days for the total amount of the registration.", locale);
-			}
 
-			Iterator iter = applications.values().iterator();
-			while (iter.hasNext()) {
-				Collection collection = (Collection) iter.next();
-				Iterator iterator = collection.iterator();
-				while (iterator.hasNext()) {
-					ApplicationHolder holder = (ApplicationHolder) iterator.next();
-
-					CourseChoice choice = getCourseChoiceHome().create();
-					choice.setApplication(application);
-					choice.setCourse(holder.getCourse());
-					choice.setDayCare(holder.getDaycare());
-					if (holder.getPickedUp() != null) {
-						choice.setPickedUp(holder.getPickedUp().booleanValue());
+			Iterator iter = applications == null ? null: applications.values().iterator();
+			if (iter != null) {
+				for (Iterator it = iter; it.hasNext();) {
+					Collection collection = (Collection) it.next();
+					Iterator iterator = collection.iterator();
+					while (iterator.hasNext()) {
+						ApplicationHolder holder = (ApplicationHolder) iterator.next();
+	
+						CourseChoice choice = getCourseChoiceHome().create();
+						choice.setApplication(application);
+						choice.setCourse(holder.getCourse());
+						choice.setDayCare(holder.getDaycare());
+						if (holder.getPickedUp() != null) {
+							choice.setPickedUp(holder.getPickedUp().booleanValue());
+						}
+						choice.setUser(holder.getUser());
+						choice.setHasDyslexia(holder.hasDyslexia());
+						if (application.isPaid()) {
+							choice.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
+						}
+						choice.store();
+	
+						sendMessageToParents(application, choice, subject, body);
 					}
-					choice.setUser(holder.getUser());
-					choice.setHasDyslexia(holder.hasDyslexia());
-					if (application.isPaid()) {
-						choice.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
-					}
-					choice.store();
-
-					sendMessageToParents(application, choice, subject, body);
 				}
 			}
 
@@ -1870,5 +1879,27 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		
 		return null;
+	}
+	
+	public List getUserCertificates(User user) {
+		if (user == null) {
+			return null;
+		}
+		
+		Collection userCertificates = null;
+		try {
+			userCertificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUser(user);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return null;
+		} catch (FinderException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		if (userCertificates == null) {
+			return null;
+		}
+		return new ArrayList(userCertificates);
 	}
 }
