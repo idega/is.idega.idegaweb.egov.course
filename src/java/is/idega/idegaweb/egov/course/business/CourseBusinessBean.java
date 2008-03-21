@@ -96,10 +96,10 @@ import com.idega.util.text.SocialSecurityNumber;
 
 public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness, AccountingBusiness {
 
-	public static final String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.course";
+	private static final long serialVersionUID = 8639939641556682373L;
 
 	protected String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
+		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
 	public void reserveCourse(Course course) {
@@ -787,10 +787,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country) {
-		return getUserDWR(personalID, childPK, minimumAge, country, null);
+		return getUserDWRByRelation(personalID, childPK, minimumAge, country, null);
 	}
 
-	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country, String selectedRelation) {
+	public UserDWR getUserDWRByRelation(String personalID, int childPK, int minimumAge, String country, String selectedRelation) {
 		Locale locale = new Locale(country, country.toUpperCase());
 		if (!SocialSecurityNumber.isValidSocialSecurityNumber(personalID, locale)) {
 			return new UserDWR();
@@ -798,7 +798,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		try {
 			User user = getUserBusiness().getUser(personalID);
-			Age age = new Age(user.getDateOfBirth());
+			Date dateOfBirth = user.getDateOfBirth();
+			if (dateOfBirth == null) {
+				dateOfBirth = getUserBusiness().getUserDateOfBirthFromPersonalId(personalID);
+			}
+			if (dateOfBirth == null) {
+				return new UserDWR();
+			}
+			Age age = new Age(dateOfBirth);
 			if (age.getYears() < minimumAge) {
 				return new UserDWR();
 			}
@@ -1902,4 +1909,73 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		return new ArrayList(userCertificates);
 	}
+	
+	public List getUserCertificatesByCourse(User user, Course course) {
+		if (user == null || course == null) {
+			return null;
+		}
+		
+		Collection certificates = null;
+		try {
+			certificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUserAndCourse(user, course);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (FinderException e) {
+			e.printStackTrace();
+		}
+		
+		if (certificates == null) {
+			return null;
+		}
+		return new ArrayList(certificates);
+	}
+
+	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates) {
+		if (certificates == null || certificates.isEmpty()) {
+			return null;
+		}
+		
+		CourseCertificate certificate = null;
+		IWTimestamp time = null;
+		for (int i = 0; i < certificates.size(); i++) {
+			certificate = (CourseCertificate) certificates.get(i);
+			
+			IWTimestamp certificateExpireDate = certificate.getValidThru();
+			if (certificateExpireDate != null) {
+				if (time == null) {
+					time = certificateExpireDate;
+				}
+				else {
+					time = time.isEarlierThan(certificateExpireDate) ? certificateExpireDate : time;
+				}
+			}
+		}
+		
+		return time;
+	}
+	
+	public IWTimestamp getLatestValidDateOfCertificate(List certificates) {
+		if (certificates == null || certificates.isEmpty()) {
+			return null;
+		}
+		
+		CourseCertificate certificate = null;
+		IWTimestamp time = null;
+		for (int i = 0; i < certificates.size(); i++) {
+			certificate = (CourseCertificate) certificates.get(i);
+			
+			IWTimestamp certificateValidDate = certificate.getValidFrom();
+			if (certificateValidDate != null) {
+				if (time == null) {
+					time = certificateValidDate;
+				}
+				else {
+					time = time.isEarlierThan(certificateValidDate) ? certificateValidDate : time;
+				}
+			}
+		}
+		
+		return time;
+	}
+
 }

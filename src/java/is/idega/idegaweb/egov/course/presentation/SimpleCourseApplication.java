@@ -13,7 +13,6 @@ import is.idega.idegaweb.egov.application.presentation.ApplicationForm;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseApplicationSession;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
-import is.idega.idegaweb.egov.course.business.CourseBusinessBean;
 import is.idega.idegaweb.egov.course.business.CourseDWR;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
@@ -22,8 +21,10 @@ import is.idega.idegaweb.egov.course.data.PriceHolder;
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -61,12 +62,13 @@ import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.CoreConstants;
 import com.idega.util.EmailValidator;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
-import com.idega.util.text.TextSoap;
 
 public class SimpleCourseApplication extends ApplicationForm {
 
@@ -103,14 +105,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private static final String PARAMETER_PAYER_NAME = "prm_payer_name";
 	private static final String PARAMETER_PAYER_PERSONAL_ID = "prm_payer_personal_id";
 	private static final String PARAMETER_NAME_ON_CARD = "prm_name_on_card";
-	private static final String PARAMETER_CARD_TYPE = "prm_card_type";
+//	private static final String PARAMETER_CARD_TYPE = "prm_card_type";
 	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
 	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
 	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
 	private static final String PARAMETER_AMOUNT = "prm_amount";
+	private static final String PARAMETER_AMOUNT_OF_CERTIFICATE_FEES = "prm_amount_of_certificate_fees";
 	private static final String PARAMETER_CCV = "prm_ccv";
 
 	private static final String SUB_ACTION = "prm_subact";
+	
+	private static final String PARAMETER_APPLICANT_AGE = "prm_applicant_age";
+	private static final String PARAMETER_TOO_LATE_APPLYING_FOR_CONTINUING_EDUCATION = "prm_too_late_applying_for_continuing_education";
 
 	private IWResourceBundle iwrb = null;
 
@@ -124,7 +130,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 	}
 
 	public String getBundleIdentifier() {
-		return CourseBusinessBean.IW_BUNDLE_IDENTIFIER;
+		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
 	protected void present(IWContext iwc) {
@@ -198,12 +204,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 		form.setId("course_step_1");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1)));
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		addDefaulScriptFiles(iwc);
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tif (document.getElementById(\"" + PARAMETER_COURSE_TYPE + "\") != null) { DWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");}\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append(getSchoolTypePK() != null ? "\tvar val = '" + getSchoolTypePK() + "';\n" : "\tvar val = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("\tgetCourses();\n").append("}");
@@ -255,11 +259,13 @@ public class SimpleCourseApplication extends ApplicationForm {
 		//script5.append("\n").append("return '<input id=\"'+course.pk+'\" type=\"checkbox\" class=\"checkbox\" name=\"" + PARAMETER_COURSE + "\" value=\"'+course.pk+'\" />'; \n");
 		script5.append("}\n");
 
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("getCourses", script3.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setCourses", script4.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setCourseID", script5.toString());
+		List jsActions = new ArrayList();
+		jsActions.add(script2.toString());
+		jsActions.add(script.toString());
+		jsActions.add(script3.toString());
+		jsActions.add(script4.toString());
+		jsActions.add(script5.toString());
+		PresentationUtil.addJavaScriptActionsToBody(iwc, jsActions);
 
 		addErrors(iwc, form);
 
@@ -470,9 +476,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		form.setId("course_step_2");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2)));
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		addDefaulScriptFiles(iwc);
 
 		addErrors(iwc, form);
 
@@ -571,17 +575,47 @@ public class SimpleCourseApplication extends ApplicationForm {
 		User applicant = getApplicant(iwc);
 		if (applicant == null) {
 			String personalID = iwc.isParameterSet(PARAMETER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PERSONAL_ID) : null;
-			if (personalID != null) {
-				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user found with personal ID") + ": " + personalID);
+			if (personalID == null) {
+				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("must_enter_personal_id", "You have to enter a personal ID"));
 			}
 			else {
-				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("must_enter_personal_id", "You have to enter a personal ID"));
+				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user found with personal ID") + ": " + personalID);
 			}
 		}
 		else {
+			//	Checking personal id
+			if (!getUserBusiness(iwc).hasValidIcelandicSSN(applicant)) {
+				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
+			}
+			//	Checking age
+			Date dateOfBirth = applicant.getDateOfBirth();
+			if (dateOfBirth == null) {
+				dateOfBirth = getUserBusiness(iwc).getUserDateOfBirthFromPersonalId(applicant.getPersonalID());
+			}
+			if (dateOfBirth == null) {
+				setError(PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("unknown_age_for_applicant", "Unkown age of applicant."));
+			}
+			else {
+				Age age = new Age(dateOfBirth);
+				if (age.getYears() < 19) {
+					setError(PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("applicant_is_too_young", "Applicant is too young. Minimal age requirement is") + ": 19.");
+				}
+			}
+			//	Checking if user already registered for current course
 			Course course = getCourseBusiness(iwc).getCourse(iwc.getParameter(PARAMETER_COURSE));
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
 				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("already_registered_to_course", "The selected applicant is already registered to the course you selected."));
+			}
+			//	Checking if user is not too late applying for "continuing education"
+			IWTimestamp latestExpireDate = getCourseBusiness(iwc).getLatestExpirationDateOfCertificate(getCourseBusiness(iwc).getUserCertificatesByCourse(applicant, course));
+			if (latestExpireDate != null) {
+				IWTimestamp rightNow = IWTimestamp.RightNow();
+				if (latestExpireDate.isEarlierThan(rightNow)) {
+					latestExpireDate.setYear(latestExpireDate.getYear() + 2);
+					if (latestExpireDate.isEarlierThan(rightNow)) {
+						setError(PARAMETER_TOO_LATE_APPLYING_FOR_CONTINUING_EDUCATION, this.iwrb.getLocalizedString("too_late_applying_for_continuing_education", "Too late applying for continuing education."));
+					}
+				}
 			}
 		}
 
@@ -875,18 +909,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		addDefaulScriptFiles(iwc);
 
 		StringBuffer script = new StringBuffer();
-		script.append("function readUser() {\n\tvar id = DWRUtil.util.getValue(\"" + PARAMETER_PAYER_PERSONAL_ID + "\");\n\tCourseDWRUtil.getUserDWR(id, -1, 18, '" + iwc.getCurrentLocale().getCountry() + "', fillUser);\n}");
+		script.append("function readUser() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_PAYER_PERSONAL_ID + "\");\n\tCourseDWRUtil.getUserDWR(id, -1, 18, '" + iwc.getCurrentLocale().getCountry() + "', fillUser);\n}");
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function fillUser(auser) {\n\tuser = auser;\n\tDWRUtil.setValues(user);\n}");
 
-		super.getParentPage().getAssociatedScript().addFunction("readUser", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("fillUser", script2.toString());
+		PresentationUtil.addJavaScriptActionToBody(iwc, script.toString());
+		PresentationUtil.addJavaScriptActionToBody(iwc, script2.toString());
 
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
 		heading.setStyleClass("applicationHeading");
@@ -931,6 +963,24 @@ public class SimpleCourseApplication extends ApplicationForm {
 		cell = row.createHeaderCell();
 		cell.setStyleClass("personalID");
 		cell.add(new Text(iwrb.getLocalizedString("personal_id", "Personal ID")));
+		
+		String defaultCertificateFee = iwc.getApplicationSettings().getProperty(CourseConstants.DEFAULT_COURSE_CERTIFICATE_FEE);
+		float certificateFee = 0;
+		if (defaultCertificateFee == null) {
+			iwc.getApplicationSettings().setProperty(CourseConstants.DEFAULT_COURSE_CERTIFICATE_FEE, String.valueOf(0));
+		}
+		else {
+			try {
+				certificateFee = Float.valueOf(defaultCertificateFee).floatValue();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (certificateFee >= 0) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("certificateFee");
+			cell.add(new Text(iwrb.getLocalizedString("certificate_fee", "Certificate fee")));
+		}
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("amount");
@@ -945,12 +995,17 @@ public class SimpleCourseApplication extends ApplicationForm {
 		float totalPrice = 0;
 		int counter = 0;
 		Iterator iter = prices.iterator();
+		float certificateFees = 0;
 		while (iter.hasNext()) {
 			row = group.createRow();
 			PriceHolder holder = (PriceHolder) iter.next();
 			User user = holder.getUser();
 
 			float price = holder.getPrice();
+			if (certificateFee > 0) {
+				certificateFees += certificateFee;
+				totalPrice += certificateFee;
+			}
 			totalPrice += price;
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
@@ -962,6 +1017,12 @@ public class SimpleCourseApplication extends ApplicationForm {
 			cell.setStyleClass("personalID");
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
+			if (certificateFee >= 0) {
+				cell = row.createCell();
+				cell.setStyleClass("certificateFee");
+				cell.add(new Text(format.format(certificateFee)));
+			}
+			
 			cell = row.createCell();
 			cell.setStyleClass("amount");
 			cell.add(new Text(format.format(price)));
@@ -978,7 +1039,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		row = group.createRow();
 
 		cell = row.createCell();
-		cell.setColumnSpan(2);
+		cell.setColumnSpan(3);
 		cell.setStyleClass("totalPrice");
 		cell.add(new Text(iwrb.getLocalizedString("total_amount", "Total amount")));
 
@@ -988,10 +1049,13 @@ public class SimpleCourseApplication extends ApplicationForm {
 		cell.add(new Text(format.format(totalPrice)));
 
 		float amountDue = totalPrice;
-		section.add(new HiddenInput(PARAMETER_AMOUNT, Float.toString(amountDue)));
+		section.add(new HiddenInput(PARAMETER_AMOUNT, Float.toString(amountDue - certificateFees)));
+		section.add(new HiddenInput(PARAMETER_AMOUNT_OF_CERTIFICATE_FEES, Float.toString(certificateFees)));
 
 		section.add(table);
 
+		/*
+		boolean creditcardPayment = false;
 		heading = new Heading1(this.iwrb.getLocalizedString("application.payment_information", "Payment information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
@@ -1002,8 +1066,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
-
-		boolean creditcardPayment = false;
 		if (iwc.isParameterSet(PARAMETER_CREDITCARD_PAYMENT)) {
 			creditcardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		}
@@ -1048,6 +1110,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		section.add(formItem);
 
 		section.add(clearLayer);
+		*/
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.payer_information", "Payer information"));
 		heading.setStyleClass("subHeader");
@@ -1080,10 +1143,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 			otherPayer.setSelected(!currentPayer);
 		}
 
-		formItem = new Layer(Layer.DIV);
+		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("payer.applicant", "Applicant"), loggedInUser);
+		Label label = new Label(this.iwrb.getLocalizedString("payer.applicant", "Applicant"), loggedInUser);
 		formItem.add(loggedInUser);
 		formItem.add(label);
 		section.add(formItem);
@@ -1125,6 +1188,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		section.add(clearLayer);
 
+		/*
 		heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
@@ -1137,6 +1201,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.creditcard_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
 		section.add(helpLayer);
+		*/
 
 		/*Collection images = getCourseBusiness(iwc).getCreditCardImages();
 		Iterator iterator = images.iterator();
@@ -1146,6 +1211,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			helpLayer.add(image);
 		}*/
 
+		/*
 		TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
 		cardOwner.keepStatusOnAction(true);
 		cardOwner.setDisabled(!creditcardPayment);
@@ -1218,6 +1284,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		section.add(formItem);
 
 		section.add(clearLayer);
+		*/
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
@@ -1237,8 +1304,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		add(form);
 	}
+	
+	private void addDefaulScriptFiles(IWContext iwc) {
+		List scriptFiles = new ArrayList();
+		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
+		scriptFiles.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scriptFiles.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scriptFiles);
+	}
 
-	private void save(IWContext iwc) throws RemoteException {
+	private void save(IWContext iwc) throws RemoteException {		
 		Boolean payerOption = iwc.isParameterSet(PARAMETER_PAYER_OPTION) ? new Boolean(iwc.getParameter(PARAMETER_PAYER_OPTION)) : null;
 		if (payerOption == null) {
 			setError(PARAMETER_PAYER_OPTION, this.iwrb.getLocalizedString("must_select_payer_option", "You have to select a payer option."));
@@ -1272,14 +1347,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 			showPhaseSix(iwc);
 			return;
 		}
-
+		
 		String payerPersonalID = iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID) : "";
 		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : "";
 		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
+		float certificateFees = Float.parseFloat(iwc.getParameter(PARAMETER_AMOUNT_OF_CERTIFICATE_FEES));
 
 		boolean creditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		IWTimestamp paymentStamp = new IWTimestamp();
 		String properties = null;
+		
 		if (creditCardPayment) {
 			String nameOnCard = iwc.getParameter(PARAMETER_NAME_ON_CARD);
 			String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
@@ -1349,6 +1426,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 			Link receipt = getButtonLink(this.iwrb.getLocalizedString("receipt", "Receipt"));
 			receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
+			receipt.addParameter(CourseConstants.EXTRA_FEES_FOR_APPLICATION, String.valueOf(certificateFees));
 			receipt.addParameter(getCourseBusiness(iwc).getSelectedCaseParameter(), application.getPrimaryKey().toString());
 			bottom.add(receipt);
 		}

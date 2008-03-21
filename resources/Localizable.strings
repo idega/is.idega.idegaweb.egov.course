@@ -1,3 +1,5 @@
+Weighers_Course_Type=Weighers Course Type
+Weighers_School_Type=Weighers School Type
 accounting_key=Accounting key
 address=Address
 afternoon=Afternoon
@@ -324,3 +326,7 @@ whole_day=Whole day
 work_phone=Work phone
 yes=Yes
 zip_code=Zip code
+certificate_fee=Certificate fee
+applicant_is_too_young=Applicant is too young. Minimal age requirement is
+unknown_age_for_applicant=Unkown age of applicant.
+too_late_applying_for_continuing_education=Too late applying for continuing education.

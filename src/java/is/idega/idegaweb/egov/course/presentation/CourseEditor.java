@@ -11,6 +11,7 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ejb.FinderException;
 
@@ -40,7 +41,9 @@ import com.idega.presentation.ui.IntegerInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.PresentationUtil;
 
 public class CourseEditor extends CourseBlock {
 
@@ -142,9 +145,11 @@ public class CourseEditor extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scriptFiles = new ArrayList();
+		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
+		scriptFiles.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scriptFiles.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scriptFiles);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
@@ -152,8 +157,10 @@ public class CourseEditor extends CourseBlock {
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
+		List jsActions = new ArrayList();
+		jsActions.add(script2.toString());
+		jsActions.add(script.toString());
+		PresentationUtil.addJavaScriptActionsToBody(iwc, jsActions);
 
 		if (!isSchoolUser()) {
 			DropdownMenu providers = null;

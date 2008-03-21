@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.data;
 
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -29,6 +30,20 @@ public class CourseCertificateHomeImpl extends IDOFactory implements CourseCerti
 	public Collection findAllCertificatesByUser(User user) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseCertificateBMPBean) entity).ejbFindAllByUser(user);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+	public Collection findAllCertificatesByUserAndCourse(User user, Course course) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseCertificateBMPBean) entity).ejbFindAllByUserAndCourse(user, course);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+	public Collection findCertificatesByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseCertificateBMPBean) entity).ejbFindByUsersAndValidityAndType(usersIds, onlyValidCertificates, certificateTypeId);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

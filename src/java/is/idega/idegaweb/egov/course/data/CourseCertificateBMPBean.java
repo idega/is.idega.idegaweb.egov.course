@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ejb.FinderException;
 
@@ -95,6 +96,25 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	public Collection ejbFindAllByUser(User user) throws FinderException {
 		IDOQuery query = idoQueryGetSelect();
 		query.appendWhereEquals(COLUMN_PARTICIPANT_ID, user.getId());
+		return super.idoFindPKsByQuery(query);
+	}
+	
+	public Collection ejbFindAllByUserAndCourse(User user, Course course) throws FinderException {
+		IDOQuery query = idoQueryGetSelect();
+		query.appendWhereEquals(COLUMN_PARTICIPANT_ID, user.getId());
+		query.appendAndEquals(COLUMN_COURSE_ID, course.getPrimaryKey());
+		return super.idoFindPKsByQuery(query);
+	}
+	
+	public Collection ejbFindByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
+		IDOQuery query = idoQueryGetSelect();
+		query.appendWhere().append(COLUMN_PARTICIPANT_ID).appendInCollection(usersIds);
+		if (onlyValidCertificates) {
+			query.appendAnd().append(COLUMN_VALID_THRU). appendGreaterThanOrEqualsSign().append(IWTimestamp.RightNow());
+		}
+		if (certificateTypeId != null) {
+			query.appendAnd().appendEquals(COLUMN_TYPE_OF_CERTIFICATE_ID, certificateTypeId);
+		}
 		return super.idoFindPKsByQuery(query);
 	}
 }

@@ -164,9 +164,9 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country) throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserDWR
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserDWRByRelation
 	 */
-	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country, String selectedRelation) throws RemoteException;
+	public UserDWR getUserDWRByRelation(String personalID, int childPK, int minimumAge, String country, String selectedRelation) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCoursesDWR
@@ -450,4 +450,10 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public CourseCertificateType getCourseCertificateTypeByType(String type);
 	
 	public List getUserCertificates(User user);
+	
+	public List getUserCertificatesByCourse(User user, Course course);
+	
+	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates);
+	
+	public IWTimestamp getLatestValidDateOfCertificate(List certificates);
 }

@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov Courses</name>
   <artifactId>is.idega.idegaweb.egov.course</artifactId>
-  <currentVersion>1.0.8</currentVersion>
+  <currentVersion>1.0.9</currentVersion>
   <inceptionYear>2007</inceptionYear>
   <shortDescription>eGov Courses</shortDescription>
   <versions>
@@ -49,6 +49,11 @@
       <name>1.0.8</name>
       <tag>EGOV_COURSE_1_0_8</tag>
     </version>
+    <version>
+      <id>1.0.9</id>
+      <name>1.0.9</name>
+      <tag>EGOV_COURSE_1_0_9</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
@@ -66,12 +71,19 @@
       <organization>idega software</organization>
       <roles/>
     </developer>
+    <developer>
+      <name>Valdas Žemaitis</name>
+      <id>valdas</id>
+      <email>valdas@idega.com</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
   </developers>
   <dependencies>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.1.67</version>
+      <version>3.1.84</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>

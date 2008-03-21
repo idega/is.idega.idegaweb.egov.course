@@ -10,7 +10,6 @@ import is.idega.idegaweb.egov.application.presentation.ApplicationForm;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseApplicationSession;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
-import is.idega.idegaweb.egov.course.business.CourseBusinessBean;
 import is.idega.idegaweb.egov.course.business.CourseDWR;
 import is.idega.idegaweb.egov.course.business.CourseSession;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
@@ -165,7 +164,7 @@ public class CourseApplication extends ApplicationForm {
 	}
 
 	public String getBundleIdentifier() {
-		return CourseBusinessBean.IW_BUNDLE_IDENTIFIER;
+		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
 	protected void present(IWContext iwc) {
@@ -618,7 +617,7 @@ public class CourseApplication extends ApplicationForm {
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
 		StringBuffer script = new StringBuffer();
-		script.append("function readUser() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_PERSONAL_ID + "\");\n\tvar child = '" + applicant.getPrimaryKey().toString() + "';\n\tvar relation = DWRUtil.getValue(\"userRelation\");\n\tCourseDWRUtil.getUserDWR(id, child, '1', '" + iwc.getCurrentLocale().getCountry() + "', relation, fillUser);\n}");
+		script.append("function readUser() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_PERSONAL_ID + "\");\n\tvar child = '" + applicant.getPrimaryKey().toString() + "';\n\tvar relation = DWRUtil.getValue(\"userRelation\");\n\tCourseDWRUtil.getUserDWRByRelation(id, child, '1', '" + iwc.getCurrentLocale().getCountry() + "', relation, fillUser);\n}");
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function fillUser(auser) {\n\tDWRUtil.setValues(auser);\n}");
