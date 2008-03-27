@@ -30,6 +30,8 @@ import com.idega.user.data.User;
 
 public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
+	private static final long serialVersionUID = 1846124987058471485L;
+
 	public static final String ENTITY_NAME = "cou_course_choice";
 
 	private static final String COLUMN_APPLICATION = "application_id";
@@ -41,6 +43,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_VALID = "is_valid";
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
 	private static final String COLUMN_PASSED = "passed_course";
+	private static final String COLUMN_CERTIFICATE_FEE = "course_certificate_fee";
 
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -54,6 +57,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_VALID, "Valid", Boolean.class);
 		addAttribute(COLUMN_DYSLEXIA, "Has dyslexia", Boolean.class);
 		addAttribute(COLUMN_PASSED, "Has passed course", Boolean.class);
+		addAttribute(COLUMN_CERTIFICATE_FEE, "Course certificate fee", Float.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
 		addManyToOneRelationship(COLUMN_COURSE, Course.class);
@@ -302,5 +306,13 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	
 	public boolean hasPassed() {
 		return getBooleanColumnValue(COLUMN_PASSED);
+	}
+	
+	public void setCourseCertificateFee(float fee) {
+		setColumn(COLUMN_CERTIFICATE_FEE, fee);
+	}
+	
+	public float getCourseCertificateFee() {
+		return getFloatColumnValue(COLUMN_CERTIFICATE_FEE, 0);
 	}
 }

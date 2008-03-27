@@ -90,4 +90,8 @@ public interface CourseChoice extends IDOEntity {
 	public void setPassed(boolean passed);
 	
 	public boolean hasPassed();
+	
+	public void setCourseCertificateFee(float fee);
+	
+	public float getCourseCertificateFee();
 }
