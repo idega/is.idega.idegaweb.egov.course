@@ -65,8 +65,6 @@ public class CourseApplicationOverview extends CourseBlock {
 
 	private ICPage iChoicePage;
 	private boolean useInWindow = false;
-	
-	private float certificateFees = 0;
 
 	public CourseApplicationOverview() {
 		this(false);
@@ -81,9 +79,6 @@ public class CourseApplicationOverview extends CourseBlock {
 			is.idega.idegaweb.egov.course.data.CourseApplication application = null;
 			if (iwc.isParameterSet(getBusiness().getSelectedCaseParameter())) {
 				application = getBusiness().getCourseApplication(iwc.getParameter(getBusiness().getSelectedCaseParameter()));
-			}
-			if (iwc.isParameterSet(CourseConstants.EXTRA_FEES_FOR_APPLICATION)) {
-				certificateFees = Float.parseFloat(iwc.getParameter(CourseConstants.EXTRA_FEES_FOR_APPLICATION));
 			}
 
 			if (application != null) {
@@ -212,6 +207,7 @@ public class CourseApplicationOverview extends CourseBlock {
 		Map applications = getBusiness().getApplicationMap(application);
 		SortedSet prices = getBusiness().calculatePrices(applications);
 		Map discounts = getBusiness().getDiscounts(prices, applications);
+		float certificateFees = getBusiness().getCalculatedCourseCertificateFees(applications);
 
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
 		float totalPrice = certificateFees;
@@ -413,7 +409,6 @@ public class CourseApplicationOverview extends CourseBlock {
 			Link receipt = getButtonLink(getResourceBundle().getLocalizedString("receipt", "Receipt"));
 			receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
 			receipt.addParameter(getBusiness().getSelectedCaseParameter(), application.getPrimaryKey().toString());
-			receipt.addParameter(CourseConstants.EXTRA_FEES_FOR_APPLICATION, String.valueOf(certificateFees));
 			bottom.add(receipt);
 
 			if (isSchoolAdministrator(iwc) /*&& getBusiness().canInvalidate(application)*/) {
@@ -484,7 +479,8 @@ public class CourseApplicationOverview extends CourseBlock {
 		Map applications = getBusiness().getApplicationMap(application);
 		SortedSet prices = getBusiness().calculatePrices(applications);
 		Map discounts = getBusiness().getDiscounts(prices, applications);
-
+		float certificateFees = getBusiness().getCalculatedCourseCertificateFees(applications);
+		
 		float totalPrice = certificateFees;
 		float discount = 0;
 		Iterator iterator = prices.iterator();
