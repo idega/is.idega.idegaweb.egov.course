@@ -31,7 +31,6 @@ import java.util.SortedSet;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.block.creditcard.business.CreditCardAuthorizationException;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -100,18 +99,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private static final String PARAMETER_AGREEMENT = "prm_agreement";
 	private static final String PARAMETER_HAS_DYSLEXIA = "prm_has_dyslexia";
 
-	private static final String PARAMETER_CREDITCARD_PAYMENT = "prm_creditcard_payment";
+//	private static final String PARAMETER_CREDITCARD_PAYMENT = "prm_creditcard_payment";
 	private static final String PARAMETER_PAYER_OPTION = "prm_payer_option";
 	private static final String PARAMETER_PAYER_NAME = "prm_payer_name";
 	private static final String PARAMETER_PAYER_PERSONAL_ID = "prm_payer_personal_id";
-	private static final String PARAMETER_NAME_ON_CARD = "prm_name_on_card";
+//	private static final String PARAMETER_NAME_ON_CARD = "prm_name_on_card";
 //	private static final String PARAMETER_CARD_TYPE = "prm_card_type";
-	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
-	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
-	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
+//	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
+//	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
+//	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
 	private static final String PARAMETER_AMOUNT = "prm_amount";
 	private static final String PARAMETER_AMOUNT_OF_CERTIFICATE_FEES = "prm_amount_of_certificate_fees";
-	private static final String PARAMETER_CCV = "prm_ccv";
+//	private static final String PARAMETER_CCV = "prm_ccv";
 
 	private static final String SUB_ACTION = "prm_subact";
 	
@@ -1353,26 +1352,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
 		float certificateFees = Float.parseFloat(iwc.getParameter(PARAMETER_AMOUNT_OF_CERTIFICATE_FEES));
 
-		boolean creditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
-		IWTimestamp paymentStamp = new IWTimestamp();
-		String properties = null;
-		
-		if (creditCardPayment) {
-			String nameOnCard = iwc.getParameter(PARAMETER_NAME_ON_CARD);
-			String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
-			String expiresMonth = iwc.getParameter(PARAMETER_VALID_MONTH);
-			String expiresYear = iwc.getParameter(PARAMETER_VALID_YEAR);
-			String ccVerifyNumber = iwc.getParameter(PARAMETER_CCV);
-			String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
-
-			try {
-				properties = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
-			}
-			catch (CreditCardAuthorizationException e) {
-				setError("", e.getLocalizedMessage(iwrb));
-			}
-		}
-
 		if (hasErrors()) {
 			showPhaseSix(iwc);
 			return;
@@ -1380,17 +1359,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
 		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
-		if (application != null && creditCardPayment) {
-			try {
-				String authorizationCode = getCourseBusiness(iwc).finishPayment(properties);
-				application.setReferenceNumber(authorizationCode);
-				application.store();
-			}
-			catch (CreditCardAuthorizationException e) {
-				setError("", e.getLocalizedMessage());
-			}
-		}
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale(), certificateFees);
 
 		if (hasErrors()) {
 			showPhaseSix(iwc);
@@ -1426,7 +1395,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 			Link receipt = getButtonLink(this.iwrb.getLocalizedString("receipt", "Receipt"));
 			receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
-			receipt.addParameter(CourseConstants.EXTRA_FEES_FOR_APPLICATION, String.valueOf(certificateFees));
 			receipt.addParameter(getCourseBusiness(iwc).getSelectedCaseParameter(), application.getPrimaryKey().toString());
 			bottom.add(receipt);
 		}
