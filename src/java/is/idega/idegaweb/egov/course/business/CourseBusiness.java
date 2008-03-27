@@ -456,4 +456,8 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates);
 	
 	public IWTimestamp getLatestValidDateOfCertificate(List certificates);
+	
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee);
+
+	public float getCalculatedCourseCertificateFees(Map applications);
 }

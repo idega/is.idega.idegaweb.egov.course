@@ -1432,6 +1432,37 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return userPrices;
 	}
+	
+	public float getCalculatedCourseCertificateFees(Map applications) {
+		if (applications == null || applications.isEmpty()) {
+			return 0;
+		}
+		
+		float fees = 0;
+		User user = null;
+		CourseChoice choise = null;
+		Collection userChoises = null;
+		Iterator keysIt = applications.keySet().iterator();
+		CourseChoiceHome choiseHome = getCourseChoiceHome();
+		for (Iterator it = keysIt; it.hasNext();) {
+			user = (User) it.next();
+			
+			userChoises = null;
+			try {
+				userChoises = choiseHome.findAllByUser(user);
+			} catch (FinderException e) {}
+			
+			if (userChoises != null && !userChoises.isEmpty()) {
+				for (Iterator choises = userChoises.iterator(); choises.hasNext();) {
+					choise = (CourseChoice) choises.next();
+					
+					fees += choise.getCourseCertificateFee();
+				}
+			}
+		}
+		
+		return fees;
+	}
 
 	public Map getDiscounts(SortedSet userPrices, Map applications) {
 		Map discountPrices = new HashMap();
@@ -1592,7 +1623,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		sendMessageToParents(application, choice, subject, body);
 	}
 
-	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
 			application.setCreditCardMerchantID(merchantID);
@@ -1642,6 +1673,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						if (application.isPaid()) {
 							choice.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
 						}
+						choice.setCourseCertificateFee(certificateFee);
 						choice.store();
 	
 						sendMessageToParents(application, choice, subject, body);
@@ -1655,6 +1687,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
+		return saveApplication(applications, merchantID, amount, merchantType, paymentType, referenceNumber, payerName, payerPersonalID, performer, locale, 0);
 	}
 
 	private void sendMessageToParents(CourseApplication application, CourseChoice choice, String subject, String body) {
