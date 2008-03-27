@@ -46,5 +46,4 @@ public class CourseConstants {
 	public static final String COURSE_PREFIX = "course_";
 	
 	public static final String DEFAULT_COURSE_CERTIFICATE_FEE = "defaultCourseCertificateFee";
-	public static final String EXTRA_FEES_FOR_APPLICATION = "extraFeesForApplication";
 }
