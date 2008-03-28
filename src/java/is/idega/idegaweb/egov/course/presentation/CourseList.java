@@ -42,7 +42,7 @@ import com.idega.util.IWTimestamp;
 
 public class CourseList extends CourseBlock {
 
-	private static final String PARAMETER_SORTING = "prm_sorting";
+	protected static final String PARAMETER_SORTING = "prm_sorting";
 
 	public void present(IWContext iwc) {
 		try {
