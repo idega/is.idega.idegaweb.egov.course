@@ -460,4 +460,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee);
 
 	public float getCalculatedCourseCertificateFees(Map applications);
+	
+	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value);
 }

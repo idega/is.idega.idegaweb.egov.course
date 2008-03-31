@@ -88,10 +88,29 @@ public interface CourseChoice extends IDOEntity {
 	public void setHasDyslexia(boolean dyslexia);
 	
 	public void setPassed(boolean passed);
-	
 	public boolean hasPassed();
 	
 	public void setCourseCertificateFee(float fee);
-	
 	public float getCourseCertificateFee();
+	
+	public void setVerificationFromGovermentOffice(boolean verificationFromGovermentOffice);
+	public boolean isVerificationFromGovermentOffice();
+	
+	public void setCertificateOfProperty(boolean certificateOfProperty);
+	public boolean isCertificateOfProperty();
+	
+	public void setCriminalRecord(boolean criminalRecord);
+	public boolean isCriminalRecord();
+	
+	public void setVerificationOfPayment(boolean verificationOfPayment);
+	public boolean isVerificationOfPayment();
+	
+	public void setNeedsVerificationFromGovermentOffice(boolean needsVerificationFromOffice);
+	public boolean isNeedVerificationFromGovermentOffice();
+	
+	public void setDidNotShowUp(boolean didNotShowUp);
+	public boolean isDidNotShowUp();
+	
+	public void setBooleanValueForColumn(boolean value, String columnName);
+	public boolean getBooleanValueFromColumn(String columnName);
 }

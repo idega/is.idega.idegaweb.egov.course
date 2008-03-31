@@ -42,8 +42,15 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_PICKED_UP = "picked_up";
 	private static final String COLUMN_VALID = "is_valid";
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
-	private static final String COLUMN_PASSED = "passed_course";
 	private static final String COLUMN_CERTIFICATE_FEE = "course_certificate_fee";
+	
+	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verification_from_goverment_office";
+	public static final String COLUMN_CERTIFICATE_OF_PROPERTY = "certificate_of_property";
+	public static final String COLUMN_CRIMINAL_RECORD = "criminal_record";
+	public static final String COLUMN_VERIFICATION_OF_PAYMENT = "verification_of_payment";
+	public static final String COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE = "need_verification_from_goverment_office";
+	public static final String COLUMN_DID_NOT_SHOW_UP = "did_not_show_up";
+	public static final String COLUMN_PASSED = "passed_course";
 
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -58,6 +65,13 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_DYSLEXIA, "Has dyslexia", Boolean.class);
 		addAttribute(COLUMN_PASSED, "Has passed course", Boolean.class);
 		addAttribute(COLUMN_CERTIFICATE_FEE, "Course certificate fee", Float.class);
+		
+		addAttribute(COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE, "Verfication from government office", Boolean.class);
+		addAttribute(COLUMN_CERTIFICATE_OF_PROPERTY, "Certificate of property", Boolean.class);
+		addAttribute(COLUMN_CRIMINAL_RECORD, "Criminal record", Boolean.class);
+		addAttribute(COLUMN_VERIFICATION_OF_PAYMENT, "Verification of payment", Boolean.class);
+		addAttribute(COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE, "Needs verification from goverment office", Boolean.class);
+		addAttribute(COLUMN_DID_NOT_SHOW_UP, "Did not show up", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
 		addManyToOneRelationship(COLUMN_COURSE, Course.class);
@@ -314,5 +328,61 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	
 	public float getCourseCertificateFee() {
 		return getFloatColumnValue(COLUMN_CERTIFICATE_FEE, 0);
+	}
+
+	public boolean isCertificateOfProperty() {
+		return getBooleanColumnValue(COLUMN_CERTIFICATE_OF_PROPERTY);
+	}
+
+	public boolean isCriminalRecord() {
+		return getBooleanColumnValue(COLUMN_CRIMINAL_RECORD);
+	}
+
+	public boolean isDidNotShowUp() {
+		return getBooleanColumnValue(COLUMN_DID_NOT_SHOW_UP);
+	}
+
+	public boolean isNeedVerificationFromGovermentOffice() {
+		return getBooleanColumnValue(COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE);
+	}
+
+	public boolean isVerificationFromGovermentOffice() {
+		return getBooleanColumnValue(COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE);
+	}
+
+	public boolean isVerificationOfPayment() {
+		return getBooleanColumnValue(COLUMN_VERIFICATION_OF_PAYMENT);
+	}
+
+	public void setCertificateOfProperty(boolean certificateOfProperty) {
+		setColumn(COLUMN_CERTIFICATE_OF_PROPERTY, certificateOfProperty);
+	}
+
+	public void setCriminalRecord(boolean criminalRecord) {
+		setColumn(COLUMN_CRIMINAL_RECORD, criminalRecord);
+	}
+
+	public void setDidNotShowUp(boolean didNotShowUp) {
+		setColumn(COLUMN_DID_NOT_SHOW_UP, didNotShowUp);
+	}
+
+	public void setNeedsVerificationFromGovermentOffice(boolean needsVerificationFromOffice) {
+		setColumn(COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE, needsVerificationFromOffice);
+	}
+
+	public void setVerificationFromGovermentOffice(boolean verificationFromGovermentOffice) {
+		setColumn(COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE, verificationFromGovermentOffice);
+	}
+
+	public void setVerificationOfPayment(boolean verificationOfPayment) {
+		setColumn(COLUMN_VERIFICATION_OF_PAYMENT, verificationOfPayment);
+	}
+
+	public boolean getBooleanValueFromColumn(String columnName) {
+		return getBooleanColumnValue(columnName);
+	}
+
+	public void setBooleanValueForColumn(boolean value, String columnName) {
+		setColumn(columnName, value);
 	}
 }

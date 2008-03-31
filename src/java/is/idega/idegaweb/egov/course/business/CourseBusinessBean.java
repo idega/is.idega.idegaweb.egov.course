@@ -2014,4 +2014,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return time;
 	}
 
+	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value) {
+		if (courseChoiceId == null || columnName == null) {
+			return false;
+		}
+		
+		CourseChoice choice = getCourseChoice(courseChoiceId);
+		if (choice == null) {
+			return false;
+		}
+		
+		choice.setBooleanValueForColumn(value, columnName);
+		choice.store();
+		
+		return true;
+	}
+
 }

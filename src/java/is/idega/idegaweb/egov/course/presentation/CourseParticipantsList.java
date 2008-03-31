@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.idega.block.school.data.School;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.location.data.Address;
@@ -32,6 +34,7 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.DownloadLink;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
@@ -212,7 +215,33 @@ public class CourseParticipantsList extends CourseBlock {
 		return link;
 	}
 	
-	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink) throws RemoteException {
+	private List getCheckboxesInfo() {
+		List info = new ArrayList();
+		
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_from_goverment_office", "Verfication from government office"),
+				CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("certificate_of_property", "Certificate of property"),
+				CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("criminal_record", "Criminal record"),
+				CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_of_payment", "Verification of payment"),
+				CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("need_verification_from_goverment_office", "Needs verification from goverment office"),
+				CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("did_not_show_up", "Did not show up"),
+				CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("passed_course", "Has passed course"),
+				CourseChoiceBMPBean.COLUMN_PASSED));
+		
+		return info;
+	}
+	
+	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink, boolean addCheckboxes) throws RemoteException {
+		if (addCheckboxes) {
+			StringBuffer action = new StringBuffer("function manageCourseChoiceSettings(parameters) {showLoadingMessage(parameters[0]); var box = document.getElementById(parameters[1]); CourseDWRUtil.manageCourseChoiceSettings(parameters[2], box.name, box.checked, {callback: function(result) {closeAllLoadingMessages();}});}");
+			PresentationUtil.addJavaScriptActionToBody(iwc, action.toString());
+		}
+		
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -244,7 +273,7 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.add(new Text(getResourceBundle().getLocalizedString("postal_code", "Postal code")));
 
 		cell = row.createHeaderCell();
-		if (!addViewParticipantLink) {
+		if (!addViewParticipantLink && !addCheckboxes) {
 			cell.setStyleClass("lastColumn");
 		}
 		cell.setStyleClass("homePhone");
@@ -252,9 +281,26 @@ public class CourseParticipantsList extends CourseBlock {
 		
 		if (addViewParticipantLink) {
 			cell = row.createHeaderCell();
-			cell.setStyleClass("lastColumn");
+			if (!addCheckboxes) {
+				cell.setStyleClass("lastColumn");
+			}
 			cell.setStyleClass("view");
 			cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
+		}
+		List checkboxesInfo = null;
+		if (addCheckboxes) {
+			checkboxesInfo = getCheckboxesInfo();
+			AdvancedProperty info = null;
+			for (int i = 0; i < checkboxesInfo.size(); i++) {
+				info = (AdvancedProperty) checkboxesInfo.get(i);
+				
+				cell = row.createHeaderCell();
+				if (i + 1 == checkboxesInfo.size()) {
+					cell.setStyleClass("lastColumn");
+				}
+				cell.setStyleClass("courseChoiseManagement");
+				cell.add(new Text(info.getId()));
+			}
 		}
 
 		group = table.createBodyRowGroup();
@@ -276,6 +322,7 @@ public class CourseParticipantsList extends CourseBlock {
 		String schoolTypeId = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
 		String courseTypeId = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
 		Iterator iter = choices.iterator();
+		String loadingMessage = getResourceBundle().getLocalizedString("loading", "Loading");
 		while (iter.hasNext()) {
 			row = group.createRow();
 
@@ -342,7 +389,7 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 
 			cell = row.createCell();
-			if (!addViewParticipantLink) {
+			if (!addViewParticipantLink && !addCheckboxes) {
 				cell.setStyleClass("lastColumn");
 			}
 			cell.setStyleClass("homePhone");
@@ -372,6 +419,20 @@ public class CourseParticipantsList extends CourseBlock {
 				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
 				cell.add(view);
 			}
+			
+			if (addCheckboxes) {
+				AdvancedProperty info = null;
+				for (int i = 0; i < checkboxesInfo.size(); i++) {
+					info = (AdvancedProperty) checkboxesInfo.get(i);
+				
+					cell = row.createCell();
+					if (i + 1 == checkboxesInfo.size()) {
+						cell.setStyleClass("lastColumn");
+					}
+					cell.setStyleClass("courseChoiseManagement");
+					cell.add(getCourseChoiseManagementCheckbox(info, choice, loadingMessage));
+				}
+			}
 
 			if (iRow % 2 == 0) {
 				row.setStyleClass("evenRow");
@@ -391,6 +452,19 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.add(new Text(getResourceBundle().getLocalizedString("number_of_participants", "Number of participants") + ": " + (iRow - 1)));
 
 		return table;
+	}
+	
+	private CheckBox getCourseChoiseManagementCheckbox(AdvancedProperty info, CourseChoice choise, String message) {
+		CheckBox box = new CheckBox(info.getValue());
+		box.setChecked(choise.getBooleanValueFromColumn(info.getValue()));
+		StringBuffer action = new StringBuffer("manageCourseChoiceSettings(['").append(message).append("', '").append(box.getId()).append("', '");
+		action.append(choise.getPrimaryKey().toString()).append("']);");
+		box.setOnClick(action.toString());
+		return box;
+	}
+	
+	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink) throws RemoteException {
+		return getParticipants(iwc, addViewParticipantLink, false);
 	}
 
 	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
