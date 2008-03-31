@@ -16,7 +16,9 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
+import com.idega.block.school.data.School;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.location.data.Address;
@@ -37,10 +39,13 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 
 public class CourseParticipantsList extends CourseBlock {
 
+	protected String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
+	
 	public void present(IWContext iwc) {
 		try {
 			Form form = new Form();
@@ -75,26 +80,26 @@ public class CourseParticipantsList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add("/dwr/engine.js");
+		scripts.add("/dwr/util.js");
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
-
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
-
 		StringBuffer script3 = new StringBuffer();
 		script3.append("function setCourseOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
-
 		StringBuffer script4 = new StringBuffer();
 		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', DWRUtil.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), DWRUtil.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
-
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setCourseOptions", script3.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeCourseValues", script4.toString());
+		List functions = new ArrayList();
+		functions.add(script2.toString());
+		functions.add(script.toString());
+		functions.add(script3.toString());
+		functions.add(script4.toString());
+		PresentationUtil.addJavaScriptActionsToBody(iwc, functions);
 
 		if (!isSchoolUser()) {
 			DropdownMenu providers = null;
@@ -199,12 +204,15 @@ public class CourseParticipantsList extends CourseBlock {
 		link.setStyleClass("xls");
 		link.setTarget(Link.TARGET_NEW_WINDOW);
 		link.maintainParameter(PARAMETER_COURSE_PK, iwc);
+		if (iwc.isParameterSet(PARAMETER_COURSE_PARTICIPANT_PK)) {
+			link.maintainParameter(PARAMETER_COURSE_PARTICIPANT_PK, iwc);
+		}
 		link.setMediaWriterClass(CourseParticipantsWriter.class);
 
 		return link;
 	}
-
-	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
+	
+	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink) throws RemoteException {
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -236,9 +244,18 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.add(new Text(getResourceBundle().getLocalizedString("postal_code", "Postal code")));
 
 		cell = row.createHeaderCell();
-		cell.setStyleClass("lastColumn");
+		if (!addViewParticipantLink) {
+			cell.setStyleClass("lastColumn");
+		}
 		cell.setStyleClass("homePhone");
 		cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
+		
+		if (addViewParticipantLink) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("lastColumn");
+			cell.setStyleClass("view");
+			cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
+		}
 
 		group = table.createBodyRowGroup();
 		int iRow = 1;
@@ -250,6 +267,14 @@ public class CourseParticipantsList extends CourseBlock {
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 		}
 
+		String courseId = course == null ? null : course.getPrimaryKey().toString();
+		String schoolId = null;
+		if (course != null) {
+			School school = course.getProvider();
+			schoolId = school == null ? null : school.getPrimaryKey().toString();
+		}
+		String schoolTypeId = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
+		String courseTypeId = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
 		Iterator iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = group.createRow();
@@ -317,13 +342,35 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 
 			cell = row.createCell();
-			cell.setStyleClass("lastColumn");
+			if (!addViewParticipantLink) {
+				cell.setStyleClass("lastColumn");
+			}
 			cell.setStyleClass("homePhone");
 			if (phone != null) {
 				cell.add(new Text(phone.getNumber()));
 			}
 			else {
 				cell.add(new Text("-"));
+			}
+			
+			if (addViewParticipantLink) {
+				cell = row.createCell();
+				Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
+				if (courseId != null) {
+					view.addParameter(PARAMETER_COURSE_PK, courseId);
+				}
+				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
+				if (schoolId != null) {
+					view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
+				}
+				if (schoolTypeId != null) {
+					view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
+				}
+				if (courseTypeId != null) {
+					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
+				}
+				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
+				cell.add(view);
 			}
 
 			if (iRow % 2 == 0) {
@@ -344,5 +391,9 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.add(new Text(getResourceBundle().getLocalizedString("number_of_participants", "Number of participants") + ": " + (iRow - 1)));
 
 		return table;
+	}
+
+	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
+		return getParticipants(iwc, false);
 	}
 }

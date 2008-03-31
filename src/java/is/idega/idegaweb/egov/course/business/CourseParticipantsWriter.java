@@ -22,11 +22,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import javax.ejb.FinderException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -69,6 +71,39 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 	public CourseParticipantsWriter() {
 	}
 
+	private Collection getChoises(Course course, IWContext iwc) {
+		if (iwc.isParameterSet(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)) {
+			User participant = null;
+			try {
+				participant = userBusiness.getUser(Integer.valueOf(iwc.getParameter(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)).intValue());
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			if (participant == null) {
+				return new ArrayList();
+			}
+			
+			CourseChoice choise = null;
+			try {
+				choise = business.getCourseChoiceHome().findByUserAndCourse(participant, course);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			} catch (FinderException e) {
+				e.printStackTrace();
+			}
+			if (choise == null) {
+				return new ArrayList();
+			}
+			return Arrays.asList(new CourseChoice[] {choise});
+		}
+		try {
+			return business.getCourseChoices(course);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return new ArrayList();
+		}
+	}
+	
 	public void init(HttpServletRequest req, IWContext iwc) {
 		try {
 			this.locale = iwc.getApplicationSettings().getApplicationLocale();
@@ -80,14 +115,16 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				Course course = business.getCourse(iwc.getParameter(CourseBlock.PARAMETER_COURSE_PK));
 				courseName = course.getName();
 
-				Collection choices = business.getCourseChoices(course);
+				Collection choices = getChoises(course, iwc);
 
 				this.buffer = writeXLS(iwc, choices);
-				setAsDownload(iwc, "students.xls", this.buffer.length());
-
+				String fileName = "participants.xls";
+				if (iwc.isParameterSet(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)) {
+					fileName = "participant.xls";
+				}
+				setAsDownload(iwc, fileName, this.buffer.length());
 			}
-		}
-		catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -303,7 +340,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 			iCell = 8;
 
-			Collection custodians = child.getCustodians();
+			Collection custodians = new ArrayList();
+			try {
+				custodians = child.getCustodians();
+			} catch(Exception e) {}
 			Custodian extraCustodian = child.getExtraCustodian();
 			if (extraCustodian != null) {
 				custodians.add(extraCustodian);
