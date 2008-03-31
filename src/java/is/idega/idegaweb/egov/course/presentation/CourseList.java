@@ -39,6 +39,7 @@ import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.util.IWTimestamp;
+import com.idega.util.PresentationUtil;
 
 public class CourseList extends CourseBlock {
 
@@ -78,18 +79,18 @@ public class CourseList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add("/dwr/engine.js");
+		scripts.add("/dwr/util.js");
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
-
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
-
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
+		PresentationUtil.addJavaScriptActionToBody(iwc, script2.toString());
+		PresentationUtil.addJavaScriptActionToBody(iwc, script.toString());
 
 		if (!isSchoolUser()) {
 			DropdownMenu providers = null;
