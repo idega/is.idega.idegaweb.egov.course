@@ -68,6 +68,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	public static final String PARAMETER_COURSE_PK = "prm_course_pk";
 	public static final String PARAMETER_CHOICE_PK = "prm_choice_pk";
 	public static final String PARAMETER_COURSE_TYPE_PK = "prm_course_type_pk";
+	public static final String PARAMETER_COURSE_PARTICIPANT_PK = "prm_course_participant_pk";
 	public static final String PARAMETER_SCHOOL_TYPE_PK = "prm_school_type_pk";
 
 	private CourseBusiness business;
