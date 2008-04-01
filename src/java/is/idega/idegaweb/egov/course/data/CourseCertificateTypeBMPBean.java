@@ -39,6 +39,8 @@ public class CourseCertificateTypeBMPBean extends GenericEntity implements
 		temporaryCertificate.setType(TEMPORARY_CERTIFICATE_TYPE);
 		temporaryCertificate.setDescription("Temporary certificate");
 		temporaryCertificate.store();
+		
+		//	TODO: add 3 more types (2, 3, 4, VOTT.xml)
 	}
 	
 	public void setType(Integer type) {
