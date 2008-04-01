@@ -44,11 +44,11 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
 	private static final String COLUMN_CERTIFICATE_FEE = "course_certificate_fee";
 	
-	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verification_from_goverment_office";
+	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verific_from_goverment";
 	public static final String COLUMN_CERTIFICATE_OF_PROPERTY = "certificate_of_property";
 	public static final String COLUMN_CRIMINAL_RECORD = "criminal_record";
 	public static final String COLUMN_VERIFICATION_OF_PAYMENT = "verification_of_payment";
-	public static final String COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE = "need_verification_from_goverment_office";
+	public static final String COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE = "need_verific_from_goverment";
 	public static final String COLUMN_DID_NOT_SHOW_UP = "did_not_show_up";
 	public static final String COLUMN_PASSED = "passed_course";
 
