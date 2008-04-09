@@ -50,20 +50,21 @@ public class CourseParticipantOverview extends CourseBlock {
 
 	private ICPage iChoicePage;
 	private UIComponent linkToPrintOut = null;
-	
+
 	private List parametersToMaintainBackButton = null;
-	
+
 	private User getParticipant(IWContext iwc) {
 		User participant = null;
 		try {
 			participant = getUserSession(iwc).getUser();
-		} catch (RemoteException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
 		}
 		if (participant != null) {
 			return participant;
 		}
-		
+
 		String paticipantId = iwc.getParameter(PARAMETER_COURSE_PARTICIPANT_PK);
 		if (paticipantId == null) {
 			return null;
@@ -71,26 +72,29 @@ public class CourseParticipantOverview extends CourseBlock {
 		int id = -1;
 		try {
 			id = Integer.valueOf(paticipantId).intValue();
-		} catch(NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
 		try {
 			return getUserBusiness().getUser(id);
-		} catch (RemoteException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	private Collection getSchoolsProviders(IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_PROVIDER_PK)) {
-			return Arrays.asList(new String[] {iwc.getParameter(PARAMETER_PROVIDER_PK)});
+			return Arrays.asList(new String[] { iwc.getParameter(PARAMETER_PROVIDER_PK) });
 		}
 		else {
 			try {
 				return getSession().getSchoolsForUser();
-			} catch (RemoteException e) {
+			}
+			catch (RemoteException e) {
 				e.printStackTrace();
 			}
 		}
@@ -120,7 +124,7 @@ public class CourseParticipantOverview extends CourseBlock {
 		form.add(getHeader(getResourceBundle().getLocalizedString("application.course_participant_overview", "Course participant overview")));
 
 		form.add(getPersonInfo(iwc, participant, true));
-		
+
 		if (linkToPrintOut != null) {
 			form.add(linkToPrintOut);
 		}
@@ -178,27 +182,29 @@ public class CourseParticipantOverview extends CourseBlock {
 			else {
 				payer = application.getOwner();
 			}
-			Name payerName = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName());
+			if (payer != null) {
+				Name payerName = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName());
 
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			label = new Label();
-			label.add(new Text(getResourceBundle().getLocalizedString("application.payer_name", "Payer name")));
-			span = new Layer(Layer.SPAN);
-			span.add(new Text(payerName.getName(iwc.getCurrentLocale())));
-			formItem.add(label);
-			formItem.add(span);
-			section.add(formItem);
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				label = new Label();
+				label.add(new Text(getResourceBundle().getLocalizedString("application.payer_name", "Payer name")));
+				span = new Layer(Layer.SPAN);
+				span.add(new Text(payerName.getName(iwc.getCurrentLocale())));
+				formItem.add(label);
+				formItem.add(span);
+				section.add(formItem);
 
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			label = new Label();
-			label.add(new Text(getResourceBundle().getLocalizedString("application.payer_personal_id", "Payer personal ID")));
-			span = new Layer(Layer.SPAN);
-			span.add(new Text(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale())));
-			formItem.add(label);
-			formItem.add(span);
-			section.add(formItem);
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				label = new Label();
+				label.add(new Text(getResourceBundle().getLocalizedString("application.payer_personal_id", "Payer personal ID")));
+				span = new Layer(Layer.SPAN);
+				span.add(new Text(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale())));
+				formItem.add(label);
+				formItem.add(span);
+				section.add(formItem);
+			}
 
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -327,7 +333,7 @@ public class CourseParticipantOverview extends CourseBlock {
 
 		add(form);
 	}
-	
+
 	public void setLinkToPrintOut(UIComponent linkToPrintOut) {
 		this.linkToPrintOut = linkToPrintOut;
 	}
