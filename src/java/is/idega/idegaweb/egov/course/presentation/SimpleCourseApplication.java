@@ -99,21 +99,21 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private static final String PARAMETER_AGREEMENT = "prm_agreement";
 	private static final String PARAMETER_HAS_DYSLEXIA = "prm_has_dyslexia";
 
-//	private static final String PARAMETER_CREDITCARD_PAYMENT = "prm_creditcard_payment";
+	//	private static final String PARAMETER_CREDITCARD_PAYMENT = "prm_creditcard_payment";
 	private static final String PARAMETER_PAYER_OPTION = "prm_payer_option";
 	private static final String PARAMETER_PAYER_NAME = "prm_payer_name";
 	private static final String PARAMETER_PAYER_PERSONAL_ID = "prm_payer_personal_id";
-//	private static final String PARAMETER_NAME_ON_CARD = "prm_name_on_card";
-//	private static final String PARAMETER_CARD_TYPE = "prm_card_type";
-//	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
-//	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
-//	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
+	//	private static final String PARAMETER_NAME_ON_CARD = "prm_name_on_card";
+	//	private static final String PARAMETER_CARD_TYPE = "prm_card_type";
+	//	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
+	//	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
+	//	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
 	private static final String PARAMETER_AMOUNT = "prm_amount";
 	private static final String PARAMETER_AMOUNT_OF_CERTIFICATE_FEES = "prm_amount_of_certificate_fees";
-//	private static final String PARAMETER_CCV = "prm_ccv";
+	//	private static final String PARAMETER_CCV = "prm_ccv";
 
 	private static final String SUB_ACTION = "prm_subact";
-	
+
 	private static final String PARAMETER_APPLICANT_AGE = "prm_applicant_age";
 	private static final String PARAMETER_TOO_LATE_APPLYING_FOR_CONTINUING_EDUCATION = "prm_too_late_applying_for_continuing_education";
 
@@ -962,7 +962,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		cell = row.createHeaderCell();
 		cell.setStyleClass("personalID");
 		cell.add(new Text(iwrb.getLocalizedString("personal_id", "Personal ID")));
-		
+
 		String defaultCertificateFee = iwc.getApplicationSettings().getProperty(CourseConstants.DEFAULT_COURSE_CERTIFICATE_FEE);
 		float certificateFee = 0;
 		if (defaultCertificateFee == null) {
@@ -971,7 +971,8 @@ public class SimpleCourseApplication extends ApplicationForm {
 		else {
 			try {
 				certificateFee = Float.valueOf(defaultCertificateFee).floatValue();
-			} catch(Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -1021,7 +1022,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 				cell.setStyleClass("certificateFee");
 				cell.add(new Text(format.format(certificateFee)));
 			}
-			
+
 			cell = row.createCell();
 			cell.setStyleClass("amount");
 			cell.add(new Text(format.format(price)));
@@ -1303,7 +1304,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		add(form);
 	}
-	
+
 	private void addDefaulScriptFiles(IWContext iwc) {
 		List scriptFiles = new ArrayList();
 		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
@@ -1312,7 +1313,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scriptFiles);
 	}
 
-	private void save(IWContext iwc) throws RemoteException {		
+	private void save(IWContext iwc) throws RemoteException {
 		Boolean payerOption = iwc.isParameterSet(PARAMETER_PAYER_OPTION) ? new Boolean(iwc.getParameter(PARAMETER_PAYER_OPTION)) : null;
 		if (payerOption == null) {
 			setError(PARAMETER_PAYER_OPTION, this.iwrb.getLocalizedString("must_select_payer_option", "You have to select a payer option."));
@@ -1346,7 +1347,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			showPhaseSix(iwc);
 			return;
 		}
-		
+
 		String payerPersonalID = iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID) : "";
 		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : "";
 		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
@@ -1415,7 +1416,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 
 		if (iwc.isParameterSet(PARAMETER_APPLICANT_OPTION)) {
-			iCompanyRegistration = !Boolean.valueOf(iwc.getParameter(PARAMETER_APPLICANT_OPTION)).booleanValue();
+			iCompanyRegistration = false; //!Boolean.valueOf(iwc.getParameter(PARAMETER_APPLICANT_OPTION)).booleanValue();
 		}
 
 		return action;
