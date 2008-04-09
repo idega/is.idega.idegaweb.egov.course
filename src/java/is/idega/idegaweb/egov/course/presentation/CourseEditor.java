@@ -264,7 +264,7 @@ public class CourseEditor extends CourseBlock {
 			}
 		}
 
-		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+		boolean useFixedPrices = true; //iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
@@ -433,7 +433,7 @@ public class CourseEditor extends CourseBlock {
 	}
 
 	public void showEditor(IWContext iwc, Object coursePK) throws java.rmi.RemoteException {
-		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+		boolean useFixedPrices = true; //iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 
 		if (!useFixedPrices) {
 			super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
