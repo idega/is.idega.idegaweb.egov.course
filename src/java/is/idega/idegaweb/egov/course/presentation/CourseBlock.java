@@ -64,6 +64,9 @@ import com.idega.util.text.Name;
  */
 public abstract class CourseBlock extends Block implements IWPageEventListener {
 
+	public static final String ACTION_PRINT = "print";
+	public static final String ACTION_CONFIRM_PRINT = "confirmPrint";
+	public static final String PARAMETER_ACTION = "prm_action";
 	public static final String PARAMETER_PRINT_CERTIFICATE = "prm_print_certificate";
 	public static final String PARAMETER_PROVIDER_PK = "prm_provider_pk";
 	public static final String PARAMETER_COURSE_PK = "prm_course_pk";
