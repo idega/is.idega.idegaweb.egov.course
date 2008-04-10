@@ -317,16 +317,20 @@ public class CourseParticipantOverview extends CourseBlock {
 				}
 			}
 			
+			section.add(table);
+			
 			if(finishedCourse) {
+				Layer bottom = new Layer(Layer.DIV);
+				bottom.setStyleClass("bottom miniBottom");
+				
 				Link printCertificate = getButtonLink(getResourceBundle().getLocalizedString("print_certificate", "Print certificate"));
 				printCertificate.setStyleClass("buttonHome");
 				printCertificate.addParameter(PARAMETER_PRINT_CERTIFICATE, "true");
 				printCertificate.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+				bottom.add(printCertificate);
 				
-				section.add(printCertificate);
+				section.add(bottom);
 			}
-			
-			section.add(table);
 		}
 
 		Layer bottom = new Layer(Layer.DIV);
