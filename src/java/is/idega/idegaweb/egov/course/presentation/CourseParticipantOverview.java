@@ -325,7 +325,7 @@ public class CourseParticipantOverview extends CourseBlock {
 				
 				Link printCertificate = getButtonLink(getResourceBundle().getLocalizedString("print_certificate", "Print certificate"));
 				printCertificate.setStyleClass("buttonHome");
-				printCertificate.addParameter(PARAMETER_PRINT_CERTIFICATE, "true");
+				printCertificate.addParameter(PARAMETER_PRINT_CERTIFICATE, "print");
 				printCertificate.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
 				bottom.add(printCertificate);
 				
