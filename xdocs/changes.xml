@@ -4,6 +4,12 @@
     <author email="gimmi@idega.com">Grimur</author>
   </properties>
   <body>
+  	<release version="1.0.13" date="2008-04-10">
+      <action dev="alexis" type="update">
+      	Some stuff to print certificates
+      </action>
+    </release>
+    
   	<release version="1.0.12" date="2008-04-01">
       <action dev="alexis" type="update">
       	Some fixes in the BMP beans

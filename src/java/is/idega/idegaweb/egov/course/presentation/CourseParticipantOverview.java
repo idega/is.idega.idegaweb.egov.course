@@ -15,6 +15,7 @@ import is.idega.idegaweb.egov.course.data.CourseType;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
 
 public class CourseParticipantOverview extends CourseBlock {
-
+	
 	private ICPage iChoicePage;
 	private UIComponent linkToPrintOut = null;
 
@@ -260,10 +261,12 @@ public class CourseParticipantOverview extends CourseBlock {
 			group = table.createBodyRowGroup();
 
 			int counter = 0;
+			boolean finishedCourse = false;
+			CourseChoice choice = null;
 			Iterator iter = choices.iterator();
 			while (iter.hasNext()) {
 				row = group.createRow();
-				CourseChoice choice = (CourseChoice) iter.next();
+				choice = (CourseChoice) iter.next();
 
 				Course course = choice.getCourse();
 				School provider = course.getProvider();
@@ -271,6 +274,10 @@ public class CourseParticipantOverview extends CourseBlock {
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 				IWTimestamp endDate = new IWTimestamp(coursePrice != null ? getBusiness().getEndDate(coursePrice, startDate.getDate()) : new IWTimestamp(course.getEndDate()).getDate());
+				IWTimestamp today = new IWTimestamp(new Date());
+				if(endDate.isEarlierThan(today)) {
+					finishedCourse = true;
+				}
 				int numberOfDays = coursePrice != null ? coursePrice.getNumberOfDays() : IWTimestamp.getDaysBetween(startDate, endDate);
 
 				cell = row.createCell();
@@ -309,7 +316,16 @@ public class CourseParticipantOverview extends CourseBlock {
 					row.setStyleClass("odd");
 				}
 			}
-
+			
+			if(finishedCourse) {
+				Link printCertificate = getButtonLink(getResourceBundle().getLocalizedString("print_certificate", "Print certificate"));
+				printCertificate.setStyleClass("buttonHome");
+				printCertificate.addParameter(PARAMETER_PRINT_CERTIFICATE, "true");
+				printCertificate.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+				
+				section.add(printCertificate);
+			}
+			
 			section.add(table);
 		}
 

@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.data;
 
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -19,4 +20,6 @@ public interface CourseCertificateTypeHome extends IDOHome {
 	public CourseCertificateType findByPrimaryKeyLegacy(int id) throws SQLException;
 	
 	public CourseCertificateType findByType(Integer type);
+	
+	public Collection findAllTypes() throws FinderException;
 }

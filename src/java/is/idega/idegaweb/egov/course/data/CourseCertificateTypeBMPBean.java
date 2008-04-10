@@ -1,5 +1,7 @@
 package is.idega.idegaweb.egov.course.data;
 
+import java.util.Collection;
+
 import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
@@ -83,6 +85,13 @@ public class CourseCertificateTypeBMPBean extends GenericEntity implements
 		}
 		
 		return null;
+	}
+	
+	public Collection ejbFindAllTypes() throws FinderException {
+		IDOQuery query = idoQuery();
+		query.appendSelectAllFrom(this);
+
+		return idoFindPKsByQuery(query);
 	}
 
 }

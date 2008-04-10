@@ -1,10 +1,12 @@
 package is.idega.idegaweb.egov.course.data;
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
+import com.idega.block.school.data.SchoolCategoryBMPBean;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
 
@@ -40,6 +42,13 @@ public class CourseCertificateTypeHomeImpl extends IDOFactory implements CourseC
 	public CourseCertificateType findByType(Integer type) {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		return ((CourseCertificateTypeBMPBean) entity).findByType(type);
+	}
+	
+	public Collection findAllTypes() throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseCertificateTypeBMPBean) entity).ejbFindAllTypes();
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
 }
