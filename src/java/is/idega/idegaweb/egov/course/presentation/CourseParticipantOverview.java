@@ -52,7 +52,7 @@ public class CourseParticipantOverview extends CourseBlock {
 	private ICPage iChoicePage;
 	private UIComponent linkToPrintOut = null;
 
-	private List parametersToMaintainBackButton = null;
+	protected List parametersToMaintainBackButton = null;
 
 	private User getParticipant(IWContext iwc) {
 		User participant = null;
@@ -87,7 +87,7 @@ public class CourseParticipantOverview extends CourseBlock {
 		return null;
 	}
 
-	private Collection getSchoolsProviders(IWContext iwc) {
+	protected Collection getSchoolsProviders(IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_PROVIDER_PK)) {
 			return Arrays.asList(new String[] { iwc.getParameter(PARAMETER_PROVIDER_PK) });
 		}
