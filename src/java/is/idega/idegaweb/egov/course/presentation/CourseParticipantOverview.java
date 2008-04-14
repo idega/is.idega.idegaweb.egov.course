@@ -118,7 +118,7 @@ public class CourseParticipantOverview extends CourseBlock {
 		}
 	}
 
-	private void getViewerForm(IWContext iwc, User participant) throws RemoteException {
+	protected void getViewerForm(IWContext iwc, User participant) throws RemoteException {
 		Form form = new Form();
 		form.maintainParameter(getBusiness().getSelectedCaseParameter());
 
