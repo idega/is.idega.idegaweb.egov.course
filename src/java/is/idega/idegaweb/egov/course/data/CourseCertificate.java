@@ -4,6 +4,7 @@ package is.idega.idegaweb.egov.course.data;
 import java.sql.Timestamp;
 
 import com.idega.company.data.Company;
+import com.idega.core.file.data.ICFile;
 import com.idega.data.IDOEntity;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
@@ -33,5 +34,9 @@ public interface CourseCertificate extends IDOEntity {
 	public void setValidThru(Timestamp validThru);
 	
 	public IWTimestamp getValidThru();
+	
+	public void setCertificateFile(ICFile file);
+	
+	public ICFile getCertificateFile();
 	
 }

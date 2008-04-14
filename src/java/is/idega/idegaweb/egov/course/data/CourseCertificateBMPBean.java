@@ -7,6 +7,7 @@ import java.util.List;
 import javax.ejb.FinderException;
 
 import com.idega.company.data.Company;
+import com.idega.core.file.data.ICFile;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
 import com.idega.user.data.User;
@@ -24,6 +25,7 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	private static final String COLUMN_VALID_FROM = "valid_from";
 	private static final String COLUMN_VALID_THRU = "valid_thru";
 	private static final String COLUMN_COURSE_ID = "course_id";
+	private static final String COLUMN_CERTIFICATE_FILE_ID = "cert_file_id";
 	
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -35,6 +37,7 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 		addAttribute(COLUMN_VALID_FROM, "Certificate valid from", Timestamp.class);
 		addAttribute(COLUMN_VALID_THRU, "Certificate valid thru", Timestamp.class);
 		
+		addManyToOneRelationship(COLUMN_CERTIFICATE_FILE_ID, ICFile.class);
 		addOneToOneRelationship(COLUMN_TYPE_OF_CERTIFICATE_ID, CourseCertificateType.class);
 		addOneToOneRelationship(COLUMN_PARTICIPANT_ID, User.class);
 		addOneToOneRelationship(COLUMN_COMPANY_ID, Company.class);
@@ -43,6 +46,14 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	
 	public void setCertificateType(CourseCertificateType type) {
 		setColumn(COLUMN_TYPE_OF_CERTIFICATE_ID, type);
+	}
+	
+	public void setCertificateFile(ICFile file) {
+		setColumn(COLUMN_CERTIFICATE_FILE_ID, file);
+	}
+	
+	public ICFile getCertificateFile() {
+		return (ICFile) getColumnValue(COLUMN_CERTIFICATE_FILE_ID);
 	}
 	
 	public CourseCertificateType getCourseCertificateType() {
