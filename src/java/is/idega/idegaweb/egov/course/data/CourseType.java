@@ -1,7 +1,6 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOEntity;
 
 public interface CourseType extends IDOEntity {
@@ -22,9 +21,9 @@ public interface CourseType extends IDOEntity {
 	public String getLocalizationKey();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getSchoolType
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getCourseCategory
 	 */
-	public SchoolType getSchoolType();
+	public CourseCategory getCourseCategory();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getAccountingKey
@@ -52,9 +51,9 @@ public interface CourseType extends IDOEntity {
 	public void setLocalizationKey(String localizationKey);
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setSchoolType
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setCourseCategory
 	 */
-	public void setSchoolType(SchoolType type);
+	public void setCourseCategory(CourseCategory category);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setAccountingKey

@@ -1,6 +1,7 @@
 package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
@@ -214,7 +215,7 @@ public class CoursePriceEditor extends CourseBlock {
 		while (iter.hasNext()) {
 			CoursePrice cPrice = (CoursePrice) iter.next();
 			CourseType type = cPrice.getCourseType();
-			SchoolType sType = type.getSchoolType();
+			CourseCategory courseCategory = type.getCourseCategory();
 			SchoolArea area = cPrice.getSchoolArea();
 			row = group.createRow();
 
@@ -247,11 +248,11 @@ public class CoursePriceEditor extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setId("category");
-				if (sType.getLocalizationKey() != null) {
-					cell.add(new Text(localize(sType.getLocalizationKey(), sType.getName())));
+				if (courseCategory.getLocalizationKey() != null) {
+					cell.add(new Text(localize(courseCategory.getLocalizationKey(), courseCategory.getName())));
 				}
 				else {
-					cell.add(new Text(sType.getName()));
+					cell.add(new Text(courseCategory.getName()));
 				}
 
 				cell = row.createCell();
@@ -423,7 +424,7 @@ public class CoursePriceEditor extends CourseBlock {
 
 		if (price != null) {
 			CourseType type = price.getCourseType();
-			SchoolType sType = type.getSchoolType();
+			CourseCategory category = type.getCourseCategory();
 			SchoolArea area = price.getSchoolArea();
 
 			inputName.setContent(price.getName());
@@ -433,7 +434,7 @@ public class CoursePriceEditor extends CourseBlock {
 			inputPrice.setContent(Integer.toString(price.getPrice()));
 			inputPreCarePrice.setContent(price.getPreCarePrice() > 0 ? Integer.toString(price.getPreCarePrice()) : Integer.toString(0));
 			inputPostCarePrice.setContent(price.getPostCarePrice() > 0 ? Integer.toString(price.getPostCarePrice()) : Integer.toString(0));
-			String stID = sType.getPrimaryKey().toString();
+			String stID = category.getPrimaryKey().toString();
 			schoolTypeID.setSelectedElement(stID);
 
 			if (area != null) {

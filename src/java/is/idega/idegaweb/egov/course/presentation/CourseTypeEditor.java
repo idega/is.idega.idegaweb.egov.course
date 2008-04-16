@@ -1,6 +1,7 @@
 package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -10,7 +11,6 @@ import java.util.Collection;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -138,9 +138,9 @@ public class CourseTypeEditor extends CourseBlock {
 			inputName.setContent(type.getName());
 			inputLocalization.setContent(type.getLocalizationKey());
 			inputDesc.setContent(type.getDatasource());
-			SchoolType sType = type.getSchoolType();
-			if (sType != null) {
-				inputSchoolTypes.setSelectedElement(sType.getPrimaryKey().toString());
+			CourseCategory category = type.getCourseCategory();
+			if (category != null) {
+				inputSchoolTypes.setSelectedElement(category.getPrimaryKey().toString());
 			}
 			if (type.getAccountingKey() != null) {
 				inputAccounting.setValue(type.getAccountingKey());
@@ -295,13 +295,13 @@ public class CourseTypeEditor extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setId("category");
-				SchoolType sType = cType.getSchoolType();
-				if (sType != null) {
-					if (sType.getLocalizationKey() != null) {
-						cell.add(new Text(localize(sType.getLocalizationKey(), sType.getName())));
+				CourseCategory category = cType.getCourseCategory();
+				if (category != null) {
+					if (category.getLocalizationKey() != null) {
+						cell.add(new Text(localize(category.getLocalizationKey(), category.getName())));
 					}
 					else {
-						cell.add(new Text(sType.getName()));
+						cell.add(new Text(category.getName()));
 					}
 				}
 

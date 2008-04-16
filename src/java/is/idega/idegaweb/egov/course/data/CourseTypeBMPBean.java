@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.query.Column;
@@ -35,7 +34,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		addAttribute(COLUMN_ORDER, "Type order", Integer.class);
 		addAttribute(COLUMN_ACCOUNTING_KEY, "Accounting key", String.class, 30);
 
-		addManyToOneRelationship(COLUMN_SCHOOL_TYPE, SchoolType.class);
+		addManyToOneRelationship(COLUMN_SCHOOL_TYPE, CourseCategory.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
 	}
 
@@ -52,8 +51,8 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		return getStringColumnValue(COLUMN_LOCALIZATION_KEY);
 	}
 
-	public SchoolType getSchoolType() {
-		return (SchoolType) getColumnValue(COLUMN_SCHOOL_TYPE);
+	public CourseCategory getCourseCategory() {
+		return (CourseCategory) getColumnValue(COLUMN_SCHOOL_TYPE);
 	}
 
 	public String getAccountingKey() {
@@ -77,8 +76,8 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		setColumn(COLUMN_LOCALIZATION_KEY, localizationKey);
 	}
 
-	public void setSchoolType(SchoolType type) {
-		setColumn(COLUMN_SCHOOL_TYPE, type);
+	public void setCourseCategory(CourseCategory category) {
+		setColumn(COLUMN_SCHOOL_TYPE, category);
 	}
 
 	public void setAccountingKey(String key) {

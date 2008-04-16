@@ -14,6 +14,12 @@ import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
+import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificateType;
+import is.idega.idegaweb.egov.course.data.CourseCertificateTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
@@ -37,6 +43,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -89,10 +96,10 @@ import com.idega.util.text.SocialSecurityNumber;
 
 public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness, AccountingBusiness {
 
-	public static final String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.course";
+	private static final long serialVersionUID = 8639939641556682373L;
 
 	protected String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
+		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
 	public void reserveCourse(Course course) {
@@ -181,7 +188,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					School provider = course.getProvider();
 					SchoolArea area = provider.getSchoolArea();
 					CourseType courseType = course.getCourseType();
-					SchoolType schoolType = courseType.getSchoolType();
+					CourseCategory schoolType = courseType.getCourseCategory();
 					User student = choice.getUser();
 					CoursePrice price = course.getPrice();
 					String paymentType = application.getPaymentType();
@@ -468,13 +475,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		type.setAccountingKey(accountingKey);
 
 		if (schoolTypePK != null) {
-			try {
-				SchoolType schoolType = getSchoolBusiness().getSchoolType(schoolTypePK);
-				type.setSchoolType(schoolType);
-			}
-			catch (RemoteException e) {
-				e.printStackTrace();
-			}
+			CourseCategory courseCategory = getCourseCategory(schoolTypePK);
+			type.setCourseCategory(courseCategory);
 		}
 
 		type.store();
@@ -497,7 +499,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
-	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -557,6 +559,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 
 		course.store();
+		
+		return course;
+	}
+	
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
@@ -779,10 +787,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country) {
-		return getUserDWR(personalID, childPK, minimumAge, country, null);
+		return getUserDWRByRelation(personalID, childPK, minimumAge, country, null);
 	}
 
-	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country, String selectedRelation) {
+	public UserDWR getUserDWRByRelation(String personalID, int childPK, int minimumAge, String country, String selectedRelation) {
 		Locale locale = new Locale(country, country.toUpperCase());
 		if (!SocialSecurityNumber.isValidSocialSecurityNumber(personalID, locale)) {
 			return new UserDWR();
@@ -790,7 +798,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		try {
 			User user = getUserBusiness().getUser(personalID);
-			Age age = new Age(user.getDateOfBirth());
+			Date dateOfBirth = user.getDateOfBirth();
+			if (dateOfBirth == null) {
+				dateOfBirth = getUserBusiness().getUserDateOfBirthFromPersonalId(personalID);
+			}
+			if (dateOfBirth == null) {
+				return new UserDWR();
+			}
+			Age age = new Age(dateOfBirth);
 			if (age.getYears() < minimumAge) {
 				return new UserDWR();
 			}
@@ -1109,9 +1124,24 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			try {
 				return getCourseTypeHome().findByPrimaryKey(new Integer(pk.toString()));
 			}
-			catch (javax.ejb.FinderException fe) {
+			catch (FinderException fe) {
+				log(fe);
 			}
 		}
+
+		return null;
+	}
+
+	public CourseCategory getCourseCategory(Object pk) {
+		if (pk != null) {
+			try {
+				return getCourseCategoryHome().findByPrimaryKey(new Integer(pk.toString()));
+			}
+			catch (FinderException fe) {
+				log(fe);
+			}
+		}
+
 		return null;
 	}
 
@@ -1402,6 +1432,37 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return userPrices;
 	}
+	
+	public float getCalculatedCourseCertificateFees(Map applications) {
+		if (applications == null || applications.isEmpty()) {
+			return 0;
+		}
+		
+		float fees = 0;
+		User user = null;
+		CourseChoice choise = null;
+		Collection userChoises = null;
+		Iterator keysIt = applications.keySet().iterator();
+		CourseChoiceHome choiseHome = getCourseChoiceHome();
+		for (Iterator it = keysIt; it.hasNext();) {
+			user = (User) it.next();
+			
+			userChoises = null;
+			try {
+				userChoises = choiseHome.findAllByUser(user);
+			} catch (FinderException e) {}
+			
+			if (userChoises != null && !userChoises.isEmpty()) {
+				for (Iterator choises = userChoises.iterator(); choises.hasNext();) {
+					choise = (CourseChoice) choises.next();
+					
+					fees += choise.getCourseCertificateFee();
+				}
+			}
+		}
+		
+		return fees;
+	}
 
 	public Map getDiscounts(SortedSet userPrices, Map applications) {
 		Map discountPrices = new HashMap();
@@ -1562,13 +1623,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		sendMessageToParents(application, choice, subject, body);
 	}
 
-	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
 			application.setCreditCardMerchantID(merchantID);
 			application.setCreditCardMerchantType(merchantType);
 			application.setPaymentType(paymentType);
-			application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));
+			if (paymentType != null) {
+				application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));
+			}
 			if (application.isPaid()) {
 				application.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
 			}
@@ -1581,35 +1644,40 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			String subject = getLocalizedString("course_choice.registration_received", "Your registration for course has been received", locale);
 			String body = "";
-			if (paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD)) {
-				body = getLocalizedString("course_choice.card_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card", locale);
+			if (paymentType != null) {
+				if (paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD)) {
+					body = getLocalizedString("course_choice.card_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card", locale);
+				}
+				else if (paymentType.equals(CourseConstants.PAYMENT_TYPE_GIRO)) {
+					body = getLocalizedString("course_choice.giro_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received.  You will receive an invoice in a few days for the total amount of the registration.", locale);
+				}
 			}
-			else if (paymentType.equals(CourseConstants.PAYMENT_TYPE_GIRO)) {
-				body = getLocalizedString("course_choice.giro_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received.  You will receive an invoice in a few days for the total amount of the registration.", locale);
-			}
 
-			Iterator iter = applications.values().iterator();
-			while (iter.hasNext()) {
-				Collection collection = (Collection) iter.next();
-				Iterator iterator = collection.iterator();
-				while (iterator.hasNext()) {
-					ApplicationHolder holder = (ApplicationHolder) iterator.next();
-
-					CourseChoice choice = getCourseChoiceHome().create();
-					choice.setApplication(application);
-					choice.setCourse(holder.getCourse());
-					choice.setDayCare(holder.getDaycare());
-					if (holder.getPickedUp() != null) {
-						choice.setPickedUp(holder.getPickedUp().booleanValue());
+			Iterator iter = applications == null ? null: applications.values().iterator();
+			if (iter != null) {
+				for (Iterator it = iter; it.hasNext();) {
+					Collection collection = (Collection) it.next();
+					Iterator iterator = collection.iterator();
+					while (iterator.hasNext()) {
+						ApplicationHolder holder = (ApplicationHolder) iterator.next();
+	
+						CourseChoice choice = getCourseChoiceHome().create();
+						choice.setApplication(application);
+						choice.setCourse(holder.getCourse());
+						choice.setDayCare(holder.getDaycare());
+						if (holder.getPickedUp() != null) {
+							choice.setPickedUp(holder.getPickedUp().booleanValue());
+						}
+						choice.setUser(holder.getUser());
+						choice.setHasDyslexia(holder.hasDyslexia());
+						if (application.isPaid()) {
+							choice.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
+						}
+						choice.setCourseCertificateFee(certificateFee);
+						choice.store();
+	
+						sendMessageToParents(application, choice, subject, body);
 					}
-					choice.setUser(holder.getUser());
-					choice.setHasDyslexia(holder.hasDyslexia());
-					if (application.isPaid()) {
-						choice.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
-					}
-					choice.store();
-
-					sendMessageToParents(application, choice, subject, body);
 				}
 			}
 
@@ -1619,6 +1687,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
+		return saveApplication(applications, merchantID, amount, merchantType, paymentType, referenceNumber, payerName, payerPersonalID, performer, locale, 0);
 	}
 
 	private void sendMessageToParents(CourseApplication application, CourseChoice choice, String subject, String body) {
@@ -1723,6 +1795,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	public CourseCategoryHome getCourseCategoryHome() {
+		try {
+			return (CourseCategoryHome) IDOLookup.getHome(CourseCategory.class);
+		}
+		catch (IDOLookupException ile) {
+			throw new IDORuntimeException(ile);
+		}
+	}
+
 	public CourseTypeHome getCourseTypeHome() {
 		try {
 			return (CourseTypeHome) IDOLookup.getHome(CourseType.class);
@@ -1812,4 +1893,141 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			throw new IBORuntimeException(e);
 		}
 	}
+	
+	public CourseCertificateType getCourseCertificateType(String id) {
+		if (id == null) {
+			return null;
+		}
+		
+		try {
+			return (CourseCertificateType) getIDOHome(CourseCertificateType.class).findByPrimaryKeyIDO(id);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (FinderException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public CourseCertificateType getCourseCertificateTypeByType(String type) {
+		if (type == null) {
+			return null;
+		}
+		
+		try {
+			return (CourseCertificateType) ((CourseCertificateTypeHome) getIDOHome(CourseCertificateType.class)).findByType(Integer.valueOf(type));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public List getUserCertificates(User user) {
+		if (user == null) {
+			return null;
+		}
+		
+		Collection userCertificates = null;
+		try {
+			userCertificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUser(user);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return null;
+		} catch (FinderException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		if (userCertificates == null) {
+			return null;
+		}
+		return new ArrayList(userCertificates);
+	}
+	
+	public List getUserCertificatesByCourse(User user, Course course) {
+		if (user == null || course == null) {
+			return null;
+		}
+		
+		Collection certificates = null;
+		try {
+			certificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUserAndCourse(user, course);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (FinderException e) {
+			e.printStackTrace();
+		}
+		
+		if (certificates == null) {
+			return null;
+		}
+		return new ArrayList(certificates);
+	}
+
+	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates) {
+		if (certificates == null || certificates.isEmpty()) {
+			return null;
+		}
+		
+		CourseCertificate certificate = null;
+		IWTimestamp time = null;
+		for (int i = 0; i < certificates.size(); i++) {
+			certificate = (CourseCertificate) certificates.get(i);
+			
+			IWTimestamp certificateExpireDate = certificate.getValidThru();
+			if (certificateExpireDate != null) {
+				if (time == null) {
+					time = certificateExpireDate;
+				}
+				else {
+					time = time.isEarlierThan(certificateExpireDate) ? certificateExpireDate : time;
+				}
+			}
+		}
+		
+		return time;
+	}
+	
+	public IWTimestamp getLatestValidDateOfCertificate(List certificates) {
+		if (certificates == null || certificates.isEmpty()) {
+			return null;
+		}
+		
+		CourseCertificate certificate = null;
+		IWTimestamp time = null;
+		for (int i = 0; i < certificates.size(); i++) {
+			certificate = (CourseCertificate) certificates.get(i);
+			
+			IWTimestamp certificateValidDate = certificate.getValidFrom();
+			if (certificateValidDate != null) {
+				if (time == null) {
+					time = certificateValidDate;
+				}
+				else {
+					time = time.isEarlierThan(certificateValidDate) ? certificateValidDate : time;
+				}
+			}
+		}
+		
+		return time;
+	}
+
+	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value) {
+		if (courseChoiceId == null || columnName == null) {
+			return false;
+		}
+		
+		CourseChoice choice = getCourseChoice(courseChoiceId);
+		if (choice == null) {
+			return false;
+		}
+		
+		choice.setBooleanValueForColumn(value, columnName);
+		choice.store();
+		
+		return true;
+	}
+
 }

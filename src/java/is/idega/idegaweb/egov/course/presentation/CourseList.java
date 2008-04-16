@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseComparator;
 import is.idega.idegaweb.egov.course.business.CourseWriter;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
@@ -22,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -39,10 +39,11 @@ import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.util.IWTimestamp;
+import com.idega.util.PresentationUtil;
 
 public class CourseList extends CourseBlock {
 
-	private static final String PARAMETER_SORTING = "prm_sorting";
+	protected static final String PARAMETER_SORTING = "prm_sorting";
 
 	public void present(IWContext iwc) {
 		try {
@@ -78,18 +79,18 @@ public class CourseList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add("/dwr/engine.js");
+		scripts.add("/dwr/util.js");
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
-
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
-
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
+		PresentationUtil.addJavaScriptActionToBody(iwc, script2.toString());
+		PresentationUtil.addJavaScriptActionToBody(iwc, script.toString());
 
 		if (!isSchoolUser()) {
 			DropdownMenu providers = null;
@@ -294,7 +295,7 @@ public class CourseList extends CourseBlock {
 
 			Course course = (Course) iter.next();
 			CourseType type = course.getCourseType();
-			SchoolType schoolType = type.getSchoolType();
+			CourseCategory courseCategory = type.getCourseCategory();
 			CoursePrice price = course.getPrice();
 			IWTimestamp dateFrom = new IWTimestamp(course.getStartDate());
 			IWTimestamp dateTo = course.getEndDate() != null ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(price, dateFrom.getDate()));
@@ -307,7 +308,7 @@ public class CourseList extends CourseBlock {
 				link.setPage(getResponsePage());
 				link.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
 				link.addParameter(PARAMETER_COURSE_TYPE_PK, type.getPrimaryKey().toString());
-				link.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolType.getPrimaryKey().toString());
+				link.addParameter(PARAMETER_SCHOOL_TYPE_PK, courseCategory.getPrimaryKey().toString());
 				cell.add(link);
 			}
 			else {
@@ -353,7 +354,7 @@ public class CourseList extends CourseBlock {
 			cell = row.createCell();
 			cell.setStyleClass("lastColumn");
 			cell.setStyleClass("employee");
-			cell.add(new Text("-"));
+			cell.add(new Text(course.getUser() != null && course.getUser().length() > 0 ? course.getUser() : "-"));
 
 			if (iRow % 2 == 0) {
 				row.setStyleClass("evenRow");

@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.course.presentation;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
@@ -10,6 +11,7 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ejb.FinderException;
 
@@ -39,7 +41,9 @@ import com.idega.presentation.ui.IntegerInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.PresentationUtil;
 
 public class CourseEditor extends CourseBlock {
 
@@ -141,9 +145,11 @@ public class CourseEditor extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scriptFiles = new ArrayList();
+		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
+		scriptFiles.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scriptFiles.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scriptFiles);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
@@ -151,8 +157,10 @@ public class CourseEditor extends CourseBlock {
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
+		List jsActions = new ArrayList();
+		jsActions.add(script2.toString());
+		jsActions.add(script.toString());
+		PresentationUtil.addJavaScriptActionsToBody(iwc, jsActions);
 
 		if (!isSchoolUser()) {
 			DropdownMenu providers = null;
@@ -256,7 +264,7 @@ public class CourseEditor extends CourseBlock {
 			}
 		}
 
-		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
+		boolean useFixedPrices = true; //iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
@@ -330,7 +338,7 @@ public class CourseEditor extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("category");
-				SchoolType sType = cType.getSchoolType();
+				CourseCategory sType = cType.getCourseCategory();
 				if (sType != null) {
 					if (sType.getLocalizationKey() != null) {
 						cell.add(new Text(localize(sType.getLocalizationKey(), sType.getName())));
@@ -368,7 +376,7 @@ public class CourseEditor extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("endDate");
-				if (useFixedPrices && course.getEndDate() != null) {
+				if (course.getEndDate() != null) {
 					cell.add(new Text(new IWTimestamp(course.getEndDate()).getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
 				}
 				else {
@@ -425,7 +433,7 @@ public class CourseEditor extends CourseBlock {
 	}
 
 	public void showEditor(IWContext iwc, Object coursePK) throws java.rmi.RemoteException {
-		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
+		boolean useFixedPrices = true; //iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 
 		if (!useFixedPrices) {
 			super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
@@ -461,7 +469,7 @@ public class CourseEditor extends CourseBlock {
 		Form form = new Form();
 		form.setID("courseEditor");
 		form.setStyleClass("adminForm");
-		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_VIEW)));
+		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(coursePK != null ? ACTION_EDIT : ACTION_NEW)));
 
 		Course course = getCourseBusiness(iwc).getCourse(coursePK);
 
@@ -490,7 +498,9 @@ public class CourseEditor extends CourseBlock {
 
 		DropdownMenu schoolTypeID = new DropdownMenu(PARAMETER_SCHOOL_TYPE_PK);
 		schoolTypeID.setId(PARAMETER_SCHOOL_TYPE_PK);
-		schoolTypeID.setOnChange("changeValues();");
+		//schoolTypeID.setOnChange("changeValues();");
+		schoolTypeID.setToSubmit(true);
+		schoolTypeID.keepStatusOnAction(true);
 		schoolTypeID.addMenuElementFirst("-1", getResourceBundle().getLocalizedString("select_school_type", "Select school type"));
 
 		DropdownMenu courseTypeID = new DropdownMenu(PARAMETER_COURSE_TYPE_PK);
@@ -507,6 +517,9 @@ public class CourseEditor extends CourseBlock {
 
 		if (course != null) {
 			CourseType type = course.getCourseType();
+			CourseCategory category = type.getCourseCategory();
+			useFixedPrices = category.useFixedPricing();
+
 			School provider = course.getProvider();
 			CoursePrice coursePrice = course.getPrice();
 
@@ -518,7 +531,7 @@ public class CourseEditor extends CourseBlock {
 			if (course.getEndDate() != null) {
 				inputTo.setDate(course.getEndDate());
 			}
-			String stID = type.getSchoolType().getPrimaryKey().toString();
+			String stID = type.getCourseCategory().getPrimaryKey().toString();
 			schoolTypeID.setSelectedElement(stID);
 			inputAccounting.setValue(course.getAccountingKey());
 			inputYearFrom.setValue(course.getBirthyearFrom());
@@ -546,6 +559,10 @@ public class CourseEditor extends CourseBlock {
 					e.printStackTrace();
 				}
 			}
+			else if (course.getCoursePrice() > 0) {
+				price.setContent(String.valueOf((int) course.getCoursePrice()));
+				price.setDisabled(false);
+			}
 
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
 		}
@@ -557,6 +574,16 @@ public class CourseEditor extends CourseBlock {
 
 			priceDrop.addMenuElement("-1", localize("select_a_date_and_search", "Select a date and search"));
 			priceDrop.setDisabled(true);
+		}
+
+		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
+			CourseCategory category = getCourseBusiness(iwc).getCourseCategory(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK));
+			useFixedPrices = category.useFixedPricing();
+			price.setDisabled(!useFixedPrices);
+
+			cargoTypes = getCourseBusiness(iwc).getCourseTypes(new Integer(category.getPrimaryKey().toString()));
+			courseTypeID.removeElements();
+			courseTypeID.addMenuElements(cargoTypes);
 		}
 
 		Heading1 heading = new Heading1(localize("information", "Information"));
@@ -626,7 +653,12 @@ public class CourseEditor extends CourseBlock {
 
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(localize("course.length_search_explanation", "Select a start date and click \"Search for length\" to populate" + " the length dropdown. If nothing is found you will be prompted to search again. If a length is found you can select one and" + " proceed with the form.")));
+		if (useFixedPrices) {
+			helpLayer.add(new Text(localize("course.length_and_max", "Select a start date and end date as well as maximum number of participants in the course.")));
+		}
+		else {
+			helpLayer.add(new Text(localize("course.length_search_explanation", "Select a start date and click \"Search for length\" to populate" + " the length dropdown. If nothing is found you will be prompted to search again. If a length is found you can select one and" + " proceed with the form.")));
+		}
 		section.add(helpLayer);
 
 		layer = new Layer(Layer.DIV);
@@ -667,23 +699,23 @@ public class CourseEditor extends CourseBlock {
 			layer.add(label);
 			layer.add(priceDrop);
 			section.add(layer);
-
-			layer = new Layer(Layer.DIV);
-			layer.setID("year_from");
-			layer.setStyleClass("formItem");
-			label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
-			layer.add(label);
-			layer.add(inputYearFrom);
-			section.add(layer);
-
-			layer = new Layer(Layer.DIV);
-			layer.setID("year_to");
-			layer.setStyleClass("formItem");
-			label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
-			layer.add(label);
-			layer.add(inputYearTo);
-			section.add(layer);
 		}
+
+		layer = new Layer(Layer.DIV);
+		layer.setID("year_from");
+		layer.setStyleClass("formItem");
+		label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
+		layer.add(label);
+		layer.add(inputYearFrom);
+		section.add(layer);
+
+		layer = new Layer(Layer.DIV);
+		layer.setID("year_to");
+		layer.setStyleClass("formItem");
+		label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
+		layer.add(label);
+		layer.add(inputYearTo);
+		section.add(layer);
 
 		layer = new Layer(Layer.DIV);
 		layer.setID("max");

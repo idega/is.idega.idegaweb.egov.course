@@ -207,9 +207,10 @@ public class CourseApplicationOverview extends CourseBlock {
 		Map applications = getBusiness().getApplicationMap(application);
 		SortedSet prices = getBusiness().calculatePrices(applications);
 		Map discounts = getBusiness().getDiscounts(prices, applications);
+		float certificateFees = getBusiness().getCalculatedCourseCertificateFees(applications);
 
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
-		float totalPrice = 0;
+		float totalPrice = certificateFees;
 		float discount = 0;
 
 		Iterator iterator = prices.iterator();
@@ -261,6 +262,10 @@ public class CourseApplicationOverview extends CourseBlock {
 			cell = row.createHeaderCell();
 			cell.setStyleClass("days");
 			cell.add(new Text(getResourceBundle().getLocalizedString("days", "Days")));
+			
+			cell = row.createHeaderCell();
+			cell.setStyleClass("certificateFee");
+			cell.add(new Text(getResourceBundle().getLocalizedString("certificate_fee", "Certificate fee")));
 
 			cell = row.createHeaderCell();
 			cell.setStyleClass("amount");
@@ -316,6 +321,10 @@ public class CourseApplicationOverview extends CourseBlock {
 				}
 
 				cell = row.createCell();
+				cell.setStyleClass("certificateFee");
+				cell.add(new Text(format.format(certificateFees)));
+				
+				cell = row.createCell();
 				cell.setStyleClass("amount");
 				cell.add(new Text(format.format(appHolder.getPrice())));
 
@@ -331,7 +340,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			row = group.createRow();
 
 			cell = row.createCell();
-			cell.setColumnSpan(5);
+			cell.setColumnSpan(6);
 			cell.setStyleClass("totalPrice");
 			cell.add(new Text(getResourceBundle().getLocalizedString("total_amount", "Total amount")));
 
@@ -470,8 +479,9 @@ public class CourseApplicationOverview extends CourseBlock {
 		Map applications = getBusiness().getApplicationMap(application);
 		SortedSet prices = getBusiness().calculatePrices(applications);
 		Map discounts = getBusiness().getDiscounts(prices, applications);
-
-		float totalPrice = 0;
+		float certificateFees = getBusiness().getCalculatedCourseCertificateFees(applications);
+		
+		float totalPrice = certificateFees;
 		float discount = 0;
 		Iterator iterator = prices.iterator();
 		while (iterator.hasNext()) {

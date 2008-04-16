@@ -5,6 +5,9 @@ import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificateType;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
@@ -19,6 +22,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
@@ -160,9 +164,9 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country) throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserDWR
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserDWRByRelation
 	 */
-	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge, String country, String selectedRelation) throws RemoteException;
+	public UserDWR getUserDWRByRelation(String personalID, int childPK, int minimumAge, String country, String selectedRelation) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCoursesDWR
@@ -248,6 +252,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseType
 	 */
 	public CourseType getCourseType(Object pk) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCategory
+	 */
+	public CourseCategory getCourseCategory(Object pk) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseApplication
@@ -410,6 +419,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public CourseDiscountHome getCourseDiscountHome() throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCategoryHome
+	 */
+	public CourseCategoryHome getCourseCategoryHome() throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseTypeHome
 	 */
 	public CourseTypeHome getCourseTypeHome() throws RemoteException;
@@ -428,4 +442,24 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseApplicationHome
 	 */
 	public CourseApplicationHome getCourseApplicationHome() throws RemoteException;
+	
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException;
+	
+	public CourseCertificateType getCourseCertificateType(String id);
+	
+	public CourseCertificateType getCourseCertificateTypeByType(String type);
+	
+	public List getUserCertificates(User user);
+	
+	public List getUserCertificatesByCourse(User user, Course course);
+	
+	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates);
+	
+	public IWTimestamp getLatestValidDateOfCertificate(List certificates);
+	
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee);
+
+	public float getCalculatedCourseCertificateFees(Map applications);
+	
+	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value);
 }

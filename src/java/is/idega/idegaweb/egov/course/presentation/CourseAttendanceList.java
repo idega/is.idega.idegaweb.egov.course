@@ -9,7 +9,10 @@ package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseAttendanceWriter;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -204,6 +207,17 @@ public class CourseAttendanceList extends CourseBlock {
 	}
 
 	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
+		boolean hasCare = true;
+		Collection choices = new ArrayList();
+		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_COURSE_PK)) {
+			Course course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
+			CourseType type = course.getCourseType();
+			CourseCategory category = type.getCourseCategory();
+			hasCare = category.hasCare();
+
+			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK));
+		}
+
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -219,34 +233,33 @@ public class CourseAttendanceList extends CourseBlock {
 		cell.add(Text.getNonBrakingSpace());
 
 		cell = row.createHeaderCell();
-		cell.setStyleClass("firstColumn");
 		cell.setStyleClass("name");
 		cell.add(new Text(getResourceBundle().getLocalizedString("name", "Name")));
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("personalID");
+		if (!hasCare) {
+			cell.setStyleClass("lastColumn");
+		}
 		cell.add(new Text(getResourceBundle().getLocalizedString("personal_id", "Personal ID")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("preCare");
-		cell.add(new Text(getResourceBundle().getLocalizedString("pre_care", "Pre care")));
+		if (hasCare) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("preCare");
+			cell.add(new Text(getResourceBundle().getLocalizedString("pre_care", "Pre care")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("postCare");
-		cell.add(new Text(getResourceBundle().getLocalizedString("post_care", "Post care")));
+			cell = row.createHeaderCell();
+			cell.setStyleClass("postCare");
+			cell.add(new Text(getResourceBundle().getLocalizedString("post_care", "Post care")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("lastColumn");
-		cell.setStyleClass("pickedUp");
-		cell.add(new Text(getResourceBundle().getLocalizedString("picked_up", "Picked up")));
+			cell = row.createHeaderCell();
+			cell.setStyleClass("lastColumn");
+			cell.setStyleClass("pickedUp");
+			cell.add(new Text(getResourceBundle().getLocalizedString("picked_up", "Picked up")));
+		}
 
 		group = table.createBodyRowGroup();
 		int iRow = 1;
-
-		Collection choices = new ArrayList();
-		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_COURSE_PK)) {
-			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK));
-		}
 
 		Iterator iter = choices.iterator();
 		while (iter.hasNext()) {
@@ -279,20 +292,25 @@ public class CourseAttendanceList extends CourseBlock {
 
 			cell = row.createCell();
 			cell.setStyleClass("personalID");
+			if (!hasCare) {
+				cell.setStyleClass("lastColumn");
+			}
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
-			cell = row.createCell();
-			cell.setStyleClass("preCare");
-			cell.add(new Text(getBooleanValue(iwc, preCare)));
+			if (hasCare) {
+				cell = row.createCell();
+				cell.setStyleClass("preCare");
+				cell.add(new Text(getBooleanValue(iwc, preCare)));
 
-			cell = row.createCell();
-			cell.setStyleClass("postCare");
-			cell.add(new Text(getBooleanValue(iwc, postCare)));
+				cell = row.createCell();
+				cell.setStyleClass("postCare");
+				cell.add(new Text(getBooleanValue(iwc, postCare)));
 
-			cell = row.createCell();
-			cell.setStyleClass("lastColumn");
-			cell.setStyleClass("pickedUp");
-			cell.add(new Text(getBooleanValue(iwc, choice.isPickedUp())));
+				cell = row.createCell();
+				cell.setStyleClass("lastColumn");
+				cell.setStyleClass("pickedUp");
+				cell.add(new Text(getBooleanValue(iwc, choice.isPickedUp())));
+			}
 
 			if (iRow % 2 == 0) {
 				row.setStyleClass("evenRow");
@@ -308,7 +326,7 @@ public class CourseAttendanceList extends CourseBlock {
 
 		cell = row.createCell();
 		cell.setStyleClass("numberOfParticipants");
-		cell.setColumnSpan(6);
+		cell.setColumnSpan(hasCare ? 6 : 3);
 		cell.add(new Text(getResourceBundle().getLocalizedString("number_of_participants", "Number of participants") + ": " + (iRow - 1)));
 
 		return table;

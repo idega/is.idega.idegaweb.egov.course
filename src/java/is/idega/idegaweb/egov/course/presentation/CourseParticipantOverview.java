@@ -13,13 +13,18 @@ import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.ejb.FinderException;
+import javax.faces.component.UIComponent;
 
 import com.idega.block.school.data.School;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -43,12 +48,63 @@ import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
 
 public class CourseParticipantOverview extends CourseBlock {
-
+	
 	private ICPage iChoicePage;
+	private UIComponent linkToPrintOut = null;
+
+	protected List parametersToMaintainBackButton = null;
+
+	private User getParticipant(IWContext iwc) {
+		User participant = null;
+		try {
+			participant = getUserSession(iwc).getUser();
+		}
+		catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		if (participant != null) {
+			return participant;
+		}
+
+		String paticipantId = iwc.getParameter(PARAMETER_COURSE_PARTICIPANT_PK);
+		if (paticipantId == null) {
+			return null;
+		}
+		int id = -1;
+		try {
+			id = Integer.valueOf(paticipantId).intValue();
+		}
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		try {
+			return getUserBusiness().getUser(id);
+		}
+		catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	protected Collection getSchoolsProviders(IWContext iwc) {
+		if (iwc.isParameterSet(PARAMETER_PROVIDER_PK)) {
+			return Arrays.asList(new String[] { iwc.getParameter(PARAMETER_PROVIDER_PK) });
+		}
+		else {
+			try {
+				return getSession().getSchoolsForUser();
+			}
+			catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 
 	public void present(IWContext iwc) {
 		try {
-			User participant = getUserSession(iwc).getUser();
+			User participant = getParticipant(iwc);
 
 			if (participant != null) {
 				getViewerForm(iwc, participant);
@@ -62,19 +118,23 @@ public class CourseParticipantOverview extends CourseBlock {
 		}
 	}
 
-	private void getViewerForm(IWContext iwc, User participant) throws RemoteException {
+	protected void getViewerForm(IWContext iwc, User participant) throws RemoteException {
 		Form form = new Form();
 		form.maintainParameter(getBusiness().getSelectedCaseParameter());
 
-		form.add(getHeader(getResourceBundle().getLocalizedString("application.course_application_overview", "Course application overview")));
+		form.add(getHeader(getResourceBundle().getLocalizedString("application.course_participant_overview", "Course participant overview")));
 
 		form.add(getPersonInfo(iwc, participant, true));
+
+		if (linkToPrintOut != null) {
+			form.add(linkToPrintOut);
+		}
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 
 		int count = 1;
-		Collection providers = getSession().getSchoolsForUser();
+		Collection providers = getSchoolsProviders(iwc);
 		Map applications = getBusiness().getApplicationMap(participant, providers);
 		Iterator iterator = applications.keySet().iterator();
 		while (iterator.hasNext()) {
@@ -114,7 +174,6 @@ public class CourseParticipantOverview extends CourseBlock {
 					payer = getUserBusiness().getUser(application.getPayerPersonalID());
 				}
 				catch (FinderException e) {
-					e.printStackTrace();
 					payer = application.getOwner();
 				}
 				catch (RemoteException re) {
@@ -124,27 +183,29 @@ public class CourseParticipantOverview extends CourseBlock {
 			else {
 				payer = application.getOwner();
 			}
-			Name payerName = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName());
+			if (payer != null) {
+				Name payerName = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName());
 
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			label = new Label();
-			label.add(new Text(getResourceBundle().getLocalizedString("application.payer_name", "Payer name")));
-			span = new Layer(Layer.SPAN);
-			span.add(new Text(payerName.getName(iwc.getCurrentLocale())));
-			formItem.add(label);
-			formItem.add(span);
-			section.add(formItem);
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				label = new Label();
+				label.add(new Text(getResourceBundle().getLocalizedString("application.payer_name", "Payer name")));
+				span = new Layer(Layer.SPAN);
+				span.add(new Text(payerName.getName(iwc.getCurrentLocale())));
+				formItem.add(label);
+				formItem.add(span);
+				section.add(formItem);
 
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			label = new Label();
-			label.add(new Text(getResourceBundle().getLocalizedString("application.payer_personal_id", "Payer personal ID")));
-			span = new Layer(Layer.SPAN);
-			span.add(new Text(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale())));
-			formItem.add(label);
-			formItem.add(span);
-			section.add(formItem);
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				label = new Label();
+				label.add(new Text(getResourceBundle().getLocalizedString("application.payer_personal_id", "Payer personal ID")));
+				span = new Layer(Layer.SPAN);
+				span.add(new Text(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale())));
+				formItem.add(label);
+				formItem.add(span);
+				section.add(formItem);
+			}
 
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -200,17 +261,24 @@ public class CourseParticipantOverview extends CourseBlock {
 			group = table.createBodyRowGroup();
 
 			int counter = 0;
+			boolean finishedCourse = false;
+			CourseChoice choice = null;
 			Iterator iter = choices.iterator();
 			while (iter.hasNext()) {
 				row = group.createRow();
-				CourseChoice choice = (CourseChoice) iter.next();
+				choice = (CourseChoice) iter.next();
 
 				Course course = choice.getCourse();
 				School provider = course.getProvider();
 				CourseType type = course.getCourseType();
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
-				IWTimestamp endDate = new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
+				IWTimestamp endDate = new IWTimestamp(coursePrice != null ? getBusiness().getEndDate(coursePrice, startDate.getDate()) : new IWTimestamp(course.getEndDate()).getDate());
+				IWTimestamp today = new IWTimestamp(new Date());
+				if(endDate.isEarlierThan(today)) {
+					finishedCourse = true;
+				}
+				int numberOfDays = coursePrice != null ? coursePrice.getNumberOfDays() : IWTimestamp.getDaysBetween(startDate, endDate);
 
 				cell = row.createCell();
 				cell.setStyleClass("course");
@@ -239,7 +307,7 @@ public class CourseParticipantOverview extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("days");
-				cell.add(new Text(String.valueOf(coursePrice.getNumberOfDays())));
+				cell.add(new Text(String.valueOf(numberOfDays)));
 
 				if (counter++ % 2 == 0) {
 					row.setStyleClass("even");
@@ -248,8 +316,21 @@ public class CourseParticipantOverview extends CourseBlock {
 					row.setStyleClass("odd");
 				}
 			}
-
+			
 			section.add(table);
+			
+			if(finishedCourse) {
+				Layer bottom = new Layer(Layer.DIV);
+				bottom.setStyleClass("bottom miniBottom");
+				
+				Link printCertificate = getButtonLink(getResourceBundle().getLocalizedString("print_certificate", "Print certificate"));
+				printCertificate.setStyleClass("buttonHome");
+				printCertificate.addParameter(PARAMETER_ACTION, ACTION_PRINT);
+				printCertificate.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+				bottom.add(printCertificate);
+				
+				section.add(bottom);
+			}
 		}
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -258,12 +339,27 @@ public class CourseParticipantOverview extends CourseBlock {
 
 		Link home = getButtonLink(getResourceBundle().getLocalizedString("back", "Back"));
 		home.setStyleClass("buttonHome");
+		if (parametersToMaintainBackButton != null) {
+			AdvancedProperty parameter = null;
+			for (int i = 0; i < parametersToMaintainBackButton.size(); i++) {
+				parameter = (AdvancedProperty) parametersToMaintainBackButton.get(i);
+				home.addParameter(parameter.getId(), parameter.getValue());
+			}
+		}
 		if (getResponsePage() != null) {
 			home.setPage(getResponsePage());
 		}
 		bottom.add(home);
 
 		add(form);
+	}
+
+	public void setLinkToPrintOut(UIComponent linkToPrintOut) {
+		this.linkToPrintOut = linkToPrintOut;
+	}
+
+	public void setParametersToMaintainBackButton(List parametersToMaintainBackButton) {
+		this.parametersToMaintainBackButton = parametersToMaintainBackButton;
 	}
 
 	private UserSession getUserSession(IWUserContext iwuc) {
