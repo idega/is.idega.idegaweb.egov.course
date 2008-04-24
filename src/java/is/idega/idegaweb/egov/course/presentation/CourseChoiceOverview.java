@@ -48,8 +48,6 @@ import com.idega.util.text.TextSoap;
 
 public class CourseChoiceOverview extends CourseBlock {
 
-	private static final String PARAMETER_ACTION = "prm_action";
-
 	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
 	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
 	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";

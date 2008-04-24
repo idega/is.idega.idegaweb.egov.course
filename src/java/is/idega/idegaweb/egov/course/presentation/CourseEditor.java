@@ -47,7 +47,6 @@ import com.idega.util.PresentationUtil;
 
 public class CourseEditor extends CourseBlock {
 
-	private static final String PARAMETER_ACTION = "prm_action";
 	private static final String PARAMETER_COURSE_PRICE_PK = "prm_course_price";
 	private static final String PARAMETER_NAME = "prm_name";
 	private static final String PARAMETER_VALID_FROM = "prm_valid_from";

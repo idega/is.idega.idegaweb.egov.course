@@ -37,8 +37,6 @@ import com.idega.util.IWTimestamp;
 
 public class CourseDiscountEditor extends CourseBlock {
 
-	private static final String PARAMETER_ACTION = "prm_action";
-
 	private static final String PARAMETER_COURSE_DISCOUNT_ID = "prm_course_discount";
 	private static final String PARAMETER_NAME = "prm_name";
 	private static final String PARAMETER_TYPE = "prm_type";

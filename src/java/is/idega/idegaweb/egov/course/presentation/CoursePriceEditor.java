@@ -40,7 +40,6 @@ import com.idega.util.IWTimestamp;
 
 public class CoursePriceEditor extends CourseBlock {
 
-	private static final String PARAMETER_ACTION = "CPE_ac";
 	private static final String PARAMETER_COURSE_PRICE_ID = "CPE_cp";
 	private static final String PARAMETER_NAME = "CPE_n";
 	private static final String PARAMETER_DAYS = "CPE_d";
