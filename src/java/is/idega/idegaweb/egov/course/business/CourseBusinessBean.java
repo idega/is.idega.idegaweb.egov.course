@@ -559,10 +559,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 
 		course.store();
-		
+
 		return course;
 	}
-	
+
 	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
 		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 	}
@@ -1893,34 +1893,37 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			throw new IBORuntimeException(e);
 		}
 	}
-	
+
 	public CourseCertificateType getCourseCertificateType(String id) {
 		if (id == null) {
 			return null;
 		}
-		
+
 		try {
 			return (CourseCertificateType) getIDOHome(CourseCertificateType.class).findByPrimaryKeyIDO(id);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (FinderException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
-	
+
 	public CourseCertificateType getCourseCertificateTypeByType(String type) {
 		if (type == null) {
 			return null;
 		}
-		
+
 		try {
-			return (CourseCertificateType) ((CourseCertificateTypeHome) getIDOHome(CourseCertificateType.class)).findByType(Integer.valueOf(type));
-		} catch (Exception e) {
+			return ((CourseCertificateTypeHome) getIDOHome(CourseCertificateType.class)).findByType(Integer.valueOf(type));
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 	
