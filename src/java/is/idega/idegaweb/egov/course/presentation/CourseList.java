@@ -231,6 +231,10 @@ public class CourseList extends CourseBlock {
 
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
+		cell.setStyleClass("number");
+		cell.add(new Text(getResourceBundle().getLocalizedString("number_abbreviated", "No.")));
+
+		cell = row.createHeaderCell();
 		cell.setStyleClass("course");
 		cell.add(new Text(getResourceBundle().getLocalizedString("course", "Course")));
 
@@ -320,6 +324,10 @@ public class CourseList extends CourseBlock {
 
 			cell = row.createCell();
 			cell.setStyleClass("firstColumn");
+			cell.setStyleClass("number");
+			cell.add(new Text(course.getPrimaryKey().toString()));
+
+			cell = row.createCell();
 			cell.setStyleClass("course");
 			if (getResponsePage() != null) {
 				Link link = new Link(new Text(course.getName()));

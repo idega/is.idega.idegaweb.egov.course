@@ -241,6 +241,7 @@ no_answer=Won't answer
 no_user_found_with_personal_id=No user found with personal ID
 none=None
 not_valid_personal_id=Not a valid personal ID
+number_abbreviated=No.
 number_of_days=Number of days
 number_of_participants=Number of participants
 participant=Participant
