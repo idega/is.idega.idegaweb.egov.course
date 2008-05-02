@@ -4,6 +4,14 @@
     <author email="gimmi@idega.com">Grimur</author>
   </properties>
   <body>
+  	<release version="1.0.15" date="2008-05-02">
+      <action dev="laddi" type="update">
+      	Added possibility to send course PK into the application and that course will then be preselected.
+      	Changed so that only course types that have courses available (to the participant) are shown in the application dropdown.
+      	Added restriction so that it is only possible to select three courses per participant for each registration.
+      </action>
+    </release>
+    
   	<release version="1.0.14" date="2008-04-14">
       <action dev="alexis" type="update">
       	Added column to CourseCertificate bean - Certificate file (ICFile)

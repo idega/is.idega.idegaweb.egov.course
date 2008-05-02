@@ -75,6 +75,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		return theReturn;
 	}
 
+	public int getCountByCourseTypeAndBirthYear(Object courseTypePK, int birthYear, Date fromDate) throws IDOException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		int theReturn = ((CourseBMPBean) entity).ejbHomeGetCountByCourseTypeAndBirthYear(courseTypePK, birthYear, fromDate);
+		this.idoCheckInPooledEntity(entity);
+		return theReturn;
+	}
+
 	public int getCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		int theReturn = ((CourseBMPBean) entity).ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(provider, type, courseType, fromDate, toDate);

@@ -28,6 +28,7 @@ public class CourseConstants {
 	public static final String PROPERTY_INVALIDATE_INTERVAL = "egov.course.invalidate.interval";
 	public static final String PROPERTY_USE_DWR = "egov.course.use.dwr";
 	public static final String PROPERTY_USE_FIXED_PRICES = "egov.course.use.fixed.prices";
+	public static final String PROPERTY_USE_BIRTHYEARS = "egov.course.use.birthyears";
 
 	public static final String APPLICATION_PROPERTY_COURSE_MAP = "egov.course.map";
 
@@ -44,6 +45,7 @@ public class CourseConstants {
 	public static final String DISCOUNT_QUANTITY = "quantity";
 
 	public static final String COURSE_PREFIX = "course_";
-	
+
 	public static final String DEFAULT_COURSE_CERTIFICATE_FEE = "defaultCourseCertificateFee";
+
 }

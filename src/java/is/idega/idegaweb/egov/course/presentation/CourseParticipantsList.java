@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolType;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
@@ -48,7 +49,9 @@ import com.idega.util.text.Name;
 public class CourseParticipantsList extends CourseBlock {
 
 	protected String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
-	
+
+	private SchoolType type = null;
+
 	public void present(IWContext iwc) {
 		try {
 			Form form = new Form();
@@ -133,6 +136,10 @@ public class CourseParticipantsList extends CourseBlock {
 
 		if (getSession().getProvider() != null) {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			if (schoolTypes.size() == 1) {
+				type = (SchoolType) schoolTypes.iterator().next();
+				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+			}
 			schoolType.addMenuElements(schoolTypes);
 		}
 
@@ -144,6 +151,10 @@ public class CourseParticipantsList extends CourseBlock {
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
 			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)));
+			courseType.addMenuElements(courseTypes);
+		}
+		else if (type != null) {
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()));
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -214,34 +225,27 @@ public class CourseParticipantsList extends CourseBlock {
 
 		return link;
 	}
-	
+
 	private List getCheckboxesInfo() {
 		List info = new ArrayList();
-		
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_from_goverment_office", "Verfication from government office"),
-				CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("certificate_of_property", "Certificate of property"),
-				CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("criminal_record", "Criminal record"),
-				CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_of_payment", "Verification of payment"),
-				CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("need_verification_from_goverment_office", "Needs verification from goverment office"),
-				CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("did_not_show_up", "Did not show up"),
-				CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("passed_course", "Has passed course"),
-				CourseChoiceBMPBean.COLUMN_PASSED));
-		
+
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_from_goverment_office", "Verfication from government office"), CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("certificate_of_property", "Certificate of property"), CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("criminal_record", "Criminal record"), CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_of_payment", "Verification of payment"), CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("need_verification_from_goverment_office", "Needs verification from goverment office"), CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
+		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
+
 		return info;
 	}
-	
+
 	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink, boolean addCheckboxes) throws RemoteException {
 		if (addCheckboxes) {
 			StringBuffer action = new StringBuffer("function manageCourseChoiceSettings(parameters) {showLoadingMessage(parameters[0]); var box = document.getElementById(parameters[1]); CourseDWRUtil.manageCourseChoiceSettings(parameters[2], box.name, box.checked, {callback: function(result) {closeAllLoadingMessages();}});}");
 			PresentationUtil.addJavaScriptActionToBody(iwc, action.toString());
 		}
-		
+
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -278,7 +282,7 @@ public class CourseParticipantsList extends CourseBlock {
 		}
 		cell.setStyleClass("homePhone");
 		cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
-		
+
 		if (addViewParticipantLink) {
 			cell = row.createHeaderCell();
 			if (!addCheckboxes) {
@@ -293,7 +297,7 @@ public class CourseParticipantsList extends CourseBlock {
 			AdvancedProperty info = null;
 			for (int i = 0; i < checkboxesInfo.size(); i++) {
 				info = (AdvancedProperty) checkboxesInfo.get(i);
-				
+
 				cell = row.createHeaderCell();
 				if (i + 1 == checkboxesInfo.size()) {
 					cell.setStyleClass("lastColumn");
@@ -399,7 +403,7 @@ public class CourseParticipantsList extends CourseBlock {
 			else {
 				cell.add(new Text("-"));
 			}
-			
+
 			if (addViewParticipantLink) {
 				cell = row.createCell();
 				Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
@@ -419,12 +423,12 @@ public class CourseParticipantsList extends CourseBlock {
 				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
 				cell.add(view);
 			}
-			
+
 			if (addCheckboxes) {
 				AdvancedProperty info = null;
 				for (int i = 0; i < checkboxesInfo.size(); i++) {
 					info = (AdvancedProperty) checkboxesInfo.get(i);
-				
+
 					cell = row.createCell();
 					if (i + 1 == checkboxesInfo.size()) {
 						cell.setStyleClass("lastColumn");
@@ -453,7 +457,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		return table;
 	}
-	
+
 	private CheckBox getCourseChoiseManagementCheckbox(AdvancedProperty info, CourseChoice choise, String message) {
 		CheckBox box = new CheckBox(info.getValue());
 		box.setChecked(choise.getBooleanValueFromColumn(info.getValue()));
@@ -462,7 +466,7 @@ public class CourseParticipantsList extends CourseBlock {
 		box.setOnClick(action.toString());
 		return box;
 	}
-	
+
 	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink) throws RemoteException {
 		return getParticipants(iwc, addViewParticipantLink, false);
 	}

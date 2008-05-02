@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -44,6 +45,8 @@ import com.idega.util.PresentationUtil;
 public class CourseList extends CourseBlock {
 
 	protected static final String PARAMETER_SORTING = "prm_sorting";
+
+	private SchoolType type = null;
 
 	public void present(IWContext iwc) {
 		try {
@@ -121,10 +124,18 @@ public class CourseList extends CourseBlock {
 
 		if (getSession().getProvider() != null) {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			if (schoolTypes.size() == 1) {
+				type = (SchoolType) schoolTypes.iterator().next();
+				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+			}
 			schoolType.addMenuElements(schoolTypes);
 		}
 		else {
 			Collection schoolTypes = getBusiness().getAllSchoolTypes();
+			if (schoolTypes.size() == 1) {
+				type = (SchoolType) schoolTypes.iterator().next();
+				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+			}
 			schoolType.addMenuElements(schoolTypes);
 		}
 
@@ -135,6 +146,10 @@ public class CourseList extends CourseBlock {
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
 			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)));
+			courseType.addMenuElements(courseTypes);
+		}
+		else if (type != null) {
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()));
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -268,6 +283,9 @@ public class CourseList extends CourseBlock {
 			if (schoolTypePK.intValue() < 0) {
 				schoolTypePK = null;
 			}
+		}
+		else if (type != null) {
+			schoolTypePK = new Integer(type.getPrimaryKey().toString());
 		}
 
 		Integer courseTypePK = null;

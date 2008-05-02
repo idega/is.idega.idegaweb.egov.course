@@ -66,6 +66,8 @@ public class CourseEditor extends CourseBlock {
 	private static final int ACTION_SAVE = 4;
 	private static final int ACTION_DELETE = 5;
 
+	private SchoolType type = null;
+
 	public void present(IWContext iwc) {
 		try {
 			switch (parseAction(iwc)) {
@@ -190,6 +192,10 @@ public class CourseEditor extends CourseBlock {
 
 		if (getSession().getProvider() != null) {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			if (schoolTypes.size() == 1) {
+				type = (SchoolType) schoolTypes.iterator().next();
+				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+			}
 			schoolType.addMenuElements(schoolTypes);
 		}
 
@@ -200,6 +206,10 @@ public class CourseEditor extends CourseBlock {
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
 			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)));
+			courseType.addMenuElements(courseTypes);
+		}
+		else if (type != null) {
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()));
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -256,14 +266,14 @@ public class CourseEditor extends CourseBlock {
 		Collection courses = new ArrayList();
 		if (getSession().getProvider() != null) {
 			try {
-				courses = getCourseBusiness(iwc).getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : null, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null);
+				courses = getCourseBusiness(iwc).getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey() : null), iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null);
 			}
 			catch (RemoteException rex) {
 				throw new IBORuntimeException(rex);
 			}
 		}
 
-		boolean useFixedPrices = true; //iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
@@ -281,7 +291,7 @@ public class CourseEditor extends CourseBlock {
 		cell.setStyleClass("type");
 		cell.add(new Text(localize("type", "Type")));
 
-		if (!useFixedPrices) {
+		if (!useBirthYears) {
 			cell = row.createHeaderCell();
 			cell.setStyleClass("yearFrom");
 			cell.add(new Text(localize("from", "From")));
@@ -356,7 +366,7 @@ public class CourseEditor extends CourseBlock {
 					cell.add(new Text(cType.getName()));
 				}
 
-				if (!useFixedPrices) {
+				if (!useBirthYears) {
 					cell = row.createCell();
 					cell.setStyleClass("yearFrom");
 					cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
@@ -432,7 +442,8 @@ public class CourseEditor extends CourseBlock {
 	}
 
 	public void showEditor(IWContext iwc, Object coursePK) throws java.rmi.RemoteException {
-		boolean useFixedPrices = true; //iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 
 		if (!useFixedPrices) {
 			super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
@@ -533,8 +544,10 @@ public class CourseEditor extends CourseBlock {
 			String stID = type.getCourseCategory().getPrimaryKey().toString();
 			schoolTypeID.setSelectedElement(stID);
 			inputAccounting.setValue(course.getAccountingKey());
-			inputYearFrom.setValue(course.getBirthyearFrom());
-			inputYearTo.setValue(course.getBirthyearTo());
+			if (useBirthYears) {
+				inputYearFrom.setValue(course.getBirthyearFrom());
+				inputYearTo.setValue(course.getBirthyearTo());
+			}
 			inputMaxPer.setValue(course.getMax());
 
 			cargoTypes = getCourseBusiness(iwc).getCourseTypes(new Integer(stID));
@@ -700,21 +713,23 @@ public class CourseEditor extends CourseBlock {
 			section.add(layer);
 		}
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("year_from");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
-		layer.add(label);
-		layer.add(inputYearFrom);
-		section.add(layer);
+		if (useBirthYears) {
+			layer = new Layer(Layer.DIV);
+			layer.setID("year_from");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
+			layer.add(label);
+			layer.add(inputYearFrom);
+			section.add(layer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("year_to");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
-		layer.add(label);
-		layer.add(inputYearTo);
-		section.add(layer);
+			layer = new Layer(Layer.DIV);
+			layer.setID("year_to");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
+			layer.add(label);
+			layer.add(inputYearTo);
+			section.add(layer);
+		}
 
 		layer = new Layer(Layer.DIV);
 		layer.setID("max");

@@ -15,11 +15,13 @@ import is.idega.idegaweb.egov.course.business.CourseSession;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 
 import java.rmi.RemoteException;
 import java.sql.Date;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -192,7 +194,7 @@ public class CourseApplication extends ApplicationForm {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.user_not_applicable", "The user you selected is not applicable for this application"));
 						canContinue = false;
 					}
-					else if (!getCourseBusiness(iwc).hasAvailableCourses(applicant, null)) {
+					else if (!getCourseBusiness(iwc).hasAvailableCourses(applicant, (SchoolType) null)) {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.no_courses_available", "There are no courses available for the user you have selected."));
 						canContinue = false;
 					}
@@ -359,6 +361,7 @@ public class CourseApplication extends ApplicationForm {
 		Form form = getForm(ACTION_PHASE_1);
 		form.setId("course_step_1");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1)));
+		form.maintainParameter(PARAMETER_COURSE);
 
 		addErrors(iwc, form);
 
@@ -375,6 +378,7 @@ public class CourseApplication extends ApplicationForm {
 			lists.add(iwrb.getLocalizedString("help.select_an_applicant_from_the_dropdown_OR_type_in_a_social_security_number", "Select an applicant from the dropdown OR type in a social security number."));
 			lists.add(iwrb.getLocalizedString("help.when_a_registration_is_complete_you_can_then_register_another_child", "When registration is complete you can go back and register another."));
 			lists.add(iwrb.getLocalizedString("help.when_all_applicants_have_been_registered_you_pay_for_them_all_at_the_same_time", "When all applicants have been registered you pay for them all at the same time."));
+			lists.add(iwrb.getLocalizedString("help.only_three_weeks_possible", "It is only possible to register each participant to max three courses at a time."));
 			info.add(lists);
 
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_child", "Select child"));
@@ -594,6 +598,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Form form = getForm(ACTION_PHASE_2);
 		form.addParameter(PARAMETER_ACTION, ACTION_PHASE_2);
+		form.maintainParameter(PARAMETER_COURSE);
 
 		User applicant = getApplicant(iwc);
 		Child child = getMemberFamilyLogic(iwc).getChild(applicant);
@@ -685,6 +690,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Form form = getForm(ACTION_PHASE_3);
 		form.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
+		form.maintainParameter(PARAMETER_COURSE);
 
 		addErrors(iwc, form);
 
@@ -737,6 +743,7 @@ public class CourseApplication extends ApplicationForm {
 		Form form = getForm(ACTION_PHASE_4);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
+		form.maintainParameter(PARAMETER_COURSE);
 
 		addErrors(iwc, form);
 
@@ -758,7 +765,12 @@ public class CourseApplication extends ApplicationForm {
 		form.add(bottom);
 
 		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+		if (iwc.isParameterSet(PARAMETER_COURSE)) {
+			next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_6));
+		}
+		else {
+			next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+		}
 		next.setToFormSubmit(form);
 		bottom.add(next);
 
@@ -899,7 +911,13 @@ public class CourseApplication extends ApplicationForm {
 		DropdownMenu typeMenu = new DropdownMenu(PARAMETER_COURSE_TYPE);
 		typeMenu.setId(PARAMETER_COURSE_TYPE);
 		Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK);
-		typeMenu.addMenuElements(courseTypes);
+		Iterator iter = courseTypes.iterator();
+		while (iter.hasNext()) {
+			CourseType courseType = (CourseType) iter.next();
+			if (getCourseBusiness(iwc).hasAvailableCourses(applicant, courseType)) {
+				typeMenu.addMenuElement(courseType.getPrimaryKey().toString(), courseType.getName());
+			}
+		}
 		typeMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("select_course_type", "Select course type"));
 		if (useDWR) {
 			typeMenu.setOnChange("getCourses();");
@@ -985,7 +1003,7 @@ public class CourseApplication extends ApplicationForm {
 		group = table.createBodyRowGroup();
 		group.setId(PARAMETER_COURSE_TABLE_ID);
 		if (courses != null) {
-			Iterator iter = courses.iterator();
+			iter = courses.iterator();
 			int counter = 0;
 			while (iter.hasNext()) {
 				row = group.createRow();
@@ -1071,19 +1089,28 @@ public class CourseApplication extends ApplicationForm {
 		for (int i = 0; courses != null && i < courses.length; i++) {
 			ApplicationHolder h = new ApplicationHolder();
 			Course course = getCourseBusiness(iwc).getCourse(new Integer(courses[i]));
-			if (!getCourseBusiness(iwc).isFull(course)) {
+			if (!getCourseBusiness(iwc).isFull(course) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				h.setUser(applicant);
 				h.setCourse(course);
 				getCourseApplicationSession(iwc).addApplication(applicant, h);
 			}
-			else {
+			else if (getCourseBusiness(iwc).isFull(course)) {
 				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.full_course_selected", "You have selected a course that is already full: ") + course.getName());
+			}
+			else if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
+				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.already_registered_course_selected", "You have selected a course that the participant is already registered to: ") + course.getName());
+			}
+			else if (!getCourseBusiness(iwc).isOfAge(applicant, course)) {
+				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
 			}
 		}
 		Collection applications = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (applications == null || applications.isEmpty() || hasErrors()) {
 			showPhaseFive(iwc);
 			return;
+		}
+		else if (applications.size() > 3) {
+			setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.too_many_courses_selected", "You have selected too many courses for this applicant.  You can select a maximum of three courses at a time."));
 		}
 
 		Form form = getForm(ACTION_PHASE_6);
@@ -1136,6 +1163,7 @@ public class CourseApplication extends ApplicationForm {
 		Locale locale = iwc.getCurrentLocale();
 		group.setId(PARAMETER_COURSE_TABLE_ID);
 
+		NumberFormat format = NumberFormat.getCurrencyInstance(iwc.getCurrentLocale());
 		int counter = 0;
 		Iterator iter = applications.iterator();
 		while (iter.hasNext()) {
@@ -1148,6 +1176,7 @@ public class CourseApplication extends ApplicationForm {
 			}
 			ApplicationHolder holder = (ApplicationHolder) iter.next();
 			Course course = holder.getCourse();
+			CoursePrice price = course.getPrice();
 			CourseType type = course.getCourseType();
 			School provider = course.getProvider();
 			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course);
@@ -1155,13 +1184,16 @@ public class CourseApplication extends ApplicationForm {
 			DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
 			daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
 			if (provider.hasPreCare()) {
-				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, iwrb.getLocalizedString("morning", "Morning"));
+				Object[] arguments = { format.format(price.getPreCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
 			}
 			if (provider.hasPostCare()) {
-				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, iwrb.getLocalizedString("afternoon", "Afternoon"));
+				Object[] arguments = { format.format(price.getPostCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
 			}
 			if (provider.hasPreCare() && provider.hasPostCare()) {
-				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, iwrb.getLocalizedString("whole_day", "Whole day"));
+				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
 			}
 			daycare.keepStatusOnAction(true);
 
@@ -1240,26 +1272,28 @@ public class CourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_7));
-		next.setToFormSubmit(form);
-		bottom.add(next);
+		if (applications.size() <= 3) {
+			Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+			next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_7));
+			next.setToFormSubmit(form);
+			bottom.add(next);
 
-		Link newAppl = getButtonLink(this.iwrb.getLocalizedString("another_applicant", "Another applicant"));
-		newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
-		newAppl.setToFormSubmit(form);
-		bottom.add(newAppl);
+			Link newAppl = getButtonLink(this.iwrb.getLocalizedString("another_applicant", "Another applicant"));
+			newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
+			newAppl.setToFormSubmit(form);
+			bottom.add(newAppl);
 
-		Link newCourse = getButtonLink(this.iwrb.getLocalizedString("another_course", "Another course"));
-		newCourse.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
-		newCourse.setToFormSubmit(form);
-		bottom.add(newCourse);
+			Link newCourse = getButtonLink(this.iwrb.getLocalizedString("another_course", "Another course"));
+			newCourse.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+			newCourse.setToFormSubmit(form);
+			bottom.add(newCourse);
 
-		Link back = getButtonLink(this.iwrb.getLocalizedString("previous", "Previous"));
-		back.setValueOnClick(PARAMETER_BACK, Boolean.TRUE.toString());
-		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
-		back.setToFormSubmit(form);
-		bottom.add(back);
+			Link back = getButtonLink(this.iwrb.getLocalizedString("previous", "Previous"));
+			back.setValueOnClick(PARAMETER_BACK, Boolean.TRUE.toString());
+			back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+			back.setToFormSubmit(form);
+			bottom.add(back);
+		}
 	}
 
 	private void addParentToForm(Form form, IWContext iwc, Child child, Custodian custodian, boolean isExtraCustodian, int number, boolean editable, boolean showMaritalStatus, boolean hasRelation) throws RemoteException {
