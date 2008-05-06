@@ -1183,10 +1183,12 @@ public class CourseApplication extends ApplicationForm {
 			CoursePrice price = course.getPrice();
 			CourseType type = course.getCourseType();
 			School provider = course.getProvider();
-			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course);
+			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course, false);
 
 			DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
 			daycare.setStyleClass("dayCare");
+			daycare.setOnFocus("this.style.width=225px;");
+			daycare.setOnBlur("this.style.width=125px;");
 			daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
 			if (provider.hasPreCare()) {
 				Object[] arguments = { format.format(price.getPreCarePrice()) };
