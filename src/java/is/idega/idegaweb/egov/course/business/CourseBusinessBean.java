@@ -970,6 +970,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public CourseDWR getCourseDWR(Locale locale, Course course) {
+		return getCourseDWR(locale, course, true);
+	}
+
+	public CourseDWR getCourseDWR(Locale locale, Course course, boolean showYear) {
 		CourseDWR cDWR = new CourseDWR();
 		cDWR.setName(course.getName());
 		cDWR.setPk(course.getPrimaryKey().toString());
@@ -987,9 +991,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (from != null && price != null) {
 			IWTimestamp toDate = new IWTimestamp(getEndDate(price, from.getDate()));
 			dayS = Integer.toString(price.getNumberOfDays());
-			toS = toDate.getDateString("dd.MM.yyyy", locale);
+			if (showYear) {
+				toS = toDate.getDateString("dd.MM.yyyy", locale);
+			}
+			else {
+				toS = toDate.getDateString("dd.MM", locale);
+			}
 			cDWR.setPrice(price.getPrice() + " ISK");
-			cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
+			if (showYear) {
+				cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
+			}
+			else {
+				cDWR.setTimeframe(from.getDateString("dd.MM", locale) + " - " + toS);
+			}
 		}
 		else if (from != null && course.getEndDate() != null) {
 			IWTimestamp toDate = new IWTimestamp(course.getEndDate());

@@ -64,6 +64,10 @@
 	font-size: 10px;
 }
 
+.formItem.formItemBig select.dayCare {
+	width: 125px;
+}
+
 .courses.coursesPhaseSix .column0 {
 	width: auto;
 }

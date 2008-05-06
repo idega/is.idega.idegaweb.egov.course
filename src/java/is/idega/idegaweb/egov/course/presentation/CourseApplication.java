@@ -1186,6 +1186,7 @@ public class CourseApplication extends ApplicationForm {
 			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course);
 
 			DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
+			daycare.setStyleClass("dayCare");
 			daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
 			if (provider.hasPreCare()) {
 				Object[] arguments = { format.format(price.getPreCarePrice()) };
@@ -1828,62 +1829,8 @@ public class CourseApplication extends ApplicationForm {
 
 		section.add(table);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.payment_information", "Payment information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
 		clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
-
-		boolean creditcardPayment = true;
-		if (iwc.isParameterSet(PARAMETER_CREDITCARD_PAYMENT)) {
-			creditcardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
-		}
-
-		RadioButton giro = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.FALSE.toString());
-		giro.setStyleClass("radiobutton");
-		giro.setSelected(!creditcardPayment);
-		giro.keepStatusOnAction(true);
-		giro.setToDisableOnClick(PARAMETER_CARD_TYPE, true, false);
-		giro.setToDisableOnClick(PARAMETER_CARD_NUMBER, true);
-		giro.setToDisableOnClick(PARAMETER_VALID_MONTH, true, false);
-		giro.setToDisableOnClick(PARAMETER_VALID_YEAR, true, false);
-
-		RadioButton creditcard = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.TRUE.toString());
-		creditcard.setStyleClass("radiobutton");
-		creditcard.setSelected(creditcardPayment);
-		creditcard.keepStatusOnAction(true);
-		creditcard.setToDisableOnClick(PARAMETER_CARD_TYPE, false, false);
-		creditcard.setToDisableOnClick(PARAMETER_CARD_NUMBER, false);
-		creditcard.setToDisableOnClick(PARAMETER_VALID_MONTH, false, false);
-		creditcard.setToDisableOnClick(PARAMETER_VALID_YEAR, false, false);
-
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.payment_information_help", "Please select which type of payment you will be using to pay for the service.")));
-		section.add(helpLayer);
-
-		Layer formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		Label label = new Label(this.iwrb.getLocalizedString("application.payment_creditcard", "Payment with creditcard"), creditcard);
-		formItem.add(creditcard);
-		formItem.add(label);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("application.payment_giro", "Payment with giro"), giro);
-		formItem.add(giro);
-		formItem.add(label);
-		section.add(formItem);
-
-		section.add(clearLayer);
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.payer_information", "Payer information"));
 		heading.setStyleClass("subHeader");
@@ -1916,10 +1863,10 @@ public class CourseApplication extends ApplicationForm {
 			otherPayer.setSelected(!currentPayer);
 		}
 
-		formItem = new Layer(Layer.DIV);
+		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("payer.logged_in_user", "Logged in user"), loggedInUser);
+		Label label = new Label(this.iwrb.getLocalizedString("payer.logged_in_user", "Logged in user"), loggedInUser);
 		formItem.add(loggedInUser);
 		formItem.add(label);
 		section.add(formItem);
@@ -1957,6 +1904,60 @@ public class CourseApplication extends ApplicationForm {
 		label = new Label(this.iwrb.getLocalizedString("application.payer_name", "Name"), payerName);
 		formItem.add(label);
 		formItem.add(payerName);
+		section.add(formItem);
+
+		section.add(clearLayer);
+
+		heading = new Heading1(this.iwrb.getLocalizedString("application.payment_information", "Payment information"));
+		heading.setStyleClass("subHeader");
+		form.add(heading);
+
+		section = new Layer(Layer.DIV);
+		section.setStyleClass("formSection");
+		form.add(section);
+
+		boolean creditcardPayment = true;
+		if (iwc.isParameterSet(PARAMETER_CREDITCARD_PAYMENT)) {
+			creditcardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
+		}
+
+		RadioButton giro = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.FALSE.toString());
+		giro.setStyleClass("radiobutton");
+		giro.setSelected(!creditcardPayment);
+		giro.keepStatusOnAction(true);
+		giro.setToDisableOnClick(PARAMETER_CARD_TYPE, true, false);
+		giro.setToDisableOnClick(PARAMETER_CARD_NUMBER, true);
+		giro.setToDisableOnClick(PARAMETER_VALID_MONTH, true, false);
+		giro.setToDisableOnClick(PARAMETER_VALID_YEAR, true, false);
+
+		RadioButton creditcard = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.TRUE.toString());
+		creditcard.setStyleClass("radiobutton");
+		creditcard.setSelected(creditcardPayment);
+		creditcard.keepStatusOnAction(true);
+		creditcard.setToDisableOnClick(PARAMETER_CARD_TYPE, false, false);
+		creditcard.setToDisableOnClick(PARAMETER_CARD_NUMBER, false);
+		creditcard.setToDisableOnClick(PARAMETER_VALID_MONTH, false, false);
+		creditcard.setToDisableOnClick(PARAMETER_VALID_YEAR, false, false);
+
+		helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.payment_information_help", "Please select which type of payment you will be using to pay for the service.")));
+		section.add(helpLayer);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("radioButtonItem");
+		label = new Label(this.iwrb.getLocalizedString("application.payment_creditcard", "Payment with creditcard"), creditcard);
+		formItem.add(creditcard);
+		formItem.add(label);
+		section.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("radioButtonItem");
+		label = new Label(this.iwrb.getLocalizedString("application.payment_giro", "Payment with giro"), giro);
+		formItem.add(giro);
+		formItem.add(label);
 		section.add(formItem);
 
 		section.add(clearLayer);
