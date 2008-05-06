@@ -90,6 +90,7 @@ application_error.must_select_daycare_option=You must select all daycare options
 application_error.must_select_picked_up_option=You must select all picked up options.
 application_error.no_courses_available=There are no courses available for the user you have selected.
 application_error.no_user_found_with_personal_id=No user was found with the given personal ID
+application_error.old_course_selected=You have selected a course that has already started or finished\: 
 application_error.too_many_courses_selected=You have selected too many courses for this applicant.  You can select a maximum of three courses at a time.
 application_error.user_not_applicable=The user you selected is not applicable for this application
 application_errors_occured=There was a problem with the following items

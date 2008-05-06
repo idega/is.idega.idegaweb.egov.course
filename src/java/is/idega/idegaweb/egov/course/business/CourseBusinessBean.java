@@ -957,6 +957,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	public boolean hasNotStarted(Course course, boolean isAdmin) {
+		IWTimestamp stamp = new IWTimestamp();
+		IWTimestamp start = new IWTimestamp(course.getStartDate());
+
+		return !isAdmin ? start.isLaterThan(stamp) : true;
+	}
+
 	public boolean isOfAge(User user, Course course) {
 		IWTimestamp dateOfBirth = new IWTimestamp(user.getDateOfBirth());
 		return dateOfBirth.getYear() <= course.getBirthyearTo() && dateOfBirth.getYear() >= course.getBirthyearFrom();

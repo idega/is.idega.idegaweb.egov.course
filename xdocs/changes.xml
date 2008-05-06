@@ -4,6 +4,12 @@
     <author email="gimmi@idega.com">Grimur</author>
   </properties>
   <body>
+  	<release version="1.0.16" date="2008-05-06">
+      <action dev="laddi" type="update">
+      	Changed so that when linking directly to a course it's not possible to register to a course that has already started/is finished.
+      </action>
+    </release>
+    
   	<release version="1.0.15" date="2008-05-02">
       <action dev="laddi" type="update">
       	Added possibility to send course PK into the application and that course will then be preselected.

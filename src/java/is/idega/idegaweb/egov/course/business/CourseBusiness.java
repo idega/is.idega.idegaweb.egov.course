@@ -189,6 +189,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public boolean isRegistered(User user, Course course) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasNotStarted
+	 */
+	public boolean hasNotStarted(Course course, boolean isAdmin) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#isOfAge
 	 */
 	public boolean isOfAge(User user, Course course) throws RemoteException;
