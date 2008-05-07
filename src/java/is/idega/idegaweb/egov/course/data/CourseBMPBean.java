@@ -87,7 +87,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	public float getCoursePrice() {
-		return getFloatColumnValue(COLUMN_PRICE, 0);
+		return getFloatColumnValue(COLUMN_PRICE, -1);
 	}
 
 	public String getAccountingKey() {
