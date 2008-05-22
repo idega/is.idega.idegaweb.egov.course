@@ -73,6 +73,7 @@ import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.business.UserSession;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
@@ -613,8 +614,8 @@ public class CourseApplication extends ApplicationForm {
 		addErrors(iwc, form);
 
 		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		super.getParentPage().addJavascriptURL(CoreConstants.DWR_ENGINE_SCRIPT);
+		super.getParentPage().addJavascriptURL(CoreConstants.DWR_UTIL_SCRIPT);
 
 		StringBuffer script = new StringBuffer();
 		script.append("function readUser() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_PERSONAL_ID + "\");\n\tvar child = '" + applicant.getPrimaryKey().toString() + "';\n\tvar relation = DWRUtil.getValue(\"userRelation\");\n\tCourseDWRUtil.getUserDWRByRelation(id, child, '1', '" + iwc.getCurrentLocale().getCountry() + "', relation, fillUser);\n}");
@@ -781,8 +782,8 @@ public class CourseApplication extends ApplicationForm {
 		Integer applicantPK = (Integer) applicant.getPrimaryKey();
 
 		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		super.getParentPage().addJavascriptURL(CoreConstants.DWR_ENGINE_SCRIPT);
+		super.getParentPage().addJavascriptURL(CoreConstants.DWR_UTIL_SCRIPT);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
