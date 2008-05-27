@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov Courses</name>
   <artifactId>is.idega.idegaweb.egov.course</artifactId>
-  <currentVersion>1.0.16</currentVersion>
+  <currentVersion>1.0.18</currentVersion>
   <inceptionYear>2007</inceptionYear>
   <shortDescription>eGov Courses</shortDescription>
   <versions>
@@ -118,7 +118,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.1.84</version>
+      <version>3.1.88</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
