@@ -197,9 +197,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					String courseName = course.getName();
 					String uniqueID = application.getPrimaryKey().toString() + "-" + choice.getPrimaryKey() + "-";
 					Date startDate = new IWTimestamp(course.getStartDate()).getDate();
-					Date endDate = getEndDate(price, startDate);
+					Date endDate = price != null ? getEndDate(price, startDate) : new IWTimestamp(course.getEndDate()).getDate();
 
-					float coursePrice = price.getPrice() * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
+					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
 
 					String payerPId;
 					if (application.getPayerPersonalID() != null && application.getPayerPersonalID().length() > 0) {
@@ -262,7 +262,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						e.printStackTrace();
 					}
 
-					if (choice.getDayCare() != CourseConstants.DAY_CARE_NONE) {
+					if (choice.getDayCare() != CourseConstants.DAY_CARE_NONE && price != null) {
 						float carePrice = 0;
 						if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
 							carePrice = price.getPreCarePrice();

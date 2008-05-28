@@ -172,7 +172,7 @@ public class CourseStatistics extends CourseBlock {
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("type", "Type")));
 
 		Map typeTotals = new HashMap();
-		Iterator iterator = courseTypes.iterator();
+		Iterator iterator = providers.iterator();
 		while (iterator.hasNext()) {
 			School provider = (School) iterator.next();
 
