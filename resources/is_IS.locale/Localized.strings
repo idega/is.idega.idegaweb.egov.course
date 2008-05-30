@@ -306,3 +306,5 @@ create_certificate=B\u00FAa til sk\u00EDrteini
 application.valid_from_date=Gildir fr\u00E1
 application.valid_thru_date=Gildir til
 application.certificate_type=Tegund sk\u00EDrteinis
+Full_certificate=L\u00F6ggilding
+Temporary_certificate=Br\u00E1\u00F0abirg\u00F0al\u00F6ggildin

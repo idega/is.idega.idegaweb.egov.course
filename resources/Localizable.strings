@@ -351,3 +351,5 @@ loading=Loading
 application.valid_from_date=Valid from
 application.valid_thru_date=Valid through
 application.certificate_type=Certificate type
+Full_certificate=Full certificate
+Temporary_certificate=Temporary certificate
