@@ -4,6 +4,12 @@
     <author email="gimmi@idega.com">Grimur</author>
   </properties>
   <body>
+  	<release version="1.0.21" date="2008-06-02">
+      <action dev="alexis" type="update">
+      	Changed visibility for some members in CourseParticipantOverview
+      </action>
+    </release>
+    
   	<release version="1.0.20" date="2008-06-02">
       <action dev="laddi" type="update">
       	Bug fixes for NeSt.
