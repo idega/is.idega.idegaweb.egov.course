@@ -37,6 +37,7 @@ import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.util.IWTimestamp;
@@ -47,6 +48,7 @@ public class CourseList extends CourseBlock {
 	protected static final String PARAMETER_SORTING = "prm_sorting";
 
 	private SchoolType type = null;
+	private boolean showTypes = true;
 
 	public void present(IWContext iwc) {
 		try {
@@ -125,6 +127,7 @@ public class CourseList extends CourseBlock {
 		if (getSession().getProvider() != null) {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
+				showTypes = false;
 				type = (SchoolType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
@@ -133,6 +136,7 @@ public class CourseList extends CourseBlock {
 		else {
 			Collection schoolTypes = getBusiness().getAllSchoolTypes();
 			if (schoolTypes.size() == 1) {
+				showTypes = false;
 				type = (SchoolType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
@@ -162,16 +166,21 @@ public class CourseList extends CourseBlock {
 		sorting.addMenuElement(CourseComparator.FREE_PLACES_SORT, getResourceBundle().getLocalizedString("sort.free_places"));
 		sorting.keepStatusOnAction(true);
 
+		if (showTypes) {
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
+			formItem.add(label);
+			formItem.add(schoolType);
+			layer.add(formItem);
+		}
+		else if (type != null) {
+			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
+		}
+
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
-		formItem.add(label);
-		formItem.add(schoolType);
-		layer.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
+		Label label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
 		formItem.add(label);
 		formItem.add(courseType);
 		layer.add(formItem);

@@ -160,11 +160,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	private CourseCategory getAccountingSchoolType() {
+		String typePK = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCOUNTING_TYPE_PK);
+		if (typePK != null) {
+			return getCourseCategory(typePK);
+		}
+		return null;
+	}
+
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {
 		Collection entries = new ArrayList();
 
 		try {
 			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
+			CourseCategory category = getAccountingSchoolType();
 
 			Collection applications = getCourseApplicationHome().findAll(getCaseStatusOpen(), fromDate, toDate);
 			Iterator iterator = applications.iterator();
@@ -172,7 +181,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				CourseApplication application = (CourseApplication) iterator.next();
 				TPosAuthorisationEntriesBean ccAuthEntry = null;
 				if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
-					ccAuthEntry = (TPosAuthorisationEntriesBean) getCreditCardBusiness().getAuthorizationEntry(getCreditCardInformation(), application.getReferenceNumber(), new IWTimestamp(application.getCreated()));
+					IWTimestamp stamp = new IWTimestamp(application.getCreated());
+					ccAuthEntry = (TPosAuthorisationEntriesBean) getCreditCardBusiness().getAuthorizationEntry(getCreditCardInformation(), application.getReferenceNumber(), stamp);
+					if (ccAuthEntry == null) {
+						stamp.addDays(1);
+						ccAuthEntry = (TPosAuthorisationEntriesBean) getCreditCardBusiness().getAuthorizationEntry(getCreditCardInformation(), application.getReferenceNumber(), stamp);
+					}
 				}
 
 				Map applicationMap = getApplicationMap(application);
@@ -189,6 +203,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					SchoolArea area = provider.getSchoolArea();
 					CourseType courseType = course.getCourseType();
 					CourseCategory schoolType = courseType.getCourseCategory();
+					if (category != null && !schoolType.equals(category)) {
+						continue;
+					}
 					User student = choice.getUser();
 					CoursePrice price = course.getPrice();
 					String paymentType = application.getPaymentType();
@@ -1666,8 +1683,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
-			application.setCreditCardMerchantID(merchantID);
-			application.setCreditCardMerchantType(merchantType);
+			if (merchantID > 0) {
+				application.setCreditCardMerchantID(merchantID);
+			}
+			if (merchantType != null) {
+				application.setCreditCardMerchantType(merchantType);
+			}
 			application.setPaymentType(paymentType);
 			if (paymentType != null) {
 				application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));

@@ -29,6 +29,7 @@ public class CourseConstants {
 	public static final String PROPERTY_USE_DWR = "egov.course.use.dwr";
 	public static final String PROPERTY_USE_FIXED_PRICES = "egov.course.use.fixed.prices";
 	public static final String PROPERTY_USE_BIRTHYEARS = "egov.course.use.birthyears";
+	public static final String PROPERTY_ACCOUNTING_TYPE_PK = "egov.course.accounting.type";
 
 	public static final String APPLICATION_PROPERTY_COURSE_MAP = "egov.course.map";
 
@@ -37,6 +38,7 @@ public class CourseConstants {
 
 	public static final String PAYMENT_TYPE_CARD = "credit_card";
 	public static final String PAYMENT_TYPE_GIRO = "giro";
+	public static final String PAYMENT_TYPE_BANK_TRANSFER = "bank_transfer";
 
 	public static final String PRODUCT_CODE_CARE = "CARE";
 	public static final String PRODUCT_CODE_COURSE = "COURSE";

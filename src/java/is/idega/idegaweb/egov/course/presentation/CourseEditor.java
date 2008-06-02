@@ -67,6 +67,7 @@ public class CourseEditor extends CourseBlock {
 	private static final int ACTION_DELETE = 5;
 
 	private SchoolType type = null;
+	private boolean showTypes = true;
 
 	public void present(IWContext iwc) {
 		try {
@@ -193,6 +194,16 @@ public class CourseEditor extends CourseBlock {
 		if (getSession().getProvider() != null) {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
+				showTypes = false;
+				type = (SchoolType) schoolTypes.iterator().next();
+				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+			}
+			schoolType.addMenuElements(schoolTypes);
+		}
+		else {
+			Collection schoolTypes = getBusiness().getAllSchoolTypes();
+			if (schoolTypes.size() == 1) {
+				showTypes = false;
 				type = (SchoolType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
@@ -213,16 +224,21 @@ public class CourseEditor extends CourseBlock {
 			courseType.addMenuElements(courseTypes);
 		}
 
+		if (showTypes) {
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
+			formItem.add(label);
+			formItem.add(schoolType);
+			layer.add(formItem);
+		}
+		else if (type != null) {
+			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
+		}
+
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
-		formItem.add(label);
-		formItem.add(schoolType);
-		layer.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
+		Label label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
 		formItem.add(label);
 		formItem.add(courseType);
 		layer.add(formItem);
@@ -234,6 +250,16 @@ public class CourseEditor extends CourseBlock {
 		formItem.setStyleClass("formItem");
 		formItem.add(fetch);
 		layer.add(formItem);
+
+		if (getSession().getProvider() != null) {
+			SubmitButton newLink = new SubmitButton(localize("course.new", "New course"), PARAMETER_ACTION, String.valueOf(ACTION_NEW));
+			newLink.setStyleClass("indentedButton");
+			newLink.setStyleClass("button");
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.add(newLink);
+			layer.add(formItem);
+		}
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -280,12 +306,18 @@ public class CourseEditor extends CourseBlock {
 
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
+		cell.setStyleClass("number");
+		cell.add(Text.getNonBrakingSpace());
+
+		cell = row.createHeaderCell();
 		cell.setStyleClass("name");
 		cell.add(new Text(localize("name", "Name")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("category");
-		cell.add(new Text(localize("category", "Category")));
+		if (showTypes) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("category");
+			cell.add(new Text(localize("category", "Category")));
+		}
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("type");
@@ -342,18 +374,24 @@ public class CourseEditor extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("firstColumn");
+				cell.setStyleClass("number");
+				cell.add(new Text(course.getPrimaryKey().toString()));
+
+				cell = row.createCell();
 				cell.setStyleClass("name");
 				cell.add(new Text(course.getName()));
 
-				cell = row.createCell();
-				cell.setStyleClass("category");
-				CourseCategory sType = cType.getCourseCategory();
-				if (sType != null) {
-					if (sType.getLocalizationKey() != null) {
-						cell.add(new Text(localize(sType.getLocalizationKey(), sType.getName())));
-					}
-					else {
-						cell.add(new Text(sType.getName()));
+				if (showTypes) {
+					cell = row.createCell();
+					cell.setStyleClass("category");
+					CourseCategory sType = cType.getCourseCategory();
+					if (sType != null) {
+						if (sType.getLocalizationKey() != null) {
+							cell.add(new Text(localize(sType.getLocalizationKey(), sType.getName())));
+						}
+						else {
+							cell.add(new Text(sType.getName()));
+						}
 					}
 				}
 

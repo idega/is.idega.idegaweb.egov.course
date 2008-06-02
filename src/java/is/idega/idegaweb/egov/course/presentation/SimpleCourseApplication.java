@@ -76,7 +76,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private static final int ACTION_PHASE_3 = 3;
 	private static final int ACTION_PHASE_4 = 4;
 	private static final int ACTION_PHASE_5 = 5;
-	private static final int ACTION_PHASE_6 = 6;
 	private static final int ACTION_SAVE = 0;
 
 	protected static final String PARAMETER_ACTION = "prm_action";
@@ -99,27 +98,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private static final String PARAMETER_AGREEMENT = "prm_agreement";
 	private static final String PARAMETER_HAS_DYSLEXIA = "prm_has_dyslexia";
 
-	//	private static final String PARAMETER_CREDITCARD_PAYMENT = "prm_creditcard_payment";
-	private static final String PARAMETER_PAYER_OPTION = "prm_payer_option";
 	private static final String PARAMETER_PAYER_NAME = "prm_payer_name";
 	private static final String PARAMETER_PAYER_PERSONAL_ID = "prm_payer_personal_id";
-	//	private static final String PARAMETER_NAME_ON_CARD = "prm_name_on_card";
-	//	private static final String PARAMETER_CARD_TYPE = "prm_card_type";
-	//	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
-	//	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
-	//	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
 	private static final String PARAMETER_AMOUNT = "prm_amount";
 	private static final String PARAMETER_AMOUNT_OF_CERTIFICATE_FEES = "prm_amount_of_certificate_fees";
-	//	private static final String PARAMETER_CCV = "prm_ccv";
-
-	private static final String SUB_ACTION = "prm_subact";
+	private static final String PARAMETER_REFERENCE_NUMBER = "prm_reference_number";
 
 	private static final String PARAMETER_APPLICANT_AGE = "prm_applicant_age";
 	private static final String PARAMETER_TOO_LATE_APPLYING_FOR_CONTINUING_EDUCATION = "prm_too_late_applying_for_continuing_education";
 
 	private IWResourceBundle iwrb = null;
 
-	private int numberOfPhases = 7;
+	private int numberOfPhases = 6;
 	private boolean iUseSessionUser = false;
 	private Object iSchoolTypePK = null;
 	private boolean iCompanyRegistration = false;
@@ -138,9 +128,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		try {
 			switch (parseAction(iwc)) {
 				case ACTION_PHASE_1:
-					if (handleSubAction(iwc)) {
-
-					}
 					showPhaseOne(iwc);
 					break;
 
@@ -160,10 +147,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 					showPhaseFive(iwc);
 					break;
 
-				case ACTION_PHASE_6:
-					showPhaseSix(iwc);
-					break;
-
 				case ACTION_SAVE:
 					save(iwc);
 					break;
@@ -172,10 +155,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		catch (RemoteException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private boolean handleSubAction(IWContext iwc) throws RemoteException {
-		return iwc.isParameterSet(SUB_ACTION);
 	}
 
 	private Form getForm(int state) {
@@ -255,7 +234,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
 		script5.append("\n\t").append("radio.value = course.pk;");
 		script5.append("\n\t").append("return radio;");
-		//script5.append("\n").append("return '<input id=\"'+course.pk+'\" type=\"checkbox\" class=\"checkbox\" name=\"" + PARAMETER_COURSE + "\" value=\"'+course.pk+'\" />'; \n");
 		script5.append("}\n");
 
 		List jsActions = new ArrayList();
@@ -463,10 +441,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private void showPhaseTwo(IWContext iwc) throws RemoteException {
 		if (!iwc.isParameterSet(PARAMETER_COURSE)) {
-			setError(PARAMETER_COURSE, this.iwrb.getLocalizedString("must_select_course", "You have to select a course"));
+			setError(ACTION_PHASE_2, PARAMETER_COURSE, this.iwrb.getLocalizedString("must_select_course", "You have to select a course"));
 		}
 
-		if (hasErrors()) {
+		if (hasErrors(ACTION_PHASE_2)) {
 			showPhaseOne(iwc);
 			return;
 		}
@@ -511,7 +489,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		RadioButton companyRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.FALSE.toString());
 		companyRegistration.setStyleClass("radiobutton");
 		companyRegistration.keepStatusOnAction(true);
-		companyRegistration.setDisabled(true);
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -575,16 +552,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 		if (applicant == null) {
 			String personalID = iwc.isParameterSet(PARAMETER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PERSONAL_ID) : null;
 			if (personalID == null) {
-				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("must_enter_personal_id", "You have to enter a personal ID"));
+				setError(ACTION_PHASE_3, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("must_enter_personal_id", "You have to enter a personal ID"));
 			}
 			else {
-				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user found with personal ID") + ": " + personalID);
+				setError(ACTION_PHASE_3, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user found with personal ID") + ": " + personalID);
 			}
 		}
 		else {
 			//	Checking personal id
 			if (!getUserBusiness(iwc).hasValidIcelandicSSN(applicant)) {
-				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
+				setError(ACTION_PHASE_3, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
 			}
 			//	Checking age
 			Date dateOfBirth = applicant.getDateOfBirth();
@@ -592,18 +569,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 				dateOfBirth = getUserBusiness(iwc).getUserDateOfBirthFromPersonalId(applicant.getPersonalID());
 			}
 			if (dateOfBirth == null) {
-				setError(PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("unknown_age_for_applicant", "Unkown age of applicant."));
+				setError(ACTION_PHASE_3, PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("unknown_age_for_applicant", "Unkown age of applicant."));
 			}
 			else {
 				Age age = new Age(dateOfBirth);
 				if (age.getYears() < 19) {
-					setError(PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("applicant_is_too_young", "Applicant is too young. Minimal age requirement is") + ": 19.");
+					setError(ACTION_PHASE_3, PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("applicant_is_too_young", "Applicant is too young. Minimal age requirement is") + ": 19.");
 				}
 			}
 			//	Checking if user already registered for current course
 			Course course = getCourseBusiness(iwc).getCourse(iwc.getParameter(PARAMETER_COURSE));
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
-				setError(PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("already_registered_to_course", "The selected applicant is already registered to the course you selected."));
+				setError(ACTION_PHASE_3, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("already_registered_to_course", "The selected applicant is already registered to the course you selected."));
 			}
 			//	Checking if user is not too late applying for "continuing education"
 			IWTimestamp latestExpireDate = getCourseBusiness(iwc).getLatestExpirationDateOfCertificate(getCourseBusiness(iwc).getUserCertificatesByCourse(applicant, course));
@@ -618,7 +595,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			}
 		}
 
-		if (hasErrors()) {
+		if (hasErrors(ACTION_PHASE_3)) {
 			showPhaseTwo(iwc);
 			return;
 		}
@@ -763,57 +740,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		heading.setStyleClass("applicationHeading");
 		form.add(heading);
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.company_information", "Company information"), 4, numberOfPhases));
-
-		form.add(getPersonInfo(iwc, applicant));
-
-		heading = new Heading1(this.iwrb.getLocalizedString("application.contact_information", "Contact information"));
-		heading.setStyleClass("subHeader");
-		heading.setStyleClass("topSubHeader");
-		form.add(heading);
-
-		Layer section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		Layer helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.contact_information_help", "Please enter contact information for the selected applicant.")));
-		section.add(helpLayer);
-
-		Layer bottom = new Layer(Layer.DIV);
-		bottom.setStyleClass("bottom");
-		form.add(bottom);
-
-		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
-		link.setToFormSubmit(form);
-		bottom.add(link);
-
-		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
-		link.setToFormSubmit(form);
-		bottom.add(link);
-
-		add(form);
-	}
-
-	private void showPhaseFive(IWContext iwc) throws RemoteException {
-		User applicant = getApplicant(iwc);
-		if (!storeContactInfo(iwc, applicant)) {
-			showPhaseThree(iwc);
-			return;
-		}
-
-		Form form = getForm(ACTION_PHASE_5);
-		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5)));
-
-		addErrors(iwc, form);
-
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.application_name", "Course application"));
-		heading.setStyleClass("applicationHeading");
-		form.add(heading);
-
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.applicant_information", "Applicant information"), 5, numberOfPhases));
 
 		form.add(getPersonInfo(iwc, applicant));
@@ -878,31 +804,31 @@ public class SimpleCourseApplication extends ApplicationForm {
 		form.add(bottom);
 
 		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_6));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
 		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(iCompanyRegistration ? ACTION_PHASE_4 : ACTION_PHASE_3));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
 		add(form);
 	}
 
-	private void showPhaseSix(IWContext iwc) throws RemoteException {
+	private void showPhaseFive(IWContext iwc) throws RemoteException {
 		if (!iwc.isParameterSet(PARAMETER_AGREEMENT)) {
-			setError(PARAMETER_AGREEMENT, this.iwrb.getLocalizedString("must_agree_terms", "You have to agree to the terms."));
+			setError(ACTION_PHASE_5, PARAMETER_AGREEMENT, this.iwrb.getLocalizedString("must_agree_terms", "You have to agree to the terms."));
 		}
 
-		if (hasErrors()) {
-			showPhaseFive(iwc);
+		if (hasErrors(ACTION_PHASE_5)) {
+			showPhaseFour(iwc);
 			return;
 		}
 
 		addApplication(iwc);
 
-		Form form = getForm(ACTION_PHASE_6);
+		Form form = getForm(ACTION_PHASE_5);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_SAVE)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
 
@@ -1054,64 +980,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		section.add(table);
 
-		/*
-		boolean creditcardPayment = false;
-		heading = new Heading1(this.iwrb.getLocalizedString("application.payment_information", "Payment information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-		if (iwc.isParameterSet(PARAMETER_CREDITCARD_PAYMENT)) {
-			creditcardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
-		}
-
-		RadioButton creditcard = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.TRUE.toString());
-		creditcard.setStyleClass("radiobutton");
-		creditcard.setSelected(creditcardPayment);
-		creditcard.keepStatusOnAction(true);
-		creditcard.setToDisableOnClick(PARAMETER_CARD_TYPE, false, false);
-		creditcard.setToDisableOnClick(PARAMETER_CARD_NUMBER, false);
-		creditcard.setToDisableOnClick(PARAMETER_VALID_MONTH, false, false);
-		creditcard.setToDisableOnClick(PARAMETER_VALID_YEAR, false, false);
-
-		RadioButton giro = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.FALSE.toString());
-		giro.setStyleClass("radiobutton");
-		giro.setSelected(!creditcardPayment);
-		giro.keepStatusOnAction(true);
-		giro.setToDisableOnClick(PARAMETER_CARD_TYPE, true, false);
-		giro.setToDisableOnClick(PARAMETER_CARD_NUMBER, true);
-		giro.setToDisableOnClick(PARAMETER_VALID_MONTH, true, false);
-		giro.setToDisableOnClick(PARAMETER_VALID_YEAR, true, false);
-
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.payment_information_help", "Please select which type of payment you will be using to pay for the service.")));
-		section.add(helpLayer);
-
-		Layer formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		Label label = new Label(this.iwrb.getLocalizedString("application.payment_giro", "Payment with giro"), giro);
-		formItem.add(giro);
-		formItem.add(label);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("application.payment_creditcard", "Payment with creditcard"), creditcard);
-		formItem.add(creditcard);
-		formItem.add(label);
-		section.add(formItem);
-
-		section.add(clearLayer);
-		*/
-
 		heading = new Heading1(this.iwrb.getLocalizedString("application.payer_information", "Payer information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
@@ -1122,169 +990,67 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.payer_information_help", "Please enter informations about the destined payer, if other than yourself.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.reference_number_help", "Please enter information about reference number.")));
 		section.add(helpLayer);
 
-		RadioButton loggedInUser = new RadioButton(PARAMETER_PAYER_OPTION, Boolean.TRUE.toString());
-		loggedInUser.setStyleClass("radiobutton");
-		loggedInUser.keepStatusOnAction(true);
-		loggedInUser.setToDisableOnClick(PARAMETER_PAYER_NAME, true);
-		loggedInUser.setToDisableOnClick(PARAMETER_PAYER_PERSONAL_ID, true);
-
-		RadioButton otherPayer = new RadioButton(PARAMETER_PAYER_OPTION, Boolean.FALSE.toString());
-		otherPayer.setStyleClass("radiobutton");
-		otherPayer.keepStatusOnAction(true);
-		otherPayer.setToDisableOnClick(PARAMETER_PAYER_NAME, false);
-		otherPayer.setToDisableOnClick(PARAMETER_PAYER_PERSONAL_ID, false);
-
-		if (iwc.isParameterSet(PARAMETER_PAYER_OPTION)) {
-			boolean currentPayer = new Boolean(iwc.getParameter(PARAMETER_PAYER_OPTION)).booleanValue();
-			loggedInUser.setSelected(currentPayer);
-			otherPayer.setSelected(!currentPayer);
-		}
+		TextInput referenceNumber = new TextInput(PARAMETER_REFERENCE_NUMBER, null);
+		referenceNumber.keepStatusOnAction(true);
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		Label label = new Label(this.iwrb.getLocalizedString("payer.applicant", "Applicant"), loggedInUser);
-		formItem.add(loggedInUser);
+		Label label = new Label(this.iwrb.getLocalizedString("application.reference_number", "Reference number"), referenceNumber);
 		formItem.add(label);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("payer.other_payer", "Other payer"), otherPayer);
-		formItem.add(otherPayer);
-		formItem.add(label);
-		section.add(formItem);
-
-		TextInput payerName = new TextInput(PARAMETER_PAYER_NAME, null);
-		payerName.setId("userName");
-		payerName.keepStatusOnAction(true);
-		payerName.setDisabled(loggedInUser.getSelected());
-
-		TextInput payerPersonalID = new TextInput(PARAMETER_PAYER_PERSONAL_ID, null);
-		payerPersonalID.setId(PARAMETER_PAYER_PERSONAL_ID);
-		payerPersonalID.keepStatusOnAction(true);
-		payerPersonalID.setMaxlength(10);
-		payerPersonalID.setDisabled(loggedInUser.getSelected());
-		payerPersonalID.setOnKeyUp("readUser();");
-		payerPersonalID.setOnChange("readUser();");
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString("application.payer_personal_id", "Personal ID"), payerPersonalID);
-		formItem.add(label);
-		formItem.add(payerPersonalID);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString("application.payer_name", "Name"), payerName);
-		formItem.add(label);
-		formItem.add(payerName);
+		formItem.add(referenceNumber);
 		section.add(formItem);
 
 		section.add(clearLayer);
 
-		/*
-		heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
+		if (this.iCompanyRegistration || this.iUseSessionUser) {
+			heading = new Heading1(this.iwrb.getLocalizedString("application.payer_information", "Payer information"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
 
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
 
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.creditcard_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
-		section.add(helpLayer);
-		*/
+			helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.other_payer_information_help", "Please enter informations about the destined payer, if other than yourself.")));
+			section.add(helpLayer);
 
-		/*Collection images = getCourseBusiness(iwc).getCreditCardImages();
-		Iterator iterator = images.iterator();
-		while (iterator.hasNext()) {
-			Image image = (Image) iterator.next();
-			image.setStyleClass("creditCardImage");
-			helpLayer.add(image);
-		}*/
+			TextInput payerName = new TextInput(PARAMETER_PAYER_NAME, null);
+			payerName.setId("userName");
+			payerName.keepStatusOnAction(true);
 
-		/*
-		TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
-		cardOwner.keepStatusOnAction(true);
-		cardOwner.setDisabled(!creditcardPayment);
+			TextInput payerPersonalID = new TextInput(PARAMETER_PAYER_PERSONAL_ID, null);
+			payerPersonalID.setId(PARAMETER_PAYER_PERSONAL_ID);
+			payerPersonalID.keepStatusOnAction(true);
+			payerPersonalID.setMaxlength(10);
+			payerPersonalID.setOnKeyUp("readUser();");
+			payerPersonalID.setOnChange("readUser();");
 
-		TextInput cardNumber = new TextInput(PARAMETER_CARD_NUMBER, null);
-		cardNumber.setLength(16);
-		cardNumber.setMaxlength(16);
-		cardNumber.keepStatusOnAction(true);
-		cardNumber.setDisabled(!creditcardPayment);
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(this.iwrb.getLocalizedString("application.payer_personal_id", "Personal ID"), payerPersonalID);
+			formItem.add(label);
+			formItem.add(payerPersonalID);
+			section.add(formItem);
 
-		TextInput ccNumber = new TextInput(PARAMETER_CCV, null);
-		ccNumber.setLength(3);
-		ccNumber.setMaxlength(3);
-		ccNumber.keepStatusOnAction(true);
-		ccNumber.setDisabled(!creditcardPayment);
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(this.iwrb.getLocalizedString("application.payer_name", "Name"), payerName);
+			formItem.add(label);
+			formItem.add(payerName);
+			section.add(formItem);
 
-		DropdownMenu validMonth = new DropdownMenu(PARAMETER_VALID_MONTH);
-		validMonth.setWidth("45px");
-		validMonth.keepStatusOnAction(true);
-		for (int a = 1; a <= 12; a++) {
-			validMonth.addMenuElement(TextSoap.addZero(a), TextSoap.addZero(a));
+			section.add(clearLayer);
 		}
-		validMonth.setDisabled(!creditcardPayment);
-
-		IWTimestamp stamp = new IWTimestamp();
-		DropdownMenu validYear = new DropdownMenu(PARAMETER_VALID_YEAR);
-		validYear.setWidth("60px");
-		validYear.keepStatusOnAction(true);
-		int year = stamp.getYear();
-		for (int a = year; a <= year + 10; a++) {
-			validYear.addMenuElement(String.valueOf(stamp.getYear()).substring(2), String.valueOf(stamp.getYear()));
-			stamp.addYears(1);
+		else {
+			User user = iwc.getCurrentUser();
+			form.add(new HiddenInput(PARAMETER_PAYER_PERSONAL_ID, user.getPersonalID()));
+			form.add(new HiddenInput(PARAMETER_PAYER_NAME, new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(iwc.getCurrentLocale())));
 		}
-		validYear.setDisabled(!creditcardPayment);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_owner", "Card owner"))), cardOwner);
-		formItem.add(label);
-		formItem.add(cardOwner);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_CARD_NUMBER)) {
-			formItem.setStyleClass("hasError");
-		}
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_number", "Card number"))), cardNumber);
-		formItem.add(label);
-		formItem.add(cardNumber);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.ccv_number", "Credit card verification number"))), ccNumber);
-		formItem.add(label);
-		formItem.add(ccNumber);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_valid_time", "Card valid through"))), validMonth);
-		formItem.add(label);
-		formItem.add(validMonth);
-		formItem.add(validYear);
-		section.add(formItem);
-
-		section.add(clearLayer);
-		*/
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
@@ -1298,7 +1064,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		Link back = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
 		back.setValueOnClick(PARAMETER_BACK, Boolean.TRUE.toString());
-		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
 		back.setToFormSubmit(form);
 		bottom.add(back);
 
@@ -1314,37 +1080,32 @@ public class SimpleCourseApplication extends ApplicationForm {
 	}
 
 	private void save(IWContext iwc) throws RemoteException {
-		Boolean payerOption = iwc.isParameterSet(PARAMETER_PAYER_OPTION) ? new Boolean(iwc.getParameter(PARAMETER_PAYER_OPTION)) : null;
-		if (payerOption == null) {
-			setError(PARAMETER_PAYER_OPTION, this.iwrb.getLocalizedString("must_select_payer_option", "You have to select a payer option."));
+		if (!iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID)) {
+			setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_personal_id_empty", "Payer personal ID is empty"));
 		}
-		else if (!payerOption.booleanValue()) {
-			if (!iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID)) {
-				setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_personal_id_empty", "Payer personal ID is empty"));
+		else if (!SocialSecurityNumber.isValidSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
+			setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
+		}
+		else if (SocialSecurityNumber.isIndividualSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
+			Date dateOfBirth = SocialSecurityNumber.getDateFromSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
+			Age age = new Age(dateOfBirth);
+			if (age.getYears() < 18) {
+				setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_be_at_least_18_years_old", "The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older."));
 			}
-			else if (!SocialSecurityNumber.isValidSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
-				setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
-			}
-			else {
-				Date dateOfBirth = SocialSecurityNumber.getDateFromSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
-				Age age = new Age(dateOfBirth);
-				if (age.getYears() < 18) {
-					setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_be_at_least_18_years_old", "The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older."));
-				}
 
-				try {
-					getUserBusiness(iwc).getUser(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
-				}
-				catch (FinderException e) {
-					setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
-				}
+			try {
+				getUserBusiness(iwc).getUser(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
 			}
-			if (!iwc.isParameterSet(PARAMETER_PAYER_NAME)) {
-				setError(PARAMETER_PAYER_NAME, this.iwrb.getLocalizedString("payer_name_empty", "Payer name is empty"));
+			catch (FinderException e) {
+				setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
 			}
 		}
+		if (!iwc.isParameterSet(PARAMETER_PAYER_NAME)) {
+			setError(PARAMETER_PAYER_NAME, this.iwrb.getLocalizedString("payer_name_empty", "Payer name is empty"));
+		}
+
 		if (hasErrors()) {
-			showPhaseSix(iwc);
+			showPhaseFive(iwc);
 			return;
 		}
 
@@ -1352,18 +1113,17 @@ public class SimpleCourseApplication extends ApplicationForm {
 		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : "";
 		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
 		float certificateFees = Float.parseFloat(iwc.getParameter(PARAMETER_AMOUNT_OF_CERTIFICATE_FEES));
+		String referenceNumber = iwc.getParameter(PARAMETER_REFERENCE_NUMBER);
 
 		if (hasErrors()) {
-			showPhaseSix(iwc);
+			showPhaseFive(iwc);
 			return;
 		}
 
-		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
-		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale(), certificateFees);
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), -1, (float) amount, null, CourseConstants.PAYMENT_TYPE_BANK_TRANSFER, referenceNumber, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale(), certificateFees);
 
 		if (hasErrors()) {
-			showPhaseSix(iwc);
+			showPhaseFive(iwc);
 			return;
 		}
 
