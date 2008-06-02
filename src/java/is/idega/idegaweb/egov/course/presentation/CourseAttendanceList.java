@@ -82,23 +82,6 @@ public class CourseAttendanceList extends CourseBlock {
 		super.getParentPage().addJavascriptURL("/dwr/engine.js");
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
-		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
-
-		StringBuffer script = new StringBuffer();
-		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
-
-		StringBuffer script3 = new StringBuffer();
-		script3.append("function setCourseOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
-
-		StringBuffer script4 = new StringBuffer();
-		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', DWRUtil.getValue('" + PARAMETER_SCHOOL_TYPE + "'), DWRUtil.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
-
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setCourseOptions", script3.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeCourseValues", script4.toString());
-
 		if (!isSchoolUser()) {
 			DropdownMenu providers = null;
 			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
@@ -124,6 +107,23 @@ public class CourseAttendanceList extends CourseBlock {
 				layer.add(formItem);
 			}
 		}
+
+		StringBuffer script2 = new StringBuffer();
+		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
+
+		StringBuffer script = new StringBuffer();
+		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
+
+		StringBuffer script3 = new StringBuffer();
+		script3.append("function setCourseOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
+
+		StringBuffer script4 = new StringBuffer();
+		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', DWRUtil.getValue('" + PARAMETER_SCHOOL_TYPE + "'), DWRUtil.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
+
+		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
+		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
+		super.getParentPage().getAssociatedScript().addFunction("setCourseOptions", script3.toString());
+		super.getParentPage().getAssociatedScript().addFunction("changeCourseValues", script4.toString());
 
 		DropdownMenu schoolType = new DropdownMenu(PARAMETER_SCHOOL_TYPE);
 		schoolType.setId(PARAMETER_SCHOOL_TYPE);
