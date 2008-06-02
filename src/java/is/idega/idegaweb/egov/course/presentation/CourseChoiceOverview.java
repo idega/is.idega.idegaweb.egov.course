@@ -61,6 +61,7 @@ public class CourseChoiceOverview extends CourseBlock {
 	public void present(IWContext iwc) {
 		try {
 			CourseChoice choice = null;
+			System.out.println("Checking PARAMETER_CHOICE_PK");
 			if (iwc.isParameterSet(PARAMETER_CHOICE_PK)) {
 				System.out.println("PARAMETER_CHOICE_PK is set: " + iwc.getParameter(PARAMETER_CHOICE_PK));
 				try {
