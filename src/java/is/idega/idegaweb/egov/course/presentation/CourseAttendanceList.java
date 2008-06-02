@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.idega.block.school.data.School;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -91,12 +90,7 @@ public class CourseAttendanceList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			Collection providersList = getBusiness().getProviders();
-			if (providersList.size() == 1) {
-				School school = (School) providersList.iterator().next();
-				getSession().setProvider(school);
-			}
-			else if (providers != null) {
+			if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);

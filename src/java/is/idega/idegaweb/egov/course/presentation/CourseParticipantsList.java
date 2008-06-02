@@ -101,12 +101,7 @@ public class CourseParticipantsList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			Collection providersList = getBusiness().getProviders();
-			if (providersList.size() == 1) {
-				School school = (School) providersList.iterator().next();
-				getSession().setProvider(school);
-			}
-			else if (providers != null) {
+			if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
