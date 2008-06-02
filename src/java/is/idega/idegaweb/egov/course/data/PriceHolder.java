@@ -14,6 +14,7 @@ public class PriceHolder implements Comparable {
 	private User user = null;
 	private float price = 0;
 	private float discount = 0;
+	private float cost = 0;
 
 	public User getUser() {
 		return user;
@@ -29,6 +30,14 @@ public class PriceHolder implements Comparable {
 
 	public void setPrice(float price) {
 		this.price = price;
+	}
+
+	public float getCost() {
+		return cost;
+	}
+
+	public void setCost(float cost) {
+		this.cost = cost;
 	}
 
 	public float getDiscount() {

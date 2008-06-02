@@ -39,8 +39,8 @@ import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
-import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
@@ -116,7 +116,12 @@ public class CourseParticipantsList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			if (providers != null) {
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+			}
+			else if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -134,9 +139,11 @@ public class CourseParticipantsList extends CourseBlock {
 		schoolType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_school_type", "Select school type"));
 		schoolType.keepStatusOnAction(true);
 
+		boolean showTypes = true;
 		if (getSession().getProvider() != null) {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
+				showTypes = false;
 				type = (SchoolType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
@@ -149,12 +156,15 @@ public class CourseParticipantsList extends CourseBlock {
 		courseType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course_type", "Select course type"));
 		courseType.keepStatusOnAction(true);
 
+		Integer typePK = null;
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)));
+			typePK = new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK));
+			Collection courseTypes = getBusiness().getCourseTypes(typePK);
 			courseType.addMenuElements(courseTypes);
 		}
 		else if (type != null) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()));
+			typePK = new Integer(type.getPrimaryKey().toString());
+			Collection courseTypes = getBusiness().getCourseTypes(typePK);
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -162,22 +172,28 @@ public class CourseParticipantsList extends CourseBlock {
 		course.setId(PARAMETER_COURSE_PK);
 		course.keepStatusOnAction(true);
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
+		course.setToSubmit();
 
-		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) && iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK)) {
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(PARAMETER_COURSE_TYPE_PK));
+		if (getSession().getProvider() != null && typePK != null) {
+			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, null, null);
 			course.addMenuElements(courses);
+		}
+
+		if (showTypes) {
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
+			formItem.add(label);
+			formItem.add(schoolType);
+			layer.add(formItem);
+		}
+		else if (type != null) {
+			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
 		}
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
-		formItem.add(label);
-		formItem.add(schoolType);
-		layer.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
+		Label label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
 		formItem.add(label);
 		formItem.add(courseType);
 		layer.add(formItem);
@@ -187,14 +203,6 @@ public class CourseParticipantsList extends CourseBlock {
 		label = new Label(getResourceBundle().getLocalizedString("course", "Course"), course);
 		formItem.add(label);
 		formItem.add(course);
-		layer.add(formItem);
-
-		SubmitButton fetch = new SubmitButton(getResourceBundle().getLocalizedString("get", "Get"));
-		fetch.setStyleClass("indentedButton");
-		fetch.setStyleClass("button");
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.add(fetch);
 		layer.add(formItem);
 
 		Layer clearLayer = new Layer(Layer.DIV);
@@ -268,29 +276,32 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.setStyleClass("personalID");
 		cell.add(new Text(getResourceBundle().getLocalizedString("personal_id", "Personal ID")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("address");
-		cell.add(new Text(getResourceBundle().getLocalizedString("address", "Address")));
-
-		cell = row.createHeaderCell();
-		cell.setStyleClass("postalCode");
-		cell.add(new Text(getResourceBundle().getLocalizedString("postal_code", "Postal code")));
-
-		cell = row.createHeaderCell();
-		if (!addViewParticipantLink && !addCheckboxes) {
-			cell.setStyleClass("lastColumn");
-		}
-		cell.setStyleClass("homePhone");
-		cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
-
-		if (addViewParticipantLink) {
+		if (!addCheckboxes) {
 			cell = row.createHeaderCell();
-			if (!addCheckboxes) {
+			cell.setStyleClass("address");
+			cell.add(new Text(getResourceBundle().getLocalizedString("address", "Address")));
+
+			cell = row.createHeaderCell();
+			cell.setStyleClass("postalCode");
+			cell.add(new Text(getResourceBundle().getLocalizedString("postal_code", "Postal code")));
+
+			cell = row.createHeaderCell();
+			if (!addViewParticipantLink) {
 				cell.setStyleClass("lastColumn");
 			}
-			cell.setStyleClass("view");
-			cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
+			cell.setStyleClass("homePhone");
+			cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
+
+			if (addViewParticipantLink) {
+				cell = row.createHeaderCell();
+				if (!addCheckboxes) {
+					cell.setStyleClass("lastColumn");
+				}
+				cell.setStyleClass("view");
+				cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
+			}
 		}
+
 		List checkboxesInfo = null;
 		if (addCheckboxes) {
 			checkboxesInfo = getCheckboxesInfo();
@@ -374,58 +385,59 @@ public class CourseParticipantsList extends CourseBlock {
 			cell.setStyleClass("personalID");
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
-			cell = row.createCell();
-			cell.setStyleClass("address");
-			if (address != null) {
-				cell.add(new Text(address.getStreetAddress()));
-			}
-			else {
-				cell.add(new Text("-"));
-			}
-
-			cell = row.createCell();
-			cell.setStyleClass("postalCode");
-			if (postalCode != null) {
-				cell.add(new Text(postalCode.getPostalAddress()));
-			}
-			else {
-				cell.add(new Text("-"));
-			}
-
-			cell = row.createCell();
-			if (!addViewParticipantLink && !addCheckboxes) {
-				cell.setStyleClass("lastColumn");
-			}
-			cell.setStyleClass("homePhone");
-			if (phone != null) {
-				cell.add(new Text(phone.getNumber()));
-			}
-			else {
-				cell.add(new Text("-"));
-			}
-
-			if (addViewParticipantLink) {
+			if (!addCheckboxes) {
 				cell = row.createCell();
-				Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
-				if (courseId != null) {
-					view.addParameter(PARAMETER_COURSE_PK, courseId);
+				cell.setStyleClass("address");
+				if (address != null) {
+					cell.add(new Text(address.getStreetAddress()));
 				}
-				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
-				if (schoolId != null) {
-					view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
+				else {
+					cell.add(new Text("-"));
 				}
-				if (schoolTypeId != null) {
-					view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
-				}
-				if (courseTypeId != null) {
-					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
-				}
-				view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
-				view.addParameter(PARAMETER_ACTION, 1);
-				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
-				cell.add(view);
-			}
 
+				cell = row.createCell();
+				cell.setStyleClass("postalCode");
+				if (postalCode != null) {
+					cell.add(new Text(postalCode.getPostalAddress()));
+				}
+				else {
+					cell.add(new Text("-"));
+				}
+
+				cell = row.createCell();
+				if (!addViewParticipantLink) {
+					cell.setStyleClass("lastColumn");
+				}
+				cell.setStyleClass("homePhone");
+				if (phone != null) {
+					cell.add(new Text(phone.getNumber()));
+				}
+				else {
+					cell.add(new Text("-"));
+				}
+
+				if (addViewParticipantLink) {
+					cell = row.createCell();
+					Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
+					if (courseId != null) {
+						view.addParameter(PARAMETER_COURSE_PK, courseId);
+					}
+					view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
+					if (schoolId != null) {
+						view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
+					}
+					if (schoolTypeId != null) {
+						view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
+					}
+					if (courseTypeId != null) {
+						view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
+					}
+					view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+					view.addParameter(PARAMETER_ACTION, 1);
+					view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
+					cell.add(view);
+				}
+			}
 			if (addCheckboxes) {
 				AdvancedProperty info = null;
 				for (int i = 0; i < checkboxesInfo.size(); i++) {

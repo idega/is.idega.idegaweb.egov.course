@@ -23,6 +23,7 @@ public class CourseComparator implements Comparator {
 	public static final int DATE_SORT = 4;
 	public static final int PLACES_SORT = 5;
 	public static final int FREE_PLACES_SORT = 6;
+	public static final int ID_SORT = 7;
 
 	private Locale locale;
 	private int compareBy = NAME_SORT;
@@ -40,6 +41,10 @@ public class CourseComparator implements Comparator {
 
 		int returner = 0;
 		switch (this.compareBy) {
+			case ID_SORT:
+				returner = idSort(course1, course2);
+				break;
+
 			case NAME_SORT:
 				returner = nameSort(course1, course2);
 				break;
@@ -70,6 +75,10 @@ public class CourseComparator implements Comparator {
 		}
 
 		return returner;
+	}
+
+	private int idSort(Course course1, Course course2) {
+		return collator.compare(course1.getPrimaryKey().toString(), course2.getPrimaryKey().toString());
 	}
 
 	private int nameSort(Course course1, Course course2) {

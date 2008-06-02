@@ -902,11 +902,9 @@ public class SimpleCourseApplication extends ApplicationForm {
 				e.printStackTrace();
 			}
 		}
-		if (certificateFee >= 0) {
-			cell = row.createHeaderCell();
-			cell.setStyleClass("certificateFee");
-			cell.add(new Text(iwrb.getLocalizedString("certificate_fee", "Certificate fee")));
-		}
+		cell = row.createHeaderCell();
+		cell.setStyleClass("certificateFee");
+		cell.add(new Text(iwrb.getLocalizedString("certificate_fee", "Certificate fee")));
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("amount");
@@ -943,10 +941,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 			cell.setStyleClass("personalID");
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
-			if (certificateFee >= 0) {
-				cell = row.createCell();
-				cell.setStyleClass("certificateFee");
+			cell = row.createCell();
+			cell.setStyleClass("certificateFee");
+			if (holder.getCost() > 0) {
+				cell.add(new Text(format.format(holder.getCost())));
+			}
+			else if (certificateFee >= 0) {
 				cell.add(new Text(format.format(certificateFee)));
+			}
+			else {
+				cell.add(Text.getNonBrakingSpace());
 			}
 
 			cell = row.createCell();

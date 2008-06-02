@@ -30,6 +30,8 @@ public class CourseConstants {
 	public static final String PROPERTY_USE_FIXED_PRICES = "egov.course.use.fixed.prices";
 	public static final String PROPERTY_USE_BIRTHYEARS = "egov.course.use.birthyears";
 	public static final String PROPERTY_ACCOUNTING_TYPE_PK = "egov.course.accounting.type";
+	public static final String PROPERTY_SHOW_ID_IN_NAME = "egov.course.show.id.in.name";
+	public static final String PROPERTY_INCEPTION_YEAR = "egov.course.inception.year";
 
 	public static final String APPLICATION_PROPERTY_COURSE_MAP = "egov.course.map";
 
@@ -49,5 +51,4 @@ public class CourseConstants {
 	public static final String COURSE_PREFIX = "course_";
 
 	public static final String DEFAULT_COURSE_CERTIFICATE_FEE = "defaultCourseCertificateFee";
-
 }

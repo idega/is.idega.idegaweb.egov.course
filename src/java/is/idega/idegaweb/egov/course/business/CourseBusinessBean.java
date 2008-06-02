@@ -516,7 +516,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
-	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -574,14 +574,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (price > 0) {
 			course.setCoursePrice(price);
 		}
+		if (cost > 0) {
+			course.setCourseCost(cost);
+		}
 
 		course.store();
 
 		return course;
 	}
 
-	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
-		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
+		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
@@ -732,7 +735,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public Map getCourseMapDWR(int providerPK, int schoolTypePK, int courseTypePK, String country) {
-		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK));
+		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK), null, null);
 		Map map = new LinkedHashMap();
 		if (coll != null) {
 			Locale locale = new Locale(country, country.toUpperCase());
@@ -939,7 +942,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map map = new LinkedHashMap();
-			Collection courses = getCourses(birth != null ? birth.getYear() : 0, iP, iST, iCT);
+			Collection courses = getCourses(birth != null ? birth.getYear() : 0, iP, iST, iCT, null, null);
 			if (courses != null) {
 				Iterator iter = courses.iterator();
 				while (iter.hasNext()) {
@@ -991,8 +994,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public CourseDWR getCourseDWR(Locale locale, Course course, boolean showYear) {
+		boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+
 		CourseDWR cDWR = new CourseDWR();
-		cDWR.setName(course.getName());
+		cDWR.setName(showIDInName ? course.getPrimaryKey().toString() + " - " + course.getName() : course.getName());
 		cDWR.setPk(course.getPrimaryKey().toString());
 		cDWR.setFrom(Integer.toString(course.getBirthyearFrom()));
 		cDWR.setTo(Integer.toString(course.getBirthyearTo()));
@@ -1035,14 +1040,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return cDWR;
 	}
 
-	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK) {
-		return getCourses(birthYear, null, schoolTypePK, courseTypePK);
+	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
+		return getCourses(birthYear, null, schoolTypePK, courseTypePK, fromDate, toDate);
 	}
 
-	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) {
+	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
 		Collection courses = new ArrayList();
 		try {
-			courses = getCourseHome().findAll(providerPK, schoolTypePK, courseTypePK, birthYear);
+			courses = getCourseHome().findAll(providerPK, schoolTypePK, courseTypePK, birthYear, fromDate, toDate);
 		}
 		catch (IDORelationshipException e) {
 			e.printStackTrace();
@@ -1053,10 +1058,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return courses;
 	}
 
-	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK) {
+	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
 		Collection courses = new ArrayList();
 		try {
-			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK);
+			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK, -1, fromDate, toDate);
 		}
 		catch (IDORelationshipException e) {
 			e.printStackTrace();
@@ -1462,14 +1467,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			Collection userApplications = (Collection) applications.get(user);
 			Iterator iter = userApplications.iterator();
 			int totalPrice = 0;
+			int totalCost = 0;
 			while (iter.hasNext()) {
 				ApplicationHolder holder = (ApplicationHolder) iter.next();
 				totalPrice += holder.getPrice();
+				totalCost += holder.getCourse().getCourseCost() > -1 ? holder.getCourse().getCourseCost() : 0;
 			}
 
 			PriceHolder priceHolder = new PriceHolder();
 			priceHolder.setUser(user);
 			priceHolder.setPrice(totalPrice);
+			priceHolder.setCost(totalCost);
 			userPrices.add(priceHolder);
 		}
 

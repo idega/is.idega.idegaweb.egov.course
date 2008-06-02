@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.idega.block.school.data.School;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -107,7 +108,12 @@ public class CourseAttendanceList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			if (providers != null) {
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+			}
+			else if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -147,7 +153,7 @@ public class CourseAttendanceList extends CourseBlock {
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_SCHOOL_TYPE) && iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE));
+			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), null, null);
 			course.addMenuElements(courses);
 		}
 

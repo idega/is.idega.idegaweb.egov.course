@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.rmi.RemoteException;
+import java.sql.Date;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
@@ -71,7 +72,10 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				SchoolType type = getSchoolBusiness(iwc).getSchoolType(iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK));
 				schoolTypeName = type.getSchoolTypeName();
 
-				Collection courses = business.getCourses(-1, getCourseSession(iwc).getProvider().getPrimaryKey(), iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK));
+				Date fromDate = iwc.isParameterSet(CourseBlock.PARAMETER_FROM_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_FROM_DATE)).getDate() : null;
+				Date toDate = iwc.isParameterSet(CourseBlock.PARAMETER_TO_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_TO_DATE)).getDate() : null;
+
+				Collection courses = business.getCourses(-1, getCourseSession(iwc).getProvider().getPrimaryKey(), iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK), fromDate, toDate);
 
 				this.buffer = writeXLS(iwc, courses);
 				setAsDownload(iwc, "students.xls", this.buffer.length());

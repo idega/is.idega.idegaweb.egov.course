@@ -1,16 +1,17 @@
 package is.idega.idegaweb.egov.course.data;
 
-
-import com.idega.data.IDOException;
-import com.idega.block.school.data.School;
-import com.idega.data.IDORelationshipException;
-import java.util.Collection;
-import javax.ejb.CreateException;
-import com.idega.block.school.data.SchoolType;
-import javax.ejb.FinderException;
 import java.sql.Date;
+import java.util.Collection;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+
+import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOEntity;
+import com.idega.data.IDOException;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDORelationshipException;
 
 public class CourseHomeImpl extends IDOFactory implements CourseHome {
 
@@ -47,9 +48,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
-	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
+	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear);
+		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, fromDate, toDate);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

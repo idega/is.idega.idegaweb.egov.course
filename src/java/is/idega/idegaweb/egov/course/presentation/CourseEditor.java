@@ -8,6 +8,7 @@ import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.DateInput;
 import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
@@ -57,6 +59,7 @@ public class CourseEditor extends CourseBlock {
 	private static final String PARAMETER_YEAR_TO = "prm_year_to";
 	private static final String PARAMETER_MAX_PER = "prm_max_participants";
 	private static final String PARAMETER_PRICE = "prm_price";
+	private static final String PARAMETER_COST = "prm_cost";
 
 	private static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
 
@@ -134,7 +137,8 @@ public class CourseEditor extends CourseBlock {
 			int birthYearTo = yearTo != null ? Integer.parseInt(yearTo) : -1;
 			int maxPer = Integer.parseInt(max);
 			float price = iwc.isParameterSet(PARAMETER_PRICE) ? Float.parseFloat(iwc.getParameter(PARAMETER_PRICE)) : 0;
-			getCourseBusiness(iwc).storeCourse(pk, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
+			float cost = iwc.isParameterSet(PARAMETER_COST) ? Float.parseFloat(iwc.getParameter(PARAMETER_COST)) : 0;
+			getCourseBusiness(iwc).storeCourse(pk, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -144,6 +148,8 @@ public class CourseEditor extends CourseBlock {
 	}
 
 	private Layer getNavigation(IWContext iwc) throws RemoteException {
+		int inceptionYear = Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_INCEPTION_YEAR, "2007"));
+
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -173,7 +179,12 @@ public class CourseEditor extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			if (providers != null) {
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+			}
+			else if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -224,6 +235,20 @@ public class CourseEditor extends CourseBlock {
 			courseType.addMenuElements(courseTypes);
 		}
 
+		IWTimestamp stamp = new IWTimestamp();
+
+		DateInput fromDate = new DateInput(PARAMETER_FROM_DATE);
+		fromDate.setYearRange(inceptionYear, stamp.getYear());
+		fromDate.keepStatusOnAction(true);
+
+		DateInput toDate = new DateInput(PARAMETER_TO_DATE);
+		toDate.setYearRange(inceptionYear, stamp.getYear());
+		toDate.keepStatusOnAction(true);
+		toDate.setDate(stamp.getDate());
+
+		stamp.addMonths(-1);
+		fromDate.setDate(stamp.getDate());
+
 		if (showTypes) {
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -241,6 +266,20 @@ public class CourseEditor extends CourseBlock {
 		Label label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
 		formItem.add(label);
 		formItem.add(courseType);
+		layer.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(getResourceBundle().getLocalizedString("from", "From"), fromDate);
+		formItem.add(label);
+		formItem.add(fromDate);
+		layer.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(getResourceBundle().getLocalizedString("to", "To"), toDate);
+		formItem.add(label);
+		formItem.add(toDate);
 		layer.add(formItem);
 
 		SubmitButton fetch = new SubmitButton(getResourceBundle().getLocalizedString("get", "Get"));
@@ -289,10 +328,24 @@ public class CourseEditor extends CourseBlock {
 		column.setSpan(2);
 		column.setWidth("12");
 
+		IWTimestamp stamp = new IWTimestamp();
+		stamp.addMonths(-1);
+
+		Date fromDate = stamp.getDate();
+		if (iwc.isParameterSet(PARAMETER_FROM_DATE)) {
+			fromDate = new IWTimestamp(iwc.getParameter(PARAMETER_FROM_DATE)).getDate();
+		}
+
+		stamp.addMonths(1);
+		Date toDate = stamp.getDate();
+		if (iwc.isParameterSet(PARAMETER_TO_DATE)) {
+			fromDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
+		}
+
 		Collection courses = new ArrayList();
 		if (getSession().getProvider() != null) {
 			try {
-				courses = getCourseBusiness(iwc).getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey() : null), iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null);
+				courses = getCourseBusiness(iwc).getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey() : null), iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate);
 			}
 			catch (RemoteException rex) {
 				throw new IBORuntimeException(rex);
@@ -429,8 +482,8 @@ public class CourseEditor extends CourseBlock {
 				else {
 					CoursePrice price = course.getPrice();
 					if (start != null && price != null) {
-						IWTimestamp toDate = new IWTimestamp(getBusiness().getEndDate(price, new IWTimestamp(start).getDate()));
-						cell.add(new Text(toDate.getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
+						IWTimestamp date = new IWTimestamp(getBusiness().getEndDate(price, new IWTimestamp(start).getDate()));
+						cell.add(new Text(date.getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
 					}
 				}
 
@@ -536,6 +589,8 @@ public class CourseEditor extends CourseBlock {
 		price.setId("price");
 		price.setDisabled(!useFixedPrices);
 
+		TextInput courseCost = new TextInput(PARAMETER_COST);
+
 		TextInput preCarePrice = new TextInput("preCarePrice");
 		preCarePrice.setId("preCarePrice");
 		preCarePrice.setDisabled(true);
@@ -612,6 +667,8 @@ public class CourseEditor extends CourseBlock {
 			else if (course.getCoursePrice() > 0) {
 				price.setContent(String.valueOf((int) course.getCoursePrice()));
 				price.setDisabled(false);
+
+				courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 			}
 
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
@@ -823,6 +880,14 @@ public class CourseEditor extends CourseBlock {
 			label = new Label(localize("post_care_price", "Post care price"), postCarePrice);
 			layer.add(label);
 			layer.add(postCarePrice);
+			section.add(layer);
+		}
+		else {
+			layer = new Layer(Layer.DIV);
+			layer.setStyleClass("formItem");
+			label = new Label(localize("course_cost", "Course cost"), courseCost);
+			layer.add(label);
+			layer.add(courseCost);
 			section.add(layer);
 		}
 
