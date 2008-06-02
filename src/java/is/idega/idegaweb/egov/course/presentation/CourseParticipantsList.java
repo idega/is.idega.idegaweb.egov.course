@@ -420,6 +420,7 @@ public class CourseParticipantsList extends CourseBlock {
 				if (courseTypeId != null) {
 					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
 				}
+				view.addParameter(PARAMETER_ACTION, 1);
 				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
 				cell.add(view);
 			}
