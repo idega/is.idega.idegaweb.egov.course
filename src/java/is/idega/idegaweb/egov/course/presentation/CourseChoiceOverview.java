@@ -61,9 +61,7 @@ public class CourseChoiceOverview extends CourseBlock {
 	public void present(IWContext iwc) {
 		try {
 			CourseChoice choice = null;
-			System.out.println("Checking PARAMETER_CHOICE_PK");
 			if (iwc.isParameterSet(PARAMETER_CHOICE_PK)) {
-				System.out.println("PARAMETER_CHOICE_PK is set: " + iwc.getParameter(PARAMETER_CHOICE_PK));
 				try {
 					choice = getBusiness().getCourseChoiceHome().findByPrimaryKey(iwc.getParameter(PARAMETER_CHOICE_PK));
 				}
@@ -73,7 +71,6 @@ public class CourseChoiceOverview extends CourseBlock {
 			}
 
 			if (choice != null) {
-				System.out.println("PARAMETER_ACTION is: " + parseAction(iwc));
 				switch (parseAction(iwc)) {
 					case ACTION_VIEW:
 						getViewerForm(iwc, choice);
