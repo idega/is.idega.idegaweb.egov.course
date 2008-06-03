@@ -31,6 +31,11 @@ public interface CourseType extends IDOEntity {
 	public String getAccountingKey();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getAbbreviation
+	 */
+	public String getAbbreviation();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#getOrder
 	 */
 	public int getOrder();
@@ -59,6 +64,11 @@ public interface CourseType extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setAccountingKey
 	 */
 	public void setAccountingKey(String key);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setAbbreviation
+	 */
+	public void setAbbreviation(String abbreviation);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setOrder

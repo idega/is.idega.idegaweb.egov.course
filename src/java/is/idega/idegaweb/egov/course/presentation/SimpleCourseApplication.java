@@ -712,7 +712,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		form.add(bottom);
 
 		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(iCompanyRegistration ? ACTION_PHASE_4 : ACTION_PHASE_5));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 

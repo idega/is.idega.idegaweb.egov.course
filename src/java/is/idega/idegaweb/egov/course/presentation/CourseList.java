@@ -110,7 +110,13 @@ public class CourseList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			if (providers != null) {
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
+			}
+			else if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -176,17 +182,19 @@ public class CourseList extends CourseBlock {
 		sorting.keepStatusOnAction(true);
 
 		IWTimestamp stamp = new IWTimestamp();
+		stamp.addYears(1);
 
 		DateInput fromDate = new DateInput(PARAMETER_FROM_DATE);
 		fromDate.setYearRange(inceptionYear, stamp.getYear());
 		fromDate.keepStatusOnAction(true);
 
 		DateInput toDate = new DateInput(PARAMETER_TO_DATE);
-		toDate.setYearRange(inceptionYear, stamp.getYear());
+		toDate.setYearRange(inceptionYear, stamp.getYear() + 1);
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
 
 		stamp.addMonths(-1);
+		stamp.addYears(-1);
 		fromDate.setDate(stamp.getDate());
 
 		if (showTypes) {
@@ -267,6 +275,8 @@ public class CourseList extends CourseBlock {
 	}
 
 	protected Table2 getCourses(IWContext iwc) throws RemoteException {
+		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
+
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -290,20 +300,21 @@ public class CourseList extends CourseBlock {
 			cell = row.createHeaderCell();
 			cell.setStyleClass("provider");
 			cell.add(new Text(getResourceBundle().getLocalizedString("provider", "Provider")));
-
 		}
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("type");
 		cell.add(new Text(getResourceBundle().getLocalizedString("type", "Type")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("from");
-		cell.add(new Text(getResourceBundle().getLocalizedString("from", "From")));
+		if (useBirthYears) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("from");
+			cell.add(new Text(getResourceBundle().getLocalizedString("from", "From")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("to");
-		cell.add(new Text(getResourceBundle().getLocalizedString("to", "To")));
+			cell = row.createHeaderCell();
+			cell.setStyleClass("to");
+			cell.add(new Text(getResourceBundle().getLocalizedString("to", "To")));
+		}
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("dateFrom");
@@ -357,9 +368,10 @@ public class CourseList extends CourseBlock {
 		}
 
 		stamp.addMonths(1);
+		stamp.addYears(1);
 		Date toDate = stamp.getDate();
 		if (iwc.isParameterSet(PARAMETER_TO_DATE)) {
-			fromDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
+			toDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
 		}
 
 		List courses = new ArrayList();
@@ -415,13 +427,15 @@ public class CourseList extends CourseBlock {
 			cell.setStyleClass("type");
 			cell.add(new Text(type.getName()));
 
-			cell = row.createCell();
-			cell.setStyleClass("from");
-			cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
+			if (useBirthYears) {
+				cell = row.createCell();
+				cell.setStyleClass("from");
+				cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
 
-			cell = row.createCell();
-			cell.setStyleClass("to");
-			cell.add(new Text(String.valueOf(course.getBirthyearTo())));
+				cell = row.createCell();
+				cell.setStyleClass("to");
+				cell.add(new Text(String.valueOf(course.getBirthyearTo())));
+			}
 
 			cell = row.createCell();
 			cell.setStyleClass("dateFrom");

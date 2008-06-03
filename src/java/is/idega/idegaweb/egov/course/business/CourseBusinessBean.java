@@ -735,6 +735,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public Map getCourseMapDWR(int providerPK, int schoolTypePK, int courseTypePK, String country) {
+		boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+
 		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK), null, null);
 		Map map = new LinkedHashMap();
 		if (coll != null) {
@@ -744,7 +746,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			Iterator iter = coll.iterator();
 			while (iter.hasNext()) {
 				Course course = (Course) iter.next();
-				map.put(course.getPrimaryKey(), course.getName());
+				String name = "";
+				if (showIDInName) {
+					CourseType type = course.getCourseType();
+					if (type.getAbbreviation() != null) {
+						name += type.getAbbreviation();
+					}
+
+					name += course.getPrimaryKey().toString() + " - ";
+				}
+				name += course.getName();
+
+				map.put(course.getPrimaryKey(), name);
 			}
 		}
 		return map;
@@ -994,10 +1007,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public CourseDWR getCourseDWR(Locale locale, Course course, boolean showYear) {
-		boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-
 		CourseDWR cDWR = new CourseDWR();
-		cDWR.setName(showIDInName ? course.getPrimaryKey().toString() + " - " + course.getName() : course.getName());
+		cDWR.setName(course.getName());
 		cDWR.setPk(course.getPrimaryKey().toString());
 		cDWR.setFrom(Integer.toString(course.getBirthyearFrom()));
 		cDWR.setTo(Integer.toString(course.getBirthyearTo()));

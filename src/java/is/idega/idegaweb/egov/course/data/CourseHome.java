@@ -1,16 +1,15 @@
 package is.idega.idegaweb.egov.course.data;
 
-import java.sql.Date;
-import java.util.Collection;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOException;
-import com.idega.data.IDOHome;
+import com.idega.block.school.data.School;
 import com.idega.data.IDORelationshipException;
+import java.util.Collection;
+import javax.ejb.CreateException;
+import com.idega.data.IDOHome;
+import com.idega.block.school.data.SchoolType;
+import javax.ejb.FinderException;
+import java.sql.Date;
 
 public interface CourseHome extends IDOHome {
 

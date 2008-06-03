@@ -1,8 +1,8 @@
 package is.idega.idegaweb.egov.course.data;
 
-import java.sql.Timestamp;
 
 import com.idega.block.school.data.School;
+import java.sql.Timestamp;
 import com.idega.data.IDOEntity;
 
 public interface Course extends IDOEntity {

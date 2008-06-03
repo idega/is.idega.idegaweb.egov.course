@@ -179,7 +179,13 @@ public class CourseEditor extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			if (providers != null) {
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
+			}
+			else if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -231,17 +237,19 @@ public class CourseEditor extends CourseBlock {
 		}
 
 		IWTimestamp stamp = new IWTimestamp();
+		stamp.addYears(1);
 
 		DateInput fromDate = new DateInput(PARAMETER_FROM_DATE);
 		fromDate.setYearRange(inceptionYear, stamp.getYear());
 		fromDate.keepStatusOnAction(true);
 
 		DateInput toDate = new DateInput(PARAMETER_TO_DATE);
-		toDate.setYearRange(inceptionYear, stamp.getYear());
+		toDate.setYearRange(inceptionYear, stamp.getYear() + 1);
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
 
 		stamp.addMonths(-1);
+		stamp.addYears(-1);
 		fromDate.setDate(stamp.getDate());
 
 		if (showTypes) {
@@ -332,9 +340,10 @@ public class CourseEditor extends CourseBlock {
 		}
 
 		stamp.addMonths(1);
+		stamp.addYears(1);
 		Date toDate = stamp.getDate();
 		if (iwc.isParameterSet(PARAMETER_TO_DATE)) {
-			fromDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
+			toDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
 		}
 
 		Collection courses = new ArrayList();
@@ -414,11 +423,15 @@ public class CourseEditor extends CourseBlock {
 				Link edit = new Link(getBundle().getImage("edit.png", localize("edit", "Edit")));
 				edit.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
 				edit.addParameter(PARAMETER_ACTION, ACTION_EDIT);
+				edit.maintainParameter(PARAMETER_FROM_DATE, iwc);
+				edit.maintainParameter(PARAMETER_TO_DATE, iwc);
 
 				Link delete = new Link(getBundle().getImage("delete.png", localize("delete", "Delete")));
 				delete.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
 				delete.addParameter(PARAMETER_ACTION, ACTION_DELETE);
 				delete.setClickConfirmation(getResourceBundle().getLocalizedString("course.confirm_delete", "Are you sure you want to delete the course selected?"));
+				delete.maintainParameter(PARAMETER_FROM_DATE, iwc);
+				delete.maintainParameter(PARAMETER_TO_DATE, iwc);
 
 				cell = row.createCell();
 				cell.setStyleClass("firstColumn");
@@ -566,6 +579,8 @@ public class CourseEditor extends CourseBlock {
 		form.setID("courseEditor");
 		form.setStyleClass("adminForm");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(coursePK != null ? ACTION_EDIT : ACTION_NEW)));
+		form.maintainParameter(PARAMETER_FROM_DATE);
+		form.maintainParameter(PARAMETER_TO_DATE);
 
 		Course course = getCourseBusiness(iwc).getCourse(coursePK);
 

@@ -12,6 +12,7 @@ import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -101,7 +102,12 @@ public class CourseParticipantsList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			if (providers != null) {
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+			}
+			else if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -170,8 +176,24 @@ public class CourseParticipantsList extends CourseBlock {
 		course.setToSubmit();
 
 		if (getSession().getProvider() != null && typePK != null) {
+			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, null, null);
-			course.addMenuElements(courses);
+
+			Iterator iter = courses.iterator();
+			while (iter.hasNext()) {
+				Course element = (Course) iter.next();
+				String name = "";
+				if (showIDInName) {
+					CourseType type = element.getCourseType();
+					if (type.getAbbreviation() != null) {
+						name += type.getAbbreviation();
+					}
+
+					name += element.getPrimaryKey().toString() + " - ";
+				}
+				name += element.getName();
+				course.addMenuElement(element.getPrimaryKey().toString(), name);
+			}
 		}
 
 		if (showTypes) {
