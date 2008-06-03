@@ -103,7 +103,11 @@ public class CourseChoiceOverview extends CourseBlock {
 	private int parseAction(IWContext iwc) {
 		int action = ACTION_VIEW;
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
-			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
+			try {
+				action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
+			} catch(NumberFormatException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return action;
