@@ -74,11 +74,17 @@ public class CourseComparator implements Comparator {
 				break;
 		}
 
+		if (returner == 0) {
+			returner = idSort(course1, course2);
+		}
+
 		return returner;
 	}
 
 	private int idSort(Course course1, Course course2) {
-		return collator.compare(course1.getPrimaryKey().toString(), course2.getPrimaryKey().toString());
+		Integer pk1 = (Integer) course1.getPrimaryKey();
+		Integer pk2 = (Integer) course2.getPrimaryKey();
+		return pk1.intValue() - pk2.intValue();
 	}
 
 	private int nameSort(Course course1, Course course2) {
@@ -97,7 +103,13 @@ public class CourseComparator implements Comparator {
 		IWTimestamp start1 = new IWTimestamp(course1.getStartDate());
 		IWTimestamp start2 = new IWTimestamp(course2.getStartDate());
 
-		return (int) (start1.getTime().getTime() - start2.getTime().getTime());
+		if (start1.isEarlierThan(start2)) {
+			return -1;
+		}
+		else if (start2.isEarlierThan(start1)) {
+			return 1;
+		}
+		return 0;
 	}
 
 	private int placesSort(Course course1, Course course2) {

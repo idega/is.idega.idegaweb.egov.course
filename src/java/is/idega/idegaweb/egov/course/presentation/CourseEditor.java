@@ -33,7 +33,6 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
-import com.idega.presentation.ui.DateInput;
 import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
@@ -148,8 +147,6 @@ public class CourseEditor extends CourseBlock {
 	}
 
 	private Layer getNavigation(IWContext iwc) throws RemoteException {
-		int inceptionYear = Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_INCEPTION_YEAR, "2007"));
-
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -239,12 +236,10 @@ public class CourseEditor extends CourseBlock {
 		IWTimestamp stamp = new IWTimestamp();
 		stamp.addYears(1);
 
-		DateInput fromDate = new DateInput(PARAMETER_FROM_DATE);
-		fromDate.setYearRange(inceptionYear, stamp.getYear());
+		DatePicker fromDate = new DatePicker(PARAMETER_FROM_DATE);
 		fromDate.keepStatusOnAction(true);
 
-		DateInput toDate = new DateInput(PARAMETER_TO_DATE);
-		toDate.setYearRange(inceptionYear, stamp.getYear() + 1);
+		DatePicker toDate = new DatePicker(PARAMETER_TO_DATE);
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
 
@@ -273,14 +268,16 @@ public class CourseEditor extends CourseBlock {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("from", "From"), fromDate);
+		label = new Label();
+		label.setLabel(getResourceBundle().getLocalizedString("from", "From"));
 		formItem.add(label);
 		formItem.add(fromDate);
 		layer.add(formItem);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("to", "To"), toDate);
+		label = new Label();
+		label.setLabel(getResourceBundle().getLocalizedString("to", "To"));
 		formItem.add(label);
 		formItem.add(toDate);
 		layer.add(formItem);
@@ -290,6 +287,7 @@ public class CourseEditor extends CourseBlock {
 		fetch.setStyleClass("button");
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("buttonItem");
 		formItem.add(fetch);
 		layer.add(formItem);
 
@@ -299,6 +297,7 @@ public class CourseEditor extends CourseBlock {
 			newLink.setStyleClass("button");
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("buttonItem");
 			formItem.add(newLink);
 			layer.add(formItem);
 		}
@@ -380,7 +379,7 @@ public class CourseEditor extends CourseBlock {
 		cell.setStyleClass("type");
 		cell.add(new Text(localize("type", "Type")));
 
-		if (!useBirthYears) {
+		if (useBirthYears) {
 			cell = row.createHeaderCell();
 			cell.setStyleClass("yearFrom");
 			cell.add(new Text(localize("from", "From")));
@@ -436,6 +435,9 @@ public class CourseEditor extends CourseBlock {
 				cell = row.createCell();
 				cell.setStyleClass("firstColumn");
 				cell.setStyleClass("number");
+				if (cType.getAbbreviation() != null) {
+					cell.add(new Text(cType.getAbbreviation()));
+				}
 				cell.add(new Text(course.getPrimaryKey().toString()));
 
 				cell = row.createCell();
@@ -465,7 +467,7 @@ public class CourseEditor extends CourseBlock {
 					cell.add(new Text(cType.getName()));
 				}
 
-				if (!useBirthYears) {
+				if (useBirthYears) {
 					cell = row.createCell();
 					cell.setStyleClass("yearFrom");
 					cell.add(new Text(String.valueOf(course.getBirthyearFrom())));

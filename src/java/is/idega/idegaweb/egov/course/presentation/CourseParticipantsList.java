@@ -102,12 +102,7 @@ public class CourseParticipantsList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			Collection providersList = getBusiness().getProviders();
-			if (providersList.size() == 1) {
-				School school = (School) providersList.iterator().next();
-				getSession().setProvider(school);
-			}
-			else if (providers != null) {
+			if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -285,22 +280,28 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.setStyleClass("number");
 		cell.add(Text.getNonBrakingSpace());
 
+		int columns = 1;
+
 		cell = row.createHeaderCell();
 		cell.setStyleClass("name");
 		cell.add(new Text(getResourceBundle().getLocalizedString("name", "Name")));
+		columns++;
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("personalID");
 		cell.add(new Text(getResourceBundle().getLocalizedString("personal_id", "Personal ID")));
+		columns++;
 
 		if (!addCheckboxes) {
 			cell = row.createHeaderCell();
 			cell.setStyleClass("address");
 			cell.add(new Text(getResourceBundle().getLocalizedString("address", "Address")));
+			columns++;
 
 			cell = row.createHeaderCell();
 			cell.setStyleClass("postalCode");
 			cell.add(new Text(getResourceBundle().getLocalizedString("postal_code", "Postal code")));
+			columns++;
 
 			cell = row.createHeaderCell();
 			if (!addViewParticipantLink) {
@@ -308,6 +309,7 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 			cell.setStyleClass("homePhone");
 			cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
+			columns++;
 
 			if (addViewParticipantLink) {
 				cell = row.createHeaderCell();
@@ -316,6 +318,7 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 				cell.setStyleClass("view");
 				cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
+				columns++;
 			}
 		}
 
@@ -332,6 +335,7 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 				cell.setStyleClass("courseChoiseManagement");
 				cell.add(new Text(info.getId()));
+				columns++;
 			}
 		}
 
@@ -483,7 +487,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		cell = row.createCell();
 		cell.setStyleClass("numberOfParticipants");
-		cell.setColumnSpan(6);
+		cell.setColumnSpan(columns);
 		cell.add(new Text(getResourceBundle().getLocalizedString("number_of_participants", "Number of participants") + ": " + (iRow - 1)));
 
 		return table;

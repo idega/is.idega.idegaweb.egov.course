@@ -169,7 +169,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			form.maintainParameter(PARAMETER_APPLICANT_OPTION);
 			form.maintainParameter(PARAMETER_PERSONAL_ID);
 		}
-		if (state != ACTION_PHASE_5) {
+		if (state != ACTION_PHASE_4) {
 			form.maintainParameter(PARAMETER_AGREEMENT);
 			form.maintainParameter(PARAMETER_HAS_DYSLEXIA);
 		}
@@ -740,7 +740,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		heading.setStyleClass("applicationHeading");
 		form.add(heading);
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.applicant_information", "Applicant information"), 5, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.applicant_information", "Applicant information"), 4, numberOfPhases));
 
 		form.add(getPersonInfo(iwc, applicant));
 
@@ -849,7 +849,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		heading.setStyleClass("applicationHeading");
 		form.add(heading);
 
-		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.payment_information", "Payment information"), 6, numberOfPhases));
+		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.payment_information", "Payment information"), 5, numberOfPhases));
 
 		form.add(getPersonInfo(iwc, null));
 
@@ -926,10 +926,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 			User user = holder.getUser();
 
 			float price = holder.getPrice();
-			if (certificateFee > 0) {
-				certificateFees += certificateFee;
-				totalPrice += certificateFee;
-			}
 			totalPrice += price;
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
@@ -945,9 +941,11 @@ public class SimpleCourseApplication extends ApplicationForm {
 			cell.setStyleClass("certificateFee");
 			if (holder.getCost() > 0) {
 				cell.add(new Text(format.format(holder.getCost())));
+				totalPrice += holder.getCost();
 			}
 			else if (certificateFee >= 0) {
 				cell.add(new Text(format.format(certificateFee)));
+				totalPrice += certificateFee;
 			}
 			else {
 				cell.add(Text.getNonBrakingSpace());
@@ -984,7 +982,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		section.add(table);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.payer_information", "Payer information"));
+		heading = new Heading1(this.iwrb.getLocalizedString("application.reference_number_information", "Reference number information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
 

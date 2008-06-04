@@ -35,7 +35,7 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.DownloadLink;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
-import com.idega.presentation.ui.DateInput;
+import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
@@ -83,8 +83,6 @@ public class CourseList extends CourseBlock {
 	}
 
 	protected Layer getNavigation(IWContext iwc) throws RemoteException {
-		int inceptionYear = Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_INCEPTION_YEAR, "2007"));
-
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -184,12 +182,12 @@ public class CourseList extends CourseBlock {
 		IWTimestamp stamp = new IWTimestamp();
 		stamp.addYears(1);
 
-		DateInput fromDate = new DateInput(PARAMETER_FROM_DATE);
-		fromDate.setYearRange(inceptionYear, stamp.getYear());
+		DatePicker fromDate = new DatePicker(PARAMETER_FROM_DATE);
+		fromDate.setStyleClass("dateInput");
 		fromDate.keepStatusOnAction(true);
 
-		DateInput toDate = new DateInput(PARAMETER_TO_DATE);
-		toDate.setYearRange(inceptionYear, stamp.getYear() + 1);
+		DatePicker toDate = new DatePicker(PARAMETER_TO_DATE);
+		toDate.setStyleClass("dateInput");
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
 
@@ -218,14 +216,16 @@ public class CourseList extends CourseBlock {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("from", "From"), fromDate);
+		label = new Label();
+		label.setLabel(getResourceBundle().getLocalizedString("from", "From"));
 		formItem.add(label);
 		formItem.add(fromDate);
 		layer.add(formItem);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("to", "To"), toDate);
+		label = new Label();
+		label.setLabel(getResourceBundle().getLocalizedString("to", "To"));
 		formItem.add(label);
 		formItem.add(toDate);
 		layer.add(formItem);
@@ -399,6 +399,9 @@ public class CourseList extends CourseBlock {
 			cell = row.createCell();
 			cell.setStyleClass("firstColumn");
 			cell.setStyleClass("number");
+			if (type.getAbbreviation() != null) {
+				cell.add(new Text(type.getAbbreviation()));
+			}
 			cell.add(new Text(course.getPrimaryKey().toString()));
 
 			cell = row.createCell();
