@@ -11,8 +11,8 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
 import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -43,6 +43,7 @@ import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
@@ -89,8 +90,8 @@ public class CourseParticipantsList extends CourseBlock {
 
 		List scripts = new ArrayList();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
-		scripts.add("/dwr/engine.js");
-		scripts.add("/dwr/util.js");
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		if (!isSchoolUser()) {
@@ -246,24 +247,9 @@ public class CourseParticipantsList extends CourseBlock {
 		return link;
 	}
 
-	private List getCheckboxesInfo() {
-		List info = new ArrayList();
-
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_from_goverment_office", "Verfication from government office"), CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("certificate_of_property", "Certificate of property"), CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("criminal_record", "Criminal record"), CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("verification_of_payment", "Verification of payment"), CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("need_verification_from_goverment_office", "Needs verification from goverment office"), CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
-		info.add(new AdvancedProperty(getResourceBundle().getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
-
-		return info;
-	}
-
 	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink, boolean addCheckboxes) throws RemoteException {
 		if (addCheckboxes) {
-			StringBuffer action = new StringBuffer("function manageCourseChoiceSettings(parameters) {showLoadingMessage(parameters[0]); var box = document.getElementById(parameters[1]); CourseDWRUtil.manageCourseChoiceSettings(parameters[2], box.name, box.checked, {callback: function(result) {closeAllLoadingMessages();}});}");
-			PresentationUtil.addJavaScriptActionToBody(iwc, action.toString());
+			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, getBundle().getVirtualPathWithFileNameString("javascript/CourseParticipantsListHelper.js"));
 		}
 
 		Table2 table = new Table2();
@@ -324,7 +310,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		List checkboxesInfo = null;
 		if (addCheckboxes) {
-			checkboxesInfo = getCheckboxesInfo();
+			checkboxesInfo = getBusiness().getCheckBoxesForCourseParticipants(getResourceBundle());
 			AdvancedProperty info = null;
 			for (int i = 0; i < checkboxesInfo.size(); i++) {
 				info = (AdvancedProperty) checkboxesInfo.get(i);
@@ -413,7 +399,7 @@ public class CourseParticipantsList extends CourseBlock {
 					cell.add(new Text(address.getStreetAddress()));
 				}
 				else {
-					cell.add(new Text("-"));
+					cell.add(new Text(CoreConstants.MINUS));
 				}
 
 				cell = row.createCell();
@@ -422,7 +408,7 @@ public class CourseParticipantsList extends CourseBlock {
 					cell.add(new Text(postalCode.getPostalAddress()));
 				}
 				else {
-					cell.add(new Text("-"));
+					cell.add(new Text(CoreConstants.MINUS));
 				}
 
 				cell = row.createCell();
@@ -434,7 +420,7 @@ public class CourseParticipantsList extends CourseBlock {
 					cell.add(new Text(phone.getNumber()));
 				}
 				else {
-					cell.add(new Text("-"));
+					cell.add(new Text(CoreConstants.MINUS));
 				}
 
 				if (addViewParticipantLink) {
@@ -461,15 +447,36 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 			if (addCheckboxes) {
 				AdvancedProperty info = null;
+				CheckBox box = null;
+				boolean disabled = false;
+				boolean show = true;
+				List rowData = getBusiness().getCourseParticipantListRowData(choice, getResourceBundle());
+				if (rowData == null || checkboxesInfo.size() != rowData.size()) {
+					throw new RemoteException("Can not add checkboxes to list!");
+				}
+				CourseParticipantListRowData data = null;
 				for (int i = 0; i < checkboxesInfo.size(); i++) {
 					info = (AdvancedProperty) checkboxesInfo.get(i);
-
+					data = (CourseParticipantListRowData) rowData.get(i);
+					
 					cell = row.createCell();
-					if (i + 1 == checkboxesInfo.size()) {
-						cell.setStyleClass("lastColumn");
-					}
 					cell.setStyleClass("courseChoiseManagement");
-					cell.add(getCourseChoiseManagementCheckbox(info, choice, loadingMessage));
+
+					disabled = data.isDisabled();
+					show = data.isShow();
+					
+					box = getCourseChoiseManagementCheckbox(info, choice, loadingMessage, disabled);
+					
+					if (data.isForceToCheck()) {
+						box.setChecked(true);
+					}
+					
+					if (show) {
+						cell.add(box);
+					}
+					else {
+						cell.add(new Text(CoreConstants.MINUS));
+					}
 				}
 			}
 
@@ -493,8 +500,9 @@ public class CourseParticipantsList extends CourseBlock {
 		return table;
 	}
 
-	private CheckBox getCourseChoiseManagementCheckbox(AdvancedProperty info, CourseChoice choise, String message) {
+	private CheckBox getCourseChoiseManagementCheckbox(AdvancedProperty info, CourseChoice choise, String message, boolean disabled) {
 		CheckBox box = new CheckBox(info.getValue());
+		box.setDisabled(disabled);
 		box.setChecked(choise.getBooleanValueFromColumn(info.getValue()));
 		StringBuffer action = new StringBuffer("manageCourseChoiceSettings(['").append(message).append("', '").append(box.getId()).append("', '");
 		action.append(choise.getPrimaryKey().toString()).append("']);");

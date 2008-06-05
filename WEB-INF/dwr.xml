@@ -16,7 +16,15 @@
 	<convert converter="bean" match="is.idega.idegaweb.egov.course.business.CourseDWR"/>
 	<convert converter="bean" match="is.idega.idegaweb.egov.course.business.CoursePriceDWR"/>
 	<convert converter="bean" match="is.idega.idegaweb.egov.course.business.UserDWR"/>
+	<convert match="is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData" converter="bean" />
   </allow>
   <signatures>
+  	<![CDATA[
+		import java.util.List;
+		
+		import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
+		
+  		List<CourseParticipantListRowData> CourseDWRUtil.manageCourseChoiceSettings(String, String, Boolean);
+  	]]>
   </signatures>
 </dwr>

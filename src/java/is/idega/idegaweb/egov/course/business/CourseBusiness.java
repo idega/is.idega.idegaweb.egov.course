@@ -37,6 +37,7 @@ import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolArea;
 import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOService;
+import com.idega.idegaweb.IWResourceBundle;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
@@ -511,5 +512,9 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#manageCourseChoiceSettings
 	 */
-	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value) throws RemoteException;
+	public List manageCourseChoiceSettings(String courseChoiceId, String columnName, Boolean value) throws RemoteException;
+	
+	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb);
+	
+	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb);
 }
