@@ -10,6 +10,8 @@ package is.idega.idegaweb.egov.course.presentation;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
+import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
@@ -25,8 +27,10 @@ import com.idega.block.school.data.SchoolType;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
+import com.idega.core.file.data.ICFile;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
+import com.idega.data.IDOLookup;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
@@ -181,11 +185,12 @@ public class CourseParticipantsList extends CourseBlock {
 				String name = "";
 				if (showIDInName) {
 					CourseType type = element.getCourseType();
-					if (type.getAbbreviation() != null) {
-						name += type.getAbbreviation();
-					}
 
 					name += element.getPrimaryKey().toString() + " - ";
+
+					if (type.getAbbreviation() != null && type.showAbbreviation()) {
+						name += type.getAbbreviation() + " ";
+					}
 				}
 				name += element.getName();
 				course.addMenuElement(element.getPrimaryKey().toString(), name);
@@ -252,6 +257,8 @@ public class CourseParticipantsList extends CourseBlock {
 			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, getBundle().getVirtualPathWithFileNameString("javascript/CourseParticipantsListHelper.js"));
 		}
 
+		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
+
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -290,12 +297,22 @@ public class CourseParticipantsList extends CourseBlock {
 			columns++;
 
 			cell = row.createHeaderCell();
-			if (!addViewParticipantLink) {
+			if (!addViewParticipantLink && !showCertificates) {
 				cell.setStyleClass("lastColumn");
 			}
 			cell.setStyleClass("homePhone");
 			cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
 			columns++;
+
+			if (showCertificates) {
+				cell = row.createHeaderCell();
+				if (!addViewParticipantLink) {
+					cell.setStyleClass("lastColumn");
+				}
+				cell.setStyleClass("certificate");
+				cell.add(new Text(getResourceBundle().getLocalizedString("pdf", "PDF")));
+				columns++;
+			}
 
 			if (addViewParticipantLink) {
 				cell = row.createHeaderCell();
@@ -319,7 +336,8 @@ public class CourseParticipantsList extends CourseBlock {
 				if (i + 1 == checkboxesInfo.size()) {
 					cell.setStyleClass("lastColumn");
 				}
-				cell.setStyleClass("courseChoiseManagement");
+				cell.setStyleClass(info.getValue());
+				cell.setStyleClass("courseChoiceManagement");
 				cell.add(new Text(info.getId()));
 				columns++;
 			}
@@ -329,10 +347,15 @@ public class CourseParticipantsList extends CourseBlock {
 		int iRow = 1;
 
 		Course course = null;
+		CourseType type = null;
 		Collection choices = new ArrayList();
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK));
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
+			type = course.getCourseType();
+			if (type.getAbbreviation() != null) {
+				table.setStyleClass("abbr_" + type.getAbbreviation());
+			}
 		}
 
 		String courseId = course == null ? null : course.getPrimaryKey().toString();
@@ -412,7 +435,7 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				if (!addViewParticipantLink) {
+				if (!addViewParticipantLink && !showCertificates) {
 					cell.setStyleClass("lastColumn");
 				}
 				cell.setStyleClass("homePhone");
@@ -421,6 +444,30 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 				else {
 					cell.add(new Text(CoreConstants.MINUS));
+				}
+
+				if (showCertificates) {
+					cell = row.createCell();
+					if (!addViewParticipantLink) {
+						cell.setStyleClass("lastColumn");
+					}
+					cell.setStyleClass("certificate");
+
+					ICFile file = null;
+					CourseCertificate certificate = getBusiness().getUserCertificate(user, course);
+					if (certificate != null) {
+						file = certificate.getCertificateFile();
+					}
+
+					if (file == null) {
+						cell.add(new Text("-"));
+					}
+					else {
+						Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
+						printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
+						printCertificate.setFile(file);
+						cell.add(printCertificate);
+					}
 				}
 
 				if (addViewParticipantLink) {
@@ -458,19 +505,20 @@ public class CourseParticipantsList extends CourseBlock {
 				for (int i = 0; i < checkboxesInfo.size(); i++) {
 					info = (AdvancedProperty) checkboxesInfo.get(i);
 					data = (CourseParticipantListRowData) rowData.get(i);
-					
+
 					cell = row.createCell();
-					cell.setStyleClass("courseChoiseManagement");
+					cell.setStyleClass("courseChoiceManagement");
+					cell.setStyleClass(info.getValue());
 
 					disabled = data.isDisabled();
 					show = data.isShow();
-					
+
 					box = getCourseChoiseManagementCheckbox(info, choice, loadingMessage, disabled);
-					
+
 					if (data.isForceToCheck()) {
 						box.setChecked(true);
 					}
-					
+
 					if (show) {
 						cell.add(box);
 					}
@@ -516,5 +564,17 @@ public class CourseParticipantsList extends CourseBlock {
 
 	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
 		return getParticipants(iwc, false);
+	}
+
+	protected CourseCertificateHome getCourseCertificateHome() {
+		CourseCertificateHome home = null;
+		try {
+			home = (CourseCertificateHome) IDOLookup.getHome(CourseCertificate.class);
+		}
+		catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		return home;
 	}
 }

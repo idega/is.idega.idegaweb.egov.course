@@ -101,7 +101,7 @@ import com.idega.util.text.SocialSecurityNumber;
 public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness, AccountingBusiness {
 
 	private static final long serialVersionUID = 8639939641556682373L;
-	
+
 	private static final String EXTRA_ATTENTION_COURSE_TYPE = "Tegund";
 	private static final String EXTRA_ATTENTION_COURSE_TYPE_ABBREVIATION = "B";
 
@@ -755,12 +755,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				Course course = (Course) iter.next();
 				String name = "";
 				if (showIDInName) {
-					CourseType type = course.getCourseType();
-					if (type.getAbbreviation() != null) {
-						name += type.getAbbreviation();
-					}
-
 					name += course.getPrimaryKey().toString() + " - ";
+
+					CourseType type = course.getCourseType();
+					if (type.getAbbreviation() != null && type.showAbbreviation()) {
+						name += type.getAbbreviation() + " ";
+					}
 				}
 				name += course.getName();
 
@@ -968,6 +968,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				while (iter.hasNext()) {
 					Course course = (Course) iter.next();
 					IWTimestamp start = new IWTimestamp(course.getStartDate());
+					if (getTimeoutDay() > 0) {
+						int day = getTimeoutDay();
+						while (start.getDayOfWeek() != day) {
+							start.addDays(-1);
+						}
+					}
+					if (getTimeoutHour() > 0) {
+						start.setHour(getTimeoutHour());
+						start.setMinute(0);
+					}
 
 					if ((!isAdmin ? start.isLaterThan(stamp) : true) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
@@ -1122,6 +1132,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public Collection getCourseChoices(CourseApplication application) {
 		try {
 			return getCourseChoiceHome().findAllByApplication(application);
+		}
+		catch (FinderException fe) {
+			fe.printStackTrace();
+			return new ArrayList();
+		}
+	}
+
+	public Collection getCourseChoices(User user) {
+		try {
+			return getCourseChoiceHome().findAllByUser(user);
 		}
 		catch (FinderException fe) {
 			fe.printStackTrace();
@@ -1612,6 +1632,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return interval;
 	}
 
+	private int getTimeoutDay() {
+		int day = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_TIMEOUT_DAY_OF_WEEK, "-1"));
+		return day;
+	}
+
+	private int getTimeoutHour() {
+		int hour = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_TIMEOUT_HOUR, "-1"));
+		return hour;
+	}
+
 	public boolean canInvalidate(CourseChoice choice) {
 		IWTimestamp startDate = new IWTimestamp(choice.getCourse().getStartDate());
 		IWTimestamp dateNow = new IWTimestamp();
@@ -2021,7 +2051,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		Collection userCertificates = null;
 		try {
-			userCertificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUser(user);
+			userCertificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllByUser(user);
 		}
 		catch (RemoteException e) {
 			e.printStackTrace();
@@ -2038,6 +2068,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return new ArrayList(userCertificates);
 	}
 
+	public CourseCertificate getUserCertificate(User user, Course course) {
+		try {
+			return ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findByUserAndCourse(user, course);
+		}
+		catch (FinderException fe) {
+			//Nothing found...
+		}
+		catch (RemoteException re) {
+			throw new IBORuntimeException(re);
+		}
+
+		return null;
+	}
+
 	public List getUserCertificatesByCourse(User user, Course course) {
 		if (user == null || course == null) {
 			return null;
@@ -2045,7 +2089,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		Collection certificates = null;
 		try {
-			certificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUserAndCourse(user, course);
+			certificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllByUserAndCourse(user, course);
 		}
 		catch (RemoteException e) {
 			e.printStackTrace();
@@ -2123,17 +2167,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return getCourseParticipantListRowData(choice, null);
 	}
-	
+
 	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb) {
 		if (choice == null) {
 			return null;
 		}
-		
+
 		List checkBoxesInfo = getCheckBoxesForCourseParticipants(iwrb);
 		if (checkBoxesInfo == null || checkBoxesInfo.isEmpty()) {
 			return null;
 		}
-		
+
 		boolean show = true;
 		boolean disabled = false;
 		List data = new ArrayList();
@@ -2144,38 +2188,36 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			disabled = false;
 			show = true;
 			prop = (AdvancedProperty) checkBoxesInfo.get(i);
-		
+
 			cellData = new CourseParticipantListRowData();
 			cellData.setColumnName(prop.getValue());
-			
+
 			if (i + 1 == checkBoxesInfo.size()) {
 				//	The last checkbox
 				//	1. If checkboxes 3, 4 and 5 are check THEN the last one should be enabled, otherwise disabled
-				disabled = !(choice.getBooleanValueFromColumn(((AdvancedProperty)checkBoxesInfo.get(2)).getValue()) &&
-					choice.getBooleanValueFromColumn(((AdvancedProperty)checkBoxesInfo.get(3)).getValue()) &&
-					choice.getBooleanValueFromColumn(((AdvancedProperty)checkBoxesInfo.get(4)).getValue()));	//	Have to get "right papers" to mark as passed
-				
+				disabled = !(choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(2)).getValue()) && choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(3)).getValue()) && choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(4)).getValue())); //	Have to get "right papers" to mark as passed
+
 				//	2. If checkbox 6 is checked then the last one should never be enabled
-				disabled = choice.getBooleanValueFromColumn(((AdvancedProperty)checkBoxesInfo.get(5)).getValue());
+				disabled = choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(5)).getValue());
 			}
-			
+
 			if (i < 2 || i == 5) {
 				if (courseType == null) {
 					try {
 						courseType = choice.getCourse().getCourseType();
-					} catch(Exception e) {
+					}
+					catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-				
+
 				if (courseType == null) {
 					show = false;
 				}
 				else {
 					//	3a. Checkboxes 1 and 2 should only be shown when 'Tegund' = 'Bráðabirgðalöggilding'
-					show = EXTRA_ATTENTION_COURSE_TYPE.equalsIgnoreCase(courseType.getName()) &&
-						EXTRA_ATTENTION_COURSE_TYPE_ABBREVIATION.equalsIgnoreCase(courseType.getAbbreviation());
-					
+					show = EXTRA_ATTENTION_COURSE_TYPE.equalsIgnoreCase(courseType.getName()) && EXTRA_ATTENTION_COURSE_TYPE_ABBREVIATION.equalsIgnoreCase(courseType.getAbbreviation());
+
 					if (i == 5) {
 						//	3b. If 'Tegund' = 'Bráðabirgðalöggilding' then checkbox 6 should not be shown at all
 						show = !show;
@@ -2186,36 +2228,36 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				show = true;
 				courseType = null;
 			}
-			
+
 			if (i == 1) {
 				//	3c. If checkbox 1 is checked, then checkbox 2 should be enabled, otherwise false
-				disabled = !choice.getBooleanValueFromColumn(((AdvancedProperty)checkBoxesInfo.get(0)).getValue());
+				disabled = !choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(0)).getValue());
 			}
-			
+
 			if (i == 1 && !disabled) {
 				//	3d. If checkbox 2 is enabled it has to be checked for the last one to be enabled
 				cellData.setForceToCheck(true);
 			}
-			
+
 			cellData.setDisabled(disabled);
 			cellData.setShow(show);
-			
+
 			data.add(cellData);
 		}
-		
+
 		return data;
 	}
-	
+
 	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) {
 		List info = new ArrayList();
 
-/*5 > 1*/	info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("need_verification_from_goverment_office", "Needs verification from goverment office"), CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
-/*1 > 2*/	info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_from_goverment_office", "Verfication from government office"), CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
-/*2 > 3*/	info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("certificate_of_property", "Certificate of property"), CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
-/*3 > 4*/	info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("criminal_record", "Criminal record"), CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
-/*4 > 5*/	info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_of_payment", "Verification of payment"), CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
-/*6*/		info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
-/*7*/		info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
+		/*5 > 1*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("need_verification_from_goverment_office", "Needs verification from goverment office"), CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		/*1 > 2*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_from_goverment_office", "Verfication from government office"), CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		/*2 > 3*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("certificate_of_property", "Certificate of property"), CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
+		/*3 > 4*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("criminal_record", "Criminal record"), CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
+		/*4 > 5*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_of_payment", "Verification of payment"), CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
+		/*6*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
+		/*7*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
 
 		return info;
 	}

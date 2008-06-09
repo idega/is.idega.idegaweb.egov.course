@@ -22,6 +22,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	private static final String COLUMN_ORDER = "TYPE_ORDER";
 	private static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
 	private static final String COLUMN_ABBREVIATION = "ABBREVIATION";
+	private static final String COLUMN_SHOW_ABBREVIATION = "SHOW_ABBREVIATION";
 
 	public String getEntityName() {
 		return TABLE_NAME;
@@ -35,6 +36,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		addAttribute(COLUMN_ORDER, "Type order", Integer.class);
 		addAttribute(COLUMN_ACCOUNTING_KEY, "Accounting key", String.class, 30);
 		addAttribute(COLUMN_ABBREVIATION, "Abbreviation", String.class, 1);
+		addAttribute(COLUMN_SHOW_ABBREVIATION, "Show abbreviation", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_SCHOOL_TYPE, CourseCategory.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
@@ -69,6 +71,10 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		return getIntColumnValue(COLUMN_ORDER);
 	}
 
+	public boolean showAbbreviation() {
+		return getBooleanColumnValue(COLUMN_SHOW_ABBREVIATION, false);
+	}
+
 	// Setters
 	public void setName(String name) {
 		setColumn(COLUMN_NAME, name);
@@ -96,6 +102,10 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 
 	public void setOrder(int order) {
 		setColumn(COLUMN_ORDER, order);
+	}
+
+	public void setShowAbbreviation(boolean showAbbreviation) {
+		setColumn(COLUMN_SHOW_ABBREVIATION, showAbbreviation);
 	}
 
 	// Finders

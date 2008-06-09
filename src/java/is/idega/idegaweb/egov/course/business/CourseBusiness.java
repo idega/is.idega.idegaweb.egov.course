@@ -7,6 +7,7 @@ import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import is.idega.idegaweb.egov.course.data.CourseCertificateType;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
@@ -243,6 +244,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
 	 */
 	public Collection getCourseChoices(CourseApplication application) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
+	 */
+	public Collection getCourseChoices(User user) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseDiscount
@@ -495,6 +501,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public List getUserCertificates(User user) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificate
+	 */
+	public CourseCertificate getUserCertificate(User user, Course course) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificatesByCourse
 	 */
 	public List getUserCertificatesByCourse(User user, Course course) throws RemoteException;
@@ -513,8 +524,14 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#manageCourseChoiceSettings
 	 */
 	public List manageCourseChoiceSettings(String courseChoiceId, String columnName, Boolean value) throws RemoteException;
-	
-	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb);
-	
-	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseParticipantListRowData
+	 */
+	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCheckBoxesForCourseParticipants
+	 */
+	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) throws RemoteException;
 }
