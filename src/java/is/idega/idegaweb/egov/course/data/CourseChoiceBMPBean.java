@@ -43,7 +43,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_VALID = "is_valid";
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
 	private static final String COLUMN_CERTIFICATE_FEE = "course_certificate_fee";
-	
+
 	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verific_from_goverment";
 	public static final String COLUMN_CERTIFICATE_OF_PROPERTY = "certificate_of_property";
 	public static final String COLUMN_CRIMINAL_RECORD = "criminal_record";
@@ -65,7 +65,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_DYSLEXIA, "Has dyslexia", Boolean.class);
 		addAttribute(COLUMN_PASSED, "Has passed course", Boolean.class);
 		addAttribute(COLUMN_CERTIFICATE_FEE, "Course certificate fee", Float.class);
-		
+
 		addAttribute(COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE, "Verfication from government office", Boolean.class);
 		addAttribute(COLUMN_CERTIFICATE_OF_PROPERTY, "Certificate of property", Boolean.class);
 		addAttribute(COLUMN_CRIMINAL_RECORD, "Criminal record", Boolean.class);
@@ -209,11 +209,19 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 	public Collection ejbFindAllByUser(User user) throws FinderException {
 		Table table = new Table(this);
+		Table course = new Table(Course.class);
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(table.getColumn(getIDColumnName()));
+		try {
+			query.addJoin(table, course);
+		}
+		catch (IDORelationshipException ire) {
+			throw new FinderException(ire.getMessage());
+		}
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_USER), MatchCriteria.EQUALS, user));
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
+		query.addOrder(new Order(course.getColumn("START_DATE"), true));
 
 		return idoFindPKsByQuery(query);
 	}
