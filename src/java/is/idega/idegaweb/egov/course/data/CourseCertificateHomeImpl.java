@@ -40,6 +40,13 @@ public class CourseCertificateHomeImpl extends IDOFactory implements CourseCerti
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
+	
+	public CourseCertificate findByUserAndCourse(User user, Course course) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Object pk = ((CourseCertificateBMPBean) entity).ejbFindByUserAndCourse(user, course);
+		this.idoCheckInPooledEntity(entity);
+		return this.findByPrimaryKey(pk);
+	}
 
 	public Collection findCertificatesByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();

@@ -110,11 +110,11 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 			schools.add(getProvider());
 		}
 		else {
-			if (this.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, getUserContext())) {
-				schools.addAll(getCourseBusiness().getProvidersForUser(getUserContext().getCurrentUser()));
-			}
-			else if (this.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, getUserContext())) {
+			if (this.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, getUserContext())) {
 				schools.addAll(getCourseBusiness().getProviders());
+			}
+			else if (this.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, getUserContext())) {
+				schools.addAll(getCourseBusiness().getProvidersForUser(getUserContext().getCurrentUser()));
 			}
 		}
 

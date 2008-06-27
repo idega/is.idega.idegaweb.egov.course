@@ -117,6 +117,14 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 		return super.idoFindPKsByQuery(query);
 	}
 	
+	public Object ejbFindByUserAndCourse(User user, Course course) throws FinderException {
+		IDOQuery query = idoQueryGetSelect();
+		query.appendWhereEquals(COLUMN_PARTICIPANT_ID, user.getId());
+		query.appendAndEquals(COLUMN_COURSE_ID, course.getPrimaryKey());
+		query.appendOrderByDescending(COLUMN_VALID_THRU);
+		return super.idoFindOnePKByQuery(query);
+	}
+	
 	public Collection ejbFindByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
 		IDOQuery query = idoQueryGetSelect();
 		query.appendWhere().append(COLUMN_PARTICIPANT_ID).appendInCollection(usersIds);

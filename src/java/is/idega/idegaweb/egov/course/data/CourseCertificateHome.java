@@ -20,5 +20,7 @@ public interface CourseCertificateHome extends IDOHome {
 	
 	public Collection findAllCertificatesByUserAndCourse(User user, Course course) throws FinderException;
 	
+	public CourseCertificate findByUserAndCourse(User user, Course course) throws FinderException;
+	
 	public Collection findCertificatesByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException;
 }

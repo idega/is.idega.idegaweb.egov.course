@@ -21,6 +21,7 @@ import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
 import is.idega.idegaweb.egov.course.data.CourseCertificateType;
 import is.idega.idegaweb.egov.course.data.CourseCertificateTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseDiscount;
 import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
@@ -30,6 +31,7 @@ import is.idega.idegaweb.egov.course.data.CoursePriceHome;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
+import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 
 import java.rmi.RemoteException;
@@ -70,6 +72,7 @@ import com.idega.block.school.data.SchoolArea;
 import com.idega.block.school.data.SchoolType;
 import com.idega.block.school.data.SchoolUser;
 import com.idega.block.trade.data.CreditCardInformation;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -82,6 +85,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
+import com.idega.idegaweb.IWResourceBundle;
 import com.idega.repository.data.ImplementorRepository;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
@@ -97,6 +101,9 @@ import com.idega.util.text.SocialSecurityNumber;
 public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness, AccountingBusiness {
 
 	private static final long serialVersionUID = 8639939641556682373L;
+
+	private static final String EXTRA_ATTENTION_COURSE_TYPE = "Tegund";
+	private static final String EXTRA_ATTENTION_COURSE_TYPE_ABBREVIATION = "B";
 
 	protected String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
@@ -160,11 +167,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	private CourseCategory getAccountingSchoolType() {
+		String typePK = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCOUNTING_TYPE_PK);
+		if (typePK != null) {
+			return getCourseCategory(typePK);
+		}
+		return null;
+	}
+
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {
 		Collection entries = new ArrayList();
 
 		try {
 			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
+			CourseCategory category = getAccountingSchoolType();
 
 			Collection applications = getCourseApplicationHome().findAll(getCaseStatusOpen(), fromDate, toDate);
 			Iterator iterator = applications.iterator();
@@ -172,7 +188,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				CourseApplication application = (CourseApplication) iterator.next();
 				TPosAuthorisationEntriesBean ccAuthEntry = null;
 				if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
-					ccAuthEntry = (TPosAuthorisationEntriesBean) getCreditCardBusiness().getAuthorizationEntry(getCreditCardInformation(), application.getReferenceNumber(), new IWTimestamp(application.getCreated()));
+					IWTimestamp stamp = new IWTimestamp(application.getCreated());
+					ccAuthEntry = (TPosAuthorisationEntriesBean) getCreditCardBusiness().getAuthorizationEntry(getCreditCardInformation(), application.getReferenceNumber(), stamp);
+					if (ccAuthEntry == null) {
+						stamp.addDays(1);
+						ccAuthEntry = (TPosAuthorisationEntriesBean) getCreditCardBusiness().getAuthorizationEntry(getCreditCardInformation(), application.getReferenceNumber(), stamp);
+					}
 				}
 
 				Map applicationMap = getApplicationMap(application);
@@ -189,6 +210,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					SchoolArea area = provider.getSchoolArea();
 					CourseType courseType = course.getCourseType();
 					CourseCategory schoolType = courseType.getCourseCategory();
+					if (category != null && !schoolType.equals(category)) {
+						continue;
+					}
 					User student = choice.getUser();
 					CoursePrice price = course.getPrice();
 					String paymentType = application.getPaymentType();
@@ -197,9 +221,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					String courseName = course.getName();
 					String uniqueID = application.getPrimaryKey().toString() + "-" + choice.getPrimaryKey() + "-";
 					Date startDate = new IWTimestamp(course.getStartDate()).getDate();
-					Date endDate = getEndDate(price, startDate);
+					Date endDate = price != null ? getEndDate(price, startDate) : new IWTimestamp(course.getEndDate()).getDate();
 
-					float coursePrice = price.getPrice() * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
+					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(student)).getDiscount());
 
 					String payerPId;
 					if (application.getPayerPersonalID() != null && application.getPayerPersonalID().length() > 0) {
@@ -262,7 +286,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						e.printStackTrace();
 					}
 
-					if (choice.getDayCare() != CourseConstants.DAY_CARE_NONE) {
+					if (choice.getDayCare() != CourseConstants.DAY_CARE_NONE && price != null) {
 						float carePrice = 0;
 						if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
 							carePrice = price.getPreCarePrice();
@@ -500,6 +524,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+		return createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, -1);
+	}
+
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -557,14 +585,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (price > 0) {
 			course.setCoursePrice(price);
 		}
+		if (cost > 0) {
+			course.setCourseCost(cost);
+		}
 
 		course.store();
-		
+
 		return course;
 	}
 	
 	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
 		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
+	}
+
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
+		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
@@ -715,7 +750,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public Map getCourseMapDWR(int providerPK, int schoolTypePK, int courseTypePK, String country) {
-		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK));
+		boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+
+		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK), null, null);
 		Map map = new LinkedHashMap();
 		if (coll != null) {
 			Locale locale = new Locale(country, country.toUpperCase());
@@ -724,7 +761,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			Iterator iter = coll.iterator();
 			while (iter.hasNext()) {
 				Course course = (Course) iter.next();
-				map.put(course.getPrimaryKey(), course.getName());
+				String name = "";
+				if (showIDInName) {
+					name += course.getPrimaryKey().toString() + " - ";
+
+					CourseType type = course.getCourseType();
+					if (type.getAbbreviation() != null && type.showAbbreviation()) {
+						name += type.getAbbreviation() + " ";
+					}
+				}
+				name += course.getName();
+
+				map.put(course.getPrimaryKey(), name);
 			}
 		}
 		return map;
@@ -922,12 +970,22 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map map = new LinkedHashMap();
-			Collection courses = getCourses(birth != null ? birth.getYear() : 0, iP, iST, iCT);
+			Collection courses = getCourses(birth != null ? birth.getYear() : 0, iP, iST, iCT, null, null);
 			if (courses != null) {
 				Iterator iter = courses.iterator();
 				while (iter.hasNext()) {
 					Course course = (Course) iter.next();
 					IWTimestamp start = new IWTimestamp(course.getStartDate());
+					if (getTimeoutDay() > 0) {
+						int day = getTimeoutDay();
+						while (start.getDayOfWeek() != day) {
+							start.addDays(-1);
+						}
+					}
+					if (getTimeoutHour() > 0) {
+						start.setHour(getTimeoutHour());
+						start.setMinute(0);
+					}
 
 					if ((!isAdmin ? start.isLaterThan(stamp) : true) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
@@ -957,7 +1015,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	public boolean hasNotStarted(Course course, boolean isAdmin) {
+		IWTimestamp stamp = new IWTimestamp();
+		IWTimestamp start = new IWTimestamp(course.getStartDate());
+
+		return !isAdmin ? start.isLaterThan(stamp) : true;
+	}
+
+	public boolean isOfAge(User user, Course course) {
+		IWTimestamp dateOfBirth = new IWTimestamp(user.getDateOfBirth());
+		return dateOfBirth.getYear() <= course.getBirthyearTo() && dateOfBirth.getYear() >= course.getBirthyearFrom();
+	}
+
 	public CourseDWR getCourseDWR(Locale locale, Course course) {
+		return getCourseDWR(locale, course, true);
+	}
+
+	public CourseDWR getCourseDWR(Locale locale, Course course, boolean showYear) {
 		CourseDWR cDWR = new CourseDWR();
 		cDWR.setName(course.getName());
 		cDWR.setPk(course.getPrimaryKey().toString());
@@ -975,7 +1049,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (from != null && price != null) {
 			IWTimestamp toDate = new IWTimestamp(getEndDate(price, from.getDate()));
 			dayS = Integer.toString(price.getNumberOfDays());
-			toS = toDate.getDateString("dd.MM.yyyy", locale);
+			if (showYear) {
+				toS = toDate.getDateString("dd.MM.yyyy", locale);
+			}
+			else {
+				toS = toDate.getDateString("dd.MM", locale);
+			}
 			cDWR.setPrice(price.getPrice() + " ISK");
 			cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
 		}
@@ -991,9 +1070,41 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		cDWR.setDays(dayS);
 		return cDWR;
 	}
+	
+	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
+		return getCourses(birthYear, null, schoolTypePK, courseTypePK, fromDate, toDate);
+	}
 
 	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK) {
 		return getCourses(birthYear, null, schoolTypePK, courseTypePK);
+	}
+	
+	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
+		Collection courses = new ArrayList();
+		try {
+			courses = getCourseHome().findAll(providerPK, schoolTypePK, courseTypePK, birthYear, fromDate, toDate);
+		}
+		catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+		return courses;
+	}
+	
+	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
+		Collection courses = new ArrayList();
+		try {
+			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK, -1, fromDate, toDate);
+		}
+		catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+		return courses;
 	}
 
 	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) {
@@ -1013,7 +1124,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK) {
 		Collection courses = new ArrayList();
 		try {
-			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK);
+			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK, -1, null, null);
 		}
 		catch (IDORelationshipException e) {
 			e.printStackTrace();
@@ -1056,6 +1167,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public Collection getCourseChoices(CourseApplication application) {
 		try {
 			return getCourseChoiceHome().findAllByApplication(application);
+		}
+		catch (FinderException fe) {
+			fe.printStackTrace();
+			return new ArrayList();
+		}
+	}
+
+	public Collection getCourseChoices(User user) {
+		try {
+			return getCourseChoiceHome().findAllByUser(user);
 		}
 		catch (FinderException fe) {
 			fe.printStackTrace();
@@ -1419,14 +1540,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			Collection userApplications = (Collection) applications.get(user);
 			Iterator iter = userApplications.iterator();
 			int totalPrice = 0;
+			int totalCost = 0;
 			while (iter.hasNext()) {
 				ApplicationHolder holder = (ApplicationHolder) iter.next();
 				totalPrice += holder.getPrice();
+				totalCost += holder.getCourse().getCourseCost() > -1 ? holder.getCourse().getCourseCost() : 0;
 			}
 
 			PriceHolder priceHolder = new PriceHolder();
 			priceHolder.setUser(user);
 			priceHolder.setPrice(totalPrice);
+			priceHolder.setCost(totalCost);
 			userPrices.add(priceHolder);
 		}
 
@@ -1524,9 +1648,31 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	public boolean hasAvailableCourses(User user, CourseType type) {
+		try {
+			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
+			IWTimestamp stampNow = new IWTimestamp();
+			return getCourseHome().getCountByCourseTypeAndBirthYear(type != null ? type.getPrimaryKey() : null, stamp.getYear(), stampNow.getDate()) > 0;
+		}
+		catch (IDOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	private int getInvalidateInterval() {
 		int interval = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_INVALIDATE_INTERVAL, "4"));
 		return interval;
+	}
+
+	private int getTimeoutDay() {
+		int day = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_TIMEOUT_DAY_OF_WEEK, "-1"));
+		return day;
+	}
+
+	private int getTimeoutHour() {
+		int hour = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_TIMEOUT_HOUR, "-1"));
+		return hour;
 	}
 
 	public boolean canInvalidate(CourseChoice choice) {
@@ -1626,8 +1772,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
-			application.setCreditCardMerchantID(merchantID);
-			application.setCreditCardMerchantType(merchantType);
+			if (merchantID > 0) {
+				application.setCreditCardMerchantID(merchantID);
+			}
+			if (merchantType != null) {
+				application.setCreditCardMerchantType(merchantType);
+			}
 			application.setPaymentType(paymentType);
 			if (paymentType != null) {
 				application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));
@@ -1893,7 +2043,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			throw new IBORuntimeException(e);
 		}
 	}
-	
+
 	public CourseCertificateType getCourseCertificateType(String id) {
 		if (id == null) {
 			return null;
@@ -1944,6 +2094,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			return null;
 		}
 		return new ArrayList(userCertificates);
+	}
+	
+	public CourseCertificate getUserCertificate(User user, Course course) {
+		try {
+			return ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findByUserAndCourse(user, course);
+		}
+		catch (FinderException fe) {
+			//Nothing found...
+		}
+		catch (RemoteException re) {
+			throw new IBORuntimeException(re);
+		}
+
+		return null;
 	}
 	
 	public List getUserCertificatesByCourse(User user, Course course) {
@@ -2028,6 +2192,100 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		choice.store();
 		
 		return true;
+	}
+	
+	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb) {
+		if (choice == null) {
+			return null;
+		}
+
+		List checkBoxesInfo = getCheckBoxesForCourseParticipants(iwrb);
+		if (checkBoxesInfo == null || checkBoxesInfo.isEmpty()) {
+			return null;
+		}
+
+		boolean show = true;
+		boolean disabled = false;
+		List data = new ArrayList();
+		AdvancedProperty prop = null;
+		CourseType courseType = null;
+		CourseParticipantListRowData cellData = null;
+		for (int i = 0; i < checkBoxesInfo.size(); i++) {
+			disabled = false;
+			show = true;
+			prop = (AdvancedProperty) checkBoxesInfo.get(i);
+
+			cellData = new CourseParticipantListRowData();
+			cellData.setColumnName(prop.getValue());
+
+			if (i + 1 == checkBoxesInfo.size()) {
+				//	The last checkbox
+				//	1. If checkboxes 3, 4 and 5 are check THEN the last one should be enabled, otherwise disabled
+				disabled = !(choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(2)).getValue()) && choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(3)).getValue()) && choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(4)).getValue())); //	Have to get "right papers" to mark as passed
+
+				//	2. If checkbox 6 is checked then the last one should never be enabled
+				disabled = choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(5)).getValue());
+			}
+
+			if (i < 2 || i == 5) {
+				if (courseType == null) {
+					try {
+						courseType = choice.getCourse().getCourseType();
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
+				if (courseType == null) {
+					show = false;
+				}
+				else {
+					//	3a. Checkboxes 1 and 2 should only be shown when 'Tegund' = 'Bráðabirgðalöggilding'
+					show = EXTRA_ATTENTION_COURSE_TYPE.equalsIgnoreCase(courseType.getName()) && EXTRA_ATTENTION_COURSE_TYPE_ABBREVIATION.equalsIgnoreCase(courseType.getAbbreviation());
+
+					if (i == 5) {
+						//	3b. If 'Tegund' = 'Bráðabirgðalöggilding' then checkbox 6 should not be shown at all
+						show = !show;
+					}
+				}
+			}
+			else {
+				show = true;
+				courseType = null;
+			}
+
+			if (i == 1) {
+				//	3c. If checkbox 1 is checked, then checkbox 2 should be enabled, otherwise false
+				disabled = !choice.getBooleanValueFromColumn(((AdvancedProperty) checkBoxesInfo.get(0)).getValue());
+			}
+
+			if (i == 1 && !disabled) {
+				//	3d. If checkbox 2 is enabled it has to be checked for the last one to be enabled
+				cellData.setForceToCheck(true);
+			}
+
+			cellData.setDisabled(disabled);
+			cellData.setShow(show);
+
+			data.add(cellData);
+		}
+
+		return data;
+	}
+
+	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) {
+		List info = new ArrayList();
+
+		/*5 > 1*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("need_verification_from_goverment_office", "Needs verification from goverment office"), CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		/*1 > 2*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_from_goverment_office", "Verfication from government office"), CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		/*2 > 3*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("certificate_of_property", "Certificate of property"), CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
+		/*3 > 4*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("criminal_record", "Criminal record"), CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
+		/*4 > 5*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_of_payment", "Verification of payment"), CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
+		/*6*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
+		/*7*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
+
+		return info;
 	}
 
 }

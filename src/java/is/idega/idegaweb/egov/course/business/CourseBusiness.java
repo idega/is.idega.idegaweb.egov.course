@@ -7,6 +7,7 @@ import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import is.idega.idegaweb.egov.course.data.CourseCertificateType;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
@@ -37,6 +38,7 @@ import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolArea;
 import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOService;
+import com.idega.idegaweb.IWResourceBundle;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
@@ -108,6 +110,16 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 */
 	public boolean deleteCourse(Object pk) throws RemoteException, RemoteException;
 
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#createCourse
+	 */
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException, RemoteException;
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
+	 */
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException, RemoteException;
+	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
 	 */
@@ -184,20 +196,45 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public boolean isRegistered(User user, Course course) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasNotStarted
+	 */
+	public boolean hasNotStarted(Course course, boolean isAdmin) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#isOfAge
+	 */
+	public boolean isOfAge(User user, Course course) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseDWR
 	 */
 	public CourseDWR getCourseDWR(Locale locale, Course course) throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseDWR
 	 */
-	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK) throws RemoteException;
+	public CourseDWR getCourseDWR(Locale locale, Course course, boolean showYear) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
+	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK) throws RemoteException;
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 */
+	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) throws RemoteException;
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 */
 	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) throws RemoteException;
-
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 */
+	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) throws RemoteException;
+	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
@@ -222,6 +259,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
 	 */
 	public Collection getCourseChoices(CourseApplication application) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
+	 */
+	public Collection getCourseChoices(User user) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseDiscount
@@ -354,6 +396,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public boolean hasAvailableCourses(User user, SchoolType type) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasAvailableCourses
+	 */
+	public boolean hasAvailableCourses(User user, CourseType type) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#canInvalidate
 	 */
 	public boolean canInvalidate(CourseChoice choice) throws RemoteException;
@@ -458,7 +505,22 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public IWTimestamp getLatestValidDateOfCertificate(List certificates);
 	
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee);
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificate
+	 */
+	public CourseCertificate getUserCertificate(User user, Course course) throws RemoteException;
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseParticipantListRowData
+	 */
+	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb) throws RemoteException;
 
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCheckBoxesForCourseParticipants
+	 */
+	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) throws RemoteException;
+	
 	public float getCalculatedCourseCertificateFees(Map applications);
 	
 	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value);
