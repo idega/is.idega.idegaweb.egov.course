@@ -35,4 +35,11 @@ public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
+
+	public CourseType findByAbbreviation(String abbreviation) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Object pk = ((CourseTypeBMPBean) entity).ejbFindByAbbreviation(abbreviation);
+		this.idoCheckInPooledEntity(entity);
+		return this.findByPrimaryKey(pk);
+	}
 }
