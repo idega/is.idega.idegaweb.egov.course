@@ -40,7 +40,7 @@ public class ApplicationHolder {
 	}
 
 	public int getPrice() {
-		if (course.getCoursePrice() > 0) {
+		if (course.getCoursePrice() >= 0) {
 			return (int) course.getCoursePrice();
 		}
 

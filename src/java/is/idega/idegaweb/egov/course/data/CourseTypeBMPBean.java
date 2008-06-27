@@ -21,6 +21,8 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	private static final String COLUMN_SCHOOL_TYPE = "SCH_SCHOOL_TYPE_ID";
 	private static final String COLUMN_ORDER = "TYPE_ORDER";
 	private static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
+	private static final String COLUMN_ABBREVIATION = "ABBREVIATION";
+	private static final String COLUMN_SHOW_ABBREVIATION = "SHOW_ABBREVIATION";
 
 	public String getEntityName() {
 		return TABLE_NAME;
@@ -33,6 +35,8 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		addAttribute(COLUMN_LOCALIZATION_KEY, "Localization key", String.class, 50);
 		addAttribute(COLUMN_ORDER, "Type order", Integer.class);
 		addAttribute(COLUMN_ACCOUNTING_KEY, "Accounting key", String.class, 30);
+		addAttribute(COLUMN_ABBREVIATION, "Abbreviation", String.class, 1);
+		addAttribute(COLUMN_SHOW_ABBREVIATION, "Show abbreviation", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_SCHOOL_TYPE, CourseCategory.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
@@ -59,8 +63,16 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		return getStringColumnValue(COLUMN_ACCOUNTING_KEY);
 	}
 
+	public String getAbbreviation() {
+		return getStringColumnValue(COLUMN_ABBREVIATION);
+	}
+
 	public int getOrder() {
 		return getIntColumnValue(COLUMN_ORDER);
+	}
+
+	public boolean showAbbreviation() {
+		return getBooleanColumnValue(COLUMN_SHOW_ABBREVIATION, false);
 	}
 
 	// Setters
@@ -84,8 +96,16 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		setColumn(COLUMN_ACCOUNTING_KEY, key);
 	}
 
+	public void setAbbreviation(String abbreviation) {
+		setColumn(COLUMN_ABBREVIATION, abbreviation);
+	}
+
 	public void setOrder(int order) {
 		setColumn(COLUMN_ORDER, order);
+	}
+
+	public void setShowAbbreviation(boolean showAbbreviation) {
+		setColumn(COLUMN_SHOW_ABBREVIATION, showAbbreviation);
 	}
 
 	// Finders
@@ -108,5 +128,15 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
 
 		return this.idoFindPKsByQuery(query);
+	}
+
+	public Object ejbFindByAbbreviation(String abbreviation) throws FinderException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new Column(table, getIDColumnName()));
+		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_ABBREVIATION), MatchCriteria.EQUALS, abbreviation));
+
+		return this.idoFindOnePKByQuery(query);
 	}
 }

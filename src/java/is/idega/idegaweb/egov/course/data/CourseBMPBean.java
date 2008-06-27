@@ -32,6 +32,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
 	private static final String COLUMN_COURSE_PRICE = "COU_COURSE_PRICE_ID";
 	private static final String COLUMN_PRICE = "COURSE_PRICE";
+	private static final String COLUMN_COST = "COURSE_COST";
 
 	private static final String COLUMN_START_DATE = "START_DATE";
 	private static final String COLUMN_END_DATE = "END_DATE";
@@ -55,6 +56,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_BIRTHYEAR_TO, "Birthyear from", Integer.class);
 		addAttribute(COLUMN_MAX_PARTICIPANTS, "Max", Integer.class);
 		addAttribute(COLUMN_PRICE, "Price", Float.class);
+		addAttribute(COLUMN_COST, "Cost", Float.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
@@ -87,7 +89,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	public float getCoursePrice() {
-		return getFloatColumnValue(COLUMN_PRICE, 0);
+		return getFloatColumnValue(COLUMN_PRICE, -1);
+	}
+
+	public float getCourseCost() {
+		return getFloatColumnValue(COLUMN_COST, -1);
 	}
 
 	public String getAccountingKey() {
@@ -158,6 +164,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		setColumn(COLUMN_PRICE, price);
 	}
 
+	public void setCourseCost(float cost) {
+		setColumn(COLUMN_COST, cost);
+	}
+
 	public void setAccountingKey(String key) {
 		setColumn(COLUMN_ACCOUNTING_KEY, key);
 	}
@@ -184,18 +194,18 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	// Finders
 	public Collection ejbFindAll() throws FinderException, IDORelationshipException {
-		return ejbFindAll(null, null, null, -1);
+		return ejbFindAll(null, null, null, -1, null, null);
 	}
-
+	
 	public Collection ejbFindAllByProvider(School provider) throws FinderException, IDORelationshipException {
-		return ejbFindAll(provider.getPrimaryKey(), null, null, -1);
+		return ejbFindAll(provider.getPrimaryKey(), null, null, -1, null, null);
 	}
 
 	public Collection ejbFindAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException {
-		return ejbFindAll(null, null, null, birthYear);
+		return ejbFindAll(null, null, null, birthYear, null, null);
 	}
 
-	public Collection ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
+	public Collection ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -222,10 +232,20 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			query.addCriteria(new MatchCriteria(bFrom, MatchCriteria.LESSEQUAL, birthYear));
 			query.addCriteria(new MatchCriteria(yFrom, MatchCriteria.GREATEREQUAL, birthYear));
 		}
+		if (fromDate != null) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.GREATEREQUAL, fromDate));
+		}
+		if (toDate != null) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.LESSEQUAL, toDate));
+		}
 		query.addOrder(table, COLUMN_START_DATE, true);
 		query.addOrder(table, COLUMN_NAME, true);
 
 		return this.idoFindPKsByQuery(query);
+	}
+
+	public Collection ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
+		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
 	}
 
 	public Collection ejbFindAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
@@ -302,6 +322,30 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		if (schoolTypePK != null) {
 			query.addCriteria(new MatchCriteria(schoolTypeId, MatchCriteria.EQUALS, schoolTypePK));
+		}
+
+		if (birthYear > 0) {
+			Column bFrom = new Column(table, COLUMN_BIRTHYEAR_FROM);
+			Column yFrom = new Column(table, COLUMN_BIRTHYEAR_TO);
+			query.addCriteria(new MatchCriteria(bFrom, MatchCriteria.LESSEQUAL, birthYear));
+			query.addCriteria(new MatchCriteria(yFrom, MatchCriteria.GREATEREQUAL, birthYear));
+		}
+
+		if (fromDate != null) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.GREATEREQUAL, fromDate));
+		}
+
+		return this.idoGetNumberOfRecords(query);
+	}
+
+	public int ejbHomeGetCountByCourseTypeAndBirthYear(Object courseTypePK, int birthYear, Date fromDate) throws IDOException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new CountColumn(table, getIDColumnName()));
+
+		if (courseTypePK != null) {
+			query.addCriteria(new MatchCriteria(table, COLUMN_COURSE_TYPE, MatchCriteria.EQUALS, courseTypePK));
 		}
 
 		if (birthYear > 0) {

@@ -46,6 +46,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
+	
+	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, fromDate, toDate);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
 
 	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
@@ -71,6 +78,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	public int getCountBySchoolTypeAndBirthYear(Object schoolTypePK, int birthYear, Date fromDate) throws IDOException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		int theReturn = ((CourseBMPBean) entity).ejbHomeGetCountBySchoolTypeAndBirthYear(schoolTypePK, birthYear, fromDate);
+		this.idoCheckInPooledEntity(entity);
+		return theReturn;
+	}
+
+	public int getCountByCourseTypeAndBirthYear(Object courseTypePK, int birthYear, Date fromDate) throws IDOException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		int theReturn = ((CourseBMPBean) entity).ejbHomeGetCountByCourseTypeAndBirthYear(courseTypePK, birthYear, fromDate);
 		this.idoCheckInPooledEntity(entity);
 		return theReturn;
 	}

@@ -23,6 +23,7 @@ public class CourseComparator implements Comparator {
 	public static final int DATE_SORT = 4;
 	public static final int PLACES_SORT = 5;
 	public static final int FREE_PLACES_SORT = 6;
+	public static final int ID_SORT = 7;
 
 	private Locale locale;
 	private int compareBy = NAME_SORT;
@@ -40,6 +41,10 @@ public class CourseComparator implements Comparator {
 
 		int returner = 0;
 		switch (this.compareBy) {
+			case ID_SORT:
+				returner = idSort(course1, course2);
+				break;
+
 			case NAME_SORT:
 				returner = nameSort(course1, course2);
 				break;
@@ -69,7 +74,17 @@ public class CourseComparator implements Comparator {
 				break;
 		}
 
+		if (returner == 0) {
+			returner = idSort(course1, course2);
+		}
+
 		return returner;
+	}
+
+	private int idSort(Course course1, Course course2) {
+		Integer pk1 = (Integer) course1.getPrimaryKey();
+		Integer pk2 = (Integer) course2.getPrimaryKey();
+		return pk1.intValue() - pk2.intValue();
 	}
 
 	private int nameSort(Course course1, Course course2) {
@@ -88,7 +103,13 @@ public class CourseComparator implements Comparator {
 		IWTimestamp start1 = new IWTimestamp(course1.getStartDate());
 		IWTimestamp start2 = new IWTimestamp(course2.getStartDate());
 
-		return (int) (start1.getTime().getTime() - start2.getTime().getTime());
+		if (start1.isEarlierThan(start2)) {
+			return -1;
+		}
+		else if (start2.isEarlierThan(start1)) {
+			return 1;
+		}
+		return 0;
 	}
 
 	private int placesSort(Course course1, Course course2) {
