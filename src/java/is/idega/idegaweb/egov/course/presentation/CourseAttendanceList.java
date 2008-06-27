@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.idega.block.school.data.School;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -32,6 +33,7 @@ import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
@@ -81,6 +83,33 @@ public class CourseAttendanceList extends CourseBlock {
 		super.getParentPage().addJavascriptURL("/dwr/engine.js");
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
+		if (!isSchoolUser()) {
+			DropdownMenu providers = null;
+			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
+				providers = getAllProvidersDropdown(iwc);
+			}
+			else if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+				providers = getProvidersDropdown(iwc);
+			}
+
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
+			}
+			else if (providers != null) {
+				providers.setToSubmit();
+
+				Layer formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
+				formItem.add(label);
+				formItem.add(providers);
+				layer.add(formItem);
+			}
+		}
+
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
 
@@ -97,27 +126,6 @@ public class CourseAttendanceList extends CourseBlock {
 		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
 		super.getParentPage().getAssociatedScript().addFunction("setCourseOptions", script3.toString());
 		super.getParentPage().getAssociatedScript().addFunction("changeCourseValues", script4.toString());
-
-		if (!isSchoolUser()) {
-			DropdownMenu providers = null;
-			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getAllProvidersDropdown(iwc);
-			}
-			else if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getProvidersDropdown(iwc);
-			}
-
-			if (providers != null) {
-				providers.setToSubmit();
-
-				Layer formItem = new Layer(Layer.DIV);
-				formItem.setStyleClass("formItem");
-				Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
-				formItem.add(label);
-				formItem.add(providers);
-				layer.add(formItem);
-			}
-		}
 
 		DropdownMenu schoolType = new DropdownMenu(PARAMETER_SCHOOL_TYPE);
 		schoolType.setId(PARAMETER_SCHOOL_TYPE);
@@ -147,7 +155,7 @@ public class CourseAttendanceList extends CourseBlock {
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_SCHOOL_TYPE) && iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE));
+			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), null, null);
 			course.addMenuElements(courses);
 		}
 

@@ -35,7 +35,6 @@ import com.idega.presentation.ui.TextInput;
 
 public class CourseTypeEditor extends CourseBlock {
 
-	private static final String PARAMETER_ACTION = "CTE_ac";
 	private static final String PARAMETER_NAME = "CTE_n";
 	private static final String PARAMETER_DESCRIPTION = "CTE_d";
 	private static final String PARAMETER_LOCALIZATION_KEY = "CTE_l";

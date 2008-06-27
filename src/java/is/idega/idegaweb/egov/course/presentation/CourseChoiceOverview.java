@@ -48,17 +48,15 @@ import com.idega.util.text.TextSoap;
 
 public class CourseChoiceOverview extends CourseBlock {
 
-	private static final String PARAMETER_ACTION = "prm_action";
-
 	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
 	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
 	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
 	private static final String PARAMETER_AMOUNT = "prm_amount";
 	private static final String PARAMETER_CCV = "prm_ccv";
 
-	private static final int ACTION_VIEW = 1;
-	private static final int ACTION_REFUND_FORM = 2;
-	private static final int ACTION_REFUND = 3;
+	protected static final int ACTION_VIEW = 1;
+	protected static final int ACTION_REFUND_FORM = 2;
+	protected static final int ACTION_REFUND = 3;
 
 	public void present(IWContext iwc) {
 		try {
@@ -102,13 +100,17 @@ public class CourseChoiceOverview extends CourseBlock {
 	private int parseAction(IWContext iwc) {
 		int action = ACTION_VIEW;
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
-			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
+			try {
+				action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
+			} catch(NumberFormatException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return action;
 	}
 
-	private void getViewerForm(IWContext iwc, CourseChoice choice) throws RemoteException {
+	protected void getViewerForm(IWContext iwc, CourseChoice choice) throws RemoteException {
 		Form form = new Form();
 		form.maintainParameter(PARAMETER_CHOICE_PK);
 		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
