@@ -16,6 +16,7 @@ import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -33,9 +35,11 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.DownloadLink;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.util.IWTimestamp;
@@ -44,6 +48,9 @@ import com.idega.util.PresentationUtil;
 public class CourseList extends CourseBlock {
 
 	protected static final String PARAMETER_SORTING = "prm_sorting";
+
+	private SchoolType type = null;
+	private boolean showTypes = true;
 
 	public void present(IWContext iwc) {
 		try {
@@ -101,7 +108,13 @@ public class CourseList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			if (providers != null) {
+			Collection providersList = getBusiness().getProviders();
+			if (providersList.size() == 1) {
+				School school = (School) providersList.iterator().next();
+				getSession().setProvider(school);
+				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
+			}
+			else if (providers != null) {
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
@@ -121,10 +134,20 @@ public class CourseList extends CourseBlock {
 
 		if (getSession().getProvider() != null) {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			if (schoolTypes.size() == 1) {
+				showTypes = false;
+				type = (SchoolType) schoolTypes.iterator().next();
+				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+			}
 			schoolType.addMenuElements(schoolTypes);
 		}
 		else {
 			Collection schoolTypes = getBusiness().getAllSchoolTypes();
+			if (schoolTypes.size() == 1) {
+				showTypes = false;
+				type = (SchoolType) schoolTypes.iterator().next();
+				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+			}
 			schoolType.addMenuElements(schoolTypes);
 		}
 
@@ -137,28 +160,74 @@ public class CourseList extends CourseBlock {
 			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)));
 			courseType.addMenuElements(courseTypes);
 		}
+		else if (type != null) {
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()));
+			courseType.addMenuElements(courseTypes);
+		}
+
+		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 
 		DropdownMenu sorting = new DropdownMenu(PARAMETER_SORTING);
-		sorting.addMenuElement(CourseComparator.NAME_SORT, getResourceBundle().getLocalizedString("sort.name"));
-		sorting.addMenuElement(CourseComparator.TYPE_SORT, getResourceBundle().getLocalizedString("sort.type"));
-		sorting.addMenuElement(CourseComparator.DATE_SORT, getResourceBundle().getLocalizedString("sort.date"));
-		sorting.addMenuElement(CourseComparator.YEAR_SORT, getResourceBundle().getLocalizedString("sort.year"));
-		sorting.addMenuElement(CourseComparator.PLACES_SORT, getResourceBundle().getLocalizedString("sort.places"));
-		sorting.addMenuElement(CourseComparator.FREE_PLACES_SORT, getResourceBundle().getLocalizedString("sort.free_places"));
+		sorting.addMenuElement(CourseComparator.ID_SORT, getResourceBundle().getLocalizedString("sort.id", "ID"));
+		sorting.addMenuElement(CourseComparator.NAME_SORT, getResourceBundle().getLocalizedString("sort.name", "Name"));
+		sorting.addMenuElement(CourseComparator.TYPE_SORT, getResourceBundle().getLocalizedString("sort.type", "Type"));
+		sorting.addMenuElement(CourseComparator.DATE_SORT, getResourceBundle().getLocalizedString("sort.date", "Date"));
+		if (useBirthYears) {
+			sorting.addMenuElement(CourseComparator.YEAR_SORT, getResourceBundle().getLocalizedString("sort.year", "Year"));
+		}
+		sorting.addMenuElement(CourseComparator.PLACES_SORT, getResourceBundle().getLocalizedString("sort.places", "Places"));
+		sorting.addMenuElement(CourseComparator.FREE_PLACES_SORT, getResourceBundle().getLocalizedString("sort.free_places", "Free places"));
 		sorting.keepStatusOnAction(true);
+
+		IWTimestamp stamp = new IWTimestamp();
+		stamp.addYears(1);
+
+		DatePicker fromDate = new DatePicker(PARAMETER_FROM_DATE);
+		fromDate.setStyleClass("dateInput");
+		fromDate.keepStatusOnAction(true);
+
+		DatePicker toDate = new DatePicker(PARAMETER_TO_DATE);
+		toDate.setStyleClass("dateInput");
+		toDate.keepStatusOnAction(true);
+		toDate.setDate(stamp.getDate());
+
+		stamp.addMonths(-1);
+		stamp.addYears(-1);
+		fromDate.setDate(stamp.getDate());
+
+		if (showTypes) {
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
+			formItem.add(label);
+			formItem.add(schoolType);
+			layer.add(formItem);
+		}
+		else if (type != null) {
+			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
+		}
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(getResourceBundle().getLocalizedString("category", "Category"), schoolType);
+		Label label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
 		formItem.add(label);
-		formItem.add(schoolType);
+		formItem.add(courseType);
 		layer.add(formItem);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
+		label = new Label();
+		label.setLabel(getResourceBundle().getLocalizedString("from", "From"));
 		formItem.add(label);
-		formItem.add(courseType);
+		formItem.add(fromDate);
+		layer.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.setLabel(getResourceBundle().getLocalizedString("to", "To"));
+		formItem.add(label);
+		formItem.add(toDate);
 		layer.add(formItem);
 
 		formItem = new Layer(Layer.DIV);
@@ -198,12 +267,16 @@ public class CourseList extends CourseBlock {
 		link.setTarget(Link.TARGET_NEW_WINDOW);
 		link.maintainParameter(PARAMETER_SCHOOL_TYPE_PK, iwc);
 		link.maintainParameter(PARAMETER_COURSE_TYPE_PK, iwc);
+		link.maintainParameter(PARAMETER_FROM_DATE, iwc);
+		link.maintainParameter(PARAMETER_TO_DATE, iwc);
 		link.setMediaWriterClass(CourseWriter.class);
 
 		return link;
 	}
 
 	protected Table2 getCourses(IWContext iwc) throws RemoteException {
+		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
+
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -216,6 +289,10 @@ public class CourseList extends CourseBlock {
 
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
+		cell.setStyleClass("number");
+		cell.add(new Text(getResourceBundle().getLocalizedString("number_abbreviated", "No.")));
+
+		cell = row.createHeaderCell();
 		cell.setStyleClass("course");
 		cell.add(new Text(getResourceBundle().getLocalizedString("course", "Course")));
 
@@ -223,20 +300,21 @@ public class CourseList extends CourseBlock {
 			cell = row.createHeaderCell();
 			cell.setStyleClass("provider");
 			cell.add(new Text(getResourceBundle().getLocalizedString("provider", "Provider")));
-
 		}
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("type");
 		cell.add(new Text(getResourceBundle().getLocalizedString("type", "Type")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("from");
-		cell.add(new Text(getResourceBundle().getLocalizedString("from", "From")));
+		if (useBirthYears) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("from");
+			cell.add(new Text(getResourceBundle().getLocalizedString("from", "From")));
 
-		cell = row.createHeaderCell();
-		cell.setStyleClass("to");
-		cell.add(new Text(getResourceBundle().getLocalizedString("to", "To")));
+			cell = row.createHeaderCell();
+			cell.setStyleClass("to");
+			cell.add(new Text(getResourceBundle().getLocalizedString("to", "To")));
+		}
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("dateFrom");
@@ -269,6 +347,9 @@ public class CourseList extends CourseBlock {
 				schoolTypePK = null;
 			}
 		}
+		else if (type != null) {
+			schoolTypePK = new Integer(type.getPrimaryKey().toString());
+		}
 
 		Integer courseTypePK = null;
 		if (iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK)) {
@@ -278,13 +359,28 @@ public class CourseList extends CourseBlock {
 			}
 		}
 
+		IWTimestamp stamp = new IWTimestamp();
+		stamp.addMonths(-1);
+
+		Date fromDate = stamp.getDate();
+		if (iwc.isParameterSet(PARAMETER_FROM_DATE)) {
+			fromDate = new IWTimestamp(iwc.getParameter(PARAMETER_FROM_DATE)).getDate();
+		}
+
+		stamp.addMonths(1);
+		stamp.addYears(1);
+		Date toDate = stamp.getDate();
+		if (iwc.isParameterSet(PARAMETER_TO_DATE)) {
+			toDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
+		}
+
 		List courses = new ArrayList();
 		if (true/* iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) */) {
 			if (isSchoolUser() || getSession().getProvider() != null) {
-				courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), schoolTypePK, courseTypePK));
+				courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), schoolTypePK, courseTypePK, fromDate, toDate));
 			}
 			else {
-				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK));
+				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK, fromDate, toDate));
 			}
 			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : CourseComparator.NAME_SORT));
 		}
@@ -302,6 +398,13 @@ public class CourseList extends CourseBlock {
 
 			cell = row.createCell();
 			cell.setStyleClass("firstColumn");
+			cell.setStyleClass("number");
+			if (type.getAbbreviation() != null) {
+				cell.add(new Text(type.getAbbreviation()));
+			}
+			cell.add(new Text(course.getPrimaryKey().toString()));
+
+			cell = row.createCell();
 			cell.setStyleClass("course");
 			if (getResponsePage() != null) {
 				Link link = new Link(new Text(course.getName()));
@@ -327,13 +430,15 @@ public class CourseList extends CourseBlock {
 			cell.setStyleClass("type");
 			cell.add(new Text(type.getName()));
 
-			cell = row.createCell();
-			cell.setStyleClass("from");
-			cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
+			if (useBirthYears) {
+				cell = row.createCell();
+				cell.setStyleClass("from");
+				cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
 
-			cell = row.createCell();
-			cell.setStyleClass("to");
-			cell.add(new Text(String.valueOf(course.getBirthyearTo())));
+				cell = row.createCell();
+				cell.setStyleClass("to");
+				cell.add(new Text(String.valueOf(course.getBirthyearTo())));
+			}
 
 			cell = row.createCell();
 			cell.setStyleClass("dateFrom");
