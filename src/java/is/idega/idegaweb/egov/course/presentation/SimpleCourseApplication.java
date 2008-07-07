@@ -227,12 +227,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		StringBuffer script5 = new StringBuffer();
 		script5.append("function getRadio(course) { \n").append("\nvar sel = (course.pk == 0);\n");
-		script5.append("\n\t").append("var radio = document.createElement(\"input\");");
-		script5.append("\n\t").append("radio.id = course.pk;");
-		script5.append("\n\t").append("radio.type = \"radio\";");
-		script5.append("\n\t").append("radio.className = \"checkbox\";");
-		script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
-		script5.append("\n\t").append("radio.value = course.pk;");
+		if (iwc.isIE()) {
+			script5.append("\n\t").append("var radio = document.createElement('<input id=\"' + course.pk + '\" value=\"' + course.pk + '\" class=\"checkbox\" type=\"radio\" name=\"" + PARAMETER_COURSE + "\">');");
+			
+		}
+		else {
+			script5.append("\n\t").append("var radio = document.createElement(\"input\");");
+			script5.append("\n\t").append("radio.id = course.pk;");
+			script5.append("\n\t").append("radio.type = \"radio\";");
+			script5.append("\n\t").append("radio.className = \"checkbox\";");
+			script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
+			script5.append("\n\t").append("radio.value = course.pk;");
+		}
 		script5.append("\n\t").append("return radio;");
 		script5.append("}\n");
 

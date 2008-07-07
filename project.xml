@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov Courses</name>
   <artifactId>is.idega.idegaweb.egov.course</artifactId>
-  <currentVersion>1.0.26</currentVersion>
+  <currentVersion>1.0.27</currentVersion>
   <inceptionYear>2007</inceptionYear>
   <shortDescription>eGov Courses</shortDescription>
   <versions>
@@ -133,6 +133,11 @@
       <id>1.0.26</id>
       <name>1.0.26</name>
       <tag>EGOV_COURSE_1_0_26</tag>
+    </version>
+    <version>
+      <id>1.0.27</id>
+      <name>1.0.27</name>
+      <tag>EGOV_COURSE_1_0_27</tag>
     </version>
   </versions>
   <branches/>
