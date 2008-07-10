@@ -18,7 +18,9 @@ public class CourseCertificateTypeBMPBean extends GenericEntity implements
 	private static final String COLUMN_DESCRIPTION = "description";
 
 	public static final Integer FULL_CERTIFICATE_TYPE = new Integer(1);
-	public static final Integer TEMPORARY_CERTIFICATE_TYPE = new Integer(2);
+	public static final Integer RENEWAL_CERTIFICATE_TYPE = new Integer(2);
+	public static final Integer TEMPORARY_CERTIFICATE_TYPE = new Integer(3);
+	public static final Integer LIMITED_CERTIFICATE_TYPE = new Integer(4);
 	
 	public String getEntityName() {
 		return "COU_CERTIFICATE_TYPE";
@@ -37,12 +39,21 @@ public class CourseCertificateTypeBMPBean extends GenericEntity implements
 		fullCertificate.setDescription("Full certificate");
 		fullCertificate.store();
 		
+		CourseCertificateType renewalCertificate = ((CourseCertificateTypeHome) IDOLookup.getHomeLegacy(CourseCertificateType.class)).create();
+		renewalCertificate.setType(RENEWAL_CERTIFICATE_TYPE);
+		renewalCertificate.setDescription("Renewal certificate");
+		renewalCertificate.store();
+		
 		CourseCertificateType temporaryCertificate = ((CourseCertificateTypeHome) IDOLookup.getHomeLegacy(CourseCertificateType.class)).create();
 		temporaryCertificate.setType(TEMPORARY_CERTIFICATE_TYPE);
 		temporaryCertificate.setDescription("Temporary certificate");
 		temporaryCertificate.store();
 		
-		//	TODO: add 3 more types (2, 3, 4, VOTT.xml)
+		CourseCertificateType limitedCertificate = ((CourseCertificateTypeHome) IDOLookup.getHomeLegacy(CourseCertificateType.class)).create();
+		limitedCertificate.setType(LIMITED_CERTIFICATE_TYPE);
+		limitedCertificate.setDescription("Limited certificate");
+		limitedCertificate.store();
+		
 	}
 	
 	public void setType(Integer type) {

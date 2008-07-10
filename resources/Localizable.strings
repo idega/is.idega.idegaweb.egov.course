@@ -1,4 +1,6 @@
 Full_certificate=Full certificate
+Limited_certificate=Limited certificate
+Renewal_certificate=Renewal certificate
 Temporary_certificate=Temporary certificate
 Weighers_Course_Type=Weighers Course Type
 Weighers_School_Type=Weighers School Type
@@ -234,6 +236,7 @@ iw.component.is.idega.idegaweb.egov.course.presentation.statistics.CoursePartici
 iw.component.is.idega.idegaweb.egov.course.presentation.statistics.CourseStatistics.name=CourseStatistics
 length=Length
 length_selection=Length selection
+limited_certificate=Limited certificate
 loading=Loading
 localization_key=Key
 male=Male

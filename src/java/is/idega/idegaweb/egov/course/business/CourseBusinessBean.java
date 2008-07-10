@@ -2239,8 +2239,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				cellData.setForceToCheck(true);
 			}
 
-			cellData.setDisabled(disabled);
-			cellData.setShow(show);
+			//cellData.setDisabled(disabled);
+			//cellData.setShow(show);
 
 			data.add(cellData);
 		}
@@ -2256,8 +2256,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		/*2 > 3*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("certificate_of_property", "Certificate of property"), CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
 		/*3 > 4*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("criminal_record", "Criminal record"), CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
 		/*4 > 5*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_of_payment", "Verification of payment"), CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
-		/*6*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
-		/*7*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
+		/*8 > 6*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("limited_certificate", "Limited certificate"), CourseChoiceBMPBean.COLUMN_LIMITED_CERTIFICATE));
+		/*7*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
+		/*8*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
 
 		return info;
 	}
