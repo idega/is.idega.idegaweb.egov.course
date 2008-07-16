@@ -79,7 +79,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private static final int ACTION_SAVE = 0;
 
 	protected static final String PARAMETER_ACTION = "prm_action";
-	protected static final String PARAMETER_BACK = "prm_back";
+	protected static final String PARAMETER_TRIGGER_SAVE = "prm_trigger_save";
 
 	private static final String PARAMETER_APPLICANT_OPTION = "prm_applicant_option";
 	private static final String PARAMETER_PERSONAL_ID = "prm_personal_id";
@@ -157,7 +157,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 	}
 
-	private Form getForm(int state) {
+	private Form getForm(IWContext iwc, int state) {
 		Form form = new Form();
 		if (state != ACTION_PHASE_1) {
 			form.maintainParameter(PARAMETER_COURSE);
@@ -171,14 +171,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 		if (state != ACTION_PHASE_4) {
 			form.maintainParameter(PARAMETER_AGREEMENT);
-			form.maintainParameter(PARAMETER_HAS_DYSLEXIA);
+			if (!iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+				form.maintainParameter(PARAMETER_HAS_DYSLEXIA);
+			}
 		}
 
 		return form;
 	}
 
 	private void showPhaseOne(IWContext iwc) throws RemoteException {
-		Form form = getForm(ACTION_PHASE_1);
+		Form form = getForm(iwc, ACTION_PHASE_1);
 		form.setId("course_step_1");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1)));
 
@@ -447,8 +449,12 @@ public class SimpleCourseApplication extends ApplicationForm {
 			showPhaseOne(iwc);
 			return;
 		}
+		
+		if (iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+			addApplication(iwc);
+		}
 
-		Form form = getForm(ACTION_PHASE_2);
+		Form form = getForm(iwc, ACTION_PHASE_2);
 		form.setId("course_step_2");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2)));
 
@@ -466,65 +472,72 @@ public class SimpleCourseApplication extends ApplicationForm {
 		info.setStyleClass("info");
 		form.add(info);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.select_course_type", "Select course type"));
+		if (getCourseApplicationSession(iwc).getApplications().size() <= 0) {
+			heading = new Heading1(this.iwrb.getLocalizedString("application.select_registrator", "Select registrator"));
+			heading.setStyleClass("subHeader");
+			heading.setStyleClass("topSubHeader");
+			form.add(heading);
+	
+			Layer section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+	
+			Layer helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.select_applicant_help", "Please select if you are registering yourself or on behalf of a company.  If you are registering on behalf of a company you will be able to enter company information later.")));
+			section.add(helpLayer);
+			
+			RadioButton ownRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.TRUE.toString());
+			ownRegistration.setStyleClass("radiobutton");
+			ownRegistration.setSelected(true);
+			ownRegistration.keepStatusOnAction(true);
+	
+			RadioButton companyRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.FALSE.toString());
+			companyRegistration.setStyleClass("radiobutton");
+			companyRegistration.keepStatusOnAction(true);
+	
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			Label label = new Label(this.iwrb.getLocalizedString("application.own_registration", "Own registration"), ownRegistration);
+			formItem.add(ownRegistration);
+			formItem.add(label);
+			section.add(formItem);
+	
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("application.company_registration", "Company registration"), companyRegistration);
+			formItem.add(companyRegistration);
+			formItem.add(label);
+			section.add(formItem);
+		}
+		else {
+			form.maintainParameter(PARAMETER_APPLICANT_OPTION);
+		}
+		
+		heading = new Heading1(iwrb.getLocalizedString("type_social_security_number", "Type in social security number"));
 		heading.setStyleClass("subHeader");
-		heading.setStyleClass("topSubHeader");
 		form.add(heading);
 
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		Layer helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.select_applicant_help", "Please select if you are registering yourself or on behalf of a company.  If you are registering on behalf of a company you will be able to enter company information later.")));
-		section.add(helpLayer);
-
-		RadioButton ownRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.TRUE.toString());
-		ownRegistration.setStyleClass("radiobutton");
-		ownRegistration.setSelected(true);
-		ownRegistration.keepStatusOnAction(true);
-
-		RadioButton companyRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.FALSE.toString());
-		companyRegistration.setStyleClass("radiobutton");
-		companyRegistration.keepStatusOnAction(true);
+		TextInput personalID = new TextInput(PARAMETER_PERSONAL_ID);
+		personalID.setMaxlength(10);
+		if (!iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+			personalID.keepStatusOnAction(true);
+		}
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		Label label = new Label(this.iwrb.getLocalizedString("application.own_registration", "Own registration"), ownRegistration);
-		formItem.add(ownRegistration);
-		formItem.add(label);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("application.company_registration", "Company registration"), companyRegistration);
-		formItem.add(companyRegistration);
-		formItem.add(label);
-		section.add(formItem);
-
-		heading = new Heading1(iwrb.getLocalizedString("type_social_security_number", "Type in social security number"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		TextInput personalID = new TextInput(PARAMETER_PERSONAL_ID);
-		personalID.setMaxlength(10);
-		personalID.keepStatusOnAction(true);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString("social_security_number", "Social security number"), personalID);
+		Label label = new Label(this.iwrb.getLocalizedString("social_security_number", "Social security number"), personalID);
 		formItem.add(label);
 		formItem.add(personalID);
 		section.add(formItem);
 
-		helpLayer = new Layer(Layer.DIV);
+		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_applicant_helper", "Please select an applicant by writing in the personal ID in the field to the left.")));
 		section.add(helpLayer);
@@ -539,7 +552,12 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.add(link);
 
 		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
+		if (iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+			link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
+		}
+		else {
+			link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
+		}
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
@@ -599,7 +617,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			return;
 		}
 
-		Form form = getForm(ACTION_PHASE_3);
+		Form form = getForm(iwc, ACTION_PHASE_3);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3)));
 
 		addErrors(iwc, form);
@@ -730,8 +748,9 @@ public class SimpleCourseApplication extends ApplicationForm {
 			return;
 		}
 
-		Form form = getForm(ACTION_PHASE_4);
+		Form form = getForm(iwc, ACTION_PHASE_4);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4)));
+		form.add(new HiddenInput(PARAMETER_TRIGGER_SAVE, ""));
 
 		addErrors(iwc, form);
 
@@ -769,35 +788,40 @@ public class SimpleCourseApplication extends ApplicationForm {
 		formItem.add(label);
 		section.add(formItem);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		CheckBox agree = new CheckBox(PARAMETER_AGREEMENT, Boolean.TRUE.toString());
-		agree.setStyleClass("checkbox");
-		agree.keepStatusOnAction(true);
-
-		Paragraph paragraph = new Paragraph();
-		paragraph.setStyleClass("agreement");
-		paragraph.add(new Text(this.iwrb.getLocalizedString("application.agreement", "Agreement text")));
-		section.add(paragraph);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_AGREEMENT)) {
-			formItem.setStyleClass("hasError");
+		if (getCourseApplicationSession(iwc).getApplications().size() <= 0) {
+			heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
+	
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+	
+			CheckBox agree = new CheckBox(PARAMETER_AGREEMENT, Boolean.TRUE.toString());
+			agree.setStyleClass("checkbox");
+			agree.keepStatusOnAction(true);
+	
+			Paragraph paragraph = new Paragraph();
+			paragraph.setStyleClass("agreement");
+			paragraph.add(new Text(this.iwrb.getLocalizedString("application.agreement", "Agreement text")));
+			section.add(paragraph);
+	
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_AGREEMENT)) {
+				formItem.setStyleClass("hasError");
+			}
+			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.agree_terms", "Yes, I agree"))), agree);
+			formItem.add(agree);
+			formItem.add(label);
+			section.add(formItem);
 		}
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.agree_terms", "Yes, I agree"))), agree);
-		formItem.add(agree);
-		formItem.add(label);
-		section.add(formItem);
-
+		else {	
+			form.add(new HiddenInput(PARAMETER_AGREEMENT, Boolean.TRUE.toString()));
+		}
+		
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
@@ -807,6 +831,14 @@ public class SimpleCourseApplication extends ApplicationForm {
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
+		if (iCompanyRegistration) {
+			Link newAppl = getButtonLink(this.iwrb.getLocalizedString("register_another_applicant", "Another applicant"));
+			newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2));
+			newAppl.setValueOnClick(PARAMETER_TRIGGER_SAVE, Boolean.TRUE.toString());
+			newAppl.setToFormSubmit(form);
+			bottom.add(newAppl);
+		}
+		
 		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
 		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
 		link.setToFormSubmit(form);
@@ -827,9 +859,8 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addApplication(iwc);
 
-		Form form = getForm(ACTION_PHASE_5);
+		Form form = getForm(iwc, ACTION_PHASE_5);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_SAVE)));
-		form.add(new HiddenInput(PARAMETER_BACK, ""));
 
 		addErrors(iwc, form);
 
@@ -1064,7 +1095,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.add(next);
 
 		Link back = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		back.setValueOnClick(PARAMETER_BACK, Boolean.TRUE.toString());
 		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
 		back.setToFormSubmit(form);
 		bottom.add(back);
@@ -1134,7 +1164,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			heading.setStyleClass("applicationHeading");
 			add(heading);
 
-			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation", "Your course application has been received and will be processed."), 7, numberOfPhases);
+			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation", "Your course application has been received and will be processed."), 6, numberOfPhases);
 
 			Layer clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
@@ -1177,7 +1207,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 
 		if (iwc.isParameterSet(PARAMETER_APPLICANT_OPTION)) {
-			iCompanyRegistration = false; //!Boolean.valueOf(iwc.getParameter(PARAMETER_APPLICANT_OPTION)).booleanValue();
+			iCompanyRegistration = !Boolean.valueOf(iwc.getParameter(PARAMETER_APPLICANT_OPTION)).booleanValue();
 		}
 
 		return action;
@@ -1186,15 +1216,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private boolean addApplication(IWContext iwc) throws RemoteException {
 		Object coursePK = iwc.getParameter(PARAMETER_COURSE);
 		boolean hasDyslexia = iwc.isParameterSet(PARAMETER_HAS_DYSLEXIA);
+		User applicant = getApplicant(iwc);
 
-		if (coursePK != null) {
+		if (coursePK != null && applicant != null) {
 			ApplicationHolder holder = new ApplicationHolder();
 			Course course = getCourseBusiness(iwc).getCourse(new Integer(coursePK.toString()));
 			holder.setCourse(course);
 			holder.setUser(getApplicant(iwc));
 			holder.setHasDyslexia(hasDyslexia);
 
-			getCourseApplicationSession(iwc).addApplication(getApplicant(iwc), holder);
+			getCourseApplicationSession(iwc).addApplication(applicant, holder);
 		}
 
 		return true;
