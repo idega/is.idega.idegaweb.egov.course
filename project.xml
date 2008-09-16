@@ -149,6 +149,11 @@
       <name>1.0.29</name>
       <tag>EGOV_COURSE_1_0_29</tag>
     </version>
+    <version>
+      <id>1.0.30</id>
+      <name>1.0.30</name>
+      <tag>EGOV_COURSE_1_0_30</tag>
+    </version>
   </versions>
   <branches/>
   <developers>

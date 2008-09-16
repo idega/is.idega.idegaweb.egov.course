@@ -4,6 +4,12 @@
     <author email="gimmi@idega.com">Grimur</author>
   </properties>
   <body>
+  	<release version="1.0.30" date="2008-09-16">
+      <action dev="laddi" type="update">
+      	Bug fixes for Nest weighers.
+      </action>
+    </release>
+    
   	<release version="1.0.29" date="2008-09-16">
       <action dev="laddi" type="update">
       	Bug fixes for Nest weighers.
