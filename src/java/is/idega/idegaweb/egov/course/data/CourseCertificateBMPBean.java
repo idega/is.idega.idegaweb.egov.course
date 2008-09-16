@@ -10,6 +10,9 @@ import com.idega.company.data.Company;
 import com.idega.core.file.data.ICFile;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
+import com.idega.data.query.MatchCriteria;
+import com.idega.data.query.SelectQuery;
+import com.idega.data.query.Table;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
 
@@ -26,6 +29,7 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	private static final String COLUMN_VALID_THRU = "valid_thru";
 	private static final String COLUMN_COURSE_ID = "course_id";
 	private static final String COLUMN_CERTIFICATE_FILE_ID = "cert_file_id";
+	private static final String COLUMN_CERTIFICATE_NUMBER = "certificate_number";
 
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -36,6 +40,7 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 
 		addAttribute(COLUMN_VALID_FROM, "Certificate valid from", Timestamp.class);
 		addAttribute(COLUMN_VALID_THRU, "Certificate valid thru", Timestamp.class);
+		addAttribute(COLUMN_CERTIFICATE_NUMBER, "Number", Integer.class);
 
 		addManyToOneRelationship(COLUMN_CERTIFICATE_FILE_ID, ICFile.class);
 		addOneToOneRelationship(COLUMN_TYPE_OF_CERTIFICATE_ID, CourseCertificateType.class);
@@ -104,6 +109,14 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 		return time == null ? null : new IWTimestamp(time);
 	}
 
+	public void setNumber(int number) {
+		setColumn(COLUMN_CERTIFICATE_NUMBER, number);
+	}
+	
+	public int getNumber() {
+		return getIntColumnValue(COLUMN_CERTIFICATE_NUMBER);
+	}
+	
 	public Collection ejbFindAllByUser(User user) throws FinderException {
 		IDOQuery query = idoQueryGetSelect();
 		query.appendWhereEquals(COLUMN_PARTICIPANT_ID, user.getId());
@@ -135,5 +148,16 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 			query.appendAnd().appendEquals(COLUMN_TYPE_OF_CERTIFICATE_ID, certificateTypeId);
 		}
 		return super.idoFindPKsByQuery(query);
+	}
+
+	public Object ejbFindHighestNumberByType(CourseCertificateType type) throws FinderException {
+		Table table = new Table(this);
+		
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(table.getColumn(getIDColumnName()));
+		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_TYPE_OF_CERTIFICATE_ID), MatchCriteria.EQUALS, type));
+		query.addOrder(table, COLUMN_TYPE_OF_CERTIFICATE_ID, false);
+		
+		return idoFindOnePKByQuery(query);
 	}
 }

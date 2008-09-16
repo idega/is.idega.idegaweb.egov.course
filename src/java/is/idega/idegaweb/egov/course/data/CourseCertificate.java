@@ -79,4 +79,14 @@ public interface CourseCertificate extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseCertificateBMPBean#getValidThru
 	 */
 	public IWTimestamp getValidThru();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseCertificateBMPBean#setNumber
+	 */
+	public void setNumber(int number);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseCertificateBMPBean#getNumber
+	 */
+	public int getNumber();
 }

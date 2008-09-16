@@ -546,18 +546,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
-		link.setToFormSubmit(form);
-		bottom.add(link);
-
-		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		Link link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
 		if (iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
 			link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
 		}
 		else {
 			link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
 		}
+		link.setToFormSubmit(form);
+		bottom.add(link);
+
+		link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
@@ -728,13 +728,13 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
+		Link link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
-		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2));
+		link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
@@ -826,7 +826,12 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		Link link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
+		link.setToFormSubmit(form);
+		bottom.add(link);
+
+		link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
 		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
 		link.setToFormSubmit(form);
 		bottom.add(link);
@@ -839,11 +844,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 			bottom.add(newAppl);
 		}
 		
-		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
-		link.setToFormSubmit(form);
-		bottom.add(link);
-
 		add(form);
 	}
 
@@ -919,6 +919,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 		cell.setStyleClass("personalID");
 		cell.add(new Text(iwrb.getLocalizedString("personal_id", "Personal ID")));
 
+		cell = row.createHeaderCell();
+		cell.setStyleClass("courseFee");
+		cell.add(new Text(iwrb.getLocalizedString("course_fee", "Course fee")));
+
 		String defaultCertificateFee = iwc.getApplicationSettings().getProperty(CourseConstants.DEFAULT_COURSE_CERTIFICATE_FEE);
 		float certificateFee = 0;
 		if (defaultCertificateFee == null) {
@@ -968,14 +972,20 @@ public class SimpleCourseApplication extends ApplicationForm {
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
 			cell = row.createCell();
+			cell.setStyleClass("courseFee");
+			cell.add(new Text(format.format(price)));
+
+			cell = row.createCell();
 			cell.setStyleClass("certificateFee");
 			if (holder.getCost() > 0) {
 				cell.add(new Text(format.format(holder.getCost())));
 				totalPrice += holder.getCost();
+				price += holder.getCost();
 			}
 			else if (certificateFee >= 0) {
 				cell.add(new Text(format.format(certificateFee)));
 				totalPrice += certificateFee;
+				price += certificateFee;
 			}
 			else {
 				cell.add(Text.getNonBrakingSpace());
@@ -1088,16 +1098,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
+		Link back = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
+		back.setToFormSubmit(form);
+		bottom.add(back);
+
 		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
 		next.setOnClick("this.style.display='none';");
 		next.setToFormSubmit(form);
 		bottom.add(next);
-
-		Link back = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
-		back.setToFormSubmit(form);
-		bottom.add(back);
 
 		add(form);
 	}

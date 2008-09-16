@@ -622,9 +622,20 @@ public class CourseEditor extends CourseBlock {
 		courseTypeID.setId(PARAMETER_COURSE_TYPE_PK);
 		courseTypeID.addMenuElementFirst("-1", getResourceBundle().getLocalizedString("select_course_type", "Select course type"));
 
+		boolean showTypes = true;
+		Object schoolTypePK = null;
+		
 		Collection cargoTypes = null;
 		Collection schoolTypes = getCourseBusiness(iwc).getSchoolTypes(getSession().getProvider());
-		schoolTypeID.addMenuElements(schoolTypes);
+		if (schoolTypes.size() > 1) {
+			schoolTypeID.addMenuElements(schoolTypes);
+		}
+		else if (schoolTypes.size() == 1) {
+			SchoolType type = (SchoolType) schoolTypes.iterator().next();
+			showTypes = false;
+			form.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
+			schoolTypePK = type.getPrimaryKey();
+		}
 
 		DropdownMenu priceDrop = new DropdownMenu(PARAMETER_COURSE_PRICE_PK);
 		priceDrop.setId(PARAMETER_COURSE_PRICE_PK);
@@ -696,7 +707,11 @@ public class CourseEditor extends CourseBlock {
 		}
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			CourseCategory category = getCourseBusiness(iwc).getCourseCategory(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK));
+			schoolTypePK = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
+		}
+		
+		if (schoolTypePK != null) {
+			CourseCategory category = getCourseBusiness(iwc).getCourseCategory(schoolTypePK);
 			useFixedPrices = category.useFixedPricing();
 			price.setDisabled(!useFixedPrices);
 
@@ -722,14 +737,16 @@ public class CourseEditor extends CourseBlock {
 		Layer layer;
 		Label label;
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("category");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("category", "Category"), schoolTypeID);
-		layer.add(label);
-		layer.add(schoolTypeID);
-		section.add(layer);
-
+		if (showTypes) {
+			layer = new Layer(Layer.DIV);
+			layer.setID("category");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("category", "Category"), schoolTypeID);
+			layer.add(label);
+			layer.add(schoolTypeID);
+			section.add(layer);
+		}
+		
 		layer = new Layer(Layer.DIV);
 		layer.setID("type");
 		layer.setStyleClass("formItem");
