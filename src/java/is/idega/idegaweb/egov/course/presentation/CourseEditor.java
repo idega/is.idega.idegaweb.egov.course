@@ -259,6 +259,10 @@ public class CourseEditor extends CourseBlock {
 			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
 		}
 
+		stamp.addMonths(-1);
+		stamp.addYears(-1);
+		fromDate.setDate(stamp.getDate());
+
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		Label label = new Label(getResourceBundle().getLocalizedString("type", "Type"), courseType);
@@ -444,15 +448,17 @@ public class CourseEditor extends CourseBlock {
 				cell.setStyleClass("name");
 				cell.add(new Text(course.getName()));
 
-				cell = row.createCell();
-				cell.setStyleClass("category");
-				CourseCategory sType = cType.getCourseCategory();
-				if (sType != null) {
-					if (sType.getLocalizationKey() != null) {
-						cell.add(new Text(localize(sType.getLocalizationKey(), sType.getName())));
-					}
-					else {
-						cell.add(new Text(sType.getName()));
+				if (showTypes) {
+					cell = row.createCell();
+					cell.setStyleClass("category");
+					CourseCategory sType = cType.getCourseCategory();
+					if (sType != null) {
+						if (sType.getLocalizationKey() != null) {
+							cell.add(new Text(localize(sType.getLocalizationKey(), sType.getName())));
+						}
+						else {
+							cell.add(new Text(sType.getName()));
+						}
 					}
 				}
 
@@ -579,6 +585,8 @@ public class CourseEditor extends CourseBlock {
 		form.setID("courseEditor");
 		form.setStyleClass("adminForm");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(coursePK != null ? ACTION_EDIT : ACTION_NEW)));
+		form.maintainParameter(PARAMETER_FROM_DATE);
+		form.maintainParameter(PARAMETER_TO_DATE);
 
 		Course course = getCourseBusiness(iwc).getCourse(coursePK);
 
@@ -618,9 +626,20 @@ public class CourseEditor extends CourseBlock {
 		courseTypeID.setId(PARAMETER_COURSE_TYPE_PK);
 		courseTypeID.addMenuElementFirst("-1", getResourceBundle().getLocalizedString("select_course_type", "Select course type"));
 
+		boolean showTypes = true;
+		Object schoolTypePK = null;
+		
 		Collection cargoTypes = null;
 		Collection schoolTypes = getCourseBusiness(iwc).getSchoolTypes(getSession().getProvider());
-		schoolTypeID.addMenuElements(schoolTypes);
+		if (schoolTypes.size() > 1) {
+			schoolTypeID.addMenuElements(schoolTypes);
+		}
+		else if (schoolTypes.size() == 1) {
+			SchoolType type = (SchoolType) schoolTypes.iterator().next();
+			showTypes = false;
+			form.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
+			schoolTypePK = type.getPrimaryKey();
+		}
 
 		DropdownMenu priceDrop = new DropdownMenu(PARAMETER_COURSE_PRICE_PK);
 		priceDrop.setId(PARAMETER_COURSE_PRICE_PK);
@@ -692,7 +711,11 @@ public class CourseEditor extends CourseBlock {
 		}
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			CourseCategory category = getCourseBusiness(iwc).getCourseCategory(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK));
+			schoolTypePK = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
+		}
+		
+		if (schoolTypePK != null) {
+			CourseCategory category = getCourseBusiness(iwc).getCourseCategory(schoolTypePK);
 			useFixedPrices = category.useFixedPricing();
 			price.setDisabled(!useFixedPrices);
 
@@ -718,14 +741,16 @@ public class CourseEditor extends CourseBlock {
 		Layer layer;
 		Label label;
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("category");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("category", "Category"), schoolTypeID);
-		layer.add(label);
-		layer.add(schoolTypeID);
-		section.add(layer);
-
+		if (showTypes) {
+			layer = new Layer(Layer.DIV);
+			layer.setID("category");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("category", "Category"), schoolTypeID);
+			layer.add(label);
+			layer.add(schoolTypeID);
+			section.add(layer);
+		}
+		
 		layer = new Layer(Layer.DIV);
 		layer.setID("type");
 		layer.setStyleClass("formItem");
@@ -816,21 +841,23 @@ public class CourseEditor extends CourseBlock {
 			section.add(layer);
 		}
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("year_from");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
-		layer.add(label);
-		layer.add(inputYearFrom);
-		section.add(layer);
+		if (useBirthYears) {
+			layer = new Layer(Layer.DIV);
+			layer.setID("year_from");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("birthyear_from", "Birthyear from"), inputYearFrom);
+			layer.add(label);
+			layer.add(inputYearFrom);
+			section.add(layer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("year_to");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
-		layer.add(label);
-		layer.add(inputYearTo);
-		section.add(layer);
+			layer = new Layer(Layer.DIV);
+			layer.setID("year_to");
+			layer.setStyleClass("formItem");
+			label = new Label(localize("birthyear_to", "Birthyear to"), inputYearTo);
+			layer.add(label);
+			layer.add(inputYearTo);
+			section.add(layer);
+		}
 
 		layer = new Layer(Layer.DIV);
 		layer.setID("max");

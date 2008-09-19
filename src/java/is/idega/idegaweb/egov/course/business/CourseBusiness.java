@@ -121,11 +121,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException, RemoteException;
 	
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
-	 */
-	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException, RemoteException;
-
-	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#deleteCoursePrice
 	 */
 	public boolean deleteCoursePrice(Object pk) throws RemoteException, RemoteException;
@@ -386,6 +381,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public SortedSet calculatePrices(Map applications) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCalculatedCourseCertificateFees
+	 */
+	public float getCalculatedCourseCertificateFees(Map applications) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getDiscounts
 	 */
 	public Map getDiscounts(SortedSet userPrices, Map applications) throws RemoteException;
@@ -424,6 +424,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#invalidateChoice
 	 */
 	public void invalidateChoice(CourseApplication application, CourseChoice choice, Locale locale) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
+	 */
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
@@ -504,8 +509,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	
 	public IWTimestamp getLatestValidDateOfCertificate(List certificates);
 	
-	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee);
-	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificate
 	 */
@@ -520,8 +523,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCheckBoxesForCourseParticipants
 	 */
 	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) throws RemoteException;
-	
-	public float getCalculatedCourseCertificateFees(Map applications);
 	
 	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value);
 }

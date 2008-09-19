@@ -51,8 +51,6 @@ import com.idega.util.text.TextSoap;
 
 public class CourseApplicationOverview extends CourseBlock {
 
-	private static final String PARAMETER_ACTION = "prm_action";
-
 	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
 	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
 	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
@@ -171,6 +169,8 @@ public class CourseApplicationOverview extends CourseBlock {
 			payer = application.getOwner();
 		}
 		Name payerName = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName());
+		
+		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -259,9 +259,11 @@ public class CourseApplicationOverview extends CourseBlock {
 			cell.setStyleClass("timeframe");
 			cell.add(new Text(getResourceBundle().getLocalizedString("timeframe_date", "Timeframe/Dates")));
 
-			cell = row.createHeaderCell();
-			cell.setStyleClass("days");
-			cell.add(new Text(getResourceBundle().getLocalizedString("days", "Days")));
+			if (!useFixedPrices) {
+				cell = row.createHeaderCell();
+				cell.setStyleClass("days");
+				cell.add(new Text(getResourceBundle().getLocalizedString("days", "Days")));
+			}
 			
 			cell = row.createHeaderCell();
 			cell.setStyleClass("certificateFee");
@@ -286,6 +288,11 @@ public class CourseApplicationOverview extends CourseBlock {
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 				IWTimestamp endDate = course.getCoursePrice() > 0 ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
 
+				if (course.getCourseCost() > 0) {
+					certificateFees = course.getCourseCost();
+					totalPrice += certificateFees;
+				}
+				
 				cell = row.createCell();
 				cell.setStyleClass("course");
 				if (getChoicePage() != null && !useInWindow) {
@@ -311,19 +318,21 @@ public class CourseApplicationOverview extends CourseBlock {
 				cell.setStyleClass("timeframe");
 				cell.add(new Text(startDate.getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT) + " - " + endDate.getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT)));
 
-				cell = row.createCell();
-				cell.setStyleClass("days");
-				if (course.getCoursePrice() > 0) {
-					cell.add(new Text(String.valueOf(IWTimestamp.getDaysBetween(startDate, endDate) + 1)));
+				if (!useFixedPrices) {
+					cell = row.createCell();
+					cell.setStyleClass("days");
+					if (course.getCoursePrice() > 0) {
+						cell.add(new Text(String.valueOf(IWTimestamp.getDaysBetween(startDate, endDate) + 1)));
+					}
+					else {
+						cell.add(new Text(String.valueOf(coursePrice.getNumberOfDays())));
+					}
 				}
-				else {
-					cell.add(new Text(String.valueOf(coursePrice.getNumberOfDays())));
-				}
-
+				
 				cell = row.createCell();
 				cell.setStyleClass("certificateFee");
 				cell.add(new Text(format.format(certificateFees)));
-				
+
 				cell = row.createCell();
 				cell.setStyleClass("amount");
 				cell.add(new Text(format.format(appHolder.getPrice())));
@@ -480,7 +489,7 @@ public class CourseApplicationOverview extends CourseBlock {
 		SortedSet prices = getBusiness().calculatePrices(applications);
 		Map discounts = getBusiness().getDiscounts(prices, applications);
 		float certificateFees = getBusiness().getCalculatedCourseCertificateFees(applications);
-		
+
 		float totalPrice = certificateFees;
 		float discount = 0;
 		Iterator iterator = prices.iterator();

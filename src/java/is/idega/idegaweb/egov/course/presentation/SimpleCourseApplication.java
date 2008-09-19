@@ -79,7 +79,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private static final int ACTION_SAVE = 0;
 
 	protected static final String PARAMETER_ACTION = "prm_action";
-	protected static final String PARAMETER_BACK = "prm_back";
+	protected static final String PARAMETER_TRIGGER_SAVE = "prm_trigger_save";
 
 	private static final String PARAMETER_APPLICANT_OPTION = "prm_applicant_option";
 	private static final String PARAMETER_PERSONAL_ID = "prm_personal_id";
@@ -157,7 +157,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 	}
 
-	private Form getForm(int state) {
+	private Form getForm(IWContext iwc, int state) {
 		Form form = new Form();
 		if (state != ACTION_PHASE_1) {
 			form.maintainParameter(PARAMETER_COURSE);
@@ -171,14 +171,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 		if (state != ACTION_PHASE_4) {
 			form.maintainParameter(PARAMETER_AGREEMENT);
-			form.maintainParameter(PARAMETER_HAS_DYSLEXIA);
+			if (!iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+				form.maintainParameter(PARAMETER_HAS_DYSLEXIA);
+			}
 		}
 
 		return form;
 	}
 
 	private void showPhaseOne(IWContext iwc) throws RemoteException {
-		Form form = getForm(ACTION_PHASE_1);
+		Form form = getForm(iwc, ACTION_PHASE_1);
 		form.setId("course_step_1");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1)));
 
@@ -205,7 +207,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		script4.append("var getProvider = function(course) { return course.provider };\n");
 		script4.append("var getRadioButton = function(course) { return getRadio(course); };\n");
 
-		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tDWRUtil.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tDWRUtil.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getName, getTimeframe, getProvider, getPrice], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
+		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tDWRUtil.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tDWRUtil.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getName, getTimeframe, getProvider], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
 		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
@@ -227,12 +229,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		StringBuffer script5 = new StringBuffer();
 		script5.append("function getRadio(course) { \n").append("\nvar sel = (course.pk == 0);\n");
-		script5.append("\n\t").append("var radio = document.createElement(\"input\");");
-		script5.append("\n\t").append("radio.id = course.pk;");
-		script5.append("\n\t").append("radio.type = \"radio\";");
-		script5.append("\n\t").append("radio.className = \"checkbox\";");
-		script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
-		script5.append("\n\t").append("radio.value = course.pk;");
+		if (iwc.isIE()) {
+			script5.append("\n\t").append("var radio = document.createElement('<input id=\"' + course.pk + '\" value=\"' + course.pk + '\" class=\"checkbox\" type=\"radio\" name=\"" + PARAMETER_COURSE + "\">');");
+			
+		}
+		else {
+			script5.append("\n\t").append("var radio = document.createElement(\"input\");");
+			script5.append("\n\t").append("radio.id = course.pk;");
+			script5.append("\n\t").append("radio.type = \"radio\";");
+			script5.append("\n\t").append("radio.className = \"checkbox\";");
+			script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
+			script5.append("\n\t").append("radio.value = course.pk;");
+		}
 		script5.append("\n\t").append("return radio;");
 		script5.append("}\n");
 
@@ -364,9 +372,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		cell = row.createHeaderCell();
 		cell.setStyleClass("column3");
 		cell.add(new Text(iwrb.getLocalizedString("provider", "Provider")));
-		cell = row.createHeaderCell();
-		cell.setStyleClass("column4");
-		cell.add(new Text(iwrb.getLocalizedString("price", "Price")));
 
 		group = table.createBodyRowGroup();
 		group.setId(PARAMETER_COURSE_TABLE_ID);
@@ -401,10 +406,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 				cell = row.createCell();
 				cell.setStyleClass("column3");
 				cell.add(new Text(course.getProvider()));
-
-				cell = row.createCell();
-				cell.setStyleClass("column4");
-				cell.add(new Text(course.getPrice()));
 			}
 		}
 
@@ -448,8 +449,12 @@ public class SimpleCourseApplication extends ApplicationForm {
 			showPhaseOne(iwc);
 			return;
 		}
+		
+		if (iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+			addApplication(iwc);
+		}
 
-		Form form = getForm(ACTION_PHASE_2);
+		Form form = getForm(iwc, ACTION_PHASE_2);
 		form.setId("course_step_2");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2)));
 
@@ -467,65 +472,72 @@ public class SimpleCourseApplication extends ApplicationForm {
 		info.setStyleClass("info");
 		form.add(info);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.select_course_type", "Select course type"));
+		if (getCourseApplicationSession(iwc).getApplications().size() <= 0) {
+			heading = new Heading1(this.iwrb.getLocalizedString("application.select_registrator", "Select registrator"));
+			heading.setStyleClass("subHeader");
+			heading.setStyleClass("topSubHeader");
+			form.add(heading);
+	
+			Layer section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+	
+			Layer helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.select_applicant_help", "Please select if you are registering yourself or on behalf of a company.  If you are registering on behalf of a company you will be able to enter company information later.")));
+			section.add(helpLayer);
+			
+			RadioButton ownRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.TRUE.toString());
+			ownRegistration.setStyleClass("radiobutton");
+			ownRegistration.setSelected(true);
+			ownRegistration.keepStatusOnAction(true);
+	
+			RadioButton companyRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.FALSE.toString());
+			companyRegistration.setStyleClass("radiobutton");
+			companyRegistration.keepStatusOnAction(true);
+	
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			Label label = new Label(this.iwrb.getLocalizedString("application.own_registration", "Own registration"), ownRegistration);
+			formItem.add(ownRegistration);
+			formItem.add(label);
+			section.add(formItem);
+	
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("application.company_registration", "Company registration"), companyRegistration);
+			formItem.add(companyRegistration);
+			formItem.add(label);
+			section.add(formItem);
+		}
+		else {
+			form.maintainParameter(PARAMETER_APPLICANT_OPTION);
+		}
+		
+		heading = new Heading1(iwrb.getLocalizedString("type_social_security_number", "Type in social security number"));
 		heading.setStyleClass("subHeader");
-		heading.setStyleClass("topSubHeader");
 		form.add(heading);
 
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		Layer helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.select_applicant_help", "Please select if you are registering yourself or on behalf of a company.  If you are registering on behalf of a company you will be able to enter company information later.")));
-		section.add(helpLayer);
-
-		RadioButton ownRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.TRUE.toString());
-		ownRegistration.setStyleClass("radiobutton");
-		ownRegistration.setSelected(true);
-		ownRegistration.keepStatusOnAction(true);
-
-		RadioButton companyRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.FALSE.toString());
-		companyRegistration.setStyleClass("radiobutton");
-		companyRegistration.keepStatusOnAction(true);
+		TextInput personalID = new TextInput(PARAMETER_PERSONAL_ID);
+		personalID.setMaxlength(10);
+		if (!iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+			personalID.keepStatusOnAction(true);
+		}
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		Label label = new Label(this.iwrb.getLocalizedString("application.own_registration", "Own registration"), ownRegistration);
-		formItem.add(ownRegistration);
-		formItem.add(label);
-		section.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("application.company_registration", "Company registration"), companyRegistration);
-		formItem.add(companyRegistration);
-		formItem.add(label);
-		section.add(formItem);
-
-		heading = new Heading1(iwrb.getLocalizedString("type_social_security_number", "Type in social security number"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		TextInput personalID = new TextInput(PARAMETER_PERSONAL_ID);
-		personalID.setMaxlength(10);
-		personalID.keepStatusOnAction(true);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString("social_security_number", "Social security number"), personalID);
+		Label label = new Label(this.iwrb.getLocalizedString("social_security_number", "Social security number"), personalID);
 		formItem.add(label);
 		formItem.add(personalID);
 		section.add(formItem);
 
-		helpLayer = new Layer(Layer.DIV);
+		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_applicant_helper", "Please select an applicant by writing in the personal ID in the field to the left.")));
 		section.add(helpLayer);
@@ -534,13 +546,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
+		Link link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		if (iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
+			link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
+		}
+		else {
+			link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
+		}
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
-		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
+		link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
@@ -600,7 +617,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			return;
 		}
 
-		Form form = getForm(ACTION_PHASE_3);
+		Form form = getForm(iwc, ACTION_PHASE_3);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3)));
 
 		addErrors(iwc, form);
@@ -711,13 +728,13 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
+		Link link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
-		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2));
+		link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
@@ -731,8 +748,9 @@ public class SimpleCourseApplication extends ApplicationForm {
 			return;
 		}
 
-		Form form = getForm(ACTION_PHASE_4);
+		Form form = getForm(iwc, ACTION_PHASE_4);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4)));
+		form.add(new HiddenInput(PARAMETER_TRIGGER_SAVE, ""));
 
 		addErrors(iwc, form);
 
@@ -770,49 +788,62 @@ public class SimpleCourseApplication extends ApplicationForm {
 		formItem.add(label);
 		section.add(formItem);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		CheckBox agree = new CheckBox(PARAMETER_AGREEMENT, Boolean.TRUE.toString());
-		agree.setStyleClass("checkbox");
-		agree.keepStatusOnAction(true);
-
-		Paragraph paragraph = new Paragraph();
-		paragraph.setStyleClass("agreement");
-		paragraph.add(new Text(this.iwrb.getLocalizedString("application.agreement", "Agreement text")));
-		section.add(paragraph);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_AGREEMENT)) {
-			formItem.setStyleClass("hasError");
+		if (getCourseApplicationSession(iwc).getApplications().size() <= 0) {
+			heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
+	
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+	
+			CheckBox agree = new CheckBox(PARAMETER_AGREEMENT, Boolean.TRUE.toString());
+			agree.setStyleClass("checkbox");
+			agree.keepStatusOnAction(true);
+	
+			Paragraph paragraph = new Paragraph();
+			paragraph.setStyleClass("agreement");
+			paragraph.add(new Text(this.iwrb.getLocalizedString("application.agreement", "Agreement text")));
+			section.add(paragraph);
+	
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_AGREEMENT)) {
+				formItem.setStyleClass("hasError");
+			}
+			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.agree_terms", "Yes, I agree"))), agree);
+			formItem.add(agree);
+			formItem.add(label);
+			section.add(formItem);
 		}
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.agree_terms", "Yes, I agree"))), agree);
-		formItem.add(agree);
-		formItem.add(label);
-		section.add(formItem);
-
+		else {	
+			form.add(new HiddenInput(PARAMETER_AGREEMENT, Boolean.TRUE.toString()));
+		}
+		
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
-		link.setToFormSubmit(form);
-		bottom.add(link);
-
-		link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		Link link = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
 		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_3));
 		link.setToFormSubmit(form);
 		bottom.add(link);
 
+		link = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		link.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+		link.setToFormSubmit(form);
+		bottom.add(link);
+
+		if (iCompanyRegistration) {
+			Link newAppl = getButtonLink(this.iwrb.getLocalizedString("register_another_applicant", "Another applicant"));
+			newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2));
+			newAppl.setValueOnClick(PARAMETER_TRIGGER_SAVE, Boolean.TRUE.toString());
+			newAppl.setToFormSubmit(form);
+			bottom.add(newAppl);
+		}
+		
 		add(form);
 	}
 
@@ -828,9 +859,8 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		addApplication(iwc);
 
-		Form form = getForm(ACTION_PHASE_5);
+		Form form = getForm(iwc, ACTION_PHASE_5);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_SAVE)));
-		form.add(new HiddenInput(PARAMETER_BACK, ""));
 
 		addErrors(iwc, form);
 
@@ -889,6 +919,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 		cell.setStyleClass("personalID");
 		cell.add(new Text(iwrb.getLocalizedString("personal_id", "Personal ID")));
 
+		cell = row.createHeaderCell();
+		cell.setStyleClass("courseFee");
+		cell.add(new Text(iwrb.getLocalizedString("course_fee", "Course fee")));
+
 		String defaultCertificateFee = iwc.getApplicationSettings().getProperty(CourseConstants.DEFAULT_COURSE_CERTIFICATE_FEE);
 		float certificateFee = 0;
 		if (defaultCertificateFee == null) {
@@ -938,14 +972,20 @@ public class SimpleCourseApplication extends ApplicationForm {
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
 			cell = row.createCell();
+			cell.setStyleClass("courseFee");
+			cell.add(new Text(format.format(price)));
+
+			cell = row.createCell();
 			cell.setStyleClass("certificateFee");
 			if (holder.getCost() > 0) {
 				cell.add(new Text(format.format(holder.getCost())));
 				totalPrice += holder.getCost();
+				price += holder.getCost();
 			}
 			else if (certificateFee >= 0) {
 				cell.add(new Text(format.format(certificateFee)));
 				totalPrice += certificateFee;
+				price += certificateFee;
 			}
 			else {
 				cell.add(Text.getNonBrakingSpace());
@@ -1058,17 +1098,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
+		Link back = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
+		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
+		back.setToFormSubmit(form);
+		bottom.add(back);
+
 		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
 		next.setOnClick("this.style.display='none';");
 		next.setToFormSubmit(form);
 		bottom.add(next);
-
-		Link back = getButtonLink(this.iwrb.getLocalizedString("back", "Back"));
-		back.setValueOnClick(PARAMETER_BACK, Boolean.TRUE.toString());
-		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_4));
-		back.setToFormSubmit(form);
-		bottom.add(back);
 
 		add(form);
 	}
@@ -1135,7 +1174,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			heading.setStyleClass("applicationHeading");
 			add(heading);
 
-			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation", "Your course application has been received and will be processed."), 7, numberOfPhases);
+			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation", "Your course application has been received and will be processed."), 6, numberOfPhases);
 
 			Layer clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
@@ -1187,15 +1226,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private boolean addApplication(IWContext iwc) throws RemoteException {
 		Object coursePK = iwc.getParameter(PARAMETER_COURSE);
 		boolean hasDyslexia = iwc.isParameterSet(PARAMETER_HAS_DYSLEXIA);
+		User applicant = getApplicant(iwc);
 
-		if (coursePK != null) {
+		if (coursePK != null && applicant != null) {
 			ApplicationHolder holder = new ApplicationHolder();
 			Course course = getCourseBusiness(iwc).getCourse(new Integer(coursePK.toString()));
 			holder.setCourse(course);
 			holder.setUser(getApplicant(iwc));
 			holder.setHasDyslexia(hasDyslexia);
 
-			getCourseApplicationSession(iwc).addApplication(getApplicant(iwc), holder);
+			getCourseApplicationSession(iwc).addApplication(applicant, holder);
 		}
 
 		return true;
