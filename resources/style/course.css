@@ -8,23 +8,6 @@
 	width: 542px;
 }
 
-form.citizenForm div.buttonLayer a, div.bottom a {
-	background:transparent url(/content/files/public/style/images/buttons/blackLeftBlue.gif) no-repeat scroll left center;
-	color:#FFFFFF;
-	cursor:pointer;
-	display:block;
-	float:left;
-	font-family:Arial,Helvetica,sans-serif;
-	font-size:11px;
-	font-weight:bold;
-	height:auto;
-	line-height:20px;
-	margin-right:8px;
-	padding:0pt 0pt 0pt 6px;
-	text-decoration:none;
-	text-transform:uppercase;
-}
-
 .courses thead tr th, .courses tfoot tr td {
 	font-weight: bold;
 	padding-left: 4px;
