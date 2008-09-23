@@ -178,20 +178,23 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		HSSFCell cell = row.createCell((short) 0);
 		cell.setCellValue(this.courseName);
 		cell.setCellStyle(bigStyle);
-		cell = row.createCell((short) 1);
-
+		
 		row = sheet.createRow(cellRow++);
-		row = sheet.createRow(cellRow++);
-		cell = row.createCell((short) 0);
-		cell.setCellValue(this.iwrb.getLocalizedString("participant", "Participant"));
-		cell.setCellStyle(bigStyle);
-		cell = row.createCell((short) 13);
-		cell.setCellValue(this.iwrb.getLocalizedString("custodians", "Custodians"));
-		cell.setCellStyle(bigStyle);
-		cell = row.createCell((short) 43);
-		cell.setCellValue(this.iwrb.getLocalizedString("relatives", "Relatives"));
-		cell.setCellStyle(bigStyle);
 
+		boolean showAll = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
+		if (showAll) {
+			row = sheet.createRow(cellRow++);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(this.iwrb.getLocalizedString("participant", "Participant"));
+			cell.setCellStyle(bigStyle);
+			cell = row.createCell((short) 13);
+			cell.setCellValue(this.iwrb.getLocalizedString("custodians", "Custodians"));
+			cell.setCellStyle(bigStyle);
+			cell = row.createCell((short) 43);
+			cell.setCellValue(this.iwrb.getLocalizedString("relatives", "Relatives"));
+			cell.setCellStyle(bigStyle);
+		}
+		
 		short iCell = 0;
 		row = sheet.createRow(cellRow++);
 		cell = row.createCell(iCell++);
@@ -210,35 +213,51 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
 		cell.setCellStyle(style);
 
-		cell = row.createCell(iCell++);
-		cell.setCellValue(this.iwrb.getLocalizedString("child_care.growth_deviation", "Growth deviation"));
-		cell.setCellStyle(style);
-		cell = row.createCell(iCell++);
-		cell.setCellValue(this.iwrb.getLocalizedString("child_care.allergies", "Allergies"));
-		cell.setCellStyle(style);
-		cell = row.createCell(iCell++);
-		cell.setCellValue(this.iwrb.getLocalizedString("child.other_information", "Other information"));
-		cell.setCellStyle(style);
-
-		for (int a = 1; a <= 3; a++) {
+		if (showAll) {
 			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
+			cell.setCellValue(this.iwrb.getLocalizedString("child_care.growth_deviation", "Growth deviation"));
 			cell.setCellStyle(style);
 			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
+			cell.setCellValue(this.iwrb.getLocalizedString("child_care.allergies", "Allergies"));
 			cell.setCellStyle(style);
 			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("personal_id", "Personal ID"));
+			cell.setCellValue(this.iwrb.getLocalizedString("child.other_information", "Other information"));
 			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("address", "Address"));
-			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("zip_code", "Zip code"));
-			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
-			cell.setCellStyle(style);
+	
+			for (int a = 1; a <= 3; a++) {
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("personal_id", "Personal ID"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("address", "Address"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("zip_code", "Zip code"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("work_phone", "Work phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("mobile_phone", "Mobile phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("email", "E-mail"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("marital_status", "Marital status"));
+				cell.setCellStyle(style);
+			}
+		}
+		else {
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("work_phone", "Work phone"));
 			cell.setCellStyle(style);
@@ -249,31 +268,33 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell.setCellValue(this.iwrb.getLocalizedString("email", "E-mail"));
 			cell.setCellStyle(style);
 			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("marital_status", "Marital status"));
+			cell.setCellValue(this.iwrb.getLocalizedString("application.has_dyslexia", "Has dyslexia"));
 			cell.setCellStyle(style);
 		}
-
-		for (int a = 1; a <= 2; a++) {
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
-			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
-			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
-			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("work_phone", "Work phone"));
-			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("mobile_phone", "Mobile phone"));
-			cell.setCellStyle(style);
-			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("email", "E-mail"));
-			cell.setCellStyle(style);
+		
+		if (showAll) {
+			for (int a = 1; a <= 2; a++) {
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("work_phone", "Work phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("mobile_phone", "Mobile phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("email", "E-mail"));
+				cell.setCellStyle(style);
+			}
 		}
-
+		
 		User user;
 		User owner;
 		Address address;
@@ -309,106 +330,188 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				row.createCell((short) 4).setCellValue(phone.getNumber());
 			}
 
-			Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-			if (hasGrowthDeviation == null) {
-				hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
-			}
-			if (hasGrowthDeviation != null && hasGrowthDeviation.booleanValue()) {
-				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+			if (showAll) {
+				Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				if (hasGrowthDeviation == null) {
+					hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
+				}
+				if (hasGrowthDeviation != null && hasGrowthDeviation.booleanValue()) {
+					row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+				}
+				else {
+					row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+				}
+	
+				Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				if (hasAllergies == null) {
+					hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
+				}
+				if (hasAllergies != null && hasAllergies.booleanValue()) {
+					row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+				}
+				else {
+					row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+				}
+	
+				if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
+					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
+				}
+				else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
+					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
+				}
+	
+				iCell = 8;
+	
+				Collection custodians = new ArrayList();
+				try {
+					custodians = child.getCustodians();
+				} catch(Exception e) {}
+				Custodian extraCustodian = child.getExtraCustodian();
+				if (extraCustodian != null) {
+					custodians.add(extraCustodian);
+				}
+	
+				Iterator iterator = custodians.iterator();
+				while (iterator.hasNext()) {
+					Custodian element = (Custodian) iterator.next();
+					address = this.userBusiness.getUsersMainAddress(element);
+					Phone work = null;
+					Phone mobile = null;
+					Email email = null;
+					String relation = this.iwrb.getLocalizedString("relation." + child.getRelation(element));
+					String maritalStatus = this.iwrb.getLocalizedString("marital_status." + element.getMaritalStatus());
+	
+					try {
+						phone = this.userBusiness.getUsersHomePhone(element);
+					}
+					catch (NoPhoneFoundException npfe) {
+						phone = null;
+					}
+	
+					try {
+						work = this.userBusiness.getUsersWorkPhone(element);
+					}
+					catch (NoPhoneFoundException npfe) {
+						work = null;
+					}
+	
+					try {
+						mobile = this.userBusiness.getUsersMobilePhone(element);
+					}
+					catch (NoPhoneFoundException npfe) {
+						mobile = null;
+					}
+	
+					try {
+						email = this.userBusiness.getUsersMainEmail(element);
+					}
+					catch (NoEmailFoundException nefe) {
+						email = null;
+					}
+	
+					name = new Name(element.getFirstName(), element.getMiddleName(), element.getLastName());
+					row.createCell(iCell++).setCellValue(relation);
+					row.createCell(iCell++).setCellValue(name.getName(this.locale, true));
+					row.createCell(iCell++).setCellValue(PersonalIDFormatter.format(element.getPersonalID(), this.locale));
+					if (address != null) {
+						row.createCell(iCell++).setCellValue(address.getStreetAddress());
+						if (postalCode != null) {
+							row.createCell(iCell++).setCellValue(postalCode.getPostalAddress());
+						}
+						else {
+							iCell++;
+						}
+					}
+					else {
+						iCell++;
+					}
+					if (phone != null) {
+						row.createCell(iCell++).setCellValue(phone.getNumber());
+					}
+					else {
+						iCell++;
+					}
+					if (work != null) {
+						row.createCell(iCell++).setCellValue(work.getNumber());
+					}
+					else {
+						iCell++;
+					}
+					if (mobile != null) {
+						row.createCell(iCell++).setCellValue(mobile.getNumber());
+					}
+					else {
+						iCell++;
+					}
+					if (email != null) {
+						row.createCell(iCell++).setCellValue(email.getEmailAddress());
+					}
+					else {
+						iCell++;
+					}
+					if (maritalStatus != null) {
+						row.createCell(iCell++).setCellValue(maritalStatus);
+					}
+					else {
+						iCell++;
+					}
+				}
+	
+				iCell = 38;
+	
+				List relatives = new ArrayList();
+				Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				if (mainRelative == null) {
+					mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+				}
+				if (mainRelative != null) {
+					relatives.add(mainRelative);
+				}
+				Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				if (otherRelatives.isEmpty()) {
+					otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
+				}
+				relatives.addAll(otherRelatives);
+				iterator = relatives.iterator();
+				while (iterator.hasNext()) {
+					Relative element = (Relative) iterator.next();
+					String relation = this.iwrb.getLocalizedString("relation." + element.getRelation());
+	
+					row.createCell(iCell++).setCellValue(relation);
+					row.createCell(iCell++).setCellValue(element.getName());
+					row.createCell(iCell++).setCellValue(element.getHomePhone());
+					row.createCell(iCell++).setCellValue(element.getWorkPhone());
+					row.createCell(iCell++).setCellValue(element.getMobilePhone());
+					row.createCell(iCell++).setCellValue(element.getEmail());
+				}
 			}
 			else {
-				row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
-			}
-
-			Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-			if (hasAllergies == null) {
-				hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
-			}
-			if (hasAllergies != null && hasAllergies.booleanValue()) {
-				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
-			}
-			else {
-				row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
-			}
-
-			if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
-				row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-			}
-			else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
-				row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
-			}
-
-			iCell = 8;
-
-			Collection custodians = new ArrayList();
-			try {
-				custodians = child.getCustodians();
-			} catch(Exception e) {}
-			Custodian extraCustodian = child.getExtraCustodian();
-			if (extraCustodian != null) {
-				custodians.add(extraCustodian);
-			}
-
-			Iterator iterator = custodians.iterator();
-			while (iterator.hasNext()) {
-				Custodian element = (Custodian) iterator.next();
-				address = this.userBusiness.getUsersMainAddress(element);
+				iCell = 5;
 				Phone work = null;
 				Phone mobile = null;
 				Email email = null;
-				String relation = this.iwrb.getLocalizedString("relation." + child.getRelation(element));
-				String maritalStatus = this.iwrb.getLocalizedString("marital_status." + element.getMaritalStatus());
 
 				try {
-					phone = this.userBusiness.getUsersHomePhone(element);
-				}
-				catch (NoPhoneFoundException npfe) {
-					phone = null;
-				}
-
-				try {
-					work = this.userBusiness.getUsersWorkPhone(element);
+					work = this.userBusiness.getUsersWorkPhone(child);
 				}
 				catch (NoPhoneFoundException npfe) {
 					work = null;
 				}
 
 				try {
-					mobile = this.userBusiness.getUsersMobilePhone(element);
+					mobile = this.userBusiness.getUsersMobilePhone(child);
 				}
 				catch (NoPhoneFoundException npfe) {
 					mobile = null;
 				}
 
 				try {
-					email = this.userBusiness.getUsersMainEmail(element);
+					email = this.userBusiness.getUsersMainEmail(child);
 				}
 				catch (NoEmailFoundException nefe) {
 					email = null;
 				}
 
-				name = new Name(element.getFirstName(), element.getMiddleName(), element.getLastName());
-				row.createCell(iCell++).setCellValue(relation);
-				row.createCell(iCell++).setCellValue(name.getName(this.locale, true));
-				row.createCell(iCell++).setCellValue(PersonalIDFormatter.format(element.getPersonalID(), this.locale));
-				if (address != null) {
-					row.createCell(iCell++).setCellValue(address.getStreetAddress());
-					if (postalCode != null) {
-						row.createCell(iCell++).setCellValue(postalCode.getPostalAddress());
-					}
-					else {
-						iCell++;
-					}
-				}
-				else {
-					iCell++;
-				}
-				if (phone != null) {
-					row.createCell(iCell++).setCellValue(phone.getNumber());
-				}
-				else {
-					iCell++;
-				}
 				if (work != null) {
 					row.createCell(iCell++).setCellValue(work.getNumber());
 				}
@@ -427,40 +530,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				else {
 					iCell++;
 				}
-				if (maritalStatus != null) {
-					row.createCell(iCell++).setCellValue(maritalStatus);
+				if (choice.hasDyslexia()) {
+					row.createCell(iCell++).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 				}
 				else {
-					iCell++;
+					row.createCell(iCell++).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
-			}
-
-			iCell = 38;
-
-			List relatives = new ArrayList();
-			Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-			if (mainRelative == null) {
-				mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
-			}
-			if (mainRelative != null) {
-				relatives.add(mainRelative);
-			}
-			Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-			if (otherRelatives.isEmpty()) {
-				otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
-			}
-			relatives.addAll(otherRelatives);
-			iterator = relatives.iterator();
-			while (iterator.hasNext()) {
-				Relative element = (Relative) iterator.next();
-				String relation = this.iwrb.getLocalizedString("relation." + element.getRelation());
-
-				row.createCell(iCell++).setCellValue(relation);
-				row.createCell(iCell++).setCellValue(element.getName());
-				row.createCell(iCell++).setCellValue(element.getHomePhone());
-				row.createCell(iCell++).setCellValue(element.getWorkPhone());
-				row.createCell(iCell++).setCellValue(element.getMobilePhone());
-				row.createCell(iCell++).setCellValue(element.getEmail());
 			}
 		}
 		wb.write(mos);

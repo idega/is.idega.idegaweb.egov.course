@@ -1007,7 +1007,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		row = group.createRow();
 
 		cell = row.createCell();
-		cell.setColumnSpan(3);
+		cell.setColumnSpan(4);
 		cell.setStyleClass("totalPrice");
 		cell.add(new Text(iwrb.getLocalizedString("total_amount", "Total amount")));
 
