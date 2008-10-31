@@ -507,7 +507,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	
 	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates);
 	
-	public IWTimestamp getLatestValidDateOfCertificate(List certificates);
+	public IWTimestamp getLatestValidCertificate(List certificates);
 	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificate

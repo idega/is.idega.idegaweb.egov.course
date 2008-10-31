@@ -105,6 +105,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	private static final String EXTRA_ATTENTION_COURSE_TYPE = "Tegund";
 	private static final String EXTRA_ATTENTION_COURSE_TYPE_ABBREVIATION = "B";
 
+	@Override
 	protected String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
@@ -343,6 +344,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return (AccountingEntry[]) entries.toArray(new AccountingEntry[0]);
 	}
 
+	@Override
 	public String getLocalizedCaseDescription(Case theCase, Locale locale) {
 		/*
 		 * CourseApplication choice = getCourseApplicationInstance(theCase);
@@ -2066,7 +2068,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		
 		try {
-			return (CourseCertificateType) ((CourseCertificateTypeHome) getIDOHome(CourseCertificateType.class)).findByType(Integer.valueOf(type));
+			return ((CourseCertificateTypeHome) getIDOHome(CourseCertificateType.class)).findByType(Integer.valueOf(type));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -2154,7 +2156,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return time;
 	}
 	
-	public IWTimestamp getLatestValidDateOfCertificate(List certificates) {
+	public IWTimestamp getLatestValidCertificate(List certificates) {
 		if (certificates == null || certificates.isEmpty()) {
 			return null;
 		}
@@ -2164,13 +2166,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		for (int i = 0; i < certificates.size(); i++) {
 			certificate = (CourseCertificate) certificates.get(i);
 			
-			IWTimestamp certificateValidDate = certificate.getValidFrom();
+			IWTimestamp certificateValidDate = certificate.getValidThru();
 			if (certificateValidDate != null) {
 				if (time == null) {
 					time = certificateValidDate;
 				}
 				else {
-					time = time.isEarlierThan(certificateValidDate) ? certificateValidDate : time;
+					time = time.isLaterThan(certificateValidDate) ? time : certificateValidDate;
 				}
 			}
 		}

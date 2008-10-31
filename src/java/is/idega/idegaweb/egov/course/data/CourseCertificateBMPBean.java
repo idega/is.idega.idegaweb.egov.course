@@ -12,6 +12,7 @@ import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 
 public class CourseCertificateBMPBean extends GenericEntity implements CourseCertificate {
 
@@ -27,10 +28,12 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	private static final String COLUMN_COURSE_ID = "course_id";
 	private static final String COLUMN_CERTIFICATE_FILE_ID = "cert_file_id";
 	
+	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
 
+	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		
@@ -127,13 +130,20 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	
 	public Collection ejbFindByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
 		IDOQuery query = idoQueryGetSelect();
-		query.appendWhere().append(COLUMN_PARTICIPANT_ID).appendInCollection(usersIds);
+		
+		if (ListUtil.isEmpty(usersIds)) {
+			query.appendWhere().append(COLUMN_PARTICIPANT_ID).appendIsNotNull();
+		}
+		else {
+			query.appendWhere().append(COLUMN_PARTICIPANT_ID).appendInCollection(usersIds);
+		}
 		if (onlyValidCertificates) {
-			query.appendAnd().append(COLUMN_VALID_THRU). appendGreaterThanOrEqualsSign().append(IWTimestamp.RightNow());
+			query.appendAnd().append(COLUMN_VALID_THRU).appendGreaterThanOrEqualsSign().append(IWTimestamp.RightNow());
 		}
 		if (certificateTypeId != null) {
 			query.appendAnd().appendEquals(COLUMN_TYPE_OF_CERTIFICATE_ID, certificateTypeId);
 		}
+		
 		return super.idoFindPKsByQuery(query);
 	}
 }
