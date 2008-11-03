@@ -34,6 +34,7 @@ public class CourseConstants {
 	public static final String PROPERTY_INCEPTION_YEAR = "egov.course.inception.year";
 	public static final String PROPERTY_SHOW_ALL_COURSES = "egov.course.show.all.courses";
 	public static final String PROPERTY_SHOW_CERTIFICATES = "egov.course.show.certificates";
+	public static final String PROPERTY_BACK_MONTHS = "egov.course.back.months";
 
 	public static final String PROPERTY_TIMEOUT_DAY_OF_WEEK = "egov.course.timeout.day";
 	public static final String PROPERTY_TIMEOUT_HOUR = "egov.course.timeout.hour";

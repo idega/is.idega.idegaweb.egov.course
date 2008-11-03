@@ -959,6 +959,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			}
 
 			Locale locale = new Locale(country, country.toUpperCase());
+			IWTimestamp defaultStamp = new IWTimestamp();
+			int backMonths = getIWMainApplication().getSettings().getProperty(CourseConstants.PROPERTY_BACK_MONTHS) != null ? Integer.parseInt(getIWMainApplication().getSettings().getProperty(CourseConstants.PROPERTY_BACK_MONTHS)) : -1;
+			if (backMonths != -1) {
+				defaultStamp.addMonths(backMonths);
+			}
+			else {
+				defaultStamp = null;
+			}
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map map = new LinkedHashMap();
@@ -979,7 +987,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						start.setMinute(0);
 					}
 
-					if ((!isAdmin ? start.isLaterThan(stamp) : true) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
+					if ((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
 					}
