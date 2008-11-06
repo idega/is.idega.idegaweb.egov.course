@@ -78,6 +78,7 @@ import com.idega.util.Age;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 import com.idega.util.text.TextSoap;
@@ -162,17 +163,22 @@ public class CourseApplication extends ApplicationForm {
 	private IWBundle iwb = null;
 	private IWResourceBundle iwrb = null;
 
+	@Override
 	protected String getCaseCode() {
 		return CourseConstants.CASE_CODE_KEY;
 	}
 
+	@Override
 	public String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
+	@Override
 	protected void present(IWContext iwc) {
 		this.iwb = getBundle(iwc);
 		this.iwrb = getResourceBundle(iwc);
+		PresentationUtil.addStyleSheetToHeader(iwc, iwb.getVirtualPathWithFileNameString("style/course.css"));
+
 		try {
 			switch (parseAction(iwc)) {
 				case ACTION_PHASE_1:

@@ -54,6 +54,7 @@ import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 
 /**
@@ -110,12 +111,14 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		return true;
 	}
 
+	@Override
 	public void main(IWContext iwc) throws Exception {
 		setBundle(getBundle(iwc));
 		setResourceBundle(getResourceBundle(iwc));
 		this.business = getBusiness(iwc);
 		this.session = getSession(iwc);
 		this.uBusiness = getUserBusiness(iwc);
+		PresentationUtil.addStyleSheetToHeader(iwc, getBundle().getVirtualPathWithFileNameString("style/course.css"));
 
 		present(iwc);
 	}
@@ -197,6 +200,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		}
 	}
 
+	@Override
 	public String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}

@@ -114,16 +114,20 @@ public class SimpleCourseApplication extends ApplicationForm {
 	private Object iSchoolTypePK = null;
 	private boolean iCompanyRegistration = false;
 
+	@Override
 	protected String getCaseCode() {
 		return CourseConstants.CASE_CODE_KEY;
 	}
 
+	@Override
 	public String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
+	@Override
 	protected void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
+		PresentationUtil.addStyleSheetToHeader(iwc, getBundle(iwc).getVirtualPathWithFileNameString("style/course.css"));
 
 		try {
 			switch (parseAction(iwc)) {
