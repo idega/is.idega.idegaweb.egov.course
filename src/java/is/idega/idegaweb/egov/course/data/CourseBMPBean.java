@@ -244,6 +244,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoFindPKsByQuery(query);
 	}
 
+	public Collection ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
+		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
+	}
+
 	public Collection ejbFindAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);

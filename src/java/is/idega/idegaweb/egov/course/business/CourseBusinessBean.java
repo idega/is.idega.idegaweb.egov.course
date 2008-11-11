@@ -523,6 +523,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+		return createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, -1);
+	}
+
 	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
@@ -588,6 +592,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		course.store();
 
 		return course;
+	}
+	
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 	}
 
 	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
@@ -1080,6 +1088,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return getCourses(birthYear, null, schoolTypePK, courseTypePK, fromDate, toDate);
 	}
 
+	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK) {
+		return getCourses(birthYear, null, schoolTypePK, courseTypePK);
+	}
+	
 	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
 		Collection courses = new ArrayList();
 		try {
@@ -1098,6 +1110,34 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		Collection courses = new ArrayList();
 		try {
 			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK, -1, fromDate, toDate);
+		}
+		catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+		return courses;
+	}
+
+	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) {
+		Collection courses = new ArrayList();
+		try {
+			courses = getCourseHome().findAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
+		}
+		catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+		return courses;
+	}
+
+	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK) {
+		Collection courses = new ArrayList();
+		try {
+			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK, -1, null, null);
 		}
 		catch (IDORelationshipException e) {
 			e.printStackTrace();
@@ -2059,7 +2099,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		Collection userCertificates = null;
 		try {
-			userCertificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllByUser(user);
+			userCertificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUser(user);
 		}
 		catch (RemoteException e) {
 			e.printStackTrace();
@@ -2097,7 +2137,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		Collection certificates = null;
 		try {
-			certificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllByUserAndCourse(user, course);
+			certificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUserAndCourse(user, course);
 		}
 		catch (RemoteException e) {
 			e.printStackTrace();
@@ -2135,8 +2175,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return time;
 	}
-
-	public IWTimestamp getLatestValidDateOfCertificate(List certificates) {
+	
+	public IWTimestamp getLatestValidCertificate(List certificates) {
 		if (certificates == null || certificates.isEmpty()) {
 			return null;
 		}
@@ -2145,14 +2185,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		IWTimestamp time = null;
 		for (int i = 0; i < certificates.size(); i++) {
 			certificate = (CourseCertificate) certificates.get(i);
-
-			IWTimestamp certificateValidDate = certificate.getValidFrom();
+			
+			IWTimestamp certificateValidDate = certificate.getValidThru();
 			if (certificateValidDate != null) {
 				if (time == null) {
 					time = certificateValidDate;
 				}
 				else {
-					time = time.isEarlierThan(certificateValidDate) ? certificateValidDate : time;
+					time = time.isLaterThan(certificateValidDate) ? time : certificateValidDate;
 				}
 			}
 		}
@@ -2160,20 +2200,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return time;
 	}
 
-	public List manageCourseChoiceSettings(String courseChoiceId, String columnName, Boolean value) {
-		if (courseChoiceId == null || columnName == null || value == null) {
-			return null;
+	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value) {
+		if (courseChoiceId == null || columnName == null) {
+			return false;
 		}
-
+		
 		CourseChoice choice = getCourseChoice(courseChoiceId);
 		if (choice == null) {
-			return null;
+			return false;
 		}
-
-		choice.setBooleanValueForColumn(value.booleanValue(), columnName);
+		
+		choice.setBooleanValueForColumn(value, columnName);
 		choice.store();
-
-		return getCourseParticipantListRowData(choice, null);
+		
+		return true;
 	}
 
 	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb) {

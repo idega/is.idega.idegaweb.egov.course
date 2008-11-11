@@ -23,14 +23,14 @@ public class CourseCertificateHomeImpl extends IDOFactory implements CourseCerti
 		return (CourseCertificate) super.findByPrimaryKeyIDO(pk);
 	}
 
-	public Collection findAllByUser(User user) throws FinderException {
+	public Collection findAllCertificatesByUser(User user) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseCertificateBMPBean) entity).ejbFindAllByUser(user);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
-	public Collection findAllByUserAndCourse(User user, Course course) throws FinderException {
+	public Collection findAllCertificatesByUserAndCourse(User user, Course course) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseCertificateBMPBean) entity).ejbFindAllByUserAndCourse(user, course);
 		this.idoCheckInPooledEntity(entity);
@@ -44,7 +44,7 @@ public class CourseCertificateHomeImpl extends IDOFactory implements CourseCerti
 		return this.findByPrimaryKey(pk);
 	}
 
-	public Collection findByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
+	public Collection findCertificatesByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseCertificateBMPBean) entity).ejbFindByUsersAndValidityAndType(usersIds, onlyValidCertificates, certificateTypeId);
 		this.idoCheckInPooledEntity(entity);

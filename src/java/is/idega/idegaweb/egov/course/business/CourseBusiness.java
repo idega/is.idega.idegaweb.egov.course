@@ -219,11 +219,21 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
 	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) throws RemoteException;
-
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 */
+	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) throws RemoteException;
+	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
 	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) throws RemoteException;
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 */
+	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoice
@@ -484,46 +494,25 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseApplicationHome
 	 */
 	public CourseApplicationHome getCourseApplicationHome() throws RemoteException;
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCertificateType
-	 */
-	public CourseCertificateType getCourseCertificateType(String id) throws RemoteException;
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCertificateTypeByType
-	 */
-	public CourseCertificateType getCourseCertificateTypeByType(String type) throws RemoteException;
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificates
-	 */
-	public List getUserCertificates(User user) throws RemoteException;
-
+	
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException;
+	
+	public CourseCertificateType getCourseCertificateType(String id);
+	
+	public CourseCertificateType getCourseCertificateTypeByType(String type);
+	
+	public List getUserCertificates(User user);
+	
+	public List getUserCertificatesByCourse(User user, Course course);
+	
+	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates);
+	
+	public IWTimestamp getLatestValidCertificate(List certificates);
+	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificate
 	 */
 	public CourseCertificate getUserCertificate(User user, Course course) throws RemoteException;
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificatesByCourse
-	 */
-	public List getUserCertificatesByCourse(User user, Course course) throws RemoteException;
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getLatestExpirationDateOfCertificate
-	 */
-	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates) throws RemoteException;
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getLatestValidDateOfCertificate
-	 */
-	public IWTimestamp getLatestValidDateOfCertificate(List certificates) throws RemoteException;
-
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#manageCourseChoiceSettings
-	 */
-	public List manageCourseChoiceSettings(String courseChoiceId, String columnName, Boolean value) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseParticipantListRowData
@@ -534,4 +523,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCheckBoxesForCourseParticipants
 	 */
 	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) throws RemoteException;
+	
+	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value);
 }
