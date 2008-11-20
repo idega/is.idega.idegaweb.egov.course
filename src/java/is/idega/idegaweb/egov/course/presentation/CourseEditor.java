@@ -545,6 +545,7 @@ public class CourseEditor extends CourseBlock {
 	public void showEditor(IWContext iwc, Object coursePK) throws java.rmi.RemoteException {
 		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
+		boolean showIDInput = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 
 		if (!useFixedPrices) {
 			super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
@@ -586,6 +587,7 @@ public class CourseEditor extends CourseBlock {
 
 		Course course = getCourseBusiness(iwc).getCourse(coursePK);
 
+		TextInput inputID = new TextInput(PARAMETER_COURSE_PK);
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		DatePicker inputFrom = new DatePicker(PARAMETER_VALID_FROM);
 		DatePicker inputTo = new DatePicker(PARAMETER_VALID_TO);
@@ -649,6 +651,9 @@ public class CourseEditor extends CourseBlock {
 			School provider = course.getProvider();
 			CoursePrice coursePrice = course.getPrice();
 
+			inputID.setContent(course.getPrimaryKey().toString());
+			inputID.setDisabled(true);
+			
 			inputName.setContent(course.getName());
 			if (course.getUser() != null) {
 				inputUser.setContent(course.getUser());
@@ -737,6 +742,15 @@ public class CourseEditor extends CourseBlock {
 		Layer layer;
 		Label label;
 
+		if (showIDInput) {
+			layer = new Layer(Layer.DIV);
+			layer.setStyleClass("formItem");
+			label = new Label(localize("id", "ID"), inputID);
+			layer.add(label);
+			layer.add(inputID);
+			section.add(layer);
+		}
+		
 		if (showTypes) {
 			layer = new Layer(Layer.DIV);
 			layer.setID("category");

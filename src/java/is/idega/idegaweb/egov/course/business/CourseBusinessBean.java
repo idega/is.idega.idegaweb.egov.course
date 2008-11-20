@@ -530,7 +530,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
-			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
+			try {
+				course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
+			}
+			catch (FinderException fe) {
+				//No course found with primary key, try to create one...
+				course = getCourseHome().create(pk);
+			}
 		}
 		else {
 			course = getCourseHome().create();
@@ -1251,6 +1257,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			}
 		}
 		return null;
+	}
+	
+	public int getNextCourseNumber() {
+		try {
+			return getCourseHome().getHighestCourseNumber() + 1;
+		}
+		catch (IDOException ie) {
+			log(ie);
+			return 1;
+		}
 	}
 
 	public CourseType getCourseType(Object pk) {

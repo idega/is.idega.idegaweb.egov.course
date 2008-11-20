@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
 
+import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
 import com.idega.block.school.data.School;
@@ -16,6 +17,7 @@ import com.idega.data.query.Column;
 import com.idega.data.query.CountColumn;
 import com.idega.data.query.InCriteria;
 import com.idega.data.query.MatchCriteria;
+import com.idega.data.query.MaxColumn;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 
@@ -190,6 +192,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public void setMax(int max) {
 		setColumn(COLUMN_MAX_PARTICIPANTS, max);
+	}
+	
+	// Creators
+	public Object ejbCreate(Object pk) throws CreateException {
+		this.setPrimaryKey(pk);
+		return super.ejbCreate();
 	}
 
 	// Finders
@@ -388,6 +396,15 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		if (toDate != null) {
 			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.LESSEQUAL, toDate));
 		}
+
+		return this.idoGetNumberOfRecords(query);
+	}
+	
+	public int ejbHomeGetHighestCourseNumber() throws IDOException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new MaxColumn(table, getIDColumnName()));
 
 		return this.idoGetNumberOfRecords(query);
 	}
