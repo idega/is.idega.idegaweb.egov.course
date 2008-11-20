@@ -416,6 +416,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE_NUMBER)));
 		
 		return idoFindPKsByQuery(query);
