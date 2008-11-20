@@ -45,6 +45,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
+	
+	protected boolean doInsertInCreate() {
+		return true;
+	}
 
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());

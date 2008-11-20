@@ -709,6 +709,7 @@ public class CourseEditor extends CourseBlock {
 
 			priceDrop.addMenuElement("-1", localize("select_a_date_and_search", "Select a date and search"));
 			priceDrop.setDisabled(true);
+			inputID.setContent(String.valueOf(getCourseBusiness(iwc).getNextCourseNumber()));
 		}
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {

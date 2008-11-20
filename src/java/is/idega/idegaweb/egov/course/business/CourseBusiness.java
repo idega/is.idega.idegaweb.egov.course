@@ -1,47 +1,45 @@
 package is.idega.idegaweb.egov.course.business;
 
-import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
-import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseApplication;
-import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
-import is.idega.idegaweb.egov.course.data.CourseCertificate;
+
 import is.idega.idegaweb.egov.course.data.CourseCertificateType;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
-import is.idega.idegaweb.egov.course.data.CourseDiscount;
-import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
-import is.idega.idegaweb.egov.course.data.CourseHome;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CoursePriceHome;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.data.CourseTypeHome;
-
-import java.rmi.RemoteException;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedSet;
-
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-
-import com.idega.block.creditcard.business.CreditCardAuthorizationException;
 import com.idega.block.process.business.CaseBusiness;
-import com.idega.block.process.data.Case;
 import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolArea;
-import com.idega.block.school.data.SchoolType;
-import com.idega.business.IBOService;
-import com.idega.idegaweb.IWResourceBundle;
+import com.idega.block.process.data.Case;
+import javax.ejb.CreateException;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
+import is.idega.idegaweb.egov.course.data.CourseHome;
+import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
+import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
 import com.idega.user.data.Gender;
+import is.idega.idegaweb.egov.course.data.CoursePriceHome;
+import com.idega.business.IBOService;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import java.util.List;
+import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
+import is.idega.idegaweb.egov.course.data.CourseTypeHome;
+import com.idega.block.school.data.SchoolArea;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import com.idega.idegaweb.IWResourceBundle;
+import java.util.SortedSet;
+import java.util.Map;
+import com.idega.block.creditcard.business.CreditCardAuthorizationException;
+import java.sql.Date;
 import com.idega.user.data.User;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
+import java.rmi.RemoteException;
+import is.idega.idegaweb.egov.course.data.Course;
+import java.sql.Timestamp;
+import java.util.Locale;
+import java.util.Collection;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import com.idega.block.school.data.SchoolType;
+import javax.ejb.FinderException;
 import com.idega.util.IWTimestamp;
+import is.idega.idegaweb.egov.course.data.CourseDiscount;
 
 public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusiness {
 
@@ -113,7 +111,17 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#createCourse
 	 */
+	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException, RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#createCourse
+	 */
 	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException, RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
+	 */
+	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException, RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
@@ -218,18 +226,23 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
-	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) throws RemoteException;
-	
+	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK) throws RemoteException;
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
-	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) throws RemoteException;
-	
+	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) throws RemoteException;
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
 	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) throws RemoteException;
-	
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 */
+	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) throws RemoteException;
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
 	 */
@@ -284,6 +297,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourse
 	 */
 	public Course getCourse(Object pk) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getNextCourseNumber
+	 */
+	public int getNextCourseNumber() throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseType
@@ -494,25 +512,46 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseApplicationHome
 	 */
 	public CourseApplicationHome getCourseApplicationHome() throws RemoteException;
-	
-	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException;
-	
-	public CourseCertificateType getCourseCertificateType(String id);
-	
-	public CourseCertificateType getCourseCertificateTypeByType(String type);
-	
-	public List getUserCertificates(User user);
-	
-	public List getUserCertificatesByCourse(User user, Course course);
-	
-	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates);
-	
-	public IWTimestamp getLatestValidCertificate(List certificates);
-	
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCertificateType
+	 */
+	public CourseCertificateType getCourseCertificateType(String id) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCertificateTypeByType
+	 */
+	public CourseCertificateType getCourseCertificateTypeByType(String type) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificates
+	 */
+	public List getUserCertificates(User user) throws RemoteException;
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificate
 	 */
 	public CourseCertificate getUserCertificate(User user, Course course) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getUserCertificatesByCourse
+	 */
+	public List getUserCertificatesByCourse(User user, Course course) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getLatestExpirationDateOfCertificate
+	 */
+	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getLatestValidCertificate
+	 */
+	public IWTimestamp getLatestValidCertificate(List certificates) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#manageCourseChoiceSettings
+	 */
+	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseParticipantListRowData
@@ -523,6 +562,4 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCheckBoxesForCourseParticipants
 	 */
 	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) throws RemoteException;
-	
-	public boolean manageCourseChoiceSettings(String courseChoiceId, String columnName, boolean value);
 }
