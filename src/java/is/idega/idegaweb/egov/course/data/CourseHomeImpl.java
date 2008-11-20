@@ -9,7 +9,6 @@ import javax.ejb.CreateException;
 import com.idega.block.school.data.SchoolType;
 import javax.ejb.FinderException;
 import java.sql.Date;
-import com.idega.data.IDOCreateException;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
 
@@ -25,22 +24,6 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 
 	public Course findByPrimaryKey(Object pk) throws FinderException {
 		return (Course) super.findByPrimaryKeyIDO(pk);
-	}
-
-	public Course create(Object pk) throws CreateException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		((CourseBMPBean) entity).ejbCreate(pk);
-		((CourseBMPBean) entity).ejbPostCreate();
-		this.idoCheckInPooledEntity(entity);
-		try {
-			return findByPrimaryKey(pk);
-		}
-		catch (FinderException fe) {
-			throw new IDOCreateException(fe);
-		}
-		catch (Exception e) {
-			throw new IDOCreateException(e);
-		}
 	}
 
 	public Collection findAll() throws FinderException, IDORelationshipException {
@@ -67,6 +50,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, fromDate, toDate);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
@@ -111,5 +101,12 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		int theReturn = ((CourseBMPBean) entity).ejbHomeGetHighestCourseNumber();
 		this.idoCheckInPooledEntity(entity);
 		return theReturn;
+	}
+
+	public Collection findAllWithNoCourseNumber() throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseBMPBean) entity).ejbFindAllWithNoCourseNumber();
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 }

@@ -2,8 +2,17 @@ package is.idega.idegaweb.egov.course;
 
 import is.idega.idegaweb.egov.accounting.business.AccountingBusinessManager;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseHome;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+import javax.ejb.FinderException;
 
 import com.idega.block.process.business.CaseCodeManager;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
 import com.idega.idegaweb.include.ExternalLink;
@@ -17,11 +26,31 @@ public class IWBundleStarter implements IWBundleStartable {
 		AccountingBusinessManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 
 		//fixCourseApplicationReferenceStrings();
+		addCourseNumbers();
 	}
 
 	public void stop(IWBundle starterBundle) {
 	}
 
+	private void addCourseNumbers() {
+		try {
+			CourseHome home = (CourseHome) IDOLookup.getHome(Course.class);
+			Collection courses = home.findAllWithNoCourseNumber();
+			Iterator iterator = courses.iterator();
+			while (iterator.hasNext()) {
+				Course course = (Course) iterator.next();
+				course.setCourseNumber(new Integer(course.getPrimaryKey().toString()).intValue());
+				course.store();
+			}
+		}
+		catch (IDOLookupException e) {
+			e.printStackTrace();
+		}
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/*private void fixCourseApplicationReferenceStrings() {
 		try {
 			System.out.println("====Course Statup start==========================");

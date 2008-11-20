@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
 import com.idega.block.school.data.School;
@@ -25,6 +24,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	private static final String ENTITY_NAME = "COU_COURSE";
 
+	private static final String COLUMN_COURSE_NUMBER = "COURSE_NUMBER";
 	private static final String COLUMN_NAME = "NAME";
 	private static final String COLUMN_USER = "USER_NAME";
 	private static final String COLUMN_DESCRIPTION = "DESCRIPTION";
@@ -46,12 +46,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return ENTITY_NAME;
 	}
 	
-	protected boolean doInsertInCreate() {
-		return true;
-	}
-
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
+		addAttribute(COLUMN_COURSE_NUMBER, "Course number", Integer.class);
 		addAttribute(COLUMN_NAME, "Name", String.class, 50);
 		addAttribute(COLUMN_USER, "User", String.class);
 		addAttribute(COLUMN_DESCRIPTION, "Description", String.class);
@@ -140,6 +137,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return getMax();
 	}
+	
+	public int getCourseNumber() {
+		return getIntColumnValue(COLUMN_COURSE_NUMBER);
+	}
 
 	// Setters
 	public void setName(String name) {
@@ -198,12 +199,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		setColumn(COLUMN_MAX_PARTICIPANTS, max);
 	}
 	
-	// Creators
-	public Object ejbCreate(Object pk) throws CreateException {
-		this.setPrimaryKey(pk);
-		return super.ejbCreate();
+	public void setCourseNumber(int number) {
+		setColumn(COLUMN_COURSE_NUMBER, number);
 	}
-
+	
 	// Finders
 	public Collection ejbFindAll() throws FinderException, IDORelationshipException {
 		return ejbFindAll(null, null, null, -1, null, null);
@@ -408,8 +407,17 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
-		query.addColumn(new MaxColumn(table, getIDColumnName()));
+		query.addColumn(new MaxColumn(table, COLUMN_COURSE_NUMBER));
 
 		return this.idoGetNumberOfRecords(query);
+	}
+	
+	public Collection ejbFindAllWithNoCourseNumber() throws FinderException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE_NUMBER)));
+		
+		return idoFindPKsByQuery(query);
 	}
 }

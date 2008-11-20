@@ -187,7 +187,7 @@ public class CourseParticipantsList extends CourseBlock {
 				if (showIDInName) {
 					CourseType type = element.getCourseType();
 
-					name += element.getPrimaryKey().toString() + " - ";
+					name += element.getCourseNumber() + " - ";
 
 					if (type.getAbbreviation() != null && type.showAbbreviation()) {
 						name += type.getAbbreviation() + " ";

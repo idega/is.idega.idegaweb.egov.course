@@ -409,7 +409,7 @@ public class CourseList extends CourseBlock {
 			if (type.getAbbreviation() != null) {
 				cell.add(new Text(type.getAbbreviation()));
 			}
-			cell.add(new Text(course.getPrimaryKey().toString()));
+			cell.add(new Text(String.valueOf(course.getCourseNumber())));
 
 			cell = row.createCell();
 			cell.setStyleClass("course");

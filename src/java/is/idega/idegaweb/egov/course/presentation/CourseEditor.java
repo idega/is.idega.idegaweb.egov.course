@@ -49,6 +49,7 @@ import com.idega.util.PresentationUtil;
 public class CourseEditor extends CourseBlock {
 
 	private static final String PARAMETER_COURSE_PRICE_PK = "prm_course_price";
+	private static final String PARAMETER_COURSE_NUMBER = "prm_course_number";
 	private static final String PARAMETER_NAME = "prm_name";
 	private static final String PARAMETER_VALID_FROM = "prm_valid_from";
 	private static final String PARAMETER_VALID_TO = "prm_valid_to";
@@ -132,12 +133,13 @@ public class CourseEditor extends CourseBlock {
 		try {
 			IWTimestamp startDate = new IWTimestamp(sStartDate);
 			IWTimestamp endDate = sEndDate != null ? new IWTimestamp(sEndDate) : null;
+			int courseNumber = iwc.isParameterSet(PARAMETER_COURSE_NUMBER) ? Integer.parseInt(iwc.getParameter(PARAMETER_COURSE_NUMBER)) : -1;
 			int birthYearFrom = yearFrom != null ? Integer.parseInt(yearFrom) : -1;
 			int birthYearTo = yearTo != null ? Integer.parseInt(yearTo) : -1;
 			int maxPer = Integer.parseInt(max);
 			float price = iwc.isParameterSet(PARAMETER_PRICE) ? Float.parseFloat(iwc.getParameter(PARAMETER_PRICE)) : 0;
 			float cost = iwc.isParameterSet(PARAMETER_COST) ? Float.parseFloat(iwc.getParameter(PARAMETER_COST)) : 0;
-			getCourseBusiness(iwc).storeCourse(pk, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
+			getCourseBusiness(iwc).storeCourse(pk, courseNumber, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -438,7 +440,7 @@ public class CourseEditor extends CourseBlock {
 				if (cType.getAbbreviation() != null) {
 					cell.add(new Text(cType.getAbbreviation()));
 				}
-				cell.add(new Text(course.getPrimaryKey().toString()));
+				cell.add(new Text(String.valueOf(course.getCourseNumber())));
 
 				cell = row.createCell();
 				cell.setStyleClass("name");
@@ -587,7 +589,7 @@ public class CourseEditor extends CourseBlock {
 
 		Course course = getCourseBusiness(iwc).getCourse(coursePK);
 
-		TextInput inputID = new TextInput(PARAMETER_COURSE_PK);
+		TextInput inputCourseNumber = new TextInput(PARAMETER_COURSE_NUMBER);
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		DatePicker inputFrom = new DatePicker(PARAMETER_VALID_FROM);
 		DatePicker inputTo = new DatePicker(PARAMETER_VALID_TO);
@@ -651,8 +653,9 @@ public class CourseEditor extends CourseBlock {
 			School provider = course.getProvider();
 			CoursePrice coursePrice = course.getPrice();
 
-			inputID.setContent(course.getPrimaryKey().toString());
-			inputID.setDisabled(true);
+			if (course.getCourseNumber() > 0) {
+				inputCourseNumber.setContent(String.valueOf(course.getCourseNumber()));
+			}
 			
 			inputName.setContent(course.getName());
 			if (course.getUser() != null) {
@@ -709,7 +712,7 @@ public class CourseEditor extends CourseBlock {
 
 			priceDrop.addMenuElement("-1", localize("select_a_date_and_search", "Select a date and search"));
 			priceDrop.setDisabled(true);
-			inputID.setContent(String.valueOf(getCourseBusiness(iwc).getNextCourseNumber()));
+			inputCourseNumber.setContent(String.valueOf(getCourseBusiness(iwc).getNextCourseNumber()));
 		}
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
@@ -746,9 +749,9 @@ public class CourseEditor extends CourseBlock {
 		if (showIDInput) {
 			layer = new Layer(Layer.DIV);
 			layer.setStyleClass("formItem");
-			label = new Label(localize("id", "ID"), inputID);
+			label = new Label(localize("id", "ID"), inputCourseNumber);
 			layer.add(label);
-			layer.add(inputID);
+			layer.add(inputCourseNumber);
 			section.add(layer);
 		}
 		
