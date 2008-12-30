@@ -6,7 +6,6 @@ import java.util.Collection;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolCategoryBMPBean;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
 
@@ -33,7 +32,8 @@ public class CourseCertificateTypeHomeImpl extends IDOFactory implements CourseC
 	public CourseCertificateType findByPrimaryKeyLegacy(int id) throws SQLException {
 		try {
 			return findByPrimaryKey(id);
-		} catch (FinderException e) {
+		}
+		catch (FinderException e) {
 			e.printStackTrace();
 			throw new SQLException(e.getMessage());
 		}
@@ -43,7 +43,7 @@ public class CourseCertificateTypeHomeImpl extends IDOFactory implements CourseC
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		return ((CourseCertificateTypeBMPBean) entity).findByType(type);
 	}
-	
+
 	public Collection findAllTypes() throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseCertificateTypeBMPBean) entity).ejbFindAllTypes();

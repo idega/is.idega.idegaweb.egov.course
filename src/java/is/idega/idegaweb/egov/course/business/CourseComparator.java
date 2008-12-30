@@ -82,9 +82,7 @@ public class CourseComparator implements Comparator {
 	}
 
 	private int idSort(Course course1, Course course2) {
-		Integer pk1 = (Integer) course1.getPrimaryKey();
-		Integer pk2 = (Integer) course2.getPrimaryKey();
-		return pk1.intValue() - pk2.intValue();
+		return course1.getCourseNumber() - course2.getCourseNumber();
 	}
 
 	private int nameSort(Course course1, Course course2) {

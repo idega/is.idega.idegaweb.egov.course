@@ -639,7 +639,6 @@ public class CourseApplication extends ApplicationForm {
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.custodian_information", "Custodian information"), 2, getNumberOfPhases(iwc)));
 
-		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
 
 		Layer clearLayer = new Layer(Layer.DIV);

@@ -86,31 +86,104 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setHasDyslexia
 	 */
 	public void setHasDyslexia(boolean dyslexia);
-	
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setPassed
+	 */
 	public void setPassed(boolean passed);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#hasPassed
+	 */
 	public boolean hasPassed();
-	
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setCourseCertificateFee
+	 */
 	public void setCourseCertificateFee(float fee);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#getCourseCertificateFee
+	 */
 	public float getCourseCertificateFee();
-	
-	public void setVerificationFromGovermentOffice(boolean verificationFromGovermentOffice);
-	public boolean isVerificationFromGovermentOffice();
-	
-	public void setCertificateOfProperty(boolean certificateOfProperty);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isCertificateOfProperty
+	 */
 	public boolean isCertificateOfProperty();
-	
-	public void setCriminalRecord(boolean criminalRecord);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isCriminalRecord
+	 */
 	public boolean isCriminalRecord();
-	
-	public void setVerificationOfPayment(boolean verificationOfPayment);
-	public boolean isVerificationOfPayment();
-	
-	public void setNeedsVerificationFromGovermentOffice(boolean needsVerificationFromOffice);
-	public boolean isNeedVerificationFromGovermentOffice();
-	
-	public void setDidNotShowUp(boolean didNotShowUp);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isDidNotShowUp
+	 */
 	public boolean isDidNotShowUp();
-	
-	public void setBooleanValueForColumn(boolean value, String columnName);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isNeedVerificationFromGovermentOffice
+	 */
+	public boolean isNeedVerificationFromGovermentOffice();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isVerificationFromGovermentOffice
+	 */
+	public boolean isVerificationFromGovermentOffice();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isVerificationOfPayment
+	 */
+	public boolean isVerificationOfPayment();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setCertificateOfProperty
+	 */
+	public void setCertificateOfProperty(boolean certificateOfProperty);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setCriminalRecord
+	 */
+	public void setCriminalRecord(boolean criminalRecord);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isLimitedCertificate
+	 */
+	public boolean isLimitedCertificate();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setDidNotShowUp
+	 */
+	public void setDidNotShowUp(boolean didNotShowUp);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setNeedsVerificationFromGovermentOffice
+	 */
+	public void setNeedsVerificationFromGovermentOffice(boolean needsVerificationFromOffice);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setVerificationFromGovermentOffice
+	 */
+	public void setVerificationFromGovermentOffice(boolean verificationFromGovermentOffice);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setVerificationOfPayment
+	 */
+	public void setVerificationOfPayment(boolean verificationOfPayment);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setLimitedCertificate
+	 */
+	public void setLimitedCertificate(boolean limitedCertificate);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#getBooleanValueFromColumn
+	 */
 	public boolean getBooleanValueFromColumn(String columnName);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setBooleanValueForColumn
+	 */
+	public void setBooleanValueForColumn(boolean value, String columnName);
 }

@@ -49,6 +49,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	public static final String COLUMN_CRIMINAL_RECORD = "criminal_record";
 	public static final String COLUMN_VERIFICATION_OF_PAYMENT = "verification_of_payment";
 	public static final String COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE = "need_verific_from_goverment";
+	public static final String COLUMN_LIMITED_CERTIFICATE = "limited_certificate";
 	public static final String COLUMN_DID_NOT_SHOW_UP = "did_not_show_up";
 	public static final String COLUMN_PASSED = "passed_course";
 
@@ -71,6 +72,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_CRIMINAL_RECORD, "Criminal record", Boolean.class);
 		addAttribute(COLUMN_VERIFICATION_OF_PAYMENT, "Verification of payment", Boolean.class);
 		addAttribute(COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE, "Needs verification from goverment office", Boolean.class);
+		addAttribute(COLUMN_LIMITED_CERTIFICATE, "Limited certificate", Boolean.class);
 		addAttribute(COLUMN_DID_NOT_SHOW_UP, "Did not show up", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
@@ -321,19 +323,19 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 		return idoGetNumberOfRecords(query);
 	}
-	
+
 	public void setPassed(boolean passed) {
 		setColumn(COLUMN_PASSED, passed);
 	}
-	
+
 	public boolean hasPassed() {
 		return getBooleanColumnValue(COLUMN_PASSED);
 	}
-	
+
 	public void setCourseCertificateFee(float fee) {
 		setColumn(COLUMN_CERTIFICATE_FEE, fee);
 	}
-	
+
 	public float getCourseCertificateFee() {
 		return getFloatColumnValue(COLUMN_CERTIFICATE_FEE, 0);
 	}
@@ -370,6 +372,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		setColumn(COLUMN_CRIMINAL_RECORD, criminalRecord);
 	}
 
+	public boolean isLimitedCertificate() {
+		return getBooleanColumnValue(COLUMN_LIMITED_CERTIFICATE);
+	}
+
 	public void setDidNotShowUp(boolean didNotShowUp) {
 		setColumn(COLUMN_DID_NOT_SHOW_UP, didNotShowUp);
 	}
@@ -384,6 +390,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 	public void setVerificationOfPayment(boolean verificationOfPayment) {
 		setColumn(COLUMN_VERIFICATION_OF_PAYMENT, verificationOfPayment);
+	}
+
+	public void setLimitedCertificate(boolean limitedCertificate) {
+		setColumn(COLUMN_LIMITED_CERTIFICATE, limitedCertificate);
 	}
 
 	public boolean getBooleanValueFromColumn(String columnName) {

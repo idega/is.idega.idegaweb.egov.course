@@ -1,4 +1,6 @@
 Full_certificate=Full certificate
+Limited_certificate=Limited certificate
+Renewal_certificate=Renewal certificate
 Temporary_certificate=Temporary certificate
 Weighers_Course_Type=Weighers Course Type
 Weighers_School_Type=Weighers School Type
@@ -237,6 +239,7 @@ iw.component.is.idega.idegaweb.egov.course.presentation.statistics.CoursePartici
 iw.component.is.idega.idegaweb.egov.course.presentation.statistics.CourseStatistics.name=CourseStatistics
 length=Length
 length_selection=Length selection
+limited_certificate=Limited certificate
 loading=Loading
 localization_key=Key
 male=Male
@@ -368,11 +371,3 @@ whole_day=Whole day
 work_phone=Work phone
 yes=Yes
 zip_code=Zip code
-verification_from_goverment_office=Verfication from government office
-certificate_of_property=Certificate of property
-criminal_record=Criminal record
-verification_of_payment=Verification of payment
-need_verification_from_goverment_office=Needs verification from goverment office
-did_not_show_up=Did not show up
-passed_course=Has passed course
-loading=Loading

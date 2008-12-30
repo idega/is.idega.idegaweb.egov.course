@@ -525,11 +525,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
-	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
-		return createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, -1);
+	public Course createCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, -1);
 	}
 
-	public Course createCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
+	public Course createCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -538,6 +538,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			course = getCourseHome().create();
 		}
 
+		if (courseNumber > 0) {
+			course.setCourseNumber(courseNumber);
+		}
+		else {
+			course.setCourseNumber(getNextCourseNumber());
+		}
 		course.setName(name);
 
 		if (courseTypePK != null) {
@@ -596,12 +602,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return course;
 	}
 	
-	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
-		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
+	public void storeCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
+		createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 	}
 
-	public void storeCourse(Object pk, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
-		createCourse(pk, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
+	public void storeCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
+		createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
@@ -765,7 +771,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				Course course = (Course) iter.next();
 				String name = "";
 				if (showIDInName) {
-					name += course.getPrimaryKey().toString() + " - ";
+					name += course.getCourseNumber() + " - ";
 
 					CourseType type = course.getCourseType();
 					if (type.getAbbreviation() != null && type.showAbbreviation()) {
@@ -969,6 +975,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			}
 
 			Locale locale = new Locale(country, country.toUpperCase());
+			IWTimestamp defaultStamp = new IWTimestamp();
+			int backMonths = getIWMainApplication().getSettings().getProperty(CourseConstants.PROPERTY_BACK_MONTHS) != null ? Integer.parseInt(getIWMainApplication().getSettings().getProperty(CourseConstants.PROPERTY_BACK_MONTHS)) : -1;
+			if (backMonths != -1) {
+				defaultStamp.addMonths(backMonths);
+			}
+			else {
+				defaultStamp = null;
+			}
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map map = new LinkedHashMap();
@@ -989,7 +1003,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						start.setMinute(0);
 					}
 
-					if ((!isAdmin ? start.isLaterThan(stamp) : true) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
+					if ((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
 					}
@@ -1058,7 +1072,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				toS = toDate.getDateString("dd.MM", locale);
 			}
 			cDWR.setPrice(price.getPrice() + " ISK");
-			cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
+			if (showYear) {
+				cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
+			}
+			else {
+				cDWR.setTimeframe(from.getDateString("dd.MM", locale) + " - " + toS);
+			}
 		}
 		else if (from != null && course.getEndDate() != null) {
 			IWTimestamp toDate = new IWTimestamp(course.getEndDate());
@@ -1072,7 +1091,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		cDWR.setDays(dayS);
 		return cDWR;
 	}
-	
+
 	public Collection getCourses(int birthYear, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
 		return getCourses(birthYear, null, schoolTypePK, courseTypePK, fromDate, toDate);
 	}
@@ -1094,7 +1113,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		return courses;
 	}
-	
+
 	public Collection getCourses(Collection providers, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
 		Collection courses = new ArrayList();
 		try {
@@ -1112,7 +1131,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public Collection getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK) {
 		Collection courses = new ArrayList();
 		try {
-			courses = getCourseHome().findAll(providerPK, schoolTypePK, courseTypePK, birthYear);
+			courses = getCourseHome().findAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
 		}
 		catch (IDORelationshipException e) {
 			e.printStackTrace();
@@ -1240,6 +1259,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			}
 		}
 		return null;
+	}
+	
+	public int getNextCourseNumber() {
+		try {
+			return getCourseHome().getHighestCourseNumber() + 1;
+		}
+		catch (IDOException ie) {
+			log(ie);
+			return 1;
+		}
 	}
 
 	public CourseType getCourseType(Object pk) {
@@ -1558,12 +1587,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return userPrices;
 	}
-	
+
 	public float getCalculatedCourseCertificateFees(Map applications) {
 		if (applications == null || applications.isEmpty()) {
 			return 0;
 		}
-		
+
 		float fees = 0;
 		User user = null;
 		CourseChoice choise = null;
@@ -1572,21 +1601,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		CourseChoiceHome choiseHome = getCourseChoiceHome();
 		for (Iterator it = keysIt; it.hasNext();) {
 			user = (User) it.next();
-			
+
 			userChoises = null;
 			try {
 				userChoises = choiseHome.findAllByUser(user);
-			} catch (FinderException e) {}
-			
+			}
+			catch (FinderException e) {
+			}
+
 			if (userChoises != null && !userChoises.isEmpty()) {
 				for (Iterator choises = userChoises.iterator(); choises.hasNext();) {
 					choise = (CourseChoice) choises.next();
-					
+
 					fees += choise.getCourseCertificateFee();
 				}
 			}
 		}
-		
+
 		return fees;
 	}
 
@@ -1805,14 +1836,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				}
 			}
 
-			Iterator iter = applications == null ? null: applications.values().iterator();
+			Iterator iter = applications == null ? null : applications.values().iterator();
 			if (iter != null) {
 				for (Iterator it = iter; it.hasNext();) {
 					Collection collection = (Collection) it.next();
 					Iterator iterator = collection.iterator();
 					while (iterator.hasNext()) {
 						ApplicationHolder holder = (ApplicationHolder) iterator.next();
-	
+
 						CourseChoice choice = getCourseChoiceHome().create();
 						choice.setApplication(application);
 						choice.setCourse(holder.getCourse());
@@ -1827,7 +1858,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						}
 						choice.setCourseCertificateFee(certificateFee);
 						choice.store();
-	
+
 						sendMessageToParents(application, choice, subject, body);
 					}
 				}
@@ -1840,7 +1871,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		return null;
 	}
-	
+
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
 		return saveApplication(applications, merchantID, amount, merchantType, paymentType, referenceNumber, payerName, payerPersonalID, performer, locale, 0);
 	}
@@ -2050,54 +2081,59 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (id == null) {
 			return null;
 		}
-		
+
 		try {
 			return (CourseCertificateType) getIDOHome(CourseCertificateType.class).findByPrimaryKeyIDO(id);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (FinderException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
-	
+
 	public CourseCertificateType getCourseCertificateTypeByType(String type) {
 		if (type == null) {
 			return null;
 		}
-		
+
 		try {
 			return ((CourseCertificateTypeHome) getIDOHome(CourseCertificateType.class)).findByType(Integer.valueOf(type));
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	public List getUserCertificates(User user) {
 		if (user == null) {
 			return null;
 		}
-		
+
 		Collection userCertificates = null;
 		try {
 			userCertificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUser(user);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			return null;
-		} catch (FinderException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
 			return null;
 		}
-		
+		catch (FinderException e) {
+			e.printStackTrace();
+			return null;
+		}
+
 		if (userCertificates == null) {
 			return null;
 		}
 		return new ArrayList(userCertificates);
 	}
-	
+
 	public CourseCertificate getUserCertificate(User user, Course course) {
 		try {
 			return ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findByUserAndCourse(user, course);
@@ -2111,21 +2147,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return null;
 	}
-	
+
 	public List getUserCertificatesByCourse(User user, Course course) {
 		if (user == null || course == null) {
 			return null;
 		}
-		
+
 		Collection certificates = null;
 		try {
 			certificates = ((CourseCertificateHome) getIDOHome(CourseCertificate.class)).findAllCertificatesByUserAndCourse(user, course);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (FinderException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+
 		if (certificates == null) {
 			return null;
 		}
@@ -2136,12 +2174,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (certificates == null || certificates.isEmpty()) {
 			return null;
 		}
-		
+
 		CourseCertificate certificate = null;
 		IWTimestamp time = null;
 		for (int i = 0; i < certificates.size(); i++) {
 			certificate = (CourseCertificate) certificates.get(i);
-			
+
 			IWTimestamp certificateExpireDate = certificate.getValidThru();
 			if (certificateExpireDate != null) {
 				if (time == null) {
@@ -2152,7 +2190,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				}
 			}
 		}
-		
+
 		return time;
 	}
 	
@@ -2160,7 +2198,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (certificates == null || certificates.isEmpty()) {
 			return null;
 		}
-		
+
 		CourseCertificate certificate = null;
 		IWTimestamp time = null;
 		for (int i = 0; i < certificates.size(); i++) {
@@ -2176,7 +2214,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				}
 			}
 		}
-		
+
 		return time;
 	}
 
@@ -2195,7 +2233,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		
 		return true;
 	}
-	
+
 	public List getCourseParticipantListRowData(CourseChoice choice, IWResourceBundle iwrb) {
 		if (choice == null) {
 			return null;
@@ -2267,8 +2305,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				cellData.setForceToCheck(true);
 			}
 
-			cellData.setDisabled(disabled);
-			cellData.setShow(show);
+			//cellData.setDisabled(disabled);
+			//cellData.setShow(show);
 
 			data.add(cellData);
 		}
@@ -2284,8 +2322,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		/*2 > 3*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("certificate_of_property", "Certificate of property"), CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
 		/*3 > 4*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("criminal_record", "Criminal record"), CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
 		/*4 > 5*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("verification_of_payment", "Verification of payment"), CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
-		/*6*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
-		/*7*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
+		/*8 > 6*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("limited_certificate", "Limited certificate"), CourseChoiceBMPBean.COLUMN_LIMITED_CERTIFICATE));
+		/*7*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("did_not_show_up", "Did not show up"), CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
+		/*8*/info.add(new AdvancedProperty(iwrb == null ? null : iwrb.getLocalizedString("passed_course", "Has passed course"), CourseChoiceBMPBean.COLUMN_PASSED));
 
 		return info;
 	}

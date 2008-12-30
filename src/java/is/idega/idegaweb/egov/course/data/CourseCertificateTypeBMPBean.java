@@ -1,7 +1,6 @@
 package is.idega.idegaweb.egov.course.data;
 
 import java.util.Collection;
-import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
@@ -18,17 +17,15 @@ public class CourseCertificateTypeBMPBean extends GenericEntity implements
 	private static final String COLUMN_CERTIFICATE_TYPE = "certificate_type";
 	private static final String COLUMN_DESCRIPTION = "description";
 
-	public static final Integer FULL_CERTIFICATE_TYPE = 1;
-	public static final Integer RENEWAL_CERTIFICATE_TYPE = 2;
-	public static final Integer TEMPORARY_CERTIFICATE_TYPE = 3;
-	public static final Integer LIMITED_CERTIFICATE_TYPE = 4;
+	public static final Integer FULL_CERTIFICATE_TYPE = new Integer(1);
+	public static final Integer RENEWAL_CERTIFICATE_TYPE = new Integer(2);
+	public static final Integer TEMPORARY_CERTIFICATE_TYPE = new Integer(3);
+	public static final Integer LIMITED_CERTIFICATE_TYPE = new Integer(4);
 	
-	@Override
 	public String getEntityName() {
 		return "COU_CERTIFICATE_TYPE";
 	}
 
-	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		
@@ -36,31 +33,27 @@ public class CourseCertificateTypeBMPBean extends GenericEntity implements
 		addAttribute(COLUMN_DESCRIPTION, "Description", String.class);
 	}
 	
-	@Override
 	public void insertStartData() throws Exception {
-		//	1
 		CourseCertificateType fullCertificate = ((CourseCertificateTypeHome) IDOLookup.getHomeLegacy(CourseCertificateType.class)).create();
 		fullCertificate.setType(FULL_CERTIFICATE_TYPE);
 		fullCertificate.setDescription("Full certificate");
 		fullCertificate.store();
 		
-		//	2
 		CourseCertificateType renewalCertificate = ((CourseCertificateTypeHome) IDOLookup.getHomeLegacy(CourseCertificateType.class)).create();
 		renewalCertificate.setType(RENEWAL_CERTIFICATE_TYPE);
 		renewalCertificate.setDescription("Renewal certificate");
 		renewalCertificate.store();
 		
-		//	3
 		CourseCertificateType temporaryCertificate = ((CourseCertificateTypeHome) IDOLookup.getHomeLegacy(CourseCertificateType.class)).create();
 		temporaryCertificate.setType(TEMPORARY_CERTIFICATE_TYPE);
 		temporaryCertificate.setDescription("Temporary certificate");
 		temporaryCertificate.store();
 		
-		//	4
 		CourseCertificateType limitedCertificate = ((CourseCertificateTypeHome) IDOLookup.getHomeLegacy(CourseCertificateType.class)).create();
 		limitedCertificate.setType(LIMITED_CERTIFICATE_TYPE);
 		limitedCertificate.setDescription("Limited certificate");
 		limitedCertificate.store();
+		
 	}
 	
 	public void setType(Integer type) {
@@ -99,14 +92,13 @@ public class CourseCertificateTypeBMPBean extends GenericEntity implements
 			}
 			return null;
 		} catch (FinderException e) {
-			log(Level.WARNING, "Error getting '" + CourseCertificateType.class.getName() + "' by type: " + type);
+			e.printStackTrace();
 		}
 		
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Collection<CourseCertificateType> ejbFindAllTypes() throws FinderException {
+	public Collection ejbFindAllTypes() throws FinderException {
 		IDOQuery query = idoQuery();
 		query.appendSelectAllFrom(this);
 

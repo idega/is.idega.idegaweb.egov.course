@@ -194,7 +194,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		boolean useFixedPrices = true; //iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 
 		User payer = null;
 		if (application.getPayerPersonalID() != null) {

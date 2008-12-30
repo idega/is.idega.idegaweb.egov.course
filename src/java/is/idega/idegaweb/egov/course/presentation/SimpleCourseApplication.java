@@ -1011,7 +1011,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		row = group.createRow();
 
 		cell = row.createCell();
-		cell.setColumnSpan(3);
+		cell.setColumnSpan(4);
 		cell.setStyleClass("totalPrice");
 		cell.add(new Text(iwrb.getLocalizedString("total_amount", "Total amount")));
 
@@ -1221,7 +1221,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 
 		if (iwc.isParameterSet(PARAMETER_APPLICANT_OPTION)) {
-			iCompanyRegistration = false; //!Boolean.valueOf(iwc.getParameter(PARAMETER_APPLICANT_OPTION)).booleanValue();
+			iCompanyRegistration = !Boolean.valueOf(iwc.getParameter(PARAMETER_APPLICANT_OPTION)).booleanValue();
 		}
 
 		return action;

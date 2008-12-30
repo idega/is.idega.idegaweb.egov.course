@@ -46,7 +46,6 @@ import com.idega.presentation.ui.TextInput;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
-import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.TextSoap;
 
@@ -73,10 +72,7 @@ public class CourseApplicationOverview extends CourseBlock {
 		this.useInWindow = useInWindow;
 	}
 
-	@Override
 	public void present(IWContext iwc) {
-		PresentationUtil.addStyleSheetToHeader(iwc, getBundle(iwc).getVirtualPathWithFileNameString("style/course.css"));
-
 		try {
 			is.idega.idegaweb.egov.course.data.CourseApplication application = null;
 			if (iwc.isParameterSet(getBusiness().getSelectedCaseParameter())) {

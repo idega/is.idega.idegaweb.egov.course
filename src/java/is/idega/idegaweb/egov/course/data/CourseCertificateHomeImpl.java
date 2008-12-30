@@ -2,14 +2,12 @@ package is.idega.idegaweb.egov.course.data;
 
 
 import java.util.Collection;
-import java.util.List;
-
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-
+import java.util.List;
+import com.idega.user.data.User;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
-import com.idega.user.data.User;
 
 public class CourseCertificateHomeImpl extends IDOFactory implements CourseCertificateHome {
 
@@ -40,7 +38,7 @@ public class CourseCertificateHomeImpl extends IDOFactory implements CourseCerti
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
-	
+
 	public CourseCertificate findByUserAndCourse(User user, Course course) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Object pk = ((CourseCertificateBMPBean) entity).ejbFindByUserAndCourse(user, course);
@@ -53,5 +51,12 @@ public class CourseCertificateHomeImpl extends IDOFactory implements CourseCerti
 		Collection ids = ((CourseCertificateBMPBean) entity).ejbFindByUsersAndValidityAndType(usersIds, onlyValidCertificates, certificateTypeId);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+	public CourseCertificate findHighestNumberByType(CourseCertificateType type) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Object pk = ((CourseCertificateBMPBean) entity).ejbFindHighestNumberByType(type);
+		this.idoCheckInPooledEntity(entity);
+		return this.findByPrimaryKey(pk);
 	}
 }

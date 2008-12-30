@@ -13,7 +13,6 @@ import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 
@@ -176,9 +175,10 @@ public class CourseParticipantsList extends CourseBlock {
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 		course.setToSubmit();
 
-		if (getSession().getProvider() != null && typePK != null) {
+		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
+		if ((getSession().getProvider() != null && typePK != null) || showAllCourses) {
 			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, null, null);
+			Collection courses = getBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, null, null);
 
 			Iterator iter = courses.iterator();
 			while (iter.hasNext()) {
@@ -187,7 +187,7 @@ public class CourseParticipantsList extends CourseBlock {
 				if (showIDInName) {
 					CourseType type = element.getCourseType();
 
-					name += element.getPrimaryKey().toString() + " - ";
+					name += element.getCourseNumber() + " - ";
 
 					if (type.getAbbreviation() != null && type.showAbbreviation()) {
 						name += type.getAbbreviation() + " ";
@@ -314,16 +314,6 @@ public class CourseParticipantsList extends CourseBlock {
 				cell.add(new Text(getResourceBundle().getLocalizedString("pdf", "PDF")));
 				columns++;
 			}
-
-			if (addViewParticipantLink) {
-				cell = row.createHeaderCell();
-				if (!addCheckboxes) {
-					cell.setStyleClass("lastColumn");
-				}
-				cell.setStyleClass("view");
-				cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
-				columns++;
-			}
 		}
 
 		List checkboxesInfo = null;
@@ -344,13 +334,23 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 		}
 
+		if (addViewParticipantLink) {
+			cell = row.createHeaderCell();
+			if (!addCheckboxes) {
+				cell.setStyleClass("lastColumn");
+			}
+			cell.setStyleClass("view");
+			cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
+			columns++;
+		}
+
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 
 		Course course = null;
 		CourseType type = null;
 		Collection choices = new ArrayList();
-		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_COURSE_PK)) {
+		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK));
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 			type = course.getCourseType();
@@ -470,28 +470,6 @@ public class CourseParticipantsList extends CourseBlock {
 						cell.add(printCertificate);
 					}
 				}
-
-				if (addViewParticipantLink) {
-					cell = row.createCell();
-					Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
-					if (courseId != null) {
-						view.addParameter(PARAMETER_COURSE_PK, courseId);
-					}
-					view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
-					if (schoolId != null) {
-						view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
-					}
-					if (schoolTypeId != null) {
-						view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
-					}
-					if (courseTypeId != null) {
-						view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
-					}
-					view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
-					view.addParameter(PARAMETER_ACTION, 1);
-					view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
-					cell.add(view);
-				}
 			}
 			if (addCheckboxes) {
 				AdvancedProperty info = null;
@@ -527,6 +505,28 @@ public class CourseParticipantsList extends CourseBlock {
 						cell.add(new Text(CoreConstants.MINUS));
 					}
 				}
+			}
+
+			if (addViewParticipantLink) {
+				cell = row.createCell();
+				Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
+				if (courseId != null) {
+					view.addParameter(PARAMETER_COURSE_PK, courseId);
+				}
+				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
+				if (schoolId != null) {
+					view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
+				}
+				if (schoolTypeId != null) {
+					view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
+				}
+				if (courseTypeId != null) {
+					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
+				}
+				view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+				view.addParameter(PARAMETER_ACTION, 1);
+				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
+				cell.add(view);
 			}
 
 			if (iRow % 2 == 0) {

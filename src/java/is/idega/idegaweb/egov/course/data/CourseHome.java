@@ -23,9 +23,9 @@ public interface CourseHome extends IDOHome {
 
 	public Collection findAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException;
 
-	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException;
-	
 	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException;
+
+	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException;
 
 	public Collection findAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException;
 
@@ -36,4 +36,8 @@ public interface CourseHome extends IDOHome {
 	public int getCountByCourseTypeAndBirthYear(Object courseTypePK, int birthYear, Date fromDate) throws IDOException;
 
 	public int getCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException;
+
+	public int getHighestCourseNumber() throws IDOException;
+
+	public Collection findAllWithNoCourseNumber() throws FinderException;
 }

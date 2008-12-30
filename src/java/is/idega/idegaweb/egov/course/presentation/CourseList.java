@@ -166,6 +166,7 @@ public class CourseList extends CourseBlock {
 		}
 
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
+		int inceptionYear = Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_INCEPTION_YEAR, "-1"));
 
 		DropdownMenu sorting = new DropdownMenu(PARAMETER_SORTING);
 		sorting.addMenuElement(CourseComparator.ID_SORT, getResourceBundle().getLocalizedString("sort.id", "ID"));
@@ -191,10 +192,16 @@ public class CourseList extends CourseBlock {
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
 
-		stamp.addMonths(-1);
-		stamp.addYears(-1);
-		fromDate.setDate(stamp.getDate());
-
+		if (inceptionYear > 0) {
+			IWTimestamp fromStamp = new IWTimestamp(1, 1, inceptionYear);
+			fromDate.setDate(fromStamp.getDate());
+		}
+		else {
+			stamp.addMonths(-1);
+			stamp.addYears(-1);
+			fromDate.setDate(stamp.getDate());
+		}
+		
 		if (showTypes) {
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -382,7 +389,7 @@ public class CourseList extends CourseBlock {
 			else {
 				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK, fromDate, toDate));
 			}
-			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : CourseComparator.NAME_SORT));
+			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : (useBirthYears ? CourseComparator.NAME_SORT : CourseComparator.ID_SORT)));
 		}
 
 		Iterator iter = courses.iterator();
@@ -402,7 +409,7 @@ public class CourseList extends CourseBlock {
 			if (type.getAbbreviation() != null) {
 				cell.add(new Text(type.getAbbreviation()));
 			}
-			cell.add(new Text(course.getPrimaryKey().toString()));
+			cell.add(new Text(String.valueOf(course.getCourseNumber())));
 
 			cell = row.createCell();
 			cell.setStyleClass("course");

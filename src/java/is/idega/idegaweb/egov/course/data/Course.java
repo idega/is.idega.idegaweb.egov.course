@@ -83,6 +83,11 @@ public interface Course extends IDOEntity {
 	public int getFreePlaces();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCourseNumber
+	 */
+	public int getCourseNumber();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setName
 	 */
 	public void setName(String name);
@@ -151,4 +156,9 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setMax
 	 */
 	public void setMax(int max);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseNumber
+	 */
+	public void setCourseNumber(int number);
 }

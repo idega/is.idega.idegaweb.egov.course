@@ -46,7 +46,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
-	
+
 	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, fromDate, toDate);
@@ -94,5 +94,19 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		int theReturn = ((CourseBMPBean) entity).ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(provider, type, courseType, fromDate, toDate);
 		this.idoCheckInPooledEntity(entity);
 		return theReturn;
+	}
+
+	public int getHighestCourseNumber() throws IDOException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		int theReturn = ((CourseBMPBean) entity).ejbHomeGetHighestCourseNumber();
+		this.idoCheckInPooledEntity(entity);
+		return theReturn;
+	}
+
+	public Collection findAllWithNoCourseNumber() throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseBMPBean) entity).ejbFindAllWithNoCourseNumber();
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 }
