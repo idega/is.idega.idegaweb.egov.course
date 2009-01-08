@@ -41,6 +41,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import com.idega.business.IBOLookup;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
+import com.idega.core.file.util.MimeTypeUtil;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
 import com.idega.idegaweb.IWApplicationContext;
@@ -104,6 +105,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		}
 	}
 	
+	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
 		try {
 			this.locale = iwc.getApplicationSettings().getApplicationLocale();
@@ -129,6 +131,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		}
 	}
 
+	@Override
 	public String getMimeType() {
 		if (this.buffer != null) {
 			return this.buffer.getMimeType();
@@ -136,6 +139,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		return super.getMimeType();
 	}
 
+	@Override
 	public void writeTo(OutputStream out) throws IOException {
 		if (this.buffer != null) {
 			MemoryInputStream mis = new MemoryInputStream(this.buffer);
@@ -539,7 +543,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			}
 		}
 		wb.write(mos);
-		buffer.setMimeType("application/x-msexcel");
+		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
 		return buffer;
 	}
 
