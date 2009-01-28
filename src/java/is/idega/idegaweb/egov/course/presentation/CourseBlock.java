@@ -118,6 +118,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		this.business = getBusiness(iwc);
 		this.session = getSession(iwc);
 		this.uBusiness = getUserBusiness(iwc);
+		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle("is.idega.idegaweb.egov.application").getVirtualPathWithFileNameString("style/application.css"));
 		PresentationUtil.addStyleSheetToHeader(iwc, getBundle().getVirtualPathWithFileNameString("style/course.css"));
 
 		present(iwc);
