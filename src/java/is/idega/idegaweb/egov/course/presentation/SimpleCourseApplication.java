@@ -191,7 +191,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		addDefaulScriptFiles(iwc);
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tif (document.getElementById(\"" + PARAMETER_COURSE_TYPE + "\") != null) { DWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");}\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tif (document.getElementById(\"" + PARAMETER_COURSE_TYPE + "\") != null) { dwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");}\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append(getSchoolTypePK() != null ? "\tvar val = '" + getSchoolTypePK() + "';\n" : "\tvar val = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("\tgetCourses();\n").append("}");
@@ -211,7 +211,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		script4.append("var getProvider = function(course) { return course.provider };\n");
 		script4.append("var getRadioButton = function(course) { return getRadio(course); };\n");
 
-		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tDWRUtil.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tDWRUtil.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getName, getTimeframe, getProvider], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
+		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getName, getTimeframe, getProvider], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
 		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
@@ -871,10 +871,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 		addDefaulScriptFiles(iwc);
 
 		StringBuffer script = new StringBuffer();
-		script.append("function readUser() {\n\tvar id = DWRUtil.getValue(\"" + PARAMETER_PAYER_PERSONAL_ID + "\");\n\tCourseDWRUtil.getUserDWR(id, -1, 18, '" + iwc.getCurrentLocale().getCountry() + "', fillUser);\n}");
+		script.append("function readUser() {\n\tvar id = dwr.util.getValue(\"" + PARAMETER_PAYER_PERSONAL_ID + "\");\n\tCourseDWRUtil.getUserDWR(id, -1, 18, '" + iwc.getCurrentLocale().getCountry() + "', fillUser);\n}");
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function fillUser(auser) {\n\tuser = auser;\n\tDWRUtil.setValues(user);\n}");
+		script2.append("function fillUser(auser) {\n\tuser = auser;\n\tdwr.util.setValues(user);\n}");
 
 		PresentationUtil.addJavaScriptActionToBody(iwc, script.toString());
 		PresentationUtil.addJavaScriptActionToBody(iwc, script2.toString());

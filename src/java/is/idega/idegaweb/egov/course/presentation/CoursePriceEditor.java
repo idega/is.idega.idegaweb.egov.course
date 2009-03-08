@@ -61,6 +61,7 @@ public class CoursePriceEditor extends CourseBlock {
 	private static final int ACTION_SAVE = 4;
 	private static final int ACTION_DELETE = 5;
 
+	@Override
 	public void present(IWContext iwc) {
 		try {
 			switch (parseAction(iwc)) {
@@ -371,7 +372,7 @@ public class CoursePriceEditor extends CourseBlock {
 		super.getParentPage().addJavascriptURL("/dwr/util.js");
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_ID + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE_ID + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_ID + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_ID + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_ID + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);").append("}");

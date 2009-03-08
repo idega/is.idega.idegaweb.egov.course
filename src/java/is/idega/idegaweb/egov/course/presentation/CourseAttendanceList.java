@@ -45,6 +45,7 @@ public class CourseAttendanceList extends CourseBlock {
 	private static final String PARAMETER_COURSE_TYPE = "prm_course_type";
 	private static final String PARAMETER_SCHOOL_TYPE = "prm_school_type";
 
+	@Override
 	public void present(IWContext iwc) {
 		try {
 			Form form = new Form();
@@ -111,16 +112,16 @@ public class CourseAttendanceList extends CourseBlock {
 		}
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
 		StringBuffer script3 = new StringBuffer();
-		script3.append("function setCourseOptions(data) {\n").append("\tDWRUtil.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tDWRUtil.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
+		script3.append("function setCourseOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
-		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', DWRUtil.getValue('" + PARAMETER_SCHOOL_TYPE + "'), DWRUtil.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
+		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
 
 		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
 		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
