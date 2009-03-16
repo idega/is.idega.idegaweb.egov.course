@@ -1821,6 +1821,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			application.setReferenceNumber(referenceNumber);
 			application.setPayerName(payerName);
 			application.setPayerPersonalID(payerPersonalID);
+			if (performer == null) {
+				try {
+					performer = getIWApplicationContext().getIWMainApplication().getAccessController().getAdministratorUser();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			application.setOwner(performer);
 			application.setAmount(amount);
 			changeCaseStatus(application, getCaseStatusOpen(), performer);
