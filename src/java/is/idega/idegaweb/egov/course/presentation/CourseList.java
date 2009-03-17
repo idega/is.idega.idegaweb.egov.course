@@ -186,10 +186,12 @@ public class CourseList extends CourseBlock {
 		stamp.addYears(1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM_DATE);
+		fromDate.setShowYearChange(true);
 		fromDate.setStyleClass("dateInput");
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO_DATE);
+		toDate.setShowYearChange(true);
 		toDate.setStyleClass("dateInput");
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());

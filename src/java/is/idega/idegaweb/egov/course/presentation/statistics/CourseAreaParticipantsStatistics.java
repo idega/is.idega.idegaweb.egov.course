@@ -135,10 +135,12 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		schoolArea.addMenuElements(areas);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
+		fromDate.setShowYearChange(true);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
+		toDate.setShowYearChange(true);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
 

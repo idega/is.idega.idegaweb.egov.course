@@ -277,10 +277,12 @@ public class CourseDiscountEditor extends CourseBlock {
 		to.addDays(-1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
+		fromDate.setShowYearChange(true);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
+		toDate.setShowYearChange(true);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
 
@@ -332,7 +334,9 @@ public class CourseDiscountEditor extends CourseBlock {
 
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		IWDatePicker inputFrom = new IWDatePicker(PARAMETER_VALID_FROM);
+		inputFrom.setShowYearChange(true);
 		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
+		inputTo.setShowYearChange(true);
 		TextInput inputDiscount = new TextInput(PARAMETER_DISCOUNT);
 
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_VIEW)));

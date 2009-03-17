@@ -241,9 +241,11 @@ public class CourseEditor extends CourseBlock {
 		stamp.addYears(1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM_DATE);
+		fromDate.setShowYearChange(true);
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO_DATE);
+		toDate.setShowYearChange(true);
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
 
@@ -598,7 +600,9 @@ public class CourseEditor extends CourseBlock {
 		TextInput inputCourseNumber = new TextInput(PARAMETER_COURSE_NUMBER);
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		IWDatePicker inputFrom = new IWDatePicker(PARAMETER_VALID_FROM);
+		inputFrom.setShowYearChange(true);
 		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
+		inputTo.setShowYearChange(true);
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
 		IntegerInput inputYearFrom = new IntegerInput(PARAMETER_YEAR_FROM);
 		inputYearFrom.setMaxlength(4);

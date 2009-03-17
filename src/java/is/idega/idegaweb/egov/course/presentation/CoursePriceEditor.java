@@ -331,10 +331,12 @@ public class CoursePriceEditor extends CourseBlock {
 		to.addDays(-1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
+		fromDate.setShowYearChange(true);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
+		toDate.setShowYearChange(true);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
 
@@ -400,7 +402,9 @@ public class CoursePriceEditor extends CourseBlock {
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		TextInput inputLength = new TextInput(PARAMETER_DAYS);
 		IWDatePicker inputFrom = new IWDatePicker(PARAMETER_VALID_FROM);
+		inputFrom.setShowYearChange(true);
 		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
+		inputTo.setShowYearChange(true);
 		TextInput inputPrice = new TextInput(PARAMETER_PRICE);
 		TextInput inputPreCarePrice = new TextInput(PARAMETER_PRE_CARE_PRICE);
 		TextInput inputPostCarePrice = new TextInput(PARAMETER_POST_CARE_PRICE);
