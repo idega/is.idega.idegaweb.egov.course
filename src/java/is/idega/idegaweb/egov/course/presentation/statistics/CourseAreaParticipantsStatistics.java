@@ -36,13 +36,13 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Heading2;
 import com.idega.presentation.text.Text;
-import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
-import com.idega.presentation.ui.TextInput;
+import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.user.business.GenderBusiness;
 import com.idega.user.data.Gender;
 import com.idega.util.IWTimestamp;
@@ -82,8 +82,8 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_participants_statistics", "Course participants statistics"));
 				section.add(heading);
 
-				Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(iwc.getParameter(PARAMETER_FROM)).getDate() : null;
-				Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(iwc.getParameter(PARAMETER_TO)).getDate() : null;
+				Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM))).getDate() : null;
+				Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO))).getDate() : null;
 
 				SchoolType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
 				SchoolArea area = getSchoolBusiness(iwc).getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
@@ -134,11 +134,11 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		Collection areas = getBusiness().getSchoolAreas();
 		schoolArea.addMenuElements(areas);
 
-		DatePicker fromDate = new DatePicker(PARAMETER_FROM);
+		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
-		DatePicker toDate = new DatePicker(PARAMETER_TO);
+		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
 
@@ -151,14 +151,14 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("from_date", "From date"), (TextInput) fromDate.getPresentationObject(iwc));
+		label = new Label(getResourceBundle().getLocalizedString("from_date", "From date"), fromDate);
 		formItem.add(label);
 		formItem.add(fromDate);
 		layer.add(formItem);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("to_date", "To date"), (TextInput) toDate.getPresentationObject(iwc));
+		label = new Label(getResourceBundle().getLocalizedString("to_date", "To date"), toDate);
 		formItem.add(label);
 		formItem.add(toDate);
 		layer.add(formItem);

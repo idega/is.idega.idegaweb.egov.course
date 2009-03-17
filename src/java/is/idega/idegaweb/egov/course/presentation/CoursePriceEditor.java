@@ -28,14 +28,15 @@ import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
-import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
+import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
+import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.IWTimestamp;
 
 public class CoursePriceEditor extends CourseBlock {
@@ -116,7 +117,7 @@ public class CoursePriceEditor extends CourseBlock {
 		String courseTypeID = iwc.getParameter(PARAMETER_COURSE_TYPE_ID);
 		if (name != null && !"".equals(name.trim())) {
 			try {
-				getCourseBusiness(iwc).storeCoursePrice(pk, name, Integer.parseInt(length), new IWTimestamp(from).getTimestamp(), new IWTimestamp(to).getTimestamp(), Integer.parseInt(price), preCarePrice, postCarePrice, schoolAreaPK, courseTypeID);
+				getCourseBusiness(iwc).storeCoursePrice(pk, name, Integer.parseInt(length), new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(from)).getTimestamp(), new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(to)).getTimestamp(), Integer.parseInt(price), preCarePrice, postCarePrice, schoolAreaPK, courseTypeID);
 			}
 			catch (CreateException ce) {
 				add(ce.getMessage());
@@ -157,8 +158,8 @@ public class CoursePriceEditor extends CourseBlock {
 
 		Collection coursePrices = null;
 		try {
-			Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(iwc.getParameter(PARAMETER_FROM)).getDate() : null;
-			Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(iwc.getParameter(PARAMETER_TO)).getDate() : null;
+			Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM))).getDate() : null;
+			Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO))).getDate() : null;
 			coursePrices = getCourseBusiness(iwc).getCoursePrices(fromDate, toDate);
 		}
 		catch (RemoteException rex) {
@@ -329,24 +330,24 @@ public class CoursePriceEditor extends CourseBlock {
 		to.addYears(1);
 		to.addDays(-1);
 
-		DatePicker fromDate = new DatePicker(PARAMETER_FROM);
+		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
-		DatePicker toDate = new DatePicker(PARAMETER_TO);
+		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(getResourceBundle().getLocalizedString("from_date", "From date"), (TextInput) fromDate.getPresentationObject(iwc));
+		Label label = new Label(getResourceBundle().getLocalizedString("from_date", "From date"), fromDate);
 		formItem.add(label);
 		formItem.add(fromDate);
 		layer.add(formItem);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("to_date", "To date"), (TextInput) toDate.getPresentationObject(iwc));
+		label = new Label(getResourceBundle().getLocalizedString("to_date", "To date"), toDate);
 		formItem.add(label);
 		formItem.add(toDate);
 		layer.add(formItem);
@@ -398,8 +399,8 @@ public class CoursePriceEditor extends CourseBlock {
 
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		TextInput inputLength = new TextInput(PARAMETER_DAYS);
-		DatePicker inputFrom = new DatePicker(PARAMETER_VALID_FROM);
-		DatePicker inputTo = new DatePicker(PARAMETER_VALID_TO);
+		IWDatePicker inputFrom = new IWDatePicker(PARAMETER_VALID_FROM);
+		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
 		TextInput inputPrice = new TextInput(PARAMETER_PRICE);
 		TextInput inputPreCarePrice = new TextInput(PARAMETER_PRE_CARE_PRICE);
 		TextInput inputPostCarePrice = new TextInput(PARAMETER_POST_CARE_PRICE);
@@ -499,7 +500,7 @@ public class CoursePriceEditor extends CourseBlock {
 		layer = new Layer(Layer.DIV);
 		layer.setID("valid_from");
 		layer.setStyleClass("formItem");
-		label = new Label(localize("valid_from", "Valid from"), (TextInput) inputFrom.getPresentationObject(iwc));
+		label = new Label(localize("valid_from", "Valid from"), inputFrom);
 		layer.add(label);
 		layer.add(inputFrom);
 		section.add(layer);
@@ -507,7 +508,7 @@ public class CoursePriceEditor extends CourseBlock {
 		layer = new Layer(Layer.DIV);
 		layer.setID("valid_to");
 		layer.setStyleClass("formItem");
-		label = new Label(localize("valid_to", "Valid to"), (TextInput) inputTo.getPresentationObject(iwc));
+		label = new Label(localize("valid_to", "Valid to"), inputTo);
 		layer.add(label);
 		layer.add(inputTo);
 		section.add(layer);

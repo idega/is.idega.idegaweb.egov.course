@@ -86,6 +86,7 @@ import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
 import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.repository.data.ImplementorRepository;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
@@ -590,10 +591,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			course.setMax(maxPer);
 		}
 
-		if (price > 0) {
+		if (price >= 0 && coursePricePK == null) {
 			course.setCoursePrice(price);
 		}
-		if (cost > 0) {
+		if (cost >= 0 && coursePricePK == null) {
 			course.setCourseCost(cost);
 		}
 
@@ -799,7 +800,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				map.put("", getLocalizedString("select_course_price", "Select course price", locale));
 
 				Iterator iter = prices.iterator();
-				stamp = new IWTimestamp(date);
+				stamp = new IWTimestamp(IWDatePickerHandler.getParsedDate(date, locale));
 				while (iter.hasNext()) {
 					CoursePrice price = (CoursePrice) iter.next();
 					IWTimestamp from = new IWTimestamp(price.getValidFrom());
@@ -945,7 +946,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		catch (FinderException fe) {
 			fe.printStackTrace();
 			UserDWR user = new UserDWR();
-			user.setUserName(getLocalizedString("invalid_personal_id", "Invalid personal ID", locale));
+			user.setUserName("");
 			return user;
 		}
 		catch (RemoteException re) {

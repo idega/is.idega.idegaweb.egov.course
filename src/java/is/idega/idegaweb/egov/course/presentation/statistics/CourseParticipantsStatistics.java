@@ -34,12 +34,12 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Heading2;
 import com.idega.presentation.text.Text;
-import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
-import com.idega.presentation.ui.TextInput;
+import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.user.business.GenderBusiness;
 import com.idega.user.data.Gender;
 import com.idega.util.IWTimestamp;
@@ -119,24 +119,24 @@ public class CourseParticipantsStatistics extends CourseBlock {
 		to.addYears(1);
 		to.addDays(-1);
 
-		DatePicker fromDate = new DatePicker(PARAMETER_FROM);
+		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
-		DatePicker toDate = new DatePicker(PARAMETER_TO);
+		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(getResourceBundle().getLocalizedString("from_date", "From date"), (TextInput) fromDate.getPresentationObject(iwc));
+		Label label = new Label(getResourceBundle().getLocalizedString("from_date", "From date"), fromDate);
 		formItem.add(label);
 		formItem.add(fromDate);
 		layer.add(formItem);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(getResourceBundle().getLocalizedString("to_date", "To date"), (TextInput) toDate.getPresentationObject(iwc));
+		label = new Label(getResourceBundle().getLocalizedString("to_date", "To date"), toDate);
 		formItem.add(label);
 		formItem.add(toDate);
 		layer.add(formItem);
@@ -205,8 +205,8 @@ public class CourseParticipantsStatistics extends CourseBlock {
 
 		group = table.createBodyRowGroup();
 
-		Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(iwc.getParameter(PARAMETER_FROM)).getDate() : null;
-		Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(iwc.getParameter(PARAMETER_TO)).getDate() : null;
+		Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM))).getDate() : null;
+		Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO))).getDate() : null;
 		int iRow = 1;
 
 		int total = 0;

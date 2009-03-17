@@ -35,13 +35,14 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.DownloadLink;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
-import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
+import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
+import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
 
@@ -184,11 +185,11 @@ public class CourseList extends CourseBlock {
 		IWTimestamp stamp = new IWTimestamp();
 		stamp.addYears(1);
 
-		DatePicker fromDate = new DatePicker(PARAMETER_FROM_DATE);
+		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM_DATE);
 		fromDate.setStyleClass("dateInput");
 		fromDate.keepStatusOnAction(true);
 
-		DatePicker toDate = new DatePicker(PARAMETER_TO_DATE);
+		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO_DATE);
 		toDate.setStyleClass("dateInput");
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
@@ -372,14 +373,14 @@ public class CourseList extends CourseBlock {
 
 		Date fromDate = stamp.getDate();
 		if (iwc.isParameterSet(PARAMETER_FROM_DATE)) {
-			fromDate = new IWTimestamp(iwc.getParameter(PARAMETER_FROM_DATE)).getDate();
+			fromDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM_DATE))).getDate();
 		}
 
 		stamp.addMonths(1);
 		stamp.addYears(1);
 		Date toDate = stamp.getDate();
 		if (iwc.isParameterSet(PARAMETER_TO_DATE)) {
-			toDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
+			toDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO_DATE))).getDate();
 		}
 
 		List courses = new ArrayList();

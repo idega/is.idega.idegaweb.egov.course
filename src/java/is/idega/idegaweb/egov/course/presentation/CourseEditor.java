@@ -33,15 +33,16 @@ import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
-import com.idega.presentation.ui.DatePicker;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
+import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.IntegerInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
+import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
@@ -132,8 +133,8 @@ public class CourseEditor extends CourseBlock {
 		String max = iwc.getParameter(PARAMETER_MAX_PER);
 
 		try {
-			IWTimestamp startDate = new IWTimestamp(sStartDate);
-			IWTimestamp endDate = sEndDate != null ? new IWTimestamp(sEndDate) : null;
+			IWTimestamp startDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(sStartDate));
+			IWTimestamp endDate = sEndDate != null ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(sEndDate)) : null;
 			int courseNumber = iwc.isParameterSet(PARAMETER_COURSE_NUMBER) ? Integer.parseInt(iwc.getParameter(PARAMETER_COURSE_NUMBER)) : -1;
 			int birthYearFrom = yearFrom != null ? Integer.parseInt(yearFrom) : -1;
 			int birthYearTo = yearTo != null ? Integer.parseInt(yearTo) : -1;
@@ -239,10 +240,10 @@ public class CourseEditor extends CourseBlock {
 		IWTimestamp stamp = new IWTimestamp();
 		stamp.addYears(1);
 
-		DatePicker fromDate = new DatePicker(PARAMETER_FROM_DATE);
+		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM_DATE);
 		fromDate.keepStatusOnAction(true);
 
-		DatePicker toDate = new DatePicker(PARAMETER_TO_DATE);
+		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO_DATE);
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
 
@@ -338,14 +339,14 @@ public class CourseEditor extends CourseBlock {
 
 		Date fromDate = stamp.getDate();
 		if (iwc.isParameterSet(PARAMETER_FROM_DATE)) {
-			fromDate = new IWTimestamp(iwc.getParameter(PARAMETER_FROM_DATE)).getDate();
+			fromDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM_DATE))).getDate();
 		}
 
 		stamp.addMonths(1);
 		stamp.addYears(1);
 		Date toDate = stamp.getDate();
 		if (iwc.isParameterSet(PARAMETER_TO_DATE)) {
-			toDate = new IWTimestamp(iwc.getParameter(PARAMETER_TO_DATE)).getDate();
+			toDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO_DATE))).getDate();
 		}
 
 		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
@@ -590,11 +591,14 @@ public class CourseEditor extends CourseBlock {
 		form.maintainParameter(PARAMETER_TO_DATE);
 
 		Course course = getCourseBusiness(iwc).getCourse(coursePK);
+		if (getSession().getProvider() == null) {
+			getSession().setProvider(course.getProvider());
+		}
 
 		TextInput inputCourseNumber = new TextInput(PARAMETER_COURSE_NUMBER);
 		TextInput inputName = new TextInput(PARAMETER_NAME);
-		DatePicker inputFrom = new DatePicker(PARAMETER_VALID_FROM);
-		DatePicker inputTo = new DatePicker(PARAMETER_VALID_TO);
+		IWDatePicker inputFrom = new IWDatePicker(PARAMETER_VALID_FROM);
+		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
 		IntegerInput inputYearFrom = new IntegerInput(PARAMETER_YEAR_FROM);
 		inputYearFrom.setMaxlength(4);
@@ -697,7 +701,7 @@ public class CourseEditor extends CourseBlock {
 					e.printStackTrace();
 				}
 			}
-			else if (course.getCoursePrice() > 0) {
+			else if (course.getCoursePrice() >= 0) {
 				price.setContent(String.valueOf((int) course.getCoursePrice()));
 				price.setDisabled(false);
 
@@ -822,7 +826,7 @@ public class CourseEditor extends CourseBlock {
 		layer.setStyleClass("formItem");
 		label = new Label();
 		label.setLabel(localize("start_date", "Start date"));
-		inputFrom.setTextInputId(PARAMETER_VALID_FROM_ID);
+		inputFrom.setID(PARAMETER_VALID_FROM_ID);
 		layer.add(label);
 		layer.add(inputFrom);
 		section.add(layer);
