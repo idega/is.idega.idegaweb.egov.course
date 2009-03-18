@@ -1093,9 +1093,11 @@ public class SimpleCourseApplication extends ApplicationForm {
 			section.add(clearLayer);
 		}
 		else {
-			User user = iwc.getCurrentUser();
-			form.add(new HiddenInput(PARAMETER_PAYER_PERSONAL_ID, user.getPersonalID()));
-			form.add(new HiddenInput(PARAMETER_PAYER_NAME, new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(iwc.getCurrentLocale())));
+			User user = getUser(iwc);
+			if (user != null) {
+				form.add(new HiddenInput(PARAMETER_PAYER_PERSONAL_ID, user.getPersonalID()));
+				form.add(new HiddenInput(PARAMETER_PAYER_NAME, new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(iwc.getCurrentLocale())));
+			}
 		}
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -1188,17 +1190,19 @@ public class SimpleCourseApplication extends ApplicationForm {
 			bottom.setStyleClass("bottom");
 			add(bottom);
 
-			try {
-				ICPage page = getUserBusiness(iwc).getHomePageForUser(iwc.getCurrentUser());
-				Link link = getButtonLink(this.iwrb.getLocalizedString("my_page", "My page"));
-				link.setStyleClass("homeButton");
-				link.setPage(page);
-				bottom.add(link);
+			if (iwc.isLoggedOn()) {
+				try {
+					ICPage page = getUserBusiness(iwc).getHomePageForUser(iwc.getCurrentUser());
+					Link link = getButtonLink(this.iwrb.getLocalizedString("my_page", "My page"));
+					link.setStyleClass("homeButton");
+					link.setPage(page);
+					bottom.add(link);
+				}
+				catch (FinderException fe) {
+					fe.printStackTrace();
+				}
 			}
-			catch (FinderException fe) {
-				fe.printStackTrace();
-			}
-
+			
 			Link receipt = getButtonLink(this.iwrb.getLocalizedString("receipt", "Receipt"));
 			receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
 			receipt.addParameter(getCourseBusiness(iwc).getSelectedCaseParameter(), application.getPrimaryKey().toString());
