@@ -1205,7 +1205,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			}
 			
 			Link receipt = getButtonLink(this.iwrb.getLocalizedString("receipt", "Receipt"));
-			receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
+			receipt.setPublicWindowToOpen(CourseApplicationOverviewWindow.class);
 			receipt.addParameter(getCourseBusiness(iwc).getSelectedCaseParameter(), application.getPrimaryKey().toString());
 			bottom.add(receipt);
 		}
