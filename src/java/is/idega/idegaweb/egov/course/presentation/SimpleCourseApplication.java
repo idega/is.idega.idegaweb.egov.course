@@ -163,6 +163,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private Form getForm(IWContext iwc, int state) {
 		Form form = new Form();
+		form.setID("simpleCourseApplication");
 		if (state != ACTION_PHASE_1) {
 			form.maintainParameter(PARAMETER_COURSE);
 			form.maintainParameter(PARAMETER_CATEGORY);
