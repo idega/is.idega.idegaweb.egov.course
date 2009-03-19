@@ -152,23 +152,17 @@ public class CourseApplicationOverview extends CourseBlock {
 		formItem.add(span);
 		section.add(formItem);
 
-		User payer = null;
-		if (application.getPayerPersonalID() != null) {
-			try {
-				payer = getUserBusiness().getUser(application.getPayerPersonalID());
-			}
-			catch (FinderException e) {
-				e.printStackTrace();
-				payer = application.getOwner();
-			}
-			catch (RemoteException re) {
-				throw new IBORuntimeException(re);
-			}
+		User owner = application.getOwner();
+		String payerPersonalID = application.getPayerPersonalID();
+		String payerName = application.getPayerName();
+
+		if (payerPersonalID == null) {
+			payerPersonalID = application.getPayerPersonalID();
 		}
-		else {
-			payer = application.getOwner();
+		if (payerName == null) {
+			Name name = new Name(owner.getFirstName(), owner.getMiddleName(), owner.getLastName());
+			payerName = name.getName(iwc.getCurrentLocale());
 		}
-		Name payerName = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName());
 		
 		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
 
@@ -177,7 +171,7 @@ public class CourseApplicationOverview extends CourseBlock {
 		label = new Label();
 		label.add(new Text(getResourceBundle().getLocalizedString("application.payer_name", "Payer name")));
 		span = new Layer(Layer.SPAN);
-		span.add(new Text(payerName.getName(iwc.getCurrentLocale())));
+		span.add(new Text(payerName));
 		formItem.add(label);
 		formItem.add(span);
 		section.add(formItem);
@@ -187,7 +181,7 @@ public class CourseApplicationOverview extends CourseBlock {
 		label = new Label();
 		label.add(new Text(getResourceBundle().getLocalizedString("application.payer_personal_id", "Payer personal ID")));
 		span = new Layer(Layer.SPAN);
-		span.add(new Text(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale())));
+		span.add(new Text(PersonalIDFormatter.format(payerPersonalID, iwc.getCurrentLocale())));
 		formItem.add(label);
 		formItem.add(span);
 		section.add(formItem);

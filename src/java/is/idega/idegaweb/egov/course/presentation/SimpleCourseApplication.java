@@ -954,6 +954,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		Map applications = getCourseApplicationSession(iwc).getApplications();
 		SortedSet prices = getCourseBusiness(iwc).calculatePrices(applications);
 
+		User applicant = null;
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
 		float totalPrice = 0;
 		int counter = 0;
@@ -963,6 +964,9 @@ public class SimpleCourseApplication extends ApplicationForm {
 			row = group.createRow();
 			PriceHolder holder = (PriceHolder) iter.next();
 			User user = holder.getUser();
+			if (applicant == null) {
+				applicant = user;
+			}
 
 			float price = holder.getPrice();
 			totalPrice += price;
@@ -1052,7 +1056,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		section.add(clearLayer);
 
-		if (this.iCompanyRegistration || this.iUseSessionUser) {
+		if (this.iCompanyRegistration || this.iUseSessionUser || !iwc.isLoggedOn()) {
 			heading = new Heading1(this.iwrb.getLocalizedString("application.payer_information", "Payer information"));
 			heading.setStyleClass("subHeader");
 			form.add(heading);
@@ -1076,6 +1080,11 @@ public class SimpleCourseApplication extends ApplicationForm {
 			payerPersonalID.setMaxlength(10);
 			payerPersonalID.setOnKeyUp("readUser();");
 			payerPersonalID.setOnChange("readUser();");
+			
+			if (!iwc.isLoggedOn()) {
+				payerName.setContent(applicant.getPersonalID());
+				payerPersonalID.setContent(new Name(applicant.getFirstName(), applicant.getMiddleName(), applicant.getLastName()).getName(iwc.getCurrentLocale()));
+			}
 
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
