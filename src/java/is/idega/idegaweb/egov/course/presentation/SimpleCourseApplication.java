@@ -1082,8 +1082,8 @@ public class SimpleCourseApplication extends ApplicationForm {
 			payerPersonalID.setOnChange("readUser();");
 			
 			if (!iwc.isLoggedOn()) {
-				payerName.setContent(applicant.getPersonalID());
-				payerPersonalID.setContent(new Name(applicant.getFirstName(), applicant.getMiddleName(), applicant.getLastName()).getName(iwc.getCurrentLocale()));
+				payerPersonalID.setContent(applicant.getPersonalID());
+				payerName.setContent(new Name(applicant.getFirstName(), applicant.getMiddleName(), applicant.getLastName()).getName(iwc.getCurrentLocale()));
 			}
 
 			formItem = new Layer(Layer.DIV);
