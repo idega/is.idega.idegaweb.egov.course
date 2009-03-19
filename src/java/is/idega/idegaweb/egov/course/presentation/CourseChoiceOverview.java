@@ -25,6 +25,7 @@ import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
 import com.idega.block.school.data.School;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
 import com.idega.presentation.IWContext;
@@ -57,6 +58,9 @@ public class CourseChoiceOverview extends CourseBlock {
 	protected static final int ACTION_VIEW = 1;
 	protected static final int ACTION_REFUND_FORM = 2;
 	protected static final int ACTION_REFUND = 3;
+
+	protected List parametersToMaintainBackButton = null;
+	private boolean useBackPage = true;
 
 	public void present(IWContext iwc) {
 		try {
@@ -539,9 +543,32 @@ public class CourseChoiceOverview extends CourseBlock {
 
 		Link link = getButtonLink(localize("back", "Back"));
 		link.setStyleClass("homeButton");
-		link.setPage(backPage);
+		if (useBackPage()) {
+			link.setPage(backPage);
+		}
+		
+		if (parametersToMaintainBackButton != null) {
+			AdvancedProperty parameter = null;
+			for (int i = 0; i < parametersToMaintainBackButton.size(); i++) {
+				parameter = (AdvancedProperty) parametersToMaintainBackButton.get(i);
+				link.addParameter(parameter.getId(), parameter.getValue());
+			}
+		}
+
 		bottom.add(link);
 
 		return true;
+	}
+	
+	public void setParametersToMaintainBackButton(List parametersToMaintainBackButton) {
+		this.parametersToMaintainBackButton = parametersToMaintainBackButton;
+	}
+	
+	public void setUseBackPage(boolean useBackPage) {
+		this.useBackPage = useBackPage;
+	}
+	
+	protected boolean useBackPage() {
+		return this.useBackPage;
 	}
 }

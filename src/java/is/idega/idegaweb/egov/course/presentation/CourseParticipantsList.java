@@ -54,7 +54,7 @@ import com.idega.util.text.Name;
 
 public class CourseParticipantsList extends CourseBlock {
 
-	protected String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
+	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
 
 	private SchoolType type = null;
 
