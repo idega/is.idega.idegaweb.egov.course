@@ -1893,22 +1893,24 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()), course.getName(), provider.getName() };
 
 			User appParent = application.getOwner();
-			if (getFamilyLogic().isChildInCustodyOf(applicant, appParent)) {
-				getMessageBusiness().createUserMessage(application, appParent, subject, MessageFormat.format(body, arguments), false, false);
-			}
-
-			try {
-				Collection parents = getFamilyLogic().getCustodiansFor(applicant);
-				Iterator iter = parents.iterator();
-				while (iter.hasNext()) {
-					User parent = (User) iter.next();
-					if (!getUserBusiness().haveSameAddress(parent, appParent)) {
-						getMessageBusiness().createUserMessage(application, parent, subject, MessageFormat.format(body, arguments), false, false);
+			if (appParent != null) {
+				if (getFamilyLogic().isChildInCustodyOf(applicant, appParent)) {
+					getMessageBusiness().createUserMessage(application, appParent, subject, MessageFormat.format(body, arguments), false, false);
+				}
+	
+				try {
+					Collection parents = getFamilyLogic().getCustodiansFor(applicant);
+					Iterator iter = parents.iterator();
+					while (iter.hasNext()) {
+						User parent = (User) iter.next();
+						if (!getUserBusiness().haveSameAddress(parent, appParent)) {
+							getMessageBusiness().createUserMessage(application, parent, subject, MessageFormat.format(body, arguments), false, false);
+						}
 					}
 				}
-			}
-			catch (NoCustodianFound ncf) {
-				getMessageBusiness().createUserMessage(application, applicant, subject, MessageFormat.format(body, arguments), false, false);
+				catch (NoCustodianFound ncf) {
+					getMessageBusiness().createUserMessage(application, applicant, subject, MessageFormat.format(body, arguments), false, false);
+				}
 			}
 		}
 		catch (RemoteException re) {
