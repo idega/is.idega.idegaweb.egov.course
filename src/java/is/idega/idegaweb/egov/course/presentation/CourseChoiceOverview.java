@@ -57,7 +57,7 @@ public class CourseChoiceOverview extends CourseBlock {
 
 	protected static final int ACTION_VIEW = 1;
 	protected static final int ACTION_REFUND_FORM = 2;
-	protected static final int ACTION_REFUND = 3;
+	public static final int ACTION_REFUND = 3;
 
 	protected List parametersToMaintainBackButton = null;
 	private boolean useBackPage = true;
