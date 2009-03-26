@@ -35,6 +35,7 @@ import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.IWTimestamp;
+import com.idega.util.PresentationUtil;
 
 public class CourseDiscountEditor extends CourseBlock {
 
@@ -77,7 +78,7 @@ public class CourseDiscountEditor extends CourseBlock {
 
 				case ACTION_DELETE:
 					if (!getCourseBusiness(iwc).deleteCourseDiscount(iwc.getParameter(PARAMETER_COURSE_DISCOUNT_ID))) {
-						getParentPage().setAlertOnLoad(getResourceBundle().getLocalizedString("course_discount.remove_error", "You can not remove a course discount that has courses attached to it."));
+						PresentationUtil.addJavascriptAlertOnLoad(iwc, getResourceBundle().getLocalizedString("course_discount.remove_error", "You can not remove a course discount that has courses attached to it."));
 					}
 					showList(iwc);
 					break;

@@ -51,6 +51,7 @@ import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
 import com.idega.presentation.Layer;
+import com.idega.presentation.Script;
 import com.idega.presentation.Span;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
@@ -625,9 +626,11 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL(CoreConstants.DWR_ENGINE_SCRIPT);
-		super.getParentPage().addJavascriptURL(CoreConstants.DWR_UTIL_SCRIPT);
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script = new StringBuffer();
 		script.append("function readUser() {\n\tvar id = dwr.util.getValue(\"" + PARAMETER_PERSONAL_ID + "\");\n\tvar child = '" + applicant.getPrimaryKey().toString() + "';\n\tvar relation = dwr.util.getValue(\"userRelation\");\n\tCourseDWRUtil.getUserDWRByRelation(id, child, '1', '" + iwc.getCurrentLocale().getCountry() + "', relation, fillUser);\n}");
@@ -635,8 +638,10 @@ public class CourseApplication extends ApplicationForm {
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function fillUser(auser) {\n\tdwr.util.setValues(auser);\n}");
 
-		super.getParentPage().getAssociatedScript().addFunction("readUser", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("fillUser", script2.toString());
+		Script formScript = new Script();
+		formScript.addFunction("readUser", script.toString());
+		formScript.addFunction("fillUser", script2.toString());
+		form.add(formScript);
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.custodian_information", "Custodian information"), 2, getNumberOfPhases(iwc)));
 
@@ -799,9 +804,11 @@ public class CourseApplication extends ApplicationForm {
 
 		Integer applicantPK = (Integer) applicant.getPrimaryKey();
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL(CoreConstants.DWR_ENGINE_SCRIPT);
-		super.getParentPage().addJavascriptURL(CoreConstants.DWR_UTIL_SCRIPT);
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
@@ -857,15 +864,17 @@ public class CourseApplication extends ApplicationForm {
 		//script5.append("\n").append("return '<input id=\"'+course.pk+'\" type=\"checkbox\" class=\"checkbox\" name=\"" + PARAMETER_COURSE + "\" value=\"'+course.pk+'\" />'; \n");
 		script5.append("}\n");
 
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("getCourses", script3.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setCourses", script4.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setCourseID", script5.toString());
+		Script formScript = new Script();
+		formScript.addFunction("setOptions", script2.toString());
+		formScript.addFunction("changeValues", script.toString());
+		formScript.addFunction("getCourses", script3.toString());
+		formScript.addFunction("setCourses", script4.toString());
+		formScript.addFunction("setCourseID", script5.toString());
 
 		Form form = getForm(ACTION_PHASE_5);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
+		form.add(formScript);
 
 		addErrors(iwc, form);
 
@@ -1691,9 +1700,11 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script = new StringBuffer();
 		script.append("function readUser() {\n\tvar id = dwr.util.util.getValue(\"" + PARAMETER_PAYER_PERSONAL_ID + "\");\n\tvar child = '" + getUser(iwc).getPrimaryKey().toString() + "';\n\tCourseDWRUtil.getUserDWR(id, child, '1', '" + iwc.getCurrentLocale().getCountry() + "', fillUser);\n}");
@@ -1701,8 +1712,10 @@ public class CourseApplication extends ApplicationForm {
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function fillUser(auser) {\n\tuser = auser;\n\tdwr.util.setValues(user);\n}");
 
-		super.getParentPage().getAssociatedScript().addFunction("readUser", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("fillUser", script2.toString());
+		Script formScript = new Script();
+		formScript.addFunction("readUser", script.toString());
+		formScript.addFunction("fillUser", script2.toString());
+		form.add(formScript);
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.payment_information", "Payment information"), 7, getNumberOfPhases(iwc)));
 

@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -20,6 +21,7 @@ import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.Script;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
 import com.idega.presentation.TableColumn;
@@ -37,7 +39,9 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.PresentationUtil;
 
 public class CoursePriceEditor extends CourseBlock {
 
@@ -86,7 +90,7 @@ public class CoursePriceEditor extends CourseBlock {
 
 				case ACTION_DELETE:
 					if (!getCourseBusiness(iwc).deleteCoursePrice(iwc.getParameter(PARAMETER_COURSE_PRICE_ID))) {
-						getParentPage().setAlertOnLoad(getResourceBundle().getLocalizedString("course_price.remove_error", "You can not remove a course price that has courses attached to it."));
+						PresentationUtil.addJavascriptAlertOnLoad(iwc, getResourceBundle().getLocalizedString("course_price.remove_error", "You can not remove a course price that has courses attached to it."));
 					}
 					showList(iwc);
 					break;
@@ -370,9 +374,11 @@ public class CoursePriceEditor extends CourseBlock {
 	}
 
 	public void showEditor(IWContext iwc, Object courseTypePK) throws java.rmi.RemoteException {
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script2 = new StringBuffer();
 		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_ID + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_ID + "\", data);\n").append("}");
@@ -380,13 +386,15 @@ public class CoursePriceEditor extends CourseBlock {
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_ID + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);").append("}");
 
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
+		Script formScript = new Script();
+		formScript.addFunction("setOptions", script2.toString());
+		formScript.addFunction("changeValues", script.toString());
 
 		Form form = new Form();
 		form.setStyleClass("adminForm");
 		form.maintainParameter(PARAMETER_FROM);
 		form.maintainParameter(PARAMETER_TO);
+		form.add(formScript);
 
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");

@@ -32,6 +32,7 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextArea;
 import com.idega.presentation.ui.TextInput;
+import com.idega.util.PresentationUtil;
 
 public class CourseTypeEditor extends CourseBlock {
 
@@ -69,7 +70,7 @@ public class CourseTypeEditor extends CourseBlock {
 
 				case ACTION_DELETE:
 					if (!getCourseBusiness(iwc).deleteCourseType(iwc.getParameter(PARAMETER_COURSE_TYPE_PK))) {
-						getParentPage().setAlertOnLoad(getResourceBundle().getLocalizedString("course_type.remove_error", "You can not remove a course type that has courses or prices attached to it."));
+						PresentationUtil.addJavascriptAlertOnLoad(iwc, getResourceBundle().getLocalizedString("course_type.remove_error", "You can not remove a course type that has courses or prices attached to it."));
 					}
 					showList(iwc);
 					break;

@@ -18,11 +18,13 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import com.idega.block.school.data.School;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.Script;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
 import com.idega.presentation.TableRow;
@@ -37,7 +39,9 @@ import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 
 public class CourseAttendanceList extends CourseBlock {
@@ -80,9 +84,11 @@ public class CourseAttendanceList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-		super.getParentPage().addJavascriptURL("/dwr/engine.js");
-		super.getParentPage().addJavascriptURL("/dwr/util.js");
+		List scripts = new ArrayList();
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		if (!isSchoolUser()) {
 			DropdownMenu providers = null;
@@ -123,10 +129,12 @@ public class CourseAttendanceList extends CourseBlock {
 		StringBuffer script4 = new StringBuffer();
 		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
 
-		super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
-		super.getParentPage().getAssociatedScript().addFunction("setCourseOptions", script3.toString());
-		super.getParentPage().getAssociatedScript().addFunction("changeCourseValues", script4.toString());
+		Script formScript = new Script();
+		formScript.addFunction("setOptions", script2.toString());
+		formScript.addFunction("changeValues", script.toString());
+		formScript.addFunction("setCourseOptions", script3.toString());
+		formScript.addFunction("changeCourseValues", script4.toString());
+		layer.add(formScript);
 
 		DropdownMenu schoolType = new DropdownMenu(PARAMETER_SCHOOL_TYPE);
 		schoolType.setId(PARAMETER_SCHOOL_TYPE);
