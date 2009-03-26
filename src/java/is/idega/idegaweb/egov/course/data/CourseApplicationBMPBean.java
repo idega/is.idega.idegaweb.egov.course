@@ -32,6 +32,11 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 	private static final String COLUMN_AMOUNT = "amount";
 	private static final String COLUMN_COMPANY = "company_id";
 
+	private final static String COLUMN_CARD_TYPE = "card_type";
+	private final static String COLUMN_CARD_NUMBER = "card_number";
+	private final static String COLUMN_CARD_VALID_MONTH = "card_valid_month";
+	private final static String COLUMN_CARD_VALID_YEAR = "card_valid_year";
+
 	public String getCaseCodeDescription() {
 		return "Case for courses";
 	}
@@ -56,6 +61,11 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		addAttribute(COLUMN_AMOUNT, "Amount", Float.class);
 		addAttribute(COLUMN_PAYER_PERSONAL_ID, "Payer personal ID", String.class);
 		addAttribute(COLUMN_PAYER_NAME, "Payer name", String.class);
+
+		addAttribute(COLUMN_CARD_TYPE, "Card type", String.class);
+		addAttribute(COLUMN_CARD_NUMBER, "Card number", String.class);
+		addAttribute(COLUMN_CARD_VALID_MONTH, "Valid month", Integer.class);
+		addAttribute(COLUMN_CARD_VALID_YEAR, "Valid year", Integer.class);
 
 		addManyToOneRelationship(COLUMN_COMPANY, Company.class);
 	}
@@ -101,6 +111,22 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		return (Company) getColumnValue(COLUMN_COMPANY);
 	}
 
+	public String getCardType() {
+		return getStringColumnValue(COLUMN_CARD_TYPE);
+	}
+
+	public String getCardNumber() {
+		return getStringColumnValue(COLUMN_CARD_NUMBER);
+	}
+
+	public int getCardValidMonth() {
+		return getIntColumnValue(COLUMN_CARD_VALID_MONTH);
+	}
+
+	public int getCardValidYear() {
+		return getIntColumnValue(COLUMN_CARD_VALID_YEAR);
+	}
+
 	// Setters
 	public void setCreditCardMerchantID(int merchantID) {
 		setColumn(COLUMN_CREDITCARD_MERCHANT_ID, merchantID);
@@ -140,6 +166,22 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public void setCompany(Company company) {
 		setColumn(COLUMN_COMPANY, company);
+	}
+
+	public void setCardType(String type) {
+		setColumn(COLUMN_CARD_TYPE, type);
+	}
+
+	public void setCardNumber(String number) {
+		setColumn(COLUMN_CARD_NUMBER, number);
+	}
+
+	public void setCardValidMonth(int month) {
+		setColumn(COLUMN_CARD_VALID_MONTH, month);
+	}
+
+	public void setCardValidYear(int year) {
+		setColumn(COLUMN_CARD_VALID_YEAR, year);
 	}
 
 	// Finders

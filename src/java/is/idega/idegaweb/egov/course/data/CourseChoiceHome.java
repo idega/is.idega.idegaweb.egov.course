@@ -22,7 +22,7 @@ public interface CourseChoiceHome extends IDOHome {
 
 	public CourseChoice findFirstChoiceByApplication(CourseApplication application) throws FinderException;
 
-	public Collection findAllByCourse(Course course) throws FinderException;
+	public Collection findAllByCourse(Course course, boolean waitingList) throws FinderException;
 
 	public int getCountByCourse(Course course) throws IDOException;
 

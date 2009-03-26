@@ -98,7 +98,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			return Arrays.asList(new CourseChoice[] {choise});
 		}
 		try {
-			return business.getCourseChoices(course);
+			return business.getCourseChoices(course, false);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 			return new ArrayList();

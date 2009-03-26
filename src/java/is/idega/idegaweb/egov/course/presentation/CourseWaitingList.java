@@ -1,5 +1,5 @@
 /*
- * $Id$ Created on Mar 28, 2007
+ * $Id: CourseWaitingList.java,v 1.1 2009/03/26 06:59:57 laddi Exp $ Created on Mar 28, 2007
  * 
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
  * 
@@ -10,11 +10,8 @@ package is.idega.idegaweb.egov.course.presentation;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseCertificate;
-import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -22,15 +19,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolType;
-import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
-import com.idega.core.file.data.ICFile;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
-import com.idega.data.IDOLookup;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
@@ -46,16 +39,18 @@ import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
+import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 
-public class CourseParticipantsList extends CourseBlock {
+public class CourseWaitingList extends CourseBlock {
 
-	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
-
+	private static final int ACTION_VIEW = 1;
+	private static final int ACTION_ACCEPT = 2;
+	
 	private SchoolType type = null;
 
 	@Override
@@ -65,18 +60,26 @@ public class CourseParticipantsList extends CourseBlock {
 			form.setID("courseList");
 			form.setStyleClass("adminForm");
 			form.setEventListener(this.getClass());
+			form.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_VIEW));
 
+			parseAction(iwc);
+			
 			form.add(getNavigation(iwc));
 			if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 				form.add(getPrintouts(iwc));
 			}
 			form.add(getParticipants(iwc));
 
-			if (getBackPage() != null) {
-				Layer buttonLayer = new Layer();
-				buttonLayer.setStyleClass("buttonLayer");
-				form.add(buttonLayer);
+			Layer buttonLayer = new Layer();
+			buttonLayer.setStyleClass("buttonLayer");
+			form.add(buttonLayer);
 
+			SubmitButton accept = new SubmitButton(localize("accept_choices", "Accept choices"));
+			accept.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_ACCEPT));
+			accept.setSubmitConfirm(localize("accept_choices.confirm", "Are you sure you want to accept the selected choices?"));
+			buttonLayer.add(accept);
+			
+			if (getBackPage() != null) {
 				GenericButton back = new GenericButton(localize("back", "Back"));
 				back.setPageToOpen(getBackPage());
 				buttonLayer.add(back);
@@ -86,6 +89,20 @@ public class CourseParticipantsList extends CourseBlock {
 		}
 		catch (RemoteException re) {
 			throw new IBORuntimeException(re);
+		}
+	}
+	
+	private void parseAction(IWContext iwc) throws RemoteException {
+		int action = ACTION_VIEW;
+		if (iwc.isParameterSet(PARAMETER_ACTION)) {
+			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
+		}
+		
+		if (action == ACTION_ACCEPT) {
+			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
+			for (String choice : choices) {
+				getBusiness().acceptChoice(choice);
+			}
 		}
 	}
 
@@ -254,13 +271,7 @@ public class CourseParticipantsList extends CourseBlock {
 		return link;
 	}
 
-	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink, boolean addCheckboxes) throws RemoteException {
-		if (addCheckboxes) {
-			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, getBundle().getVirtualPathWithFileNameString("javascript/CourseParticipantsListHelper.js"));
-		}
-
-		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
-
+	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
@@ -275,101 +286,42 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.setStyleClass("number");
 		cell.add(Text.getNonBrakingSpace());
 
-		int columns = 1;
-
 		cell = row.createHeaderCell();
 		cell.setStyleClass("name");
 		cell.add(new Text(getResourceBundle().getLocalizedString("name", "Name")));
-		columns++;
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("personalID");
 		cell.add(new Text(getResourceBundle().getLocalizedString("personal_id", "Personal ID")));
-		columns++;
 
-		if (!addCheckboxes) {
-			cell = row.createHeaderCell();
-			cell.setStyleClass("address");
-			cell.add(new Text(getResourceBundle().getLocalizedString("address", "Address")));
-			columns++;
+		cell = row.createHeaderCell();
+		cell.setStyleClass("address");
+		cell.add(new Text(getResourceBundle().getLocalizedString("address", "Address")));
 
-			cell = row.createHeaderCell();
-			cell.setStyleClass("postalCode");
-			cell.add(new Text(getResourceBundle().getLocalizedString("postal_code", "Postal code")));
-			columns++;
+		cell = row.createHeaderCell();
+		cell.setStyleClass("postalCode");
+		cell.add(new Text(getResourceBundle().getLocalizedString("postal_code", "Postal code")));
 
-			cell = row.createHeaderCell();
-			if (!addViewParticipantLink && !showCertificates) {
-				cell.setStyleClass("lastColumn");
-			}
-			cell.setStyleClass("homePhone");
-			cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
-			columns++;
+		cell = row.createHeaderCell();
+		cell.setStyleClass("homePhone");
+		cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
 
-			if (showCertificates) {
-				cell = row.createHeaderCell();
-				if (!addViewParticipantLink) {
-					cell.setStyleClass("lastColumn");
-				}
-				cell.setStyleClass("certificate");
-				cell.add(new Text(getResourceBundle().getLocalizedString("pdf", "PDF")));
-				columns++;
-			}
-		}
-
-		List checkboxesInfo = null;
-		if (addCheckboxes) {
-			checkboxesInfo = getBusiness().getCheckBoxesForCourseParticipants(getResourceBundle());
-			AdvancedProperty info = null;
-			for (int i = 0; i < checkboxesInfo.size(); i++) {
-				info = (AdvancedProperty) checkboxesInfo.get(i);
-
-				cell = row.createHeaderCell();
-				if (i + 1 == checkboxesInfo.size()) {
-					cell.setStyleClass("lastColumn");
-				}
-				cell.setStyleClass(info.getValue());
-				cell.setStyleClass("courseChoiceManagement");
-				cell.add(new Text(info.getId()));
-				columns++;
-			}
-		}
-
-		if (addViewParticipantLink) {
-			cell = row.createHeaderCell();
-			if (!addCheckboxes) {
-				cell.setStyleClass("lastColumn");
-			}
-			cell.setStyleClass("view");
-			cell.add(new Text(getResourceBundle().getLocalizedString("view", "View")));
-			columns++;
-		}
+		cell = row.createHeaderCell();
+		cell.setStyleClass("lastColumn");
+		cell.setStyleClass("select");
+		cell.add(Text.getNonBrakingSpace());
 
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 
 		Course course = null;
-		CourseType type = null;
 		Collection choices = new ArrayList();
 		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
-			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), false);
+			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), true);
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
-			type = course.getCourseType();
-			if (type.getAbbreviation() != null) {
-				table.setStyleClass("abbr_" + type.getAbbreviation());
-			}
 		}
 
-		String courseId = course == null ? null : course.getPrimaryKey().toString();
-		String schoolId = null;
-		if (course != null) {
-			School school = course.getProvider();
-			schoolId = school == null ? null : school.getPrimaryKey().toString();
-		}
-		String schoolTypeId = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
-		String courseTypeId = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
 		Iterator iter = choices.iterator();
-		String loadingMessage = getResourceBundle().getLocalizedString("loading", "Loading");
 		while (iter.hasNext()) {
 			row = group.createRow();
 
@@ -381,6 +333,8 @@ public class CourseParticipantsList extends CourseBlock {
 				postalCode = address.getPostalCode();
 			}
 			Phone phone = getUserBusiness().getChildHomePhone(user);
+			
+			CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString());
 
 			if (iRow == course.getMax()) {
 				row.setStyleClass("lastAvailable");
@@ -417,118 +371,37 @@ public class CourseParticipantsList extends CourseBlock {
 			cell.setStyleClass("personalID");
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
-			if (!addCheckboxes) {
-				cell = row.createCell();
-				cell.setStyleClass("address");
-				if (address != null) {
-					cell.add(new Text(address.getStreetAddress()));
-				}
-				else {
-					cell.add(new Text(CoreConstants.MINUS));
-				}
-
-				cell = row.createCell();
-				cell.setStyleClass("postalCode");
-				if (postalCode != null) {
-					cell.add(new Text(postalCode.getPostalAddress()));
-				}
-				else {
-					cell.add(new Text(CoreConstants.MINUS));
-				}
-
-				cell = row.createCell();
-				if (!addViewParticipantLink && !showCertificates) {
-					cell.setStyleClass("lastColumn");
-				}
-				cell.setStyleClass("homePhone");
-				if (phone != null) {
-					cell.add(new Text(phone.getNumber()));
-				}
-				else {
-					cell.add(new Text(CoreConstants.MINUS));
-				}
-
-				if (showCertificates) {
-					cell = row.createCell();
-					if (!addViewParticipantLink) {
-						cell.setStyleClass("lastColumn");
-					}
-					cell.setStyleClass("certificate");
-
-					ICFile file = null;
-					CourseCertificate certificate = getBusiness().getUserCertificate(user, course);
-					if (certificate != null) {
-						file = certificate.getCertificateFile();
-					}
-
-					if (file == null) {
-						cell.add(new Text("-"));
-					}
-					else {
-						Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
-						printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
-						printCertificate.setFile(file);
-						cell.add(printCertificate);
-					}
-				}
+			cell = row.createCell();
+			cell.setStyleClass("address");
+			if (address != null) {
+				cell.add(new Text(address.getStreetAddress()));
 			}
-			if (addCheckboxes) {
-				AdvancedProperty info = null;
-				CheckBox box = null;
-				boolean disabled = false;
-				boolean show = true;
-				List rowData = getBusiness().getCourseParticipantListRowData(choice, getResourceBundle());
-				if (rowData == null || checkboxesInfo.size() != rowData.size()) {
-					throw new RemoteException("Can not add checkboxes to list!");
-				}
-				CourseParticipantListRowData data = null;
-				for (int i = 0; i < checkboxesInfo.size(); i++) {
-					info = (AdvancedProperty) checkboxesInfo.get(i);
-					data = (CourseParticipantListRowData) rowData.get(i);
-
-					cell = row.createCell();
-					cell.setStyleClass("courseChoiceManagement");
-					cell.setStyleClass(info.getValue());
-
-					disabled = data.isDisabled();
-					show = data.isShow();
-
-					box = getCourseChoiseManagementCheckbox(info, choice, loadingMessage, disabled);
-
-					if (data.isForceToCheck()) {
-						box.setChecked(true);
-					}
-
-					if (show) {
-						cell.add(box);
-					}
-					else {
-						cell.add(new Text(CoreConstants.MINUS));
-					}
-				}
+			else {
+				cell.add(new Text(CoreConstants.MINUS));
 			}
 
-			if (addViewParticipantLink) {
-				cell = row.createCell();
-				Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
-				if (courseId != null) {
-					view.addParameter(PARAMETER_COURSE_PK, courseId);
-				}
-				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
-				if (schoolId != null) {
-					view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
-				}
-				if (schoolTypeId != null) {
-					view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
-				}
-				if (courseTypeId != null) {
-					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
-				}
-				view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
-				view.addParameter(PARAMETER_ACTION, 1);
-				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
-				cell.add(view);
+			cell = row.createCell();
+			cell.setStyleClass("postalCode");
+			if (postalCode != null) {
+				cell.add(new Text(postalCode.getPostalAddress()));
 			}
+			else {
+				cell.add(new Text(CoreConstants.MINUS));
+			}
+
+			cell = row.createCell();
+			cell.setStyleClass("homePhone");
+			if (phone != null) {
+				cell.add(new Text(phone.getNumber()));
+			}
+			else {
+				cell.add(new Text(CoreConstants.MINUS));
+			}
+
+			cell = row.createCell();
+			cell.setStyleClass("lastColumn");
+			cell.setStyleClass("select");
+			cell.add(box);
 
 			if (iRow % 2 == 0) {
 				row.setStyleClass("evenRow");
@@ -544,39 +417,9 @@ public class CourseParticipantsList extends CourseBlock {
 
 		cell = row.createCell();
 		cell.setStyleClass("numberOfParticipants");
-		cell.setColumnSpan(columns);
+		cell.setColumnSpan(7);
 		cell.add(new Text(getResourceBundle().getLocalizedString("number_of_participants", "Number of participants") + ": " + (iRow - 1)));
 
 		return table;
-	}
-
-	private CheckBox getCourseChoiseManagementCheckbox(AdvancedProperty info, CourseChoice choise, String message, boolean disabled) {
-		CheckBox box = new CheckBox(info.getValue());
-		box.setDisabled(disabled);
-		box.setChecked(choise.getBooleanValueFromColumn(info.getValue()));
-		StringBuffer action = new StringBuffer("manageCourseChoiceSettings(['").append(message).append("', '").append(box.getId()).append("', '");
-		action.append(choise.getPrimaryKey().toString()).append("']);");
-		box.setOnClick(action.toString());
-		return box;
-	}
-
-	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink) throws RemoteException {
-		return getParticipants(iwc, addViewParticipantLink, false);
-	}
-
-	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
-		return getParticipants(iwc, false);
-	}
-
-	protected CourseCertificateHome getCourseCertificateHome() {
-		CourseCertificateHome home = null;
-		try {
-			home = (CourseCertificateHome) IDOLookup.getHome(CourseCertificate.class);
-		}
-		catch (RemoteException e) {
-			e.printStackTrace();
-		}
-
-		return home;
 	}
 }

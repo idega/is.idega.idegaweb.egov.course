@@ -43,6 +43,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_VALID = "is_valid";
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
 	private static final String COLUMN_CERTIFICATE_FEE = "course_certificate_fee";
+	private static final String COLUMN_WAITING_LIST = "waiting_list";
 
 	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verific_from_goverment";
 	public static final String COLUMN_CERTIFICATE_OF_PROPERTY = "certificate_of_property";
@@ -74,6 +75,8 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE, "Needs verification from goverment office", Boolean.class);
 		addAttribute(COLUMN_LIMITED_CERTIFICATE, "Limited certificate", Boolean.class);
 		addAttribute(COLUMN_DID_NOT_SHOW_UP, "Did not show up", Boolean.class);
+		
+		addAttribute(COLUMN_WAITING_LIST, "Waiting list", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
 		addManyToOneRelationship(COLUMN_COURSE, Course.class);
@@ -112,6 +115,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	public boolean hasDyslexia() {
 		return getBooleanColumnValue(COLUMN_DYSLEXIA, false);
 	}
+	
+	public boolean inOnWaitingList() {
+		return getBooleanColumnValue(COLUMN_WAITING_LIST, false);
+	}
 
 	// Setters
 	public void setApplication(CourseApplication application) {
@@ -144,6 +151,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 	public void setHasDyslexia(boolean dyslexia) {
 		setColumn(COLUMN_DYSLEXIA, dyslexia);
+	}
+	
+	public void setWaitingList(boolean waitingList) {
+		setColumn(COLUMN_WAITING_LIST, waitingList);
 	}
 
 	// Finders
@@ -185,13 +196,19 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return idoFindOnePKByQuery(query);
 	}
 
-	public Collection ejbFindAllByCourse(Course course) throws FinderException {
+	public Collection ejbFindAllByCourse(Course course, boolean waitingList) throws FinderException {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(table.getColumn(getIDColumnName()));
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE), MatchCriteria.EQUALS, course));
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
+		if (waitingList) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, true));
+		}
+		else {
+			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, false), new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST))));
+		}
 		query.addOrder(new Order(table.getColumn(COLUMN_PAYMENT_TIMESTAMP), true));
 		query.addOrder(new Order(table.getColumn(getIDColumnName()), true));
 

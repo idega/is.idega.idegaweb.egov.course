@@ -69,6 +69,26 @@ public interface CourseApplication extends IDOEntity, Case {
 	public Company getCompany();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getCardType
+	 */
+	public String getCardType();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getCardNumber
+	 */
+	public String getCardNumber();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getCardValidMonth
+	 */
+	public int getCardValidMonth();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getCardValidYear
+	 */
+	public int getCardValidYear();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCreditCardMerchantID
 	 */
 	public void setCreditCardMerchantID(int merchantID);
@@ -117,4 +137,24 @@ public interface CourseApplication extends IDOEntity, Case {
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCompany
 	 */
 	public void setCompany(Company company);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCardType
+	 */
+	public void setCardType(String type);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCardNumber
+	 */
+	public void setCardNumber(String number);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCardValidMonth
+	 */
+	public void setCardValidMonth(int month);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setCardValidYear
+	 */
+	public void setCardValidYear(int year);
 }

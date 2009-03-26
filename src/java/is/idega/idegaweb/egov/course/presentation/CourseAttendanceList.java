@@ -224,7 +224,7 @@ public class CourseAttendanceList extends CourseBlock {
 			CourseCategory category = type.getCourseCategory();
 			hasCare = category.hasCare();
 
-			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK));
+			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), false);
 		}
 
 		Table2 table = new Table2();

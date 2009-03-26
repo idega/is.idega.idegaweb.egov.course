@@ -76,6 +76,7 @@ import com.idega.user.business.UserSession;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.CoreConstants;
+import com.idega.util.CreditCardChecker;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
@@ -1119,9 +1120,6 @@ public class CourseApplication extends ApplicationForm {
 			showPhaseFive(iwc);
 			return;
 		}
-		else if (applications.size() > 3) {
-			setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.too_many_courses_selected", "You have selected too many courses for this applicant.  You can select a maximum of three courses at a time."));
-		}
 
 		Form form = getForm(ACTION_PHASE_6);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_6)));
@@ -1285,28 +1283,26 @@ public class CourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		if (applications.size() <= 3) {
-			Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
-			next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_7));
-			next.setToFormSubmit(form);
-			bottom.add(next);
+		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_7));
+		next.setToFormSubmit(form);
+		bottom.add(next);
 
-			Link newAppl = getButtonLink(this.iwrb.getLocalizedString("another_applicant", "Another applicant"));
-			newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
-			newAppl.setToFormSubmit(form);
-			bottom.add(newAppl);
+		Link newAppl = getButtonLink(this.iwrb.getLocalizedString("another_applicant", "Another applicant"));
+		newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
+		newAppl.setToFormSubmit(form);
+		bottom.add(newAppl);
 
-			Link newCourse = getButtonLink(this.iwrb.getLocalizedString("another_course", "Another course"));
-			newCourse.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
-			newCourse.setToFormSubmit(form);
-			bottom.add(newCourse);
+		Link newCourse = getButtonLink(this.iwrb.getLocalizedString("another_course", "Another course"));
+		newCourse.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+		newCourse.setToFormSubmit(form);
+		bottom.add(newCourse);
 
-			Link back = getButtonLink(this.iwrb.getLocalizedString("previous", "Previous"));
-			back.setValueOnClick(PARAMETER_BACK, Boolean.TRUE.toString());
-			back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
-			back.setToFormSubmit(form);
-			bottom.add(back);
-		}
+		Link back = getButtonLink(this.iwrb.getLocalizedString("previous", "Previous"));
+		back.setValueOnClick(PARAMETER_BACK, Boolean.TRUE.toString());
+		back.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5));
+		back.setToFormSubmit(form);
+		bottom.add(back);
 	}
 
 	private void addParentToForm(Form form, IWContext iwc, Child child, Custodian custodian, boolean isExtraCustodian, int number, boolean editable, boolean showMaritalStatus, boolean hasRelation) throws RemoteException {
@@ -1991,6 +1987,12 @@ public class CourseApplication extends ApplicationForm {
 			helpLayer.add(image);
 		}
 
+		DropdownMenu cardType = new DropdownMenu(PARAMETER_CARD_TYPE);
+		cardType.addMenuElement(CourseConstants.CARD_TYPE_EUROCARD, this.iwrb.getLocalizedString("application.eurocard", "Eurocard"));
+		cardType.addMenuElement(CourseConstants.CARD_TYPE_VISA, this.iwrb.getLocalizedString("application.visa", "Visa"));
+		cardType.keepStatusOnAction(true);
+		cardType.setDisabled(!creditcardPayment);
+
 		TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
 		cardOwner.keepStatusOnAction(true);
 		cardOwner.setDisabled(!creditcardPayment);
@@ -2026,13 +2028,27 @@ public class CourseApplication extends ApplicationForm {
 		}
 		validYear.setDisabled(!creditcardPayment);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_owner", "Card owner"))), cardOwner);
-		formItem.add(label);
-		formItem.add(cardOwner);
-		section.add(formItem);
+		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
+
+		if (useDirectPayment) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("required");
+			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_owner", "Card owner"))), cardOwner);
+			formItem.add(label);
+			formItem.add(cardOwner);
+			section.add(formItem);
+		}
+		
+		if (!useDirectPayment) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("required");
+			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_type", "Card type"))), cardType);
+			formItem.add(label);
+			formItem.add(cardType);
+			section.add(formItem);
+		}
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -2045,14 +2061,16 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(cardNumber);
 		section.add(formItem);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.ccv_number", "Credit card verification number"))), ccNumber);
-		formItem.add(label);
-		formItem.add(ccNumber);
-		section.add(formItem);
-
+		if (useDirectPayment) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("required");
+			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.ccv_number", "Credit card verification number"))), ccNumber);
+			formItem.add(label);
+			formItem.add(ccNumber);
+			section.add(formItem);
+		}
+		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
@@ -2158,22 +2176,47 @@ public class CourseApplication extends ApplicationForm {
 		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : "";
 		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
 
+		String cardType = iwc.getParameter(PARAMETER_CARD_TYPE);
+		String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
+		String expiresMonth = iwc.getParameter(PARAMETER_VALID_MONTH);
+		String expiresYear = iwc.getParameter(PARAMETER_VALID_YEAR);
+		
+		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 		boolean creditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		IWTimestamp paymentStamp = new IWTimestamp();
 		String properties = null;
 		if (creditCardPayment) {
-			String nameOnCard = iwc.getParameter(PARAMETER_NAME_ON_CARD);
-			String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
-			String expiresMonth = iwc.getParameter(PARAMETER_VALID_MONTH);
-			String expiresYear = iwc.getParameter(PARAMETER_VALID_YEAR);
-			String ccVerifyNumber = iwc.getParameter(PARAMETER_CCV);
-			String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
-
-			try {
-				properties = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
+			if (useDirectPayment) {
+				String nameOnCard = iwc.getParameter(PARAMETER_NAME_ON_CARD);
+				String ccVerifyNumber = iwc.getParameter(PARAMETER_CCV);
+				String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
+	
+				try {
+					properties = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
+				}
+				catch (CreditCardAuthorizationException e) {
+					setError("", e.getLocalizedMessage(iwrb));
+				}
 			}
-			catch (CreditCardAuthorizationException e) {
-				setError("", e.getLocalizedMessage(iwrb));
+			else {
+				if (!iwc.isParameterSet(PARAMETER_CARD_NUMBER)) {
+					setError(PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("must_enter_card_number", "You must enter credit card number"));
+				}
+				else if (!CreditCardChecker.isValid(iwc.getParameter(PARAMETER_CARD_NUMBER))) {
+					setError(PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("invalid_credit_card_number", "Invalid credit card number"));
+				}
+
+				IWTimestamp dateNow = new IWTimestamp();
+				dateNow.setAsDate();
+
+				IWTimestamp stamp = new IWTimestamp();
+				stamp.setAsDate();
+				stamp.setMonth(Integer.parseInt(iwc.getParameter(PARAMETER_VALID_MONTH)));
+				stamp.setYear(Integer.parseInt(iwc.getParameter(PARAMETER_VALID_YEAR)));
+
+				if (stamp.isEarlierThan(dateNow)) {
+					setError(PARAMETER_VALID_MONTH, this.iwrb.getLocalizedString("invalid_credit_card_validity", "Invalid credit card validity"));
+				}
 			}
 		}
 
@@ -2186,13 +2229,22 @@ public class CourseApplication extends ApplicationForm {
 		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
 		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
 		if (application != null && creditCardPayment) {
-			try {
-				String authorizationCode = getCourseBusiness(iwc).finishPayment(properties);
-				application.setReferenceNumber(authorizationCode);
-				application.store();
+			if (useDirectPayment) {
+				try {
+					String authorizationCode = getCourseBusiness(iwc).finishPayment(properties);
+					application.setReferenceNumber(authorizationCode);
+					application.store();
+				}
+				catch (CreditCardAuthorizationException e) {
+					setError("", e.getLocalizedMessage());
+				}
 			}
-			catch (CreditCardAuthorizationException e) {
-				setError("", e.getLocalizedMessage());
+			else {
+				application.setCardType(cardType);
+				application.setCardNumber(cardNumber);
+				application.setCardValidMonth(Integer.parseInt(expiresMonth));
+				application.setCardValidYear(Integer.parseInt(expiresYear));
+				application.store();
 			}
 		}
 

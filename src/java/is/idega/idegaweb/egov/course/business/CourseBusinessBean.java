@@ -266,6 +266,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						entry.setPayerPersonalId(payerPId);
 						entry.setPersonalId(studentPId);
 						entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? cardName : "GIRO");
+						if (paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) && application.getCardNumber() != null) {
+							entry.setCardExpirationMonth(application.getCardValidMonth());
+							entry.setCardExpirationYear(application.getCardValidYear());
+							entry.setCardNumber(application.getCardNumber());
+							entry.setCardType(application.getCardType());
+						}
 						entry.setAmount((int) coursePrice);
 						entry.setUnits(1);
 						entry.setStartDate(startDate);
@@ -310,6 +316,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							entry.setPayerPersonalId(payerPId);
 							entry.setPersonalId(studentPId);
 							entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? cardName : "GIRO");
+							if (paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) && application.getCardNumber() != null) {
+								entry.setCardExpirationMonth(application.getCardValidMonth());
+								entry.setCardExpirationYear(application.getCardValidYear());
+								entry.setCardNumber(application.getCardNumber());
+								entry.setCardType(application.getCardType());
+							}
 							entry.setAmount((int) carePrice);
 							entry.setUnits(1);
 							entry.setStartDate(startDate);
@@ -1159,7 +1171,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	public CourseChoice getCourseChoice(Object courseChoicePK) {
 		try {
-			return getCourseChoiceHome().findByPrimaryKey(courseChoicePK);
+			return getCourseChoiceHome().findByPrimaryKey(new Integer(courseChoicePK.toString()));
 		}
 		catch (FinderException e) {
 			e.printStackTrace();
@@ -1167,18 +1179,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
-	public Collection getCourseChoices(Object coursePK) {
+	public Collection getCourseChoices(Object coursePK, boolean waitingList) {
 		Course course = getCourse(coursePK);
 		if (course != null) {
-			return getCourseChoices(course);
+			return getCourseChoices(course, waitingList);
 		}
 
 		return new ArrayList();
 	}
 
-	public Collection getCourseChoices(Course course) {
+	public Collection getCourseChoices(Course course, boolean waitingList) {
 		try {
-			return getCourseChoiceHome().findAllByCourse(course);
+			return getCourseChoiceHome().findAllByCourse(course, waitingList);
 		}
 		catch (FinderException fe) {
 			fe.printStackTrace();
@@ -1805,6 +1817,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
 		try {
+			boolean useWaitingList = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_WAITING_LIST, false);
+			boolean useDirectPayment = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
+
 			CourseApplication application = getCourseApplicationHome().create();
 			if (merchantID > 0) {
 				application.setCreditCardMerchantID(merchantID);
@@ -1814,7 +1829,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			}
 			application.setPaymentType(paymentType);
 			if (paymentType != null) {
-				application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD));
+				application.setPaid(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) && useDirectPayment);
 			}
 			if (application.isPaid()) {
 				application.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
@@ -1844,7 +1859,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					body = getLocalizedString("course_choice.giro_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received.  You will receive an invoice in a few days for the total amount of the registration.", locale);
 				}
 			}
-
+			
 			Iterator iter = applications == null ? null : applications.values().iterator();
 			if (iter != null) {
 				for (Iterator it = iter; it.hasNext();) {
@@ -1857,6 +1872,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						choice.setApplication(application);
 						choice.setCourse(holder.getCourse());
 						choice.setDayCare(holder.getDaycare());
+						choice.setWaitingList(useWaitingList);
 						if (holder.getPickedUp() != null) {
 							choice.setPickedUp(holder.getPickedUp().booleanValue());
 						}
@@ -2340,4 +2356,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return info;
 	}
 
+	public void acceptChoice(Object courseChoicePK) {
+		CourseChoice choice = getCourseChoice(courseChoicePK);
+		choice.setWaitingList(false);
+		choice.store();
+	}
 }

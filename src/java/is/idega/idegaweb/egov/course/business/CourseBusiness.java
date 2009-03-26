@@ -256,12 +256,12 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
 	 */
-	public Collection getCourseChoices(Object coursePK) throws RemoteException;
+	public Collection getCourseChoices(Object coursePK, boolean waitingList) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
 	 */
-	public Collection getCourseChoices(Course course) throws RemoteException;
+	public Collection getCourseChoices(Course course, boolean waitingList) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
@@ -562,4 +562,9 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCheckBoxesForCourseParticipants
 	 */
 	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#acceptChoice
+	 */
+	public void acceptChoice(Object courseChoicePK) throws RemoteException;
 }

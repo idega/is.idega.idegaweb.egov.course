@@ -72,7 +72,7 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 				Course course = business.getCourse(iwc.getParameter(CourseBlock.PARAMETER_COURSE_PK));
 				courseName = course.getName();
 
-				Collection choices = business.getCourseChoices(course);
+				Collection choices = business.getCourseChoices(course, false);
 
 				this.buffer = writeXLS(iwc, choices);
 				setAsDownload(iwc, "students.xls", this.buffer.length());

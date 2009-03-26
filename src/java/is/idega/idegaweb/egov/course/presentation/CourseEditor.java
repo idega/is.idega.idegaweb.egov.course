@@ -24,6 +24,7 @@ import com.idega.business.IBORuntimeException;
 import com.idega.data.IDORelationshipException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.Script;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
 import com.idega.presentation.TableColumn;
@@ -101,7 +102,7 @@ public class CourseEditor extends CourseBlock {
 
 				case ACTION_DELETE:
 					if (!getCourseBusiness(iwc).deleteCourse(iwc.getParameter(PARAMETER_COURSE_PK))) {
-						getParentPage().setAlertOnLoad(getResourceBundle().getLocalizedString("course.remove_error", "You can not remove a course that has choices attached to it."));
+						PresentationUtil.addJavascriptAlertOnLoad(iwc, getResourceBundle().getLocalizedString("course.remove_error", "You can not remove a course that has choices attached to it."));
 					}
 					showList(iwc);
 					break;
@@ -164,7 +165,7 @@ public class CourseEditor extends CourseBlock {
 		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
-		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
+		script.append("function changeValues() {\n").append("\tvar val = dwr.util.getValue(\"" + PARAMETER_SCHOOL_TYPE_PK + "\");\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
 		List jsActions = new ArrayList();
 		jsActions.add(script2.toString());
@@ -554,19 +555,28 @@ public class CourseEditor extends CourseBlock {
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 		boolean showIDInput = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 
+		Form form = new Form();
+		form.setID("courseEditor");
+		form.setStyleClass("adminForm");
+		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(coursePK != null ? ACTION_EDIT : ACTION_NEW)));
+		form.maintainParameter(PARAMETER_FROM_DATE);
+		form.maintainParameter(PARAMETER_TO_DATE);
+
 		if (!useFixedPrices) {
-			super.getParentPage().addJavascriptURL("/dwr/interface/CourseDWRUtil.js");
-			super.getParentPage().addJavascriptURL("/dwr/engine.js");
-			super.getParentPage().addJavascriptURL("/dwr/util.js");
+			List scripts = new ArrayList();
+			scripts.add("/dwr/interface/CourseDWRUtil.js");
+			scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+			scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 			StringBuffer script2 = new StringBuffer();
 			script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
 
 			StringBuffer script = new StringBuffer();
-			script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
+			script.append("function changeValues() {\n").append("\tvar val = dwr.util.getValue(\"" + PARAMETER_SCHOOL_TYPE_PK + "\");\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 
 			StringBuffer script3 = new StringBuffer();
-			script3.append("function setOptionsPrice(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\", data);\n").append("\tvar savebtn = $(\"SAVE_BTN_ID\");\n").append("\tif (isEmpty == true) {\n").append("\t\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\",['" + localize("try_another_date", "Try another date") + "...']);\n").append("\t\tsavebtn.disabled=true;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=true;\n").append("\t} else {\n").append("\t\tsavebtn.disabled=false;\n").append("\t\t$(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=false;\n").append("\t}\n").append("}");
+			script3.append("function setOptionsPrice(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\", data);\n").append("\tvar savebtn = document.getElementById(\"SAVE_BTN_ID\");\n").append("\tif (isEmpty == true) {\n").append("\t\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PRICE_PK + "\",['" + localize("try_another_date", "Try another date") + "...']);\n").append("\t\tsavebtn.disabled=true;\n").append("\t\tdocument.getElementById(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=true;\n").append("\t} else {\n").append("\t\tsavebtn.disabled=false;\n").append("\t\tdocument.getElementById(\"" + PARAMETER_COURSE_PRICE_PK + "\").disabled=false;\n").append("\t}\n").append("}");
 
 			StringBuffer script4 = new StringBuffer();
 			script4.append("function changeValuesPrice() {\n").append("\tvar date = dwr.util.getValue(\"" + PARAMETER_VALID_FROM_ID + "\");\n").append("\tvar val = " + getSession().getProvider().getPrimaryKey().toString() + ";\n").append("\tvar val2 = dwr.util.getValue(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tCourseDWRUtil.getCoursePricesDWR(date, val, val2, '" + iwc.getCurrentLocale().getCountry() + "', setOptionsPrice);").append("}");
@@ -577,20 +587,15 @@ public class CourseEditor extends CourseBlock {
 			StringBuffer script6 = new StringBuffer();
 			script6.append("function fillPrice(aprice) {\n\tprice = aprice;\n\tdwr.util.setValues(price);\n}");
 
-			super.getParentPage().getAssociatedScript().addFunction("setOptions", script2.toString());
-			super.getParentPage().getAssociatedScript().addFunction("changeValues", script.toString());
-			super.getParentPage().getAssociatedScript().addFunction("setOptionsPrice", script3.toString());
-			super.getParentPage().getAssociatedScript().addFunction("changeValuesPrice", script4.toString());
-			super.getParentPage().getAssociatedScript().addFunction("readPrice", script5.toString());
-			super.getParentPage().getAssociatedScript().addFunction("fillPrice", script6.toString());
+			Script formScript = new Script();
+			formScript.addFunction("setOptions", script2.toString());
+			formScript.addFunction("changeValues", script.toString());
+			formScript.addFunction("setOptionsPrice", script3.toString());
+			formScript.addFunction("changeValuesPrice", script4.toString());
+			formScript.addFunction("readPrice", script5.toString());
+			formScript.addFunction("fillPrice", script6.toString());
+			form.add(formScript);
 		}
-
-		Form form = new Form();
-		form.setID("courseEditor");
-		form.setStyleClass("adminForm");
-		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(coursePK != null ? ACTION_EDIT : ACTION_NEW)));
-		form.maintainParameter(PARAMETER_FROM_DATE);
-		form.maintainParameter(PARAMETER_TO_DATE);
 
 		Course course = getCourseBusiness(iwc).getCourse(coursePK);
 		if (getSession().getProvider() == null) {
@@ -627,7 +632,7 @@ public class CourseEditor extends CourseBlock {
 
 		DropdownMenu schoolTypeID = new DropdownMenu(PARAMETER_SCHOOL_TYPE_PK);
 		schoolTypeID.setId(PARAMETER_SCHOOL_TYPE_PK);
-		//schoolTypeID.setOnChange("changeValues();");
+		// schoolTypeID.setOnChange("changeValues();");
 		schoolTypeID.setToSubmit(true);
 		schoolTypeID.keepStatusOnAction(true);
 		schoolTypeID.addMenuElementFirst("-1", getResourceBundle().getLocalizedString("select_school_type", "Select school type"));
@@ -638,7 +643,7 @@ public class CourseEditor extends CourseBlock {
 
 		boolean showTypes = true;
 		Object schoolTypePK = null;
-		
+
 		Collection cargoTypes = null;
 		Collection schoolTypes = getCourseBusiness(iwc).getSchoolTypes(getSession().getProvider());
 		if (schoolTypes.size() > 1) {
@@ -666,7 +671,7 @@ public class CourseEditor extends CourseBlock {
 			if (course.getCourseNumber() > 0) {
 				inputCourseNumber.setContent(String.valueOf(course.getCourseNumber()));
 			}
-			
+
 			inputName.setContent(course.getName());
 			if (course.getUser() != null) {
 				inputUser.setContent(course.getUser());
@@ -728,7 +733,7 @@ public class CourseEditor extends CourseBlock {
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
 			schoolTypePK = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
 		}
-		
+
 		if (schoolTypePK != null) {
 			CourseCategory category = getCourseBusiness(iwc).getCourseCategory(schoolTypePK);
 			useFixedPrices = category.useFixedPricing();
@@ -764,7 +769,7 @@ public class CourseEditor extends CourseBlock {
 			layer.add(inputCourseNumber);
 			section.add(layer);
 		}
-		
+
 		if (showTypes) {
 			layer = new Layer(Layer.DIV);
 			layer.setID("category");
@@ -774,7 +779,7 @@ public class CourseEditor extends CourseBlock {
 			layer.add(schoolTypeID);
 			section.add(layer);
 		}
-		
+
 		layer = new Layer(Layer.DIV);
 		layer.setID("type");
 		layer.setStyleClass("formItem");
