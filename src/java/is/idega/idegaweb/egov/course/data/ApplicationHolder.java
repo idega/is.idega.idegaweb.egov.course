@@ -13,14 +13,14 @@ public class ApplicationHolder {
 	private Boolean pickedUp = null;
 	private float price = 0;
 	private boolean hasDyslexia = false;
-	private Object choicePK = null;
+	private CourseChoice choice = null;
 
-	public Object getChoicePK() {
-		return choicePK;
+	public CourseChoice getChoice() {
+		return choice;
 	}
 
-	public void setChoicePK(Object choicePK) {
-		this.choicePK = choicePK;
+	public void setChoice(CourseChoice choice) {
+		this.choice = choice;
 	}
 
 	public User getUser() {

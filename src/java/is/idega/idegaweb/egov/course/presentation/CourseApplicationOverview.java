@@ -10,6 +10,7 @@ package is.idega.idegaweb.egov.course.presentation;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
@@ -116,6 +117,8 @@ public class CourseApplicationOverview extends CourseBlock {
 	}
 
 	private void getViewerForm(IWContext iwc, is.idega.idegaweb.egov.course.data.CourseApplication application) throws RemoteException {
+		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
+		
 		Form form = new Form();
 		form.maintainParameter(getBusiness().getSelectedCaseParameter());
 		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
@@ -201,10 +204,9 @@ public class CourseApplicationOverview extends CourseBlock {
 		Map applications = getBusiness().getApplicationMap(application);
 		SortedSet prices = getBusiness().calculatePrices(applications);
 		Map discounts = getBusiness().getDiscounts(prices, applications);
-		float certificateFees = getBusiness().getCalculatedCourseCertificateFees(applications);
 
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
-		float totalPrice = certificateFees;
+		float totalPrice = 0;
 		float discount = 0;
 
 		Iterator iterator = prices.iterator();
@@ -217,6 +219,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			float price = holder.getPrice();
 			totalPrice += price;
 			discount += discountHolder.getPrice();
+			float totalParticipantPrice = price + discountHolder.getPrice();
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
 
@@ -259,10 +262,12 @@ public class CourseApplicationOverview extends CourseBlock {
 				cell.add(new Text(getResourceBundle().getLocalizedString("days", "Days")));
 			}
 			
-			cell = row.createHeaderCell();
-			cell.setStyleClass("certificateFee");
-			cell.add(new Text(getResourceBundle().getLocalizedString("certificate_fee", "Certificate fee")));
-
+			if (showCertificates) {
+				cell = row.createHeaderCell();
+				cell.setStyleClass("certificateFee");
+				cell.add(new Text(getResourceBundle().getLocalizedString("certificate_fee", "Certificate fee")));
+			}
+			
 			cell = row.createHeaderCell();
 			cell.setStyleClass("amount");
 			cell.add(new Text(getResourceBundle().getLocalizedString("amount", "Amount")));
@@ -275,6 +280,7 @@ public class CourseApplicationOverview extends CourseBlock {
 				row = group.createRow();
 				ApplicationHolder appHolder = (ApplicationHolder) iter.next();
 
+				CourseChoice choice = appHolder.getChoice();
 				Course course = appHolder.getCourse();
 				School provider = course.getProvider();
 				CourseType type = course.getCourseType();
@@ -282,16 +288,17 @@ public class CourseApplicationOverview extends CourseBlock {
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 				IWTimestamp endDate = course.getCoursePrice() > 0 ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
 
-				if (course.getCourseCost() > 0) {
-					certificateFees = course.getCourseCost();
-					totalPrice += certificateFees;
+				float certificateFee = choice.getCourseCertificateFee();
+				if (choice.getCourseCertificateFee() > 0) {
+					totalPrice += certificateFee;
+					totalParticipantPrice += certificateFee;
 				}
 				
 				cell = row.createCell();
 				cell.setStyleClass("course");
 				if (getChoicePage() != null && !useInWindow) {
 					Link link = new Link(course.getName());
-					link.addParameter(PARAMETER_CHOICE_PK, appHolder.getChoicePK().toString());
+					link.addParameter(PARAMETER_CHOICE_PK, appHolder.getChoice().getPrimaryKey().toString());
 					link.setPage(getChoicePage());
 
 					cell.add(link);
@@ -323,10 +330,12 @@ public class CourseApplicationOverview extends CourseBlock {
 					}
 				}
 				
-				cell = row.createCell();
-				cell.setStyleClass("certificateFee");
-				cell.add(new Text(format.format(certificateFees)));
-
+				if (showCertificates) {
+					cell = row.createCell();
+					cell.setStyleClass("certificateFee");
+					cell.add(new Text(format.format(certificateFee)));
+				}
+				
 				cell = row.createCell();
 				cell.setStyleClass("amount");
 				cell.add(new Text(format.format(appHolder.getPrice())));
@@ -350,7 +359,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			cell = row.createCell();
 			cell.setStyleClass("totalPrice");
 			cell.setStyleClass("price");
-			cell.add(new Text(format.format(totalPrice)));
+			cell.add(new Text(format.format(totalParticipantPrice)));
 
 			section.add(table);
 		}

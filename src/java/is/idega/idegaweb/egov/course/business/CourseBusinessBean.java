@@ -1532,7 +1532,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				holder.setUser(user);
 				holder.setDaycare(choice.getDayCare());
 				holder.setPickedUp(new Boolean(choice.isPickedUp()));
-				holder.setChoicePK(choice.getPrimaryKey());
+				holder.setChoice(choice);
 
 				Collection holders = null;
 				if (map.containsKey(user)) {
@@ -1562,7 +1562,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		holder.setUser(user);
 		holder.setDaycare(choice.getDayCare());
 		holder.setPickedUp(new Boolean(choice.isPickedUp()));
-		holder.setChoicePK(choice.getPrimaryKey());
+		holder.setChoice(choice);
 
 		CourseApplication application = choice.getApplication();
 		Map applications = getApplicationMap(application);

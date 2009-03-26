@@ -263,7 +263,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		heading.setStyleClass("applicationHeading");
 		form.add(heading);
 
-		form.add(getPhasesHeader(iwrb.getLocalizedString("course", "Course"), 1, numberOfPhases, true));
+		form.add(getPhasesHeader(iwrb.getLocalizedString("application.course", "Course"), 1, numberOfPhases, true));
 
 		Layer info = new Layer(Layer.DIV);
 		info.setStyleClass("info");
@@ -767,7 +767,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		form.add(getPersonInfo(iwc, applicant));
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.student_help_information", "Student help information"));
+		/*heading = new Heading1(this.iwrb.getLocalizedString("application.student_help_information", "Student help information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
 		form.add(heading);
@@ -791,41 +791,36 @@ public class SimpleCourseApplication extends ApplicationForm {
 		Label label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.has_dyslexia", "Has dyslexia"))), hasDyslexia);
 		formItem.add(hasDyslexia);
 		formItem.add(label);
-		section.add(formItem);
+		section.add(formItem);*/
 
-		if (getCourseApplicationSession(iwc).getApplications().size() <= 0) {
-			heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
-			heading.setStyleClass("subHeader");
-			form.add(heading);
-	
-			section = new Layer(Layer.DIV);
-			section.setStyleClass("formSection");
-			form.add(section);
-	
-			CheckBox agree = new CheckBox(PARAMETER_AGREEMENT, Boolean.TRUE.toString());
-			agree.setStyleClass("checkbox");
-			agree.keepStatusOnAction(true);
-	
-			Paragraph paragraph = new Paragraph();
-			paragraph.setStyleClass("agreement");
-			paragraph.add(new Text(this.iwrb.getLocalizedString("application.agreement", "Agreement text")));
-			section.add(paragraph);
-	
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			formItem.setStyleClass("radioButtonItem");
-			formItem.setStyleClass("required");
-			if (hasError(PARAMETER_AGREEMENT)) {
-				formItem.setStyleClass("hasError");
-			}
-			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.agree_terms", "Yes, I agree"))), agree);
-			formItem.add(agree);
-			formItem.add(label);
-			section.add(formItem);
+		heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
+		heading.setStyleClass("subHeader");
+		form.add(heading);
+
+		Layer section = new Layer(Layer.DIV);
+		section.setStyleClass("formSection");
+		form.add(section);
+
+		CheckBox agree = new CheckBox(PARAMETER_AGREEMENT, Boolean.TRUE.toString());
+		agree.setStyleClass("checkbox");
+		agree.keepStatusOnAction(true);
+
+		Paragraph paragraph = new Paragraph();
+		paragraph.setStyleClass("agreement");
+		paragraph.add(new Text(this.iwrb.getLocalizedString("application.agreement", "Agreement text")));
+		section.add(paragraph);
+
+		Layer formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("radioButtonItem");
+		formItem.setStyleClass("required");
+		if (hasError(PARAMETER_AGREEMENT)) {
+			formItem.setStyleClass("hasError");
 		}
-		else {	
-			form.add(new HiddenInput(PARAMETER_AGREEMENT, Boolean.TRUE.toString()));
-		}
+		Label label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.agree_terms", "Yes, I agree"))), agree);
+		formItem.add(agree);
+		formItem.add(label);
+		section.add(formItem);
 		
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
