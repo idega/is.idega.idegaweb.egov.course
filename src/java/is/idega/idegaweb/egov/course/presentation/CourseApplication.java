@@ -856,7 +856,7 @@ public class CourseApplication extends ApplicationForm {
 		script5.append("\n\t").append("var radio = document.createElement(\"input\");");
 		script5.append("\n\t").append("radio.id = course.pk;");
 		script5.append("\n\t").append("radio.type = \"checkbox\";");
-		script5.append("\n\t").append("if (course.isfull) { radio.disabled = true; }");
+		//script5.append("\n\t").append("if (course.isfull) { radio.disabled = true; }");
 		script5.append("\n\t").append("radio.className = \"checkbox\";");
 		script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
 		script5.append("\n\t").append("radio.value = course.pk;");

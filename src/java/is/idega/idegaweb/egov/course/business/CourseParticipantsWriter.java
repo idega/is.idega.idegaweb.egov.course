@@ -69,10 +69,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 	private String courseName;
 
+	public static final String PARAMETER_WAITING_LIST = "prm_waiting_list";
+	
 	public CourseParticipantsWriter() {
 	}
 
-	private Collection getChoises(Course course, IWContext iwc) {
+	private Collection getChoices(Course course, IWContext iwc, boolean waitingList) {
 		if (iwc.isParameterSet(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)) {
 			User participant = null;
 			try {
@@ -98,7 +100,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			return Arrays.asList(new CourseChoice[] {choise});
 		}
 		try {
-			return business.getCourseChoices(course, false);
+			return business.getCourseChoices(course, waitingList);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 			return new ArrayList();
@@ -116,8 +118,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			if (req.getParameter(CourseBlock.PARAMETER_COURSE_PK) != null) {
 				Course course = business.getCourse(iwc.getParameter(CourseBlock.PARAMETER_COURSE_PK));
 				courseName = course.getName();
+				
+				boolean waitingList = iwc.isParameterSet(PARAMETER_WAITING_LIST);
 
-				Collection choices = getChoises(course, iwc);
+				Collection choices = getChoices(course, iwc, waitingList);
 
 				this.buffer = writeXLS(iwc, choices);
 				String fileName = "participants.xls";

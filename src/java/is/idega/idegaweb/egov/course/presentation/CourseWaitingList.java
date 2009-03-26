@@ -1,5 +1,5 @@
 /*
- * $Id: CourseWaitingList.java,v 1.1 2009/03/26 06:59:57 laddi Exp $ Created on Mar 28, 2007
+ * $Id: CourseWaitingList.java,v 1.2 2009/03/26 11:18:50 laddi Exp $ Created on Mar 28, 2007
  * 
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
  * 
@@ -266,6 +266,7 @@ public class CourseWaitingList extends CourseBlock {
 		if (iwc.isParameterSet(PARAMETER_COURSE_PARTICIPANT_PK)) {
 			link.maintainParameter(PARAMETER_COURSE_PARTICIPANT_PK, iwc);
 		}
+		link.addParameter(CourseParticipantsWriter.PARAMETER_WAITING_LIST, Boolean.TRUE.toString());
 		link.setMediaWriterClass(CourseParticipantsWriter.class);
 
 		return link;

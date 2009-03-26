@@ -77,7 +77,6 @@
 }
 
 table tbody tr.isfull td {
-	text-decoration: line-through;
 	color: #a0a0a0;
 }
 
