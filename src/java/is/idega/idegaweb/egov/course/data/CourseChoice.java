@@ -53,6 +53,11 @@ public interface CourseChoice extends IDOEntity {
 	public boolean inOnWaitingList();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#hasReceivedReminder
+	 */
+	public boolean hasReceivedReminder();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setApplication
 	 */
 	public void setApplication(CourseApplication application);
@@ -96,6 +101,11 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setWaitingList
 	 */
 	public void setWaitingList(boolean waitingList);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setReceivedReminder
+	 */
+	public void setReceivedReminder(boolean hasReceivedReminder);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setPassed

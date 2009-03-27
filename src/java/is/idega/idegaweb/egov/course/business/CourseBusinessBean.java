@@ -1187,7 +1187,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return new ArrayList();
 	}
-
+	
 	public Collection getCourseChoices(Course course, boolean waitingList) {
 		try {
 			return getCourseChoiceHome().findAllByCourse(course, waitingList);
@@ -2390,6 +2390,48 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			catch (RemoveException e) {
 				log(e);
 			}
+		}
+	}
+	
+	public void sendNextCoursesMessages() {
+		IWTimestamp fromDate = new IWTimestamp();
+		fromDate.addDays(6);
+		
+		IWTimestamp toDate = new IWTimestamp(fromDate);
+		toDate.addDays(7);
+		
+		Locale locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
+		String subject = getLocalizedString("course_choice.reminder_subject", "A reminder for course choice", locale);
+		String body = getLocalizedString("course_choice.reminder_body", "This is a reminder for your registration to course {2} at {3} for {0}, {1}.", locale);
+		
+		try {
+			Collection<Course> courses = getCourseHome().findAll(null, null, null, -1, fromDate.getDate(), toDate.getDate());
+			for (Course course : courses) {
+				Collection<CourseChoice> choices = getCourseChoiceHome().findAllByCourse(course, null);
+				for (CourseChoice choice : choices) {
+					if (!choice.hasReceivedReminder()) {
+						CourseApplication application = choice.getApplication();
+						User applicant = choice.getUser();
+						School provider = course.getProvider();
+						IWTimestamp startDate = new IWTimestamp(course.getStartDate());
+						
+						Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), locale), course.getName(), provider.getName(), startDate.getLocaleDate(locale, IWTimestamp.SHORT) };
+						getMessageBusiness().createUserMessage(application, application.getOwner(), subject, MessageFormat.format(body, arguments), false, false);
+						
+						choice.setReceivedReminder(true);
+						choice.store();
+					}
+				}
+			}
+		}
+		catch (IDORelationshipException ire) {
+			log(ire);
+		}
+		catch (FinderException fe) {
+			log(fe);
+		}
+		catch (RemoteException re) {
+			throw new IBORuntimeException(re);
 		}
 	}
 }

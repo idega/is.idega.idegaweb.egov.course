@@ -37,6 +37,7 @@ public class CourseConstants {
 	public static final String PROPERTY_BACK_MONTHS = "egov.course.back.months";
 	public static final String PROPERTY_USE_WAITING_LIST = "egov.course.use.waiting.list";
 	public static final String PROPERTY_USE_DIRECT_PAYMENT = "egov.course.use.direct.payment";
+	public static final String PROPERTY_SEND_REMINDERS = "egov.course.send.reminders";
 
 	public static final String PROPERTY_TIMEOUT_DAY_OF_WEEK = "egov.course.timeout.day";
 	public static final String PROPERTY_TIMEOUT_HOUR = "egov.course.timeout.hour";
@@ -59,4 +60,9 @@ public class CourseConstants {
 	public static final String COURSE_PREFIX = "course_";
 	
 	public static final String DEFAULT_COURSE_CERTIFICATE_FEE = "defaultCourseCertificateFee";
+
+	public static final String PROPERTY_TIMER_HOUR = "egov.course.timer.hour";
+	public static final String PROPERTY_TIMER_DAYOFWEEK = "egov.course.timer.dayofweek";
+	public static final String PROPERTY_TIMER_MINUTE = "egov.course.timer.minute";
+
 }

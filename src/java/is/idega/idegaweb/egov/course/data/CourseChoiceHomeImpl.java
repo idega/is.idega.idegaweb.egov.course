@@ -41,7 +41,7 @@ public class CourseChoiceHomeImpl extends IDOFactory implements CourseChoiceHome
 		return this.findByPrimaryKey(pk);
 	}
 
-	public Collection findAllByCourse(Course course, boolean waitingList) throws FinderException {
+	public Collection findAllByCourse(Course course, Boolean waitingList) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseChoiceBMPBean) entity).ejbFindAllByCourse(course, waitingList);
 		this.idoCheckInPooledEntity(entity);

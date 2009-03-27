@@ -5,25 +5,40 @@ import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseHome;
 
+import java.rmi.RemoteException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 
 import javax.ejb.FinderException;
 
 import com.idega.block.process.business.CaseCodeManager;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
+import com.idega.business.IBORuntimeException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
+import com.idega.util.timer.PastDateException;
+import com.idega.util.timer.TimerEntry;
+import com.idega.util.timer.TimerListener;
+import com.idega.util.timer.TimerManager;
 
 public class IWBundleStarter implements IWBundleStartable {
 
-	public void start(IWBundle starterBundle) {
+	private static TimerManager tManager = null;
+	private static TimerEntry courseTimerEntry = null;
+	private static IWApplicationContext iwac = null;
+
+public void start(IWBundle starterBundle) {
 		CaseCodeManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 		AccountingBusinessManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 
 		//fixCourseApplicationReferenceStrings();
 		addCourseNumbers();
+		startMessageDaemon(starterBundle);
 	}
 
 	public void stop(IWBundle starterBundle) {
@@ -48,37 +63,45 @@ public class IWBundleStarter implements IWBundleStartable {
 		}
 	}
 	
-	/*private void fixCourseApplicationReferenceStrings() {
-		try {
-			System.out.println("====Course Statup start==========================");
-			CourseApplicationHome courseHome = (CourseApplicationHome) IDOLookup.getHome(CourseApplication.class);
-			Collection courses = courseHome.findAll();
-			if (courses != null) {
-				Iterator iter = courses.iterator();
-				String key = "TPAuthorIdentifyResponse=";
-				int keyLength = key.length();
-				while (iter.hasNext()) {
-					CourseApplication apppl = (CourseApplication) iter.next();
-					String ref = apppl.getReferenceNumber();
-					if (ref != null && ref.startsWith("TPPan")) {
-						int index = ref.indexOf(key);
-						String authCode = ref.substring(index+keyLength);
-						System.out.println("==============================");
-						System.out.println("found String = "+ref);
-						System.out.println("    authCode = "+authCode);
-						apppl.setReferenceNumber(authCode);
-						apppl.store();
-						System.out.println("    updated!");
+	private void startMessageDaemon(IWBundle iwb) {
+		if (tManager == null) {
+			tManager = new TimerManager();
+		}
+		if (iwac == null) {
+			iwac = iwb.getApplication().getIWApplicationContext();
+		}
+		
+		int minute = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_MINUTE, String.valueOf(0)));
+		int hour = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_HOUR, String.valueOf(13)));
+		int dayOfWeek = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_DAYOFWEEK, String.valueOf(Calendar.MONDAY)));
+		
+		if (courseTimerEntry == null) {
+			try {
+				courseTimerEntry = tManager.addTimer(minute, hour, -1, -1, dayOfWeek, -1, new TimerListener() {
+					public void handleTimer(TimerEntry entry) {
+						sendMessages();
 					}
-				}
+				});
 			}
-			System.out.println("****Course Statup end**************************");
+			catch (PastDateException e) {
+				courseTimerEntry = null;
+				e.printStackTrace();
+			}
 		}
-		catch (IDOLookupException e) {
-			e.printStackTrace();
+	}
+	
+	protected void sendMessages() {
+		if (iwac.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SEND_REMINDERS, false)) {
+			try {
+				CourseBusiness business = (CourseBusiness) IBOLookup.getServiceInstance(iwac, CourseBusiness.class);
+				business.sendNextCoursesMessages();
+			}
+			catch (IBOLookupException ile) {
+				throw new IBORuntimeException(ile);
+			}
+			catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			}
 		}
-		catch (FinderException e) {
-			e.printStackTrace();
-		}
-	}*/
+	}
 }

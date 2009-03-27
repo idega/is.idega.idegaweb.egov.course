@@ -577,4 +577,9 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#removeCertificate
 	 */
 	public void removeCertificate(Object certificatePK) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#sendNextCoursesMessages
+	 */
+	public void sendNextCoursesMessages() throws RemoteException;
 }
