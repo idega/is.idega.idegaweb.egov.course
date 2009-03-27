@@ -514,6 +514,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public CourseApplicationHome getCourseApplicationHome() throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCertificate
+	 */
+	public CourseCertificate getCertificate(Object certificatePK) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseCertificateType
 	 */
 	public CourseCertificateType getCourseCertificateType(String id) throws RemoteException;
@@ -567,4 +572,9 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#acceptChoice
 	 */
 	public void acceptChoice(Object courseChoicePK) throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#removeCertificate
+	 */
+	public void removeCertificate(Object certificatePK) throws RemoteException;
 }

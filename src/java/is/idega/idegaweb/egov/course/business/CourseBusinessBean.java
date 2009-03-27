@@ -2103,6 +2103,25 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			throw new IBORuntimeException(e);
 		}
 	}
+	
+	private CourseCertificateHome getCertificateHome() {
+		try {
+			return (CourseCertificateHome) getIDOHome(CourseCertificate.class);
+		}
+		catch (RemoteException re) {
+			throw new IBORuntimeException(re);
+		}
+	}
+	
+	public CourseCertificate getCertificate(Object certificatePK) {
+		try {
+			return getCertificateHome().findByPrimaryKey(new Integer(certificatePK.toString()));
+		}
+		catch (FinderException fe) {
+			log(fe);
+			return null;
+		}
+	}
 
 	public CourseCertificateType getCourseCertificateType(String id) {
 		if (id == null) {
@@ -2360,5 +2379,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		CourseChoice choice = getCourseChoice(courseChoicePK);
 		choice.setWaitingList(false);
 		choice.store();
+	}
+	
+	public void removeCertificate(Object certificatePK) {
+		CourseCertificate certificate = getCertificate(certificatePK);
+		if (certificate != null) {
+			try {
+				certificate.remove();
+			}
+			catch (RemoveException e) {
+				log(e);
+			}
+		}
 	}
 }

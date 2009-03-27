@@ -10,7 +10,6 @@ package is.idega.idegaweb.egov.course.presentation;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
@@ -280,7 +279,6 @@ public class CourseApplicationOverview extends CourseBlock {
 				row = group.createRow();
 				ApplicationHolder appHolder = (ApplicationHolder) iter.next();
 
-				CourseChoice choice = appHolder.getChoice();
 				Course course = appHolder.getCourse();
 				School provider = course.getProvider();
 				CourseType type = course.getCourseType();
@@ -288,8 +286,8 @@ public class CourseApplicationOverview extends CourseBlock {
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 				IWTimestamp endDate = course.getCoursePrice() > 0 ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
 
-				float certificateFee = choice.getCourseCertificateFee();
-				if (choice.getCourseCertificateFee() > 0) {
+				float certificateFee = course.getCourseCost();
+				if (certificateFee > 0) {
 					totalPrice += certificateFee;
 					totalParticipantPrice += certificateFee;
 				}

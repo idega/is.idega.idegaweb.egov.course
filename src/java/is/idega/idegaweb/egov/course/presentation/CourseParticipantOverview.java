@@ -7,6 +7,7 @@
  */
 package is.idega.idegaweb.egov.course.presentation;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
@@ -133,6 +134,8 @@ public class CourseParticipantOverview extends CourseBlock {
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 
+		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
+		
 		int count = 1;
 		Collection providers = getSchoolsProviders(iwc);
 		Map applications = getBusiness().getApplicationMap(participant, providers);
@@ -319,7 +322,7 @@ public class CourseParticipantOverview extends CourseBlock {
 			
 			section.add(table);
 			
-			if(finishedCourse) {
+			if(finishedCourse && showCertificates) {
 				Layer bottom = new Layer(Layer.DIV);
 				bottom.setStyleClass("bottom miniBottom");
 				

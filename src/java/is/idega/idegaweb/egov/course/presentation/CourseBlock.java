@@ -67,6 +67,8 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	public static final String ACTION_PRINT = "print";
 	public static final String ACTION_CONFIRM_PRINT = "confirmPrint";
+	public static final String ACTION_REMOVE_CERTIFICATE = "removeCertificate";
+
 	public static final String PARAMETER_ACTION = "prm_action";
 	public static final String PARAMETER_PRINT_CERTIFICATE = "prm_print_certificate";
 	public static final String PARAMETER_PROVIDER_PK = "prm_provider_pk";
@@ -77,6 +79,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	public static final String PARAMETER_SCHOOL_TYPE_PK = "prm_school_type_pk";
 	public static final String PARAMETER_FROM_DATE = "prm_from_date";
 	public static final String PARAMETER_TO_DATE = "prm_to_date";
+	public static final String PARAMETER_CERTIFICATE_PK = "prm_certificate_pk";
 
 	private CourseBusiness business;
 	private CourseSession session;
