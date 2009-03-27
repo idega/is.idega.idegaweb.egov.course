@@ -1112,20 +1112,20 @@ public class CourseApplication extends ApplicationForm {
 			}
 
 			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser)) {
-				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.old_course_selected", "You have selected a course that has already started or finished: ") + course.getName());
+				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.old_course_selected", "You have selected a course that has already started or finished: ") + course.getName());
 			}
 			if (getCourseBusiness(iwc).isFull(course)) {
-				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.full_course_selected", "You have selected a course that is already full: ") + course.getName());
+				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.full_course_selected", "You have selected a course that is already full: ") + course.getName());
 			}
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
-				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.already_registered_course_selected", "You have selected a course that the participant is already registered to: ") + course.getName());
+				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.already_registered_course_selected", "You have selected a course that the participant is already registered to: ") + course.getName());
 			}
 			if (!getCourseBusiness(iwc).isOfAge(applicant, course)) {
-				setError(PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
+				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
 			}
 		}
 		Collection applications = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
-		if (applications == null || applications.isEmpty() || hasErrors()) {
+		if (applications == null || applications.isEmpty() || hasErrors(ACTION_PHASE_5)) {
 			showPhaseFive(iwc);
 			return;
 		}
@@ -2148,39 +2148,39 @@ public class CourseApplication extends ApplicationForm {
 	private void save(IWContext iwc) throws RemoteException {
 		Boolean payerOption = iwc.isParameterSet(PARAMETER_PAYER_OPTION) ? new Boolean(iwc.getParameter(PARAMETER_PAYER_OPTION)) : null;
 		if (payerOption == null) {
-			setError(PARAMETER_PAYER_OPTION, this.iwrb.getLocalizedString("must_select_payer_option", "You have to select a payer option."));
+			setError(ACTION_PHASE_7, PARAMETER_PAYER_OPTION, this.iwrb.getLocalizedString("must_select_payer_option", "You have to select a payer option."));
 		}
 		else if (!payerOption.booleanValue()) {
 			if (!iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID)) {
-				setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_personal_id_empty", "Payer personal ID is empty"));
+				setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_personal_id_empty", "Payer personal ID is empty"));
 			}
 			else if (!SocialSecurityNumber.isValidSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
-				setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
+				setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
 			}
 			else {
 				Date dateOfBirth = SocialSecurityNumber.getDateFromSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
 				Age age = new Age(dateOfBirth);
 				if (age.getYears() < 18) {
-					setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_be_at_least_18_years_old", "The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older."));
+					setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_be_at_least_18_years_old", "The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older."));
 				}
 
 				try {
 					getUserBusiness(iwc).getUser(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
 				}
 				catch (FinderException e) {
-					setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
+					setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
 				}
 			}
 			if (!iwc.isParameterSet(PARAMETER_PAYER_NAME)) {
-				setError(PARAMETER_PAYER_NAME, this.iwrb.getLocalizedString("payer_name_empty", "Payer name is empty"));
+				setError(ACTION_PHASE_7, PARAMETER_PAYER_NAME, this.iwrb.getLocalizedString("payer_name_empty", "Payer name is empty"));
 			}
 		}
 
 		if (!iwc.isParameterSet(PARAMETER_AGREEMENT)) {
-			setError(PARAMETER_AGREEMENT, this.iwrb.getLocalizedString("must_agree_terms", "You have to agree to the terms."));
+			setError(ACTION_PHASE_7, PARAMETER_AGREEMENT, this.iwrb.getLocalizedString("must_agree_terms", "You have to agree to the terms."));
 		}
 
-		if (hasErrors()) {
+		if (hasErrors(ACTION_PHASE_7)) {
 			showPhaseSeven(iwc);
 			return;
 		}
@@ -2233,7 +2233,7 @@ public class CourseApplication extends ApplicationForm {
 			}
 		}
 
-		if (hasErrors()) {
+		if (hasErrors(ACTION_PHASE_7)) {
 			showPhaseSeven(iwc);
 			return;
 		}

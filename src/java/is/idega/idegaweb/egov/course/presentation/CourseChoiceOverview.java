@@ -58,6 +58,7 @@ public class CourseChoiceOverview extends CourseBlock {
 	protected static final int ACTION_VIEW = 1;
 	protected static final int ACTION_REFUND_FORM = 2;
 	public static final int ACTION_REFUND = 3;
+	protected static final int ACTION_ACCEPT = 4;
 
 	protected List parametersToMaintainBackButton = null;
 	private boolean useBackPage = true;
@@ -90,6 +91,10 @@ public class CourseChoiceOverview extends CourseBlock {
 							getRefundForm(iwc, choice);
 						}
 						break;
+					
+					case ACTION_ACCEPT:
+						acceptChoice(choice);
+						getViewerForm(iwc, choice);
 				}
 			}
 			else {
@@ -112,6 +117,10 @@ public class CourseChoiceOverview extends CourseBlock {
 		}
 
 		return action;
+	}
+	
+	private void acceptChoice(CourseChoice choice) throws RemoteException {
+		getBusiness().acceptChoice(choice.getPrimaryKey());
 	}
 
 	protected void getViewerForm(IWContext iwc, CourseChoice choice) throws RemoteException {
@@ -322,6 +331,26 @@ public class CourseChoiceOverview extends CourseBlock {
 
 			section.add(clearLayer);
 		}
+		
+		if (iwc.isParameterSet(PARAMETER_ACTION) && Integer.parseInt(iwc.getParameter(PARAMETER_ACTION)) == ACTION_ACCEPT) {
+			Layer layer = new Layer(Layer.DIV);
+			layer.setStyleClass("attention");
+			section.add(layer);
+
+			Layer imageLayer = new Layer(Layer.DIV);
+			imageLayer.setStyleClass("attentionImage");
+			layer.add(imageLayer);
+
+			Layer textLayer = new Layer(Layer.DIV);
+			textLayer.setStyleClass("attentionText");
+			layer.add(textLayer);
+
+			Paragraph paragraph = new Paragraph();
+			paragraph.add(new Text(getResourceBundle().getLocalizedString("choice.accepted_info", "The course choice has been accepted and moved to the participants list.")));
+			textLayer.add(paragraph);
+
+			layer.add(clearLayer);
+		}
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
@@ -352,6 +381,13 @@ public class CourseChoiceOverview extends CourseBlock {
 				invalidate.setClickConfirmation(getResourceBundle().getLocalizedString("confirm_invalidation", "Are you sure you want to invalidate this registration?"));
 			}
 			bottom.add(invalidate);
+			
+			if (choice.inOnWaitingList()) {
+				Link accept = getButtonLink(getResourceBundle().getLocalizedString("accept_choices", "Accept choices"));
+				accept.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_ACCEPT));
+				accept.maintainParameter(PARAMETER_CHOICE_PK, iwc);
+				bottom.add(accept);
+			}
 		}
 
 		add(form);
