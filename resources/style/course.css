@@ -78,6 +78,7 @@
 
 table tbody tr.isfull td {
 	color: #a0a0a0;
+	text-decoration: line-through;
 }
 
 p.infoHelp {

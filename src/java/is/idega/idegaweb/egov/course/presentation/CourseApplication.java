@@ -387,7 +387,7 @@ public class CourseApplication extends ApplicationForm {
 			lists.add(iwrb.getLocalizedString("help.select_an_applicant_from_the_dropdown_OR_type_in_a_social_security_number", "Select an applicant from the dropdown OR type in a social security number."));
 			lists.add(iwrb.getLocalizedString("help.when_a_registration_is_complete_you_can_then_register_another_child", "When registration is complete you can go back and register another."));
 			lists.add(iwrb.getLocalizedString("help.when_all_applicants_have_been_registered_you_pay_for_them_all_at_the_same_time", "When all applicants have been registered you pay for them all at the same time."));
-			lists.add(iwrb.getLocalizedString("help.only_three_weeks_possible", "It is only possible to register each participant to max three courses at a time."));
+			//lists.add(iwrb.getLocalizedString("help.only_three_weeks_possible", "It is only possible to register each participant to max three courses at a time."));
 			info.add(lists);
 
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_child", "Select child"));
@@ -1294,11 +1294,17 @@ public class CourseApplication extends ApplicationForm {
 
 		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_7));
+		if (hasCare) {
+			next.setClickConfirmation(this.iwrb.getLocalizedString("confirm.care_option", "Are you sure you have selected the correct care options?"));
+		}
 		next.setToFormSubmit(form);
 		bottom.add(next);
 
 		Link newAppl = getButtonLink(this.iwrb.getLocalizedString("another_applicant", "Another applicant"));
 		newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
+		if (hasCare) {
+			newAppl.setClickConfirmation(this.iwrb.getLocalizedString("confirm.care_option", "Are you sure you have selected the correct care options?"));
+		}
 		newAppl.setToFormSubmit(form);
 		bottom.add(newAppl);
 

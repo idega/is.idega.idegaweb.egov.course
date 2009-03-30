@@ -93,7 +93,7 @@ public class CourseChoiceOverview extends CourseBlock {
 						break;
 					
 					case ACTION_ACCEPT:
-						acceptChoice(choice);
+						acceptChoice(iwc, choice);
 						getViewerForm(iwc, choice);
 				}
 			}
@@ -119,8 +119,8 @@ public class CourseChoiceOverview extends CourseBlock {
 		return action;
 	}
 	
-	private void acceptChoice(CourseChoice choice) throws RemoteException {
-		getBusiness().acceptChoice(choice.getPrimaryKey());
+	private void acceptChoice(IWContext iwc, CourseChoice choice) throws RemoteException {
+		getBusiness().acceptChoice(choice.getPrimaryKey(), iwc.getCurrentLocale());
 	}
 
 	protected void getViewerForm(IWContext iwc, CourseChoice choice) throws RemoteException {
@@ -381,6 +381,13 @@ public class CourseChoiceOverview extends CourseBlock {
 				invalidate.setClickConfirmation(getResourceBundle().getLocalizedString("confirm_invalidation", "Are you sure you want to invalidate this registration?"));
 			}
 			bottom.add(invalidate);
+			
+			if (choice.inOnWaitingList()) {
+				Link accept = getButtonLink(getResourceBundle().getLocalizedString("accept_choices", "Accept choices"));
+				accept.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_ACCEPT));
+				accept.maintainParameter(PARAMETER_CHOICE_PK, iwc);
+				bottom.add(accept);
+			}
 		}
 
 		add(form);

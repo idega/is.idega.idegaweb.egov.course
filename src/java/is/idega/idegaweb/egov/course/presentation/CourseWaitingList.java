@@ -1,5 +1,5 @@
 /*
- * $Id: CourseWaitingList.java,v 1.2 2009/03/26 11:18:50 laddi Exp $ Created on Mar 28, 2007
+ * $Id: CourseWaitingList.java,v 1.3 2009/03/30 12:24:35 laddi Exp $ Created on Mar 28, 2007
  * 
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
  * 
@@ -101,7 +101,7 @@ public class CourseWaitingList extends CourseBlock {
 		if (action == ACTION_ACCEPT) {
 			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
 			for (String choice : choices) {
-				getBusiness().acceptChoice(choice);
+				getBusiness().acceptChoice(choice, iwc.getCurrentLocale());
 			}
 		}
 	}

@@ -1812,7 +1812,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			body = getLocalizedString("course_choice.giro_registration_invalidated_body", "Your registration for course {2} at {3} for {0}, {1} has been invalidated.  If you have already paid for the course you will receive repayment shortly.", locale);
 		}
 
-		sendMessageToParents(application, choice, subject, body);
+		sendMessageToParents(application, choice, subject, body, locale);
 	}
 
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
@@ -1884,7 +1884,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						choice.setCourseCertificateFee(certificateFee);
 						choice.store();
 
-						sendMessageToParents(application, choice, subject, body);
+						sendMessageToParents(application, choice, subject, body, locale);
 					}
 				}
 			}
@@ -1901,12 +1901,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return saveApplication(applications, merchantID, amount, merchantType, paymentType, referenceNumber, payerName, payerPersonalID, performer, locale, 0);
 	}
 
-	private void sendMessageToParents(CourseApplication application, CourseChoice choice, String subject, String body) {
+	private void sendMessageToParents(CourseApplication application, CourseChoice choice, String subject, String body, Locale locale) {
 		try {
+			if (locale == null) {
+				locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
+			}
+			
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
 			School provider = course.getProvider();
-			Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()), course.getName(), provider.getName() };
+			IWTimestamp startDate = new IWTimestamp(course.getStartDate());
+			Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), locale), course.getName(), provider.getName(), startDate.getLocaleDate(locale, IWTimestamp.SHORT), new IWTimestamp(course.getEndDate() != null ? course.getEndDate() : getEndDate(course.getPrice(), startDate.getDate())).getLocaleDate(locale, IWTimestamp.SHORT) };
 
 			User appParent = application.getOwner();
 			if (appParent != null) {
@@ -2375,10 +2380,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return info;
 	}
 
-	public void acceptChoice(Object courseChoicePK) {
+	public void acceptChoice(Object courseChoicePK, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
 		choice.setWaitingList(false);
 		choice.store();
+
+		CourseApplication application = choice.getApplication();
+		String subject = getLocalizedString("course_choice.accepted_subject", "Course choice accepted", locale);
+		String body = getLocalizedString("course_choice.accepted_body", "Your registration to course {2} at {3} for {0}, {1} has been accepted.", locale);
+		
+		sendMessageToParents(application, choice, subject, body, locale);
 	}
 	
 	public void removeCertificate(Object certificatePK) {
@@ -2411,12 +2422,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				for (CourseChoice choice : choices) {
 					if (!choice.hasReceivedReminder()) {
 						CourseApplication application = choice.getApplication();
-						User applicant = choice.getUser();
-						School provider = course.getProvider();
-						IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 						
-						Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), locale), course.getName(), provider.getName(), startDate.getLocaleDate(locale, IWTimestamp.SHORT) };
-						getMessageBusiness().createUserMessage(application, application.getOwner(), subject, MessageFormat.format(body, arguments), false, false);
+						sendMessageToParents(application, choice, subject, body, locale);
 						
 						choice.setReceivedReminder(true);
 						choice.store();
@@ -2429,9 +2436,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 		catch (FinderException fe) {
 			log(fe);
-		}
-		catch (RemoteException re) {
-			throw new IBORuntimeException(re);
 		}
 	}
 }
