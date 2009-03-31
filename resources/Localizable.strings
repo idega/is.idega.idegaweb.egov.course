@@ -218,6 +218,7 @@ free_places=Free places
 from=From
 from_date=From date
 get=Get
+help.joined_courses=Courses can be joined to maximize usage.
 help.one_applicant_is_registered_at_a_time=One applicant is registered at a time.
 help.only_three_weeks_possible=It is only possible to register each participant to max three courses at a time.
 help.select_an_applicant_from_the_dropdown_OR_type_in_a_social_security_number=Select an applicant from the dropdown OR type in a social security number.
