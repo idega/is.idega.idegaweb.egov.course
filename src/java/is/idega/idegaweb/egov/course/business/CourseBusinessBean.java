@@ -50,6 +50,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import javax.ejb.CreateException;
@@ -1980,6 +1981,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public Date getEndDate(CoursePrice price, Date startDate) {
+		Collection holidays = getPublicHolidays();
 		IWTimestamp stamp = new IWTimestamp(startDate);
 		int days = price.getNumberOfDays() - 1;
 		while (days > 0) {
@@ -1987,9 +1989,39 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				days--;
 			}
 			stamp.addDays(1);
+			
+			if (!holidays.isEmpty()) {
+				Iterator iterator = holidays.iterator();
+				while (iterator.hasNext()) {
+					IWTimestamp holiday = (IWTimestamp) iterator.next();
+					if (stamp.isEqualTo(holiday)) {
+						stamp.addDays(1);
+					}
+				}
+			}
 		}
 
 		return stamp.getDate();
+	}
+	
+	private Collection getPublicHolidays() {
+		Collection collection = new ArrayList();
+		
+		String holidays = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_PUBLIC_HOLIDAYS);
+		if (holidays != null) {
+			StringTokenizer tokens = new StringTokenizer(holidays, ",");
+			while (tokens.hasMoreTokens()) {
+				String holiday = tokens.nextToken();
+				
+				IWTimestamp stamp = new IWTimestamp();
+				stamp.setAsDate();
+				stamp.setDay(Integer.parseInt(holiday.substring(0, holiday.indexOf("."))));
+				stamp.setMonth(Integer.parseInt(holiday.substring(holiday.indexOf(".") + 1)));
+				collection.add(stamp);
+			}
+		}
+		
+		return collection;
 	}
 
 	public CoursePriceHome getCoursePriceHome() {
