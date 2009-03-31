@@ -393,7 +393,7 @@ public class CourseList extends CourseBlock {
 			else {
 				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK, fromDate, toDate));
 			}
-			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : (useBirthYears ? CourseComparator.NAME_SORT : CourseComparator.ID_SORT)));
+			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : (useBirthYears ? CourseComparator.DATE_SORT : CourseComparator.ID_SORT)));
 		}
 
 		Iterator iter = courses.iterator();
