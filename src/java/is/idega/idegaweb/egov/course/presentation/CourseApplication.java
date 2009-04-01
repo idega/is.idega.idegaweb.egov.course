@@ -2220,10 +2220,10 @@ public class CourseApplication extends ApplicationForm {
 			}
 			else {
 				if (!iwc.isParameterSet(PARAMETER_CARD_NUMBER)) {
-					setError(PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("must_enter_card_number", "You must enter credit card number"));
+					setError(ACTION_PHASE_7, PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("must_enter_card_number", "You must enter credit card number"));
 				}
 				else if (!CreditCardChecker.isValid(iwc.getParameter(PARAMETER_CARD_NUMBER))) {
-					setError(PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("invalid_credit_card_number", "Invalid credit card number"));
+					setError(ACTION_PHASE_7, PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("invalid_credit_card_number", "Invalid credit card number"));
 				}
 
 				IWTimestamp dateNow = new IWTimestamp();
@@ -2235,7 +2235,7 @@ public class CourseApplication extends ApplicationForm {
 				stamp.setYear(Integer.parseInt(iwc.getParameter(PARAMETER_VALID_YEAR)));
 
 				if (stamp.isEarlierThan(dateNow)) {
-					setError(PARAMETER_VALID_MONTH, this.iwrb.getLocalizedString("invalid_credit_card_validity", "Invalid credit card validity"));
+					setError(ACTION_PHASE_7, PARAMETER_VALID_MONTH, this.iwrb.getLocalizedString("invalid_credit_card_validity", "Invalid credit card validity"));
 				}
 			}
 		}
@@ -2266,11 +2266,6 @@ public class CourseApplication extends ApplicationForm {
 				application.setCardValidYear(Integer.parseInt(expiresYear));
 				application.store();
 			}
-		}
-
-		if (hasErrors()) {
-			showPhaseSeven(iwc);
-			return;
 		}
 
 		if (application != null) {
