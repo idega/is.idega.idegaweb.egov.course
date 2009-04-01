@@ -2043,7 +2043,7 @@ public class CourseApplication extends ApplicationForm {
 		validYear.keepStatusOnAction(true);
 		int year = stamp.getYear();
 		for (int a = year; a <= year + 10; a++) {
-			validYear.addMenuElement(String.valueOf(stamp.getYear()).substring(2), String.valueOf(stamp.getYear()));
+			validYear.addMenuElement(String.valueOf(stamp.getYear()), String.valueOf(stamp.getYear()));
 			stamp.addYears(1);
 		}
 		validYear.setDisabled(!creditcardPayment);
