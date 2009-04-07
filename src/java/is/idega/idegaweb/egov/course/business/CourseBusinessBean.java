@@ -786,7 +786,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			toDate = new IWTimestamp(31, 12, year).getDate();
 		}
 		
-		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK), fromDate, toDate);
+		Collection coll = getCourses(-1, new Integer(providerPK), schoolTypePK > 0 ? new Integer(schoolTypePK) : null, courseTypePK > 0 ? new Integer(courseTypePK) : null, fromDate, toDate);
 		Map map = new LinkedHashMap();
 		if (coll != null) {
 			Locale locale = new Locale(country, country.toUpperCase());
