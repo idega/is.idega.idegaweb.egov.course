@@ -395,6 +395,8 @@ public class CourseList extends CourseBlock {
 			}
 			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : (useBirthYears ? CourseComparator.DATE_SORT : CourseComparator.ID_SORT)));
 		}
+		
+		boolean showID = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 
 		Iterator iter = courses.iterator();
 		while (iter.hasNext()) {
@@ -413,7 +415,7 @@ public class CourseList extends CourseBlock {
 			if (type.getAbbreviation() != null) {
 				cell.add(new Text(type.getAbbreviation()));
 			}
-			cell.add(new Text(String.valueOf(course.getCourseNumber())));
+			cell.add(new Text(String.valueOf(showID ? course.getCourseNumber() : course.getPrimaryKey())));
 
 			cell = row.createCell();
 			cell.setStyleClass("course");

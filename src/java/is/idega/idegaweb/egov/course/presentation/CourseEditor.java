@@ -418,6 +418,8 @@ public class CourseEditor extends CourseBlock {
 		cell.setStyleClass("delete");
 		cell.add(new Text(localize("delete", "Delete")));
 
+		boolean showID = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 		java.util.Iterator iter = courses.iterator();
@@ -446,7 +448,7 @@ public class CourseEditor extends CourseBlock {
 				if (cType.getAbbreviation() != null) {
 					cell.add(new Text(cType.getAbbreviation()));
 				}
-				cell.add(new Text(String.valueOf(course.getCourseNumber())));
+				cell.add(new Text(String.valueOf(showID ? course.getCourseNumber() : course.getPrimaryKey().toString())));
 
 				cell = row.createCell();
 				cell.setStyleClass("name");

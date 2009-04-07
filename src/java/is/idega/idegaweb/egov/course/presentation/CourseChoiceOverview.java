@@ -368,10 +368,12 @@ public class CourseChoiceOverview extends CourseBlock {
 		receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
 		receipt.addParameter(getBusiness().getSelectedCaseParameter(), application.getPrimaryKey().toString());
 		bottom.add(receipt);
+		
+		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 
 		if (isSchoolAdministrator(iwc) /*&& getBusiness().canInvalidate(choice)*/) {
 			Link invalidate = getButtonLink(getResourceBundle().getLocalizedString("invalidate", "Invalidate"));
-			if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
+			if (useDirectPayment && application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
 				invalidate.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_REFUND_FORM));
 				invalidate.setToFormSubmit(form);
 			}
@@ -510,8 +512,9 @@ public class CourseChoiceOverview extends CourseBlock {
 	}
 
 	private boolean refund(IWContext iwc, CourseChoice choice) throws RemoteException {
+		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 		is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
-		if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
+		if (useDirectPayment && application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
 			String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
 			String expiresMonth = iwc.getParameter(PARAMETER_VALID_MONTH);
 			String expiresYear = iwc.getParameter(PARAMETER_VALID_YEAR);
