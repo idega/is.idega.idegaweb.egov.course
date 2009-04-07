@@ -693,7 +693,7 @@ public class CourseEditor extends CourseBlock {
 
 			cargoTypes = getCourseBusiness(iwc).getCourseTypes(new Integer(stID));
 			courseTypeID.addMenuElements(cargoTypes);
-			courseTypeID.setSelectedElement(course.getCourseType().getPrimaryKey().toString());
+			courseTypeID.setSelectedElement(type.getPrimaryKey().toString());
 
 			if (!useFixedPrices) {
 				price.setContent(Integer.toString(coursePrice.getPrice()));
@@ -744,6 +744,9 @@ public class CourseEditor extends CourseBlock {
 			cargoTypes = getCourseBusiness(iwc).getCourseTypes(new Integer(category.getPrimaryKey().toString()));
 			courseTypeID.removeElements();
 			courseTypeID.addMenuElements(cargoTypes);
+			if (course != null) {
+				courseTypeID.setSelectedElement(course.getCourseType().getPrimaryKey().toString());
+			}
 		}
 
 		Heading1 heading = new Heading1(localize("information", "Information"));
