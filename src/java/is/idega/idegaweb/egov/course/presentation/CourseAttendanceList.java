@@ -216,7 +216,7 @@ public class CourseAttendanceList extends CourseBlock {
 		formItem.add(courseType);
 		layer.add(formItem);
 
-		if (showAllCourses && inceptionYear > 0) {
+		if (!showAllCourses && inceptionYear > 0) {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			label = new Label(getResourceBundle().getLocalizedString("year", "Year"), yearMenu);

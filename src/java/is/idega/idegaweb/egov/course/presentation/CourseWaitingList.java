@@ -1,5 +1,5 @@
 /*
- * $Id: CourseWaitingList.java,v 1.4 2009/04/07 12:40:37 laddi Exp $ Created on Mar 28, 2007
+ * $Id: CourseWaitingList.java,v 1.5 2009/04/07 13:01:56 laddi Exp $ Created on Mar 28, 2007
  * 
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
  * 
@@ -268,7 +268,7 @@ public class CourseWaitingList extends CourseBlock {
 		formItem.add(courseType);
 		layer.add(formItem);
 
-		if (showAllCourses && inceptionYear > 0) {
+		if (!showAllCourses && inceptionYear > 0) {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			label = new Label(getResourceBundle().getLocalizedString("year", "Year"), yearMenu);
