@@ -15,6 +15,7 @@ import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -40,6 +41,7 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
+import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
@@ -81,6 +83,8 @@ public class CourseAttendanceList extends CourseBlock {
 	}
 
 	protected Layer getNavigation(IWContext iwc) throws RemoteException {
+		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
+
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -127,7 +131,12 @@ public class CourseAttendanceList extends CourseBlock {
 		script3.append("function setCourseOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
-		script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
+		if (showAllCourses) {
+			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
+		}
+		else {
+			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCoursesMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_YEAR + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
+		}
 
 		Script formScript = new Script();
 		formScript.addFunction("setOptions", script2.toString());
@@ -158,13 +167,38 @@ public class CourseAttendanceList extends CourseBlock {
 			courseType.addMenuElements(courseTypes);
 		}
 
+		int inceptionYear = Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_INCEPTION_YEAR, "-1"));
+		int currentYear = new IWTimestamp().getYear();
+		int year = showAllCourses ? -1 : currentYear;
+		Date fromDate = null;
+		Date toDate = null;
+		if (iwc.isParameterSet(PARAMETER_YEAR)) {
+			year = Integer.parseInt(iwc.getParameter(PARAMETER_YEAR));
+		}
+		if (year > 0) {
+			fromDate = new IWTimestamp(1, 1, year).getDate();
+			toDate = new IWTimestamp(31, 12, year).getDate();
+		}
+		
+		DropdownMenu yearMenu = new DropdownMenu(PARAMETER_YEAR);
+		if (inceptionYear > 0) {
+			yearMenu.keepStatusOnAction(true);
+			yearMenu.setID(PARAMETER_YEAR);
+			yearMenu.setOnChange("changeCourseValues();");
+			yearMenu.setSelectedElement(year);
+			
+			for (int i = inceptionYear; i <= currentYear; i++) {
+				yearMenu.addMenuElement(i, String.valueOf(i));
+			}
+		}
+
 		DropdownMenu course = new DropdownMenu(PARAMETER_COURSE_PK);
 		course.setId(PARAMETER_COURSE_PK);
 		course.keepStatusOnAction(true);
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_SCHOOL_TYPE) && iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), null, null);
+			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), fromDate, toDate);
 			course.addMenuElements(courses);
 		}
 
@@ -181,6 +215,15 @@ public class CourseAttendanceList extends CourseBlock {
 		formItem.add(label);
 		formItem.add(courseType);
 		layer.add(formItem);
+
+		if (showAllCourses && inceptionYear > 0) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label(getResourceBundle().getLocalizedString("year", "Year"), yearMenu);
+			formItem.add(label);
+			formItem.add(yearMenu);
+			layer.add(formItem);
+		}
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");

@@ -79,6 +79,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	public static final String PARAMETER_SCHOOL_TYPE_PK = "prm_school_type_pk";
 	public static final String PARAMETER_FROM_DATE = "prm_from_date";
 	public static final String PARAMETER_TO_DATE = "prm_to_date";
+	public static final String PARAMETER_YEAR = "prm_year";
 	public static final String PARAMETER_CERTIFICATE_PK = "prm_certificate_pk";
 
 	private CourseBusiness business;

@@ -164,6 +164,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public Map getCourseMapDWR(int providerPK, int schoolTypePK, int courseTypePK, String country) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCoursesMapDWR
+	 */
+	public Map getCoursesMapDWR(int providerPK, int schoolTypePK, int courseTypePK, int year, String country) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCoursePricesDWR
 	 */
 	public Map getCoursePricesDWR(String date, int providerPK, int courseTypePK, String country) throws RemoteException;

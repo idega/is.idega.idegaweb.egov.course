@@ -772,9 +772,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public Map getCourseMapDWR(int providerPK, int schoolTypePK, int courseTypePK, String country) {
+		return getCoursesMapDWR(providerPK, schoolTypePK, courseTypePK, -1, country);
+	}
+	
+	public Map getCoursesMapDWR(int providerPK, int schoolTypePK, int courseTypePK, int year, String country) {
 		boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 
-		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK), null, null);
+		Date fromDate = null;
+		Date toDate = null;
+		
+		if (year > 0) {
+			fromDate = new IWTimestamp(1, 1, year).getDate();
+			toDate = new IWTimestamp(31, 12, year).getDate();
+		}
+		
+		Collection coll = getCourses(-1, new Integer(providerPK), new Integer(schoolTypePK), new Integer(courseTypePK), fromDate, toDate);
 		Map map = new LinkedHashMap();
 		if (coll != null) {
 			Locale locale = new Locale(country, country.toUpperCase());

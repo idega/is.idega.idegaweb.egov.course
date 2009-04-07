@@ -7,8 +7,9 @@
       <param name="class" value="is.idega.idegaweb.egov.course.business.CourseBusiness"/>
       <include method="getCourseTypesDWR" />
       <include method="getCoursePricesDWR" />
-      <include method="getCoursesDWR" />
       <include method="getCourseMapDWR" />
+      <include method="getCoursesDWR" />
+      <include method="getCoursesMapDWR" />
       <include method="getPriceDWR" />
       <include method="getUserDWR" />
       <include method="manageCourseChoiceSettings" />
