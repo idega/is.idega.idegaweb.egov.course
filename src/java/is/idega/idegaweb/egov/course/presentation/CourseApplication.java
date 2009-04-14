@@ -1106,7 +1106,7 @@ public class CourseApplication extends ApplicationForm {
 		for (int i = 0; courses != null && i < courses.length; i++) {
 			ApplicationHolder h = new ApplicationHolder();
 			Course course = getCourseBusiness(iwc).getCourse(new Integer(courses[i]));
-			if (getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isFull(course) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
+			if (getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				h.setUser(applicant);
 				h.setCourse(course);
 				getCourseApplicationSession(iwc).addApplication(applicant, h);
@@ -1114,9 +1114,6 @@ public class CourseApplication extends ApplicationForm {
 
 			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser)) {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.old_course_selected", "You have selected a course that has already started or finished: ") + course.getName());
-			}
-			if (getCourseBusiness(iwc).isFull(course)) {
-				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.full_course_selected", "You have selected a course that is already full: ") + course.getName());
 			}
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.already_registered_course_selected", "You have selected a course that the participant is already registered to: ") + course.getName());
