@@ -1815,6 +1815,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public void invalidateChoice(CourseApplication application, CourseChoice choice, Locale locale) {
 		choice.setValid(false);
 		choice.store();
+		
+		Collection certificates = getUserCertificatesByCourse(choice.getUser(), choice.getCourse());
+		if (certificates != null && !certificates.isEmpty()) {
+			Iterator iterator = certificates.iterator();
+			while (iterator.hasNext()) {
+				CourseCertificate certificate = (CourseCertificate) iterator.next();
+				try {
+					certificate.remove();
+				}
+				catch (RemoveException re) {
+					log(re);
+				}
+			}
+		}
 
 		String subject = getLocalizedString("course_choice.registration_invalidated", "Your registration for course has been invalidated", locale);
 		String body = "";
