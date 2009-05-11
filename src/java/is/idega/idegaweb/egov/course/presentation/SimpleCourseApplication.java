@@ -245,6 +245,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			script5.append("\n\t").append("radio.className = \"checkbox\";");
 			script5.append("\n\t").append("radio.name = \"" + PARAMETER_COURSE + "\";");
 			script5.append("\n\t").append("radio.value = course.pk;");
+			script5.append("\n\t").append("if (course.isfull) { radio.disabled = true; }");
 		}
 		script5.append("\n\t").append("return radio;");
 		script5.append("}\n");
