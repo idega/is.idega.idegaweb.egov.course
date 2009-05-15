@@ -95,6 +95,7 @@ import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
 import com.idega.util.text.Name;
@@ -2495,5 +2496,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		catch (FinderException fe) {
 			log(fe);
 		}
+	}
+
+	public Collection<Course> getCoursesByTypes(Collection<String> typesIds) throws RemoteException {
+		if (ListUtil.isEmpty(typesIds)) {
+			return null;
+		}
+		
+		try {
+			return getCourseHome().findAllByTypes(typesIds);
+		} catch (FinderException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }

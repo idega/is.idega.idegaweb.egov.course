@@ -14,6 +14,7 @@ import com.idega.data.IDOFactory;
 
 public class CourseHomeImpl extends IDOFactory implements CourseHome {
 
+	@Override
 	public Class getEntityInterfaceClass() {
 		return Course.class;
 	}
@@ -106,6 +107,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	public Collection findAllWithNoCourseNumber() throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseBMPBean) entity).ejbFindAllWithNoCourseNumber();
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+	public Collection<Course> findAllByTypes(Collection<String> typesIds) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Collection ids = ((CourseBMPBean) entity).ejbFindAllByTypes(typesIds);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

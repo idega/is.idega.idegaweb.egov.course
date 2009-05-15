@@ -42,10 +42,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
 	private static final String COLUMN_MAX_PARTICIPANTS = "MAX_PER";
 
+	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
 	
+	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		addAttribute(COLUMN_COURSE_NUMBER, "Course number", Integer.class);
@@ -67,6 +69,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	// Getters
+	@Override
 	public String getName() {
 		return getStringColumnValue(COLUMN_NAME);
 	}
@@ -143,6 +146,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	// Setters
+	@Override
 	public void setName(String name) {
 		setColumn(COLUMN_NAME, name);
 	}
@@ -418,6 +422,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE_NUMBER)));
+		
+		return idoFindPKsByQuery(query);
+	}
+	
+	public Collection ejbFindAllByTypes(Collection<String> typesIds) throws FinderException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new Column(table, getIDColumnName()));
+		query.addCriteria(new InCriteria(new Column(table, COLUMN_COURSE_TYPE), typesIds));
 		
 		return idoFindPKsByQuery(query);
 	}

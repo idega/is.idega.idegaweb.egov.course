@@ -587,4 +587,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#sendNextCoursesMessages
 	 */
 	public void sendNextCoursesMessages() throws RemoteException;
+	
+	public Collection<Course> getCoursesByTypes(Collection<String> typesIds) throws RemoteException;
 }
