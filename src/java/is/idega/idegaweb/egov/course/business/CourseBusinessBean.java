@@ -1105,6 +1105,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			else {
 				cDWR.setTimeframe(from.getDateString("dd.MM", locale) + " - " + toS);
 			}
+			
+			cDWR.setFirstDateOfCourse(from);
 		}
 		else if (from != null && course.getEndDate() != null) {
 			IWTimestamp toDate = new IWTimestamp(course.getEndDate());
@@ -1114,6 +1116,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			format.setMaximumFractionDigits(0);
 			cDWR.setPrice(format.format(course.getCoursePrice()));
 			cDWR.setTimeframe(from.getDateString("d. MMMM yyyy", locale) + (from.equals(toDate) ? "" : " - " + toS));
+
+			cDWR.setFirstDateOfCourse(from);
+
 		}
 		cDWR.setDays(dayS);
 		return cDWR;
