@@ -1848,6 +1848,74 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		sendMessageToParents(application, choice, subject, body, locale);
 	}
 
+	public CourseApplication saveApplication(Map applications, User performer, Locale locale) {
+		try {
+			CourseApplication application = getCourseApplicationHome().create();
+			if (performer == null) {
+				try {
+					performer = getIWApplicationContext().getIWMainApplication().getAccessController().getAdministratorUser();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			application.setOwner(performer);
+			changeCaseStatus(application, getCaseStatusOpen(), performer);
+
+			String subject = getLocalizedString("course_choice.registration_received", "Your registration for course has been received", locale);
+			String body = getLocalizedString("course_choice.card_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card", locale);
+			
+			Iterator iter = applications == null ? null : applications.values().iterator();
+			if (iter != null) {
+				for (Iterator it = iter; it.hasNext();) {
+					Collection collection = (Collection) it.next();
+					Iterator iterator = collection.iterator();
+					while (iterator.hasNext()) {
+						ApplicationHolder holder = (ApplicationHolder) iterator.next();
+
+						CourseChoice choice = getCourseChoiceHome().create();
+						choice.setApplication(application);
+						choice.setCourse(holder.getCourse());
+						choice.setUser(holder.getUser());
+						choice.store();
+
+						sendMessageToApplicationOwner(application, choice, subject, body, locale);
+					}
+				}
+			}
+
+			return application;
+		}
+		catch (CreateException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private void sendMessageToApplicationOwner(CourseApplication application, CourseChoice choice, String subject, String body, Locale locale) {
+		try {
+			if (locale == null) {
+				locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
+			}
+			
+			User applicant = choice.getUser();
+			Course course = choice.getCourse();
+			School provider = course.getProvider();
+			IWTimestamp startDate = new IWTimestamp(course.getStartDate());
+			IWTimestamp applicationDate = new IWTimestamp(application.getCreated());
+			Object[] arguments = { applicationDate.getDateString("dd.MM.yyyy"), applicant.getName(), startDate.getDateString("dd.MM.yyyy"), startDate.getDateString("HH:mm"), provider.getName() };
+
+			User appParent = application.getOwner();
+			if (appParent != null) {
+				getMessageBusiness().createUserMessage(application, appParent, subject, MessageFormat.format(body, arguments), false, false);
+			}
+		}
+		catch (RemoteException re) {
+			re.printStackTrace();
+		}
+	}
+
+	
 	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
 		try {
 			boolean useWaitingList = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_WAITING_LIST, false);

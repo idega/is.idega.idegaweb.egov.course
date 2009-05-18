@@ -4,8 +4,8 @@ package is.idega.idegaweb.egov.course.business;
 import javax.ejb.CreateException;
 import com.idega.business.IBOHomeImpl;
 
-public class CourseBusinessHomeImpl extends IBOHomeImpl implements CourseBusinessHome {
-
+public class CourseBusinessHomeImpl extends IBOHomeImpl implements
+		CourseBusinessHome {
 	public Class getBeanInterfaceClass() {
 		return CourseBusiness.class;
 	}
