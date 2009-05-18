@@ -65,6 +65,7 @@ public class CourseEditor extends CourseBlock {
 	private static final String PARAMETER_MAX_PER = "prm_max_participants";
 	private static final String PARAMETER_PRICE = "prm_price";
 	private static final String PARAMETER_COST = "prm_cost";
+	private static final String PARAMETER_OPEN_FOR_REGISTRATION = "prm_open_for_registration";
 
 	private static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
 
@@ -73,7 +74,6 @@ public class CourseEditor extends CourseBlock {
 	private static final int ACTION_NEW = 3;
 	private static final int ACTION_SAVE = 4;
 	private static final int ACTION_DELETE = 5;
-	private static final String PARAMETER_OPEN_FOR_REGISTRATION = null;
 
 	private SchoolType type = null;
 	private boolean showTypes = true;
