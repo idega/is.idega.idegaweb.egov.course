@@ -548,6 +548,7 @@ public class CourseEditor extends CourseBlock {
 		if (showLegend) {
 			Lists list = new Lists();
 			list.setStyleClass("legend");
+			form.add(list);
 
 			ListItem item = new ListItem();
 			item.setStyleClass("openForRegistration");
