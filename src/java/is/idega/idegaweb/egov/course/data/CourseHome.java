@@ -40,6 +40,6 @@ public interface CourseHome extends IDOHome {
 	public int getHighestCourseNumber() throws IDOException;
 
 	public Collection findAllWithNoCourseNumber() throws FinderException;
-	
-	public Collection<Course> findAllByTypes(Collection<String> typesIds) throws FinderException;
+
+	public Collection findAllByTypes(Collection<String> typesIds) throws FinderException;
 }

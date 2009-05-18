@@ -41,6 +41,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_BIRTHYEAR_FROM = "BIRTHYEAR_FROM";
 	private static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
 	private static final String COLUMN_MAX_PARTICIPANTS = "MAX_PER";
+	private static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION";
 
 	@Override
 	public String getEntityName() {
@@ -62,6 +63,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_MAX_PARTICIPANTS, "Max", Integer.class);
 		addAttribute(COLUMN_PRICE, "Price", Float.class);
 		addAttribute(COLUMN_COST, "Cost", Float.class);
+		addAttribute(COLUMN_OPEN_FOR_REGISTRATION, "Open for registration", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
@@ -144,6 +146,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public int getCourseNumber() {
 		return getIntColumnValue(COLUMN_COURSE_NUMBER);
 	}
+	
+	public boolean isOpenForRegistration() {
+		return getBooleanColumnValue(COLUMN_OPEN_FOR_REGISTRATION, false);
+	}
 
 	// Setters
 	@Override
@@ -205,6 +211,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	
 	public void setCourseNumber(int number) {
 		setColumn(COLUMN_COURSE_NUMBER, number);
+	}
+	
+	public void setOpenForRegistration(boolean openForRegistration) {
+		setColumn(COLUMN_OPEN_FOR_REGISTRATION, openForRegistration);
 	}
 	
 	// Finders

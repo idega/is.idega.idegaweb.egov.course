@@ -88,6 +88,11 @@ public interface Course extends IDOEntity {
 	public int getCourseNumber();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#isOpenForRegistration
+	 */
+	public boolean isOpenForRegistration();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setName
 	 */
 	public void setName(String name);
@@ -161,4 +166,9 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseNumber
 	 */
 	public void setCourseNumber(int number);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setOpenForRegistration
+	 */
+	public void setOpenForRegistration(boolean openForRegistration);
 }

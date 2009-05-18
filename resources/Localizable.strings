@@ -279,6 +279,7 @@ not_valid_personal_id=Not a valid personal ID
 number_abbreviated=No.
 number_of_days=Number of days
 number_of_participants=Number of participants
+open_for_registration=Open for registration
 participant=Participant
 passed=Passed
 passed_course=Has passed course

@@ -33,7 +33,10 @@ import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
+import com.idega.presentation.text.ListItem;
+import com.idega.presentation.text.Lists;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
@@ -70,6 +73,7 @@ public class CourseEditor extends CourseBlock {
 	private static final int ACTION_NEW = 3;
 	private static final int ACTION_SAVE = 4;
 	private static final int ACTION_DELETE = 5;
+	private static final String PARAMETER_OPEN_FOR_REGISTRATION = null;
 
 	private SchoolType type = null;
 	private boolean showTypes = true;
@@ -142,7 +146,8 @@ public class CourseEditor extends CourseBlock {
 			int maxPer = Integer.parseInt(max);
 			float price = iwc.isParameterSet(PARAMETER_PRICE) ? Float.parseFloat(iwc.getParameter(PARAMETER_PRICE)) : 0;
 			float cost = iwc.isParameterSet(PARAMETER_COST) ? Float.parseFloat(iwc.getParameter(PARAMETER_COST)) : 0;
-			getCourseBusiness(iwc).storeCourse(pk, courseNumber, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
+			boolean openForRegistration = iwc.isParameterSet(PARAMETER_OPEN_FOR_REGISTRATION);
+			getCourseBusiness(iwc).storeCourse(pk, courseNumber, name, user, courseTypePK, getSession().getProvider().getPrimaryKey(), coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -419,6 +424,7 @@ public class CourseEditor extends CourseBlock {
 		cell.add(new Text(localize("delete", "Delete")));
 
 		boolean showID = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+		boolean showLegend = false;
 
 		group = table.createBodyRowGroup();
 		int iRow = 1;
@@ -442,6 +448,11 @@ public class CourseEditor extends CourseBlock {
 				delete.maintainParameter(PARAMETER_FROM_DATE, iwc);
 				delete.maintainParameter(PARAMETER_TO_DATE, iwc);
 
+				if (course.isOpenForRegistration()) {
+					showLegend = true;
+					row.setStyleClass("openForRegistration");
+				}
+				
 				cell = row.createCell();
 				cell.setStyleClass("firstColumn");
 				cell.setStyleClass("number");
@@ -533,6 +544,16 @@ public class CourseEditor extends CourseBlock {
 			iRow++;
 		}
 		form.add(table);
+		
+		if (showLegend) {
+			Lists list = new Lists();
+			list.setStyleClass("legend");
+
+			ListItem item = new ListItem();
+			item.setStyleClass("openForRegistration");
+			item.add(new Text(getResourceBundle().getLocalizedString("open_for_registration", "Open for registration")));
+			list.add(item);
+		}
 
 		if (getSession().getProvider() != null) {
 			Layer buttonLayer = new Layer(Layer.DIV);
@@ -556,6 +577,7 @@ public class CourseEditor extends CourseBlock {
 		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 		boolean showIDInput = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+		boolean showOpenForRegistration = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false);
 
 		Form form = new Form();
 		form.setID("courseEditor");
@@ -661,6 +683,8 @@ public class CourseEditor extends CourseBlock {
 		DropdownMenu priceDrop = new DropdownMenu(PARAMETER_COURSE_PRICE_PK);
 		priceDrop.setId(PARAMETER_COURSE_PRICE_PK);
 		priceDrop.setOnChange("readPrice();");
+		
+		CheckBox openForRegistration = new CheckBox(PARAMETER_OPEN_FOR_REGISTRATION);
 
 		if (course != null) {
 			CourseType type = course.getCourseType();
@@ -694,6 +718,7 @@ public class CourseEditor extends CourseBlock {
 			cargoTypes = getCourseBusiness(iwc).getCourseTypes(new Integer(stID));
 			courseTypeID.addMenuElements(cargoTypes);
 			courseTypeID.setSelectedElement(type.getPrimaryKey().toString());
+			openForRegistration.setChecked(course.isOpenForRegistration());
 
 			if (!useFixedPrices) {
 				price.setContent(Integer.toString(coursePrice.getPrice()));
@@ -900,7 +925,18 @@ public class CourseEditor extends CourseBlock {
 		layer.add(label);
 		layer.add(inputMaxPer);
 		section.add(layer);
-
+		
+		if (showOpenForRegistration) {
+			layer = new Layer();
+			layer.setID("openForRegistration");
+			layer.setStyleClass("formItem");
+			layer.setStyleClass("checkboxFormItem");
+			label = new Label(localize("open_for_registration", "Open for registration"), openForRegistration);
+			layer.add(openForRegistration);
+			layer.add(label);
+			section.add(layer);
+		}
+		
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 

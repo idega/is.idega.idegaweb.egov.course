@@ -85,3 +85,11 @@ p.infoHelp {
 	margin: 0;
 	padding-top: 13px;
 }
+
+table.adminTable tr.openForRegistration td {
+	background-color: #cce7ff;
+}
+
+ul.legend li.openForRegistration {
+	color: #0088ff;
+}

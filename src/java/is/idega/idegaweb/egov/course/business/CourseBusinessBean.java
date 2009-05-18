@@ -541,10 +541,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	public Course createCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price) throws FinderException, CreateException {
-		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, -1);
+		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, -1, false);
 	}
 
-	public Course createCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
+	public Course createCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost, boolean openForRegistration) throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(new Integer(pk.toString()));
@@ -611,6 +611,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		if (cost >= 0 && coursePricePK == null) {
 			course.setCourseCost(cost);
 		}
+		course.setOpenForRegistration(openForRegistration);
 
 		course.store();
 
@@ -621,8 +622,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 	}
 
-	public void storeCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost) throws FinderException, CreateException {
-		createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost);
+	public void storeCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost, boolean openForRegistration) throws FinderException, CreateException {
+		createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
@@ -1030,7 +1031,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						start.setMinute(0);
 					}
 
-					if ((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
+					if (course.isOpenForRegistration() || ((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null))) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
 					}
