@@ -7,6 +7,7 @@
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 import java.rmi.RemoteException;
@@ -80,14 +81,24 @@ public class CourseParticipantsStatistics extends CourseBlock {
 			SchoolType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
 			Collection areas = getBusiness().getSchoolAreas();
 
+			Collection userProviders = null;
+			if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+				userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+			}
+
 			Iterator iter = areas.iterator();
 			while (iter.hasNext()) {
 				SchoolArea area = (SchoolArea) iter.next();
 
 				Collection providers = getBusiness().getProviders(area, type);
+				if (userProviders != null) {
+					providers.retainAll(userProviders);
+				}
 
-				addResults(iwc, iwrb, type, providers, section, area.getName());
-				section.add(clearLayer);
+				if (!providers.isEmpty()) {
+					addResults(iwc, iwrb, type, providers, section, area.getName());
+					section.add(clearLayer);
+				}
 			}
 
 			if (getBackPage() != null) {

@@ -7,6 +7,7 @@
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
@@ -76,12 +77,20 @@ public class CourseStatistics extends CourseBlock {
 			Collection courseTypes = getBusiness().getCourseTypes(new Integer(schoolTypePK.toString()));
 			Collection areas = getBusiness().getSchoolAreas();
 
+			Collection userProviders = null;
+			if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+				userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+			}
+
 			Iterator iter = areas.iterator();
 			while (iter.hasNext()) {
 				SchoolArea area = (SchoolArea) iter.next();
 
 				Collection providers = getBusiness().getProviders(area, type);
-
+				if (userProviders != null) {
+					providers.retainAll(userProviders);
+				}
+				
 				addResults(iwc, iwrb, type, providers, courseTypes, section, area.getName());
 				section.add(clearLayer);
 			}
@@ -173,7 +182,7 @@ public class CourseStatistics extends CourseBlock {
 		cell.setStyleClass("type");
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("type", "Type")));
 
-		Map typeTotals = new HashMap();
+		Map providerTotals = new HashMap();
 		Iterator iterator = providers.iterator();
 		while (iterator.hasNext()) {
 			School provider = (School) iterator.next();
@@ -198,7 +207,6 @@ public class CourseStatistics extends CourseBlock {
 		Iterator iter = courseTypes.iterator();
 		while (iter.hasNext()) {
 			CourseType courseType = (CourseType) iter.next();
-			typeTotals.put(courseType, new Integer(0));
 
 			row = group.createRow();
 			cell = row.createCell();
@@ -210,13 +218,16 @@ public class CourseStatistics extends CourseBlock {
 			iterator = providers.iterator();
 			while (iterator.hasNext()) {
 				School provider = (School) iterator.next();
-				int typeSum = getBusiness().getNumberOfCourses(provider, type, courseType, fromDate, toDate);
-				sum += typeSum;
-				typeTotals.put(courseType, new Integer(((Integer) typeTotals.get(courseType)).intValue() + typeSum));
+				if (!providerTotals.containsKey(provider)) {
+					providerTotals.put(provider, new Integer(0));
+				}
+				int providerSum = getBusiness().getNumberOfCourses(provider, type, courseType, fromDate, toDate);
+				sum += providerSum;
+				providerTotals.put(provider, new Integer(((Integer) providerTotals.get(provider)).intValue() + providerSum));
 
 				cell = row.createCell();
 				cell.setStyleClass(courseType.getPrimaryKey().toString());
-				cell.add(new Text(String.valueOf(typeSum)));
+				cell.add(new Text(String.valueOf(providerSum)));
 			}
 			total += sum;
 
@@ -243,14 +254,13 @@ public class CourseStatistics extends CourseBlock {
 		cell.setStyleClass("totals");
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("total", "Total")));
 
-		iterator = courseTypes.iterator();
+		iterator = providers.iterator();
 		while (iterator.hasNext()) {
-			CourseType courseType = (CourseType) iterator.next();
-			int typeSum = ((Integer) typeTotals.get(courseType)).intValue();
+			School provider = (School) iterator.next();
+			int providerSum = ((Integer) providerTotals.get(provider)).intValue();
 
 			cell = row.createCell();
-			cell.setStyleClass(courseType.getPrimaryKey().toString());
-			cell.add(new Text(String.valueOf(typeSum)));
+			cell.add(new Text(String.valueOf(providerSum)));
 		}
 
 		cell = row.createCell();

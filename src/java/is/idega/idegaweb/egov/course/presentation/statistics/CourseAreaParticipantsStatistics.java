@@ -7,6 +7,7 @@
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
@@ -89,6 +90,11 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				SchoolArea area = getSchoolBusiness(iwc).getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
 				Collection providers = getBusiness().getProviders(area, type);
 
+				if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+					Collection userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+					providers.retainAll(userProviders);
+				}
+
 				Iterator iter = providers.iterator();
 				while (iter.hasNext()) {
 					School provider = (School) iter.next();
@@ -131,6 +137,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 		DropdownMenu schoolArea = new DropdownMenu(PARAMETER_AREA);
 		schoolArea.addMenuElementFirst("", localize("select_school_area", "Select school area"));
+		schoolArea.keepStatusOnAction(true);
 		Collection areas = getBusiness().getSchoolAreas();
 		schoolArea.addMenuElements(areas);
 
