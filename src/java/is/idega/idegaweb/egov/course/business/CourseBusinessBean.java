@@ -2513,16 +2513,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return info;
 	}
 
-	public void acceptChoice(Object courseChoicePK, Locale locale) {
+	public boolean acceptChoice(Object courseChoicePK, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
-		choice.setWaitingList(false);
-		choice.store();
-
-		CourseApplication application = choice.getApplication();
-		String subject = getLocalizedString("course_choice.accepted_subject", "Course choice accepted", locale);
-		String body = getLocalizedString("course_choice.accepted_body", "Your registration to course {2} at {3} for {0}, {1} has been accepted.", locale);
+		Course course = choice.getCourse();
 		
-		sendMessageToParents(application, choice, subject, body, locale);
+		if (!isFull(course)) {
+			choice.setWaitingList(false);
+			choice.store();
+	
+			CourseApplication application = choice.getApplication();
+			String subject = getLocalizedString("course_choice.accepted_subject", "Course choice accepted", locale);
+			String body = getLocalizedString("course_choice.accepted_body", "Your registration to course {2} at {3} for {0}, {1} has been accepted.", locale);
+			
+			sendMessageToParents(application, choice, subject, body, locale);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public void removeCertificate(Object certificatePK) {

@@ -1,5 +1,5 @@
 /*
- * $Id: CourseWaitingList.java,v 1.5 2009/04/07 13:01:56 laddi Exp $ Created on Mar 28, 2007
+ * $Id: CourseWaitingList.java,v 1.6 2009/05/25 14:58:07 laddi Exp $ Created on Mar 28, 2007
  * 
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
  * 
@@ -64,7 +64,10 @@ public class CourseWaitingList extends CourseBlock {
 			form.setEventListener(this.getClass());
 			form.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_VIEW));
 
-			parseAction(iwc);
+			boolean success = parseAction(iwc);
+			if (!success) {
+				PresentationUtil.addJavascriptAlertOnLoad(iwc, localize("accept_choices.max_reached", "You can not accept beyond max for course."));
+			}
 			
 			form.add(getNavigation(iwc));
 			if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
@@ -76,10 +79,12 @@ public class CourseWaitingList extends CourseBlock {
 			buttonLayer.setStyleClass("buttonLayer");
 			form.add(buttonLayer);
 
-			SubmitButton accept = new SubmitButton(localize("accept_choices", "Accept choices"));
-			accept.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_ACCEPT));
-			accept.setSubmitConfirm(localize("accept_choices.confirm", "Are you sure you want to accept the selected choices?"));
-			buttonLayer.add(accept);
+			if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
+				SubmitButton accept = new SubmitButton(localize("accept_choices", "Accept choices"));
+				accept.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_ACCEPT));
+				accept.setSubmitConfirm(localize("accept_choices.confirm", "Are you sure you want to accept the selected choices?"));
+				buttonLayer.add(accept);
+			}
 			
 			if (getBackPage() != null) {
 				GenericButton back = new GenericButton(localize("back", "Back"));
@@ -94,7 +99,7 @@ public class CourseWaitingList extends CourseBlock {
 		}
 	}
 	
-	private void parseAction(IWContext iwc) throws RemoteException {
+	private boolean parseAction(IWContext iwc) throws RemoteException {
 		int action = ACTION_VIEW;
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
@@ -102,10 +107,17 @@ public class CourseWaitingList extends CourseBlock {
 		
 		if (action == ACTION_ACCEPT) {
 			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
-			for (String choice : choices) {
-				getBusiness().acceptChoice(choice, iwc.getCurrentLocale());
+			Course course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
+			if (course.getFreePlaces() >= choices.length) {
+				for (String choice : choices) {
+					getBusiness().acceptChoice(choice, iwc.getCurrentLocale());
+				}
+				return true;
 			}
+			return false;
 		}
+		
+		return true;
 	}
 
 	protected Layer getNavigation(IWContext iwc) throws RemoteException {

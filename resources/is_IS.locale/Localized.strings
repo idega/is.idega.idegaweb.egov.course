@@ -1,5 +1,6 @@
 accept_choices=Sta\u00F0festa
 accept_choices.confirm=Ertu viss um a\u00F0 \u00FE\u00FA viljir sta\u00F0festa valdar skr\u00E1ningar?
+accept_choices.max_reached=\u00DE\u00FA getur ekki sta\u00F0fest fleiri skr\u00E1ningar en h\u00E1marksfj\u00F6ldi \u00E1 n\u00E1mskei\u00F0i\u00F0 segir til um
 accounting_key=Verk\u00FE\u00E1ttan\u00FAmer
 address=Heimilisfang
 afternoon=16\:00-17\:00 ({0})

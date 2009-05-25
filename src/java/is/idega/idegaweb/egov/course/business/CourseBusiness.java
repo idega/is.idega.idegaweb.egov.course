@@ -581,7 +581,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#acceptChoice
 	 */
-	public void acceptChoice(Object courseChoicePK, Locale locale) throws RemoteException;
+	public boolean acceptChoice(Object courseChoicePK, Locale locale) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#removeCertificate
