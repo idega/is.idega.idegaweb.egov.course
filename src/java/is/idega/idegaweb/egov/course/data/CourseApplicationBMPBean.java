@@ -12,10 +12,13 @@ import com.idega.block.process.data.AbstractCaseBMPBean;
 import com.idega.block.process.data.Case;
 import com.idega.block.process.data.CaseStatus;
 import com.idega.company.data.Company;
+import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDORelationshipException;
+import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
+import com.idega.user.data.User;
 
 public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Case, CourseApplication {
 
@@ -37,18 +40,22 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 	private final static String COLUMN_CARD_VALID_MONTH = "card_valid_month";
 	private final static String COLUMN_CARD_VALID_YEAR = "card_valid_year";
 
+	@Override
 	public String getCaseCodeDescription() {
 		return "Case for courses";
 	}
 
+	@Override
 	public String getCaseCodeKey() {
 		return CourseConstants.CASE_CODE_KEY;
 	}
 
+	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
 
+	@Override
 	public void initializeAttributes() {
 		addGeneralCaseRelation();
 
@@ -211,5 +218,19 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public Collection ejbFindAll() throws FinderException {
 		return super.idoFindAllIDsBySQL();
+	}
+
+	public void addSubscriber(User subscriber)
+			throws IDOAddRelationshipException {
+		throw new UnsupportedOperationException("This method is not implemented!");
+	}
+
+	public Collection<User> getSubscribers() {
+		throw new UnsupportedOperationException("This method is not implemented!");
+	}
+
+	public void removeSubscriber(User subscriber)
+			throws IDORemoveRelationshipException {
+		throw new UnsupportedOperationException("This method is not implemented!");
 	}
 }
