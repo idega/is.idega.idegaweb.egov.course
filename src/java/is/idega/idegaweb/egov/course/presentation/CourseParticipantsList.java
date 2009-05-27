@@ -58,7 +58,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
 
-	private SchoolType type = null;
+	protected SchoolType type = null;
 
 	@Override
 	public void present(IWContext iwc) {
