@@ -12,6 +12,7 @@
       <include method="getCoursesMapDWR" />
       <include method="getPriceDWR" />
       <include method="getUserDWR" />
+      <include method="getUserDWRByRelation" />
       <include method="manageCourseChoiceSettings" />
     </create>
 	<convert converter="bean" match="is.idega.idegaweb.egov.course.business.CourseDWR"/>
