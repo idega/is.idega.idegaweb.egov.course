@@ -2558,7 +2558,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		try {
 			Collection<Course> courses = getCourseHome().findAll(null, null, null, -1, fromDate.getDate(), toDate.getDate());
 			for (Course course : courses) {
-				Collection<CourseChoice> choices = getCourseChoiceHome().findAllByCourse(course, null);
+				Collection<CourseChoice> choices = getCourseChoiceHome().findAllByCourse(course, false);
 				for (CourseChoice choice : choices) {
 					if (!choice.hasReceivedReminder()) {
 						CourseApplication application = choice.getApplication();
