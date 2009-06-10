@@ -53,6 +53,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	public static final String COLUMN_LIMITED_CERTIFICATE = "limited_certificate";
 	public static final String COLUMN_DID_NOT_SHOW_UP = "did_not_show_up";
 	public static final String COLUMN_PASSED = "passed_course";
+	public static final String COLUMN_CREATE_LOGIN = "create_login";
 	public static final String COLUMN_HAS_RECEIVED_REMINDER = "received_reminder";
 
 	public String getEntityName() {
@@ -67,6 +68,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_VALID, "Valid", Boolean.class);
 		addAttribute(COLUMN_DYSLEXIA, "Has dyslexia", Boolean.class);
 		addAttribute(COLUMN_PASSED, "Has passed course", Boolean.class);
+		addAttribute(COLUMN_CREATE_LOGIN, "Create login for user", Boolean.class);
 		addAttribute(COLUMN_CERTIFICATE_FEE, "Course certificate fee", Float.class);
 
 		addAttribute(COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE, "Verfication from government office", Boolean.class);
@@ -126,6 +128,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return getBooleanColumnValue(COLUMN_HAS_RECEIVED_REMINDER, false);
 	}
 
+	public boolean hasCreateLogin() {
+		return getBooleanColumnValue(COLUMN_CREATE_LOGIN, false);
+	}
+	
 	// Setters
 	public void setApplication(CourseApplication application) {
 		setColumn(COLUMN_APPLICATION, application);
@@ -167,6 +173,9 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		setColumn(COLUMN_HAS_RECEIVED_REMINDER, hasReceivedReminder);
 	}
 
+	public void setHasCreateLogin(boolean createLogin) {
+		setColumn(COLUMN_CREATE_LOGIN, createLogin);
+	}
 	// Finders
 	public Collection ejbFindAllByApplication(CourseApplication application) throws FinderException {
 		Table table = new Table(this);

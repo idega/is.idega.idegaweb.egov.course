@@ -7,6 +7,7 @@
  */
 package is.idega.idegaweb.egov.course.presentation;
 
+import is.idega.idegaweb.egov.citizen.presentation.CitizenFinder;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
@@ -27,6 +28,7 @@ import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolType;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
+import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.file.data.ICFile;
 import com.idega.core.location.data.Address;
@@ -59,6 +61,12 @@ public class CourseParticipantsList extends CourseBlock {
 	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
 
 	protected SchoolType type = null;
+	
+	protected ICPage changeEmailResponsePage = null;
+	
+	protected static final String PARAMETER_USER_PK = "cf_user_pk";
+	protected static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
+
 
 	@Override
 	public void present(IWContext iwc) {
@@ -457,7 +465,21 @@ public class CourseParticipantsList extends CourseBlock {
 
 			cell = row.createCell();
 			cell.setStyleClass("personalID");
-			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
+			if (getChangeEmailResponsePage() != null) {
+				Link link = new Link(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale()));
+				link.setEventListener(CitizenFinder.class);
+				if (user.getUniqueId() != null) {
+					link.addParameter(PARAMETER_USER_UNIQUE_ID, user.getUniqueId());
+				}
+				else {
+					link.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
+				}
+				link.setPage(getChangeEmailResponsePage());
+				
+				cell.add(link);
+			} else {
+				cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
+			}
 
 			if (!addCheckboxes) {
 				cell = row.createCell();
@@ -621,4 +643,13 @@ public class CourseParticipantsList extends CourseBlock {
 
 		return home;
 	}
+	
+	protected ICPage getChangeEmailResponsePage() {
+		return this.changeEmailResponsePage;
+	}
+
+	public void setChangeEmailResponsePage(ICPage responsePage) {
+		this.changeEmailResponsePage = responsePage;
+	}
+
 }

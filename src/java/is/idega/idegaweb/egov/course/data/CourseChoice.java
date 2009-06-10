@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import com.idega.data.IDOEntity;
 
 public interface CourseChoice extends IDOEntity {
-
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#getApplication
 	 */
@@ -58,6 +57,11 @@ public interface CourseChoice extends IDOEntity {
 	public boolean hasReceivedReminder();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#hasCreateLogin
+	 */
+	public boolean hasCreateLogin();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setApplication
 	 */
 	public void setApplication(CourseApplication application);
@@ -106,6 +110,11 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setReceivedReminder
 	 */
 	public void setReceivedReminder(boolean hasReceivedReminder);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setHasCreateLogin
+	 */
+	public void setHasCreateLogin(boolean createLogin);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setPassed
@@ -180,12 +189,14 @@ public interface CourseChoice extends IDOEntity {
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setNeedsVerificationFromGovermentOffice
 	 */
-	public void setNeedsVerificationFromGovermentOffice(boolean needsVerificationFromOffice);
+	public void setNeedsVerificationFromGovermentOffice(
+			boolean needsVerificationFromOffice);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setVerificationFromGovermentOffice
 	 */
-	public void setVerificationFromGovermentOffice(boolean verificationFromGovermentOffice);
+	public void setVerificationFromGovermentOffice(
+			boolean verificationFromGovermentOffice);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setVerificationOfPayment
