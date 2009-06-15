@@ -296,7 +296,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						extraEntry.setExtraInformation(uniqueID + "1");
 						entry.setExtraInformation(extraEntry);
 
-						entries.add(entry);
+						if (entry.getAmount() > 0) {
+							entries.add(entry);
+						}
 					}
 					catch (InstantiationException e) {
 						e.printStackTrace();
@@ -346,7 +348,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							extraEntry.setExtraInformation(uniqueID + "2");
 							entry.setExtraInformation(extraEntry);
 
-							entries.add(entry);
+							if (entry.getAmount() > 0) {
+								entries.add(entry);
+							}
 						}
 						catch (InstantiationException e) {
 							e.printStackTrace();
