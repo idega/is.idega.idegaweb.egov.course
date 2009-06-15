@@ -336,6 +336,7 @@ select_applicant_helper=Please select an applicant by writing in the personal ID
 select_applicant_helper_text=Please select the applicant from the drop down list.
 select_at_least_one_course=Select at least one course
 select_course=Select course
+selected_course_full=The course/s you have selected is/are already full.  If you choose to continue with the registration they will be added to waiting list.
 select_course_price=Select course price
 select_course_type=Select course type
 select_daycare_and_trip_home_options=Select daycare and trip home options.

@@ -1102,17 +1102,44 @@ public class CourseApplication extends ApplicationForm {
 	private void showPhaseSix(IWContext iwc) throws RemoteException {
 		User applicant = getApplicant(iwc);
 
+		IWTimestamp defaultStamp = new IWTimestamp();
+		int backMonths = iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_BACK_MONTHS) != null ? Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_BACK_MONTHS)) : -1;
+		if (backMonths != -1) {
+			defaultStamp.addMonths(backMonths);
+		}
+		else {
+			defaultStamp = null;
+		}
+		IWTimestamp stamp = new IWTimestamp();
+
+		boolean isFull = false;
 		String[] courses = iwc.getParameterValues(PARAMETER_COURSE);
 		for (int i = 0; courses != null && i < courses.length; i++) {
 			ApplicationHolder h = new ApplicationHolder();
 			Course course = getCourseBusiness(iwc).getCourse(new Integer(courses[i]));
-			if (getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
+			if (course.getFreePlaces() <= 0) {
+				isFull = true;
+			}
+			
+			IWTimestamp start = new IWTimestamp(course.getStartDate());
+			if (getCourseBusiness(iwc).getTimeoutDay() > 0) {
+				int day = getCourseBusiness(iwc).getTimeoutDay();
+				while (start.getDayOfWeek() != day) {
+					start.addDays(-1);
+				}
+			}
+			if (getCourseBusiness(iwc).getTimeoutHour() > 0) {
+				start.setHour(getCourseBusiness(iwc).getTimeoutHour());
+				start.setMinute(0);
+			}
+			
+			if (!iUseSessionUser ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true) && getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				h.setUser(applicant);
 				h.setCourse(course);
 				getCourseApplicationSession(iwc).addApplication(applicant, h);
 			}
 
-			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser)) {
+			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) || start.isLaterThan(stamp)) {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.old_course_selected", "You have selected a course that has already started or finished: ") + course.getName());
 			}
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
@@ -1274,6 +1301,10 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		section.setStyleClass("formSectionBig");
 		form.add(section);
+		
+		if (isFull) {
+			section.add(getAttentionLayer(this.iwrb.getLocalizedString("selected_course_full", "The course/s you have selected is/are already full.  If you choose to continue with the registration they will be added to waiting list.")));
+		}
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -2244,7 +2275,7 @@ public class CourseApplication extends ApplicationForm {
 
 		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
 		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.getCurrentLocale());
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.isLoggedOn() ? iwc.getCurrentUser() : null, iwc.getCurrentLocale());
 		if (application != null && creditCardPayment) {
 			if (useDirectPayment) {
 				try {

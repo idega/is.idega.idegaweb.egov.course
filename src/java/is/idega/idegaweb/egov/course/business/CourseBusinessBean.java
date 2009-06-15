@@ -1753,12 +1753,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return interval;
 	}
 
-	private int getTimeoutDay() {
+	public int getTimeoutDay() {
 		int day = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_TIMEOUT_DAY_OF_WEEK, "-1"));
 		return day;
 	}
 
-	private int getTimeoutHour() {
+	public int getTimeoutHour() {
 		int hour = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_TIMEOUT_HOUR, "-1"));
 		return hour;
 	}
@@ -1938,7 +1938,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
-	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) {
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User owner, User performer, Locale locale, float certificateFee) {
 		try {
 			boolean useWaitingList = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_WAITING_LIST, false);
 			boolean useDirectPayment = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
@@ -1960,17 +1960,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			application.setReferenceNumber(referenceNumber);
 			application.setPayerName(payerName);
 			application.setPayerPersonalID(payerPersonalID);
-			if (performer == null) {
+			if (owner == null) {
 				try {
-					performer = getIWApplicationContext().getIWMainApplication().getAccessController().getAdministratorUser();
+					owner = getIWApplicationContext().getIWMainApplication().getAccessController().getAdministratorUser();
 				}
 				catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			application.setOwner(performer);
+			application.setOwner(owner);
+			if (performer != null) {
+				application.setCreator(performer);
+			}
 			application.setAmount(amount);
-			changeCaseStatus(application, getCaseStatusOpen(), performer);
+			changeCaseStatus(application, getCaseStatusOpen(), owner);
 
 			String subject = getLocalizedString("course_choice.registration_received", "Your registration for course has been received", locale);
 			String body = "";
@@ -2020,8 +2023,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return null;
 	}
 
-	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) {
-		return saveApplication(applications, merchantID, amount, merchantType, paymentType, referenceNumber, payerName, payerPersonalID, performer, locale, 0);
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User owner, User performer, Locale locale) {
+		return saveApplication(applications, merchantID, amount, merchantType, paymentType, referenceNumber, payerName, payerPersonalID, owner, performer, locale, 0);
 	}
 
 	private void sendMessageToParents(CourseApplication application, CourseChoice choice, String subject, String body, Locale locale) {

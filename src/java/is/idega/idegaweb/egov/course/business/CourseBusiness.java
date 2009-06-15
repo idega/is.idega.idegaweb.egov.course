@@ -429,6 +429,16 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public boolean hasAvailableCourses(User user, CourseType type) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getTimeoutDay
+	 */
+	public int getTimeoutDay() throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getTimeoutHour
+	 */
+	public int getTimeoutHour() throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#canInvalidate
 	 */
 	public boolean canInvalidate(CourseChoice choice) throws RemoteException;
@@ -461,12 +471,12 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
 	 */
-	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale, float certificateFee) throws RemoteException;
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User owner, User performer, Locale locale, float certificateFee) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
 	 */
-	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User performer, Locale locale) throws RemoteException;
+	public CourseApplication saveApplication(Map applications, int merchantID, float amount, String merchantType, String paymentType, String referenceNumber, String payerName, String payerPersonalID, User owner, User performer, Locale locale) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getNumberOfCourses
