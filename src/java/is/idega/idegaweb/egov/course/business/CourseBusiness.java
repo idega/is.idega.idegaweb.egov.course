@@ -394,6 +394,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness, AccountingBusi
 	public Map getApplicationMap(CourseApplication application) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getApplicationMap
+	 */
+	public Map getApplicationMap(CourseApplication application, Boolean waitingList) throws RemoteException;
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#calculateRefund
 	 */
 	public float calculateRefund(CourseChoice choice) throws RemoteException;

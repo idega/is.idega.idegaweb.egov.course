@@ -176,8 +176,13 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	public void setHasCreateLogin(boolean createLogin) {
 		setColumn(COLUMN_CREATE_LOGIN, createLogin);
 	}
-	// Finders
+	
+	//Finders
 	public Collection ejbFindAllByApplication(CourseApplication application) throws FinderException {
+		return ejbFindAllByApplication(application, null);
+	}
+	
+	public Collection ejbFindAllByApplication(CourseApplication application, Boolean waitingList) throws FinderException {
 		Table table = new Table(this);
 		Table course = new Table(Course.class);
 
@@ -188,6 +193,14 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		}
 		catch (IDORelationshipException e) {
 			throw new FinderException(e.getMessage());
+		}
+		if (waitingList != null) {
+			if (waitingList.booleanValue()) {
+				query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, true));
+			}
+			else {
+				query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, false), new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST))));
+			}
 		}
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_APPLICATION), MatchCriteria.EQUALS, application));
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
