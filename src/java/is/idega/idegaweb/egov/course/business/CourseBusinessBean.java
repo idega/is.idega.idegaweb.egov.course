@@ -276,7 +276,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						entry.setProjectCode(typeCode);
 						entry.setPayerPersonalId(payerPId);
 						entry.setPersonalId(studentPId);
-						entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? application.getCardType().toUpperCase() : "GIRO");
+						entry.setPaymentMethod(paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) ? application.getCardType().substring(0, 4).toUpperCase() : "GIRO");
 						if (paymentType.equals(CourseConstants.PAYMENT_TYPE_CARD) && application.getCardNumber() != null) {
 							entry.setCardExpirationMonth(application.getCardValidMonth());
 							entry.setCardExpirationYear(application.getCardValidYear());
