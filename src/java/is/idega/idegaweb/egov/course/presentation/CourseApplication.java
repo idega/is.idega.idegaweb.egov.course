@@ -1139,7 +1139,7 @@ public class CourseApplication extends ApplicationForm {
 				getCourseApplicationSession(iwc).addApplication(applicant, h);
 			}
 
-			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) || start.isLaterThan(stamp)) {
+			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) || stamp.isLaterThan(start)) {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.old_course_selected", "You have selected a course that has already started or finished: ") + course.getName());
 			}
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
