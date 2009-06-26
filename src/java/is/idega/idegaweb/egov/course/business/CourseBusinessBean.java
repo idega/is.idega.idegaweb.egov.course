@@ -1789,32 +1789,33 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		String subject = "";
 		String body = "";
 
+		User payer = null;
+		if (application.getPayerPersonalID() != null) {
+			try {
+				payer = getUserBusiness().getUser(application.getPayerPersonalID());
+			}
+			catch (FinderException e) {
+				e.printStackTrace();
+				payer = application.getOwner();
+			}
+			catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			}
+		}
+		else {
+			payer = application.getOwner();
+		}
+
 		if (choice != null) {
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
 			School provider = course.getProvider();
-			Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()), course.getName(), provider.getName() };
+			Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()), course.getName(), provider.getName(), payer.getName(), PersonalIDFormatter.format(payer.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()) };
 
 			subject = getLocalizedString("course_choice.choice_refund_subject", "Choice invalidated", locale);
 			body = MessageFormat.format(getLocalizedString("course_choice.choice_refund_body", "A choice for course {2} at {3} for {0}, {1} has been invalidated and needs to be refunded", locale), arguments);
 		}
 		else {
-			User payer = null;
-			if (application.getPayerPersonalID() != null) {
-				try {
-					payer = getUserBusiness().getUser(application.getPayerPersonalID());
-				}
-				catch (FinderException e) {
-					e.printStackTrace();
-					payer = application.getOwner();
-				}
-				catch (RemoteException re) {
-					throw new IBORuntimeException(re);
-				}
-			}
-			else {
-				payer = application.getOwner();
-			}
 			Object[] arguments = { payer.getName(), PersonalIDFormatter.format(payer.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()) };
 
 			subject = getLocalizedString("course_choice.application_refund_subject", "Application invalidated", locale);
