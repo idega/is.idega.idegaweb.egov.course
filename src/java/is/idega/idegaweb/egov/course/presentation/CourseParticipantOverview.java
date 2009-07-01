@@ -122,6 +122,7 @@ public class CourseParticipantOverview extends CourseBlock {
 	protected void getViewerForm(IWContext iwc, User participant) throws RemoteException {
 		Form form = new Form();
 		form.maintainParameter(getBusiness().getSelectedCaseParameter());
+		form.setId("courseParticipantOverview");
 
 		form.add(getHeader(getResourceBundle().getLocalizedString("application.course_participant_overview", "Course participant overview")));
 
@@ -271,7 +272,7 @@ public class CourseParticipantOverview extends CourseBlock {
 				row = group.createRow();
 				choice = (CourseChoice) iter.next();
 				if (choice.isOnWaitingList()) {
-					continue;
+					row.setStyleClass("waitlisted");
 				}
 
 				Course course = choice.getCourse();

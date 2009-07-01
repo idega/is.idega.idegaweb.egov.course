@@ -93,3 +93,7 @@ table.adminTable tr.openForRegistration td {
 ul.legend li.openForRegistration {
 	color: #0088ff;
 }
+
+#courseParticipantOverview table.choices tr.waitlisted td, #courseParticipantOverview table.choices tr.waitlisted td a {
+	color: #a0a0a0;
+}
