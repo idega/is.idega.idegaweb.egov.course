@@ -384,7 +384,7 @@ public class CourseChoiceOverview extends CourseBlock {
 			}
 			bottom.add(invalidate);
 			
-			if (choice.inOnWaitingList()) {
+			if (choice.isOnWaitingList()) {
 				Link accept = getButtonLink(getResourceBundle().getLocalizedString("accept_choices", "Accept choices"));
 				accept.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_ACCEPT));
 				accept.maintainParameter(PARAMETER_CHOICE_PK, iwc);

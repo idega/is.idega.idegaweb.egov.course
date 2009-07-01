@@ -235,6 +235,27 @@
       <type>java.lang.String</type>
       <value>is.idega.idegaweb.egov.course</value>
     </key>
+    <key>
+      <name>egov.course.timer.minute</name>
+      <type>java.lang.String</type>
+      <value>0</value>
+      <simple>false</simple>
+      <reload>false</reload>
+    </key>
+    <key>
+      <name>egov.course.timer.hour</name>
+      <type>java.lang.String</type>
+      <value>13</value>
+      <simple>false</simple>
+      <reload>false</reload>
+    </key>
+    <key>
+      <name>egov.course.timer.dayofweek</name>
+      <type>java.lang.String</type>
+      <value>2</value>
+      <simple>false</simple>
+      <reload>false</reload>
+    </key>
   </map>
 </pxml>
 

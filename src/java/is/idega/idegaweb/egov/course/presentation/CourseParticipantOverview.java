@@ -270,6 +270,9 @@ public class CourseParticipantOverview extends CourseBlock {
 			while (iter.hasNext()) {
 				row = group.createRow();
 				choice = (CourseChoice) iter.next();
+				if (choice.isOnWaitingList()) {
+					continue;
+				}
 
 				Course course = choice.getCourse();
 				School provider = course.getProvider();

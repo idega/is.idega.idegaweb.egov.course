@@ -120,7 +120,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return getBooleanColumnValue(COLUMN_DYSLEXIA, false);
 	}
 	
-	public boolean inOnWaitingList() {
+	public boolean isOnWaitingList() {
 		return getBooleanColumnValue(COLUMN_WAITING_LIST, false);
 	}
 	

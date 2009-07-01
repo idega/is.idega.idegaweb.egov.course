@@ -48,9 +48,9 @@ public interface CourseChoice extends IDOEntity {
 	public boolean hasDyslexia();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#inOnWaitingList
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isOnWaitingList
 	 */
-	public boolean inOnWaitingList();
+	public boolean isOnWaitingList();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#hasReceivedReminder
