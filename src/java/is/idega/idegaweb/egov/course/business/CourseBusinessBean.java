@@ -2618,7 +2618,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	public void sendNextCoursesMessages() {
 		IWTimestamp fromDate = new IWTimestamp();
-		fromDate.addDays(6);
+		if (fromDate.getDayOfWeek() == Calendar.SUNDAY) {
+			fromDate.addDays(1);
+		}
+		else {
+			fromDate.addDays(7 - (fromDate.getDayOfWeek() - Calendar.MONTH));
+		}
 
 		IWTimestamp toDate = new IWTimestamp(fromDate);
 		toDate.addDays(7);
@@ -2629,6 +2634,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		try {
 			Collection<Course> courses = getCourseHome().findAll(null, null, null, -1, fromDate.getDate(), toDate.getDate());
+			int count = 0;
 			for (Course course : courses) {
 				Collection<CourseChoice> choices = getCourseChoiceHome().findAllByCourse(course, false);
 				for (CourseChoice choice : choices) {
@@ -2639,9 +2645,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 						choice.setReceivedReminder(true);
 						choice.store();
+						count++;
 					}
 				}
 			}
+			
+			System.out.println("[CourseBusiness] " + IWTimestamp.getTimestampRightNow().toString() +  " - Done sending reminder messages for courses between " + fromDate.toSQLDateString() + " and " + toDate.toSQLDateString() + ": " + count);
 		}
 		catch (IDORelationshipException ire) {
 			log(ire);

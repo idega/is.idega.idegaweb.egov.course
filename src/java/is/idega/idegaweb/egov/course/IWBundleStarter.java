@@ -6,7 +6,6 @@ import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseHome;
 
 import java.rmi.RemoteException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -73,11 +72,11 @@ public void start(IWBundle starterBundle) {
 		
 		int minute = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_MINUTE, String.valueOf(0)));
 		int hour = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_HOUR, String.valueOf(13)));
-		int dayOfWeek = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_DAYOFWEEK, String.valueOf(Calendar.MONDAY)));
+		//int dayOfWeek = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_DAYOFWEEK, String.valueOf(Calendar.MONDAY)));
 		
 		if (courseTimerEntry == null) {
 			try {
-				courseTimerEntry = tManager.addTimer(minute, hour, -1, -1, dayOfWeek, -1, new TimerListener() {
+				courseTimerEntry = tManager.addTimer(minute, hour, -1, -1, -1, -1, new TimerListener() {
 					public void handleTimer(TimerEntry entry) {
 						sendMessages();
 					}
