@@ -583,7 +583,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 		else {
 			//	Checking personal id
-			if (!getUserBusiness(iwc).hasValidIcelandicSSN(applicant)) {
+			if (!getUserBusiness(iwc).hasValidPersonalId(applicant, iwc.getCurrentLocale())) {
 				setError(ACTION_PHASE_3, PARAMETER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
 			}
 			//	Checking age
