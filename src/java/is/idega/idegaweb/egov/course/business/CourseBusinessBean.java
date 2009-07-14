@@ -2622,7 +2622,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			fromDate.addDays(1);
 		}
 		else {
-			fromDate.addDays(7 - (fromDate.getDayOfWeek() - Calendar.MONTH));
+			fromDate.addDays(7 - (fromDate.getDayOfWeek() - Calendar.MONDAY));
 		}
 
 		IWTimestamp toDate = new IWTimestamp(fromDate);
