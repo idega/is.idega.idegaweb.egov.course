@@ -2626,7 +2626,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 
 		IWTimestamp toDate = new IWTimestamp(fromDate);
-		toDate.addDays(7);
+		toDate.addDays(6);
 
 		Locale locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
 		String subject = getLocalizedString("course_choice.reminder_subject", "A reminder for course choice", locale);
