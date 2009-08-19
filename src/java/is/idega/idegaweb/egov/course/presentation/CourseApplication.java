@@ -203,7 +203,7 @@ public class CourseApplication extends ApplicationForm {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.user_not_applicable", "The user you selected is not applicable for this application"));
 						canContinue = false;
 					}
-					else if (!getCourseBusiness(iwc).hasAvailableCourses(applicant, (SchoolType) null)) {
+					else if (!iUseSessionUser && !getCourseBusiness(iwc).hasAvailableCourses(applicant, (SchoolType) null)) {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.no_courses_available", "There are no courses available for the user you have selected."));
 						canContinue = false;
 					}
