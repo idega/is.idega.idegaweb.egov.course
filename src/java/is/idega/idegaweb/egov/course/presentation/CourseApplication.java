@@ -931,7 +931,7 @@ public class CourseApplication extends ApplicationForm {
 		Iterator iter = courseTypes.iterator();
 		while (iter.hasNext()) {
 			CourseType courseType = (CourseType) iter.next();
-			if (getCourseBusiness(iwc).hasAvailableCourses(applicant, courseType)) {
+			if (iUseSessionUser || getCourseBusiness(iwc).hasAvailableCourses(applicant, courseType)) {
 				typeMenu.addMenuElement(courseType.getPrimaryKey().toString(), courseType.getName());
 			}
 		}
