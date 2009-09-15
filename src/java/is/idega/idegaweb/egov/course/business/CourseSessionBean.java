@@ -35,6 +35,7 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 	private Object iUserPK;
 	private School iProvider;
 	private Boolean iSchoolProvider;
+	private boolean allProvidersSelected;
 
 	public boolean isSchoolProvider() throws RemoteException {
 		if (iSchoolProvider == null) {
@@ -121,6 +122,14 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		return schools;
 	}
 
+	public boolean getIsAllProvidersSelected() {
+		return this.allProvidersSelected;
+	}
+	
+	public void setIsAllProvidersSelected(boolean selected) {
+		this.allProvidersSelected = selected;
+	}
+	
 	private CourseBusiness getCourseBusiness() {
 		try {
 			return (CourseBusiness) IBOLookup.getServiceInstance(getIWApplicationContext(), CourseBusiness.class);

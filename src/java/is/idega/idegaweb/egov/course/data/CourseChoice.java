@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import com.idega.data.IDOEntity;
 
 public interface CourseChoice extends IDOEntity {
-
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#getApplication
 	 */
@@ -190,12 +189,14 @@ public interface CourseChoice extends IDOEntity {
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setNeedsVerificationFromGovermentOffice
 	 */
-	public void setNeedsVerificationFromGovermentOffice(boolean needsVerificationFromOffice);
+	public void setNeedsVerificationFromGovermentOffice(
+			boolean needsVerificationFromOffice);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setVerificationFromGovermentOffice
 	 */
-	public void setVerificationFromGovermentOffice(boolean verificationFromGovermentOffice);
+	public void setVerificationFromGovermentOffice(
+			boolean verificationFromGovermentOffice);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setVerificationOfPayment

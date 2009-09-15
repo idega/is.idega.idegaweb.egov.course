@@ -7,7 +7,6 @@ import com.idega.business.IBOSession;
 import java.rmi.RemoteException;
 
 public interface CourseSession extends IBOSession {
-
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#isSchoolProvider
 	 */
@@ -31,5 +30,17 @@ public interface CourseSession extends IBOSession {
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#getSchoolsForUser
 	 */
-	public Collection getSchoolsForUser() throws RemoteException, RemoteException;
+	public Collection getSchoolsForUser() throws RemoteException,
+			RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#getIsAllProvidersSelected
+	 */
+	public boolean getIsAllProvidersSelected() throws RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#setIsAllProvidersSelected
+	 */
+	public void setIsAllProvidersSelected(boolean selected)
+			throws RemoteException;
 }

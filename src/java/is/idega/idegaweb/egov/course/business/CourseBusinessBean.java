@@ -2660,6 +2660,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	public Collection getAllChoicesByCourseAndDate(Object coursePK, IWTimestamp fromDate, IWTimestamp toDate) {
+		Course course = null;
+		if (coursePK != null) {
+			course = getCourse(coursePK);
+		}
+
+		try {
+			return getCourseChoiceHome().findAllByCourseAndDate(course, fromDate, toDate);
+		}
+		catch (FinderException fe) {
+			fe.printStackTrace();
+			return new ArrayList();
+		}
+	}
+	
 	public Collection<Course> getCoursesByTypes(Collection<String> typesIds) throws RemoteException {
 		if (ListUtil.isEmpty(typesIds)) {
 			return null;

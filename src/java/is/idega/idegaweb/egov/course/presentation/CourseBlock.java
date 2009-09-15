@@ -169,7 +169,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		}
 	}
 
-	private CourseSession getSession(IWUserContext iwuc) {
+	protected CourseSession getSession(IWUserContext iwuc) {
 		try {
 			return (CourseSession) IBOLookup.getSessionInstance(iwuc, CourseSession.class);
 		}

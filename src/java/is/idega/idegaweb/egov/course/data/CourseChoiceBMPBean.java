@@ -27,6 +27,7 @@ import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
+import com.idega.util.IWTimestamp;
 
 public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
@@ -311,6 +312,25 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return idoFindOnePKByQuery(query);
 	}
 
+	public Collection ejbFindAllByCourseAndDate(Course course, IWTimestamp fromDate, IWTimestamp toDate) throws FinderException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(table.getColumn(getIDColumnName()));
+		if (course != null) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE), MatchCriteria.EQUALS, course));
+		}
+		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
+
+		query.addOrder(new Order(table.getColumn(COLUMN_COURSE), true));
+
+		/*@TODO add handling for dates, join with course and use the date there */
+		
+		System.out.println("sql = " + query.toString());
+		
+		return idoFindPKsByQuery(query);
+	}
+	
 	public int ejbHomeGetCountByUserAndProviders(User user, Collection providers) throws IDOException {
 		Table table = new Table(this);
 		Table course = new Table(Course.class);
