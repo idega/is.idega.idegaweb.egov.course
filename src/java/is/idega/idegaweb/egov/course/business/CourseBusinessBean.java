@@ -1025,6 +1025,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			else {
 				defaultStamp = null;
 			}
+			boolean useCourseOpen = getIWMainApplication().getSettings().getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false);
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map map = new LinkedHashMap();
@@ -1045,7 +1046,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						start.setMinute(0);
 					}
 
-					if (course.isOpenForRegistration() && ((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null))) {
+					if (useCourseOpen && course.isOpenForRegistration()) {
+						CourseDWR cDWR = getCourseDWR(locale, course);
+						map.put(course.getPrimaryKey(), cDWR);
+					}
+					else if (((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null))) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
 					}
