@@ -1046,9 +1046,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						start.setMinute(0);
 					}
 
-					if (useCourseOpen && course.isOpenForRegistration()) {
-						CourseDWR cDWR = getCourseDWR(locale, course);
-						map.put(course.getPrimaryKey(), cDWR);
+					if (useCourseOpen) {
+						if (course.isOpenForRegistration()) {
+							CourseDWR cDWR = getCourseDWR(locale, course);
+							map.put(course.getPrimaryKey(), cDWR);
+						}
 					}
 					else if (((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null))) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
