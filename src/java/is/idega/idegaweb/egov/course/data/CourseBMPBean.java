@@ -148,7 +148,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 	
 	public boolean isOpenForRegistration() {
-		return getBooleanColumnValue(COLUMN_OPEN_FOR_REGISTRATION, false);
+		return getBooleanColumnValue(COLUMN_OPEN_FOR_REGISTRATION, true);
 	}
 
 	// Setters
