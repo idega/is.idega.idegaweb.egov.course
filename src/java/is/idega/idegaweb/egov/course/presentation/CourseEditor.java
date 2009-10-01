@@ -12,6 +12,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ejb.FinderException;
@@ -358,14 +359,17 @@ public class CourseEditor extends CourseBlock {
 		}
 
 		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
-		Collection courses = new ArrayList();
+		List courses = new ArrayList();
 		if (getSession().getProvider() != null || showAllCourses) {
 			try {
-				courses = getCourseBusiness(iwc).getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey() : null), iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate);
+				courses = new ArrayList(getCourseBusiness(iwc).getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey() : null), iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
 			}
 			catch (RemoteException rex) {
 				throw new IBORuntimeException(rex);
 			}
+		}
+		if (showAllCourses) {
+			Collections.reverse(courses);
 		}
 
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);

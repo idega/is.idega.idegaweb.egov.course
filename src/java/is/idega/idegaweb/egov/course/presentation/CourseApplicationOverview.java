@@ -284,7 +284,7 @@ public class CourseApplicationOverview extends CourseBlock {
 				CourseType type = course.getCourseType();
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
-				IWTimestamp endDate = course.getCoursePrice() > 0 ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate()));
+				IWTimestamp endDate = coursePrice != null ? new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate())) : new IWTimestamp(course.getEndDate());
 
 				float certificateFee = course.getCourseCost();
 				if (certificateFee > 0) {

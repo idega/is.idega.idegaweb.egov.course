@@ -21,6 +21,7 @@ public class CourseConstants {
 	public static final int DAY_CARE_POST = 2;
 	public static final int DAY_CARE_PRE_AND_POST = 3;
 
+	public static final String PROPERTY_REGISTRATION_EMAIL = "egov.course.registration.email";
 	public static final String PROPERTY_REFUND_EMAIL = "egov.course.refund.email";
 	public static final String PROPERTY_HIDDEN_SCHOOL_TYPE = "egov.course.hidden.type";
 	public static final String PROPERTY_MERCHANT_PK = "egov.course.merchant.pk";

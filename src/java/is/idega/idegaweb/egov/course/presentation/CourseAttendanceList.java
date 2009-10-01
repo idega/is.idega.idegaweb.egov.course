@@ -18,6 +18,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -198,7 +199,10 @@ public class CourseAttendanceList extends CourseBlock {
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_SCHOOL_TYPE) && iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), fromDate, toDate);
+			List courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), fromDate, toDate));
+			if (showAllCourses) {
+				Collections.reverse(courses);
+			}
 			course.addMenuElements(courses);
 		}
 

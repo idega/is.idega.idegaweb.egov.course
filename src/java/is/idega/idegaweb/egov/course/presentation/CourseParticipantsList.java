@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,6 +64,8 @@ public class CourseParticipantsList extends CourseBlock {
 	protected SchoolType type = null;
 	
 	protected ICPage changeEmailResponsePage = null;
+
+	private boolean addCheckboxes = false;
 	
 	protected static final String PARAMETER_USER_PK = "cf_user_pk";
 	protected static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
@@ -82,14 +85,21 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 			form.add(getParticipants(iwc));
 
-			if (getBackPage() != null) {
+			if (getBackPage() != null || addCheckboxes) {
 				Layer buttonLayer = new Layer();
 				buttonLayer.setStyleClass("buttonLayer");
 				form.add(buttonLayer);
 
-				GenericButton back = new GenericButton(localize("back", "Back"));
-				back.setPageToOpen(getBackPage());
-				buttonLayer.add(back);
+				if (addCheckboxes) {
+					GenericButton back = new GenericButton(localize("save", "Save"));
+					back.setOnClick("alert('" + localize("changes_saved", "Changes saved") + "');");
+				}
+				
+				if (getBackPage() != null) {
+					GenericButton back = new GenericButton(localize("back", "Back"));
+					back.setPageToOpen(getBackPage());
+					buttonLayer.add(back);
+				}
 			}
 
 			add(form);
@@ -220,8 +230,12 @@ public class CourseParticipantsList extends CourseBlock {
 
 		if ((getSession().getProvider() != null && typePK != null) || showAllCourses) {
 			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate);
+			List courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
 
+			if (showAllCourses) {
+				Collections.reverse(courses);
+			}
+			
 			Iterator iter = courses.iterator();
 			while (iter.hasNext()) {
 				Course element = (Course) iter.next();
@@ -306,6 +320,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink, boolean addCheckboxes) throws RemoteException {
 		if (addCheckboxes) {
+			this.addCheckboxes  = addCheckboxes;
 			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, getBundle().getVirtualPathWithFileNameString("javascript/CourseParticipantsListHelper.js"));
 		}
 
@@ -357,6 +372,11 @@ public class CourseParticipantsList extends CourseBlock {
 			columns++;
 
 			if (showCertificates) {
+				cell = row.createHeaderCell();
+				cell.setStyleClass("created");
+				cell.add(new Text(getResourceBundle().getLocalizedString("register_date", "Register date")));
+				columns++;
+
 				cell = row.createHeaderCell();
 				if (!addViewParticipantLink) {
 					cell.setStyleClass("lastColumn");
@@ -513,6 +533,10 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 
 				if (showCertificates) {
+					cell = row.createCell();
+					cell.setStyleClass("created");
+					cell.add(new Text(new IWTimestamp(choice.getApplication().getCreated()).getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT)));
+
 					cell = row.createCell();
 					if (!addViewParticipantLink) {
 						cell.setStyleClass("lastColumn");

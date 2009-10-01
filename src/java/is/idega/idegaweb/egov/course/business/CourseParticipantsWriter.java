@@ -39,6 +39,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import com.idega.business.IBOLookup;
+import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.file.util.MimeTypeUtil;
@@ -55,6 +56,7 @@ import com.idega.presentation.IWContext;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
+import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
 import com.idega.util.text.Name;
@@ -276,7 +278,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell.setCellValue(this.iwrb.getLocalizedString("email", "E-mail"));
 			cell.setCellStyle(style);
 			cell = row.createCell(iCell++);
+			cell.setCellValue(this.iwrb.getLocalizedString("register_date", "Register date"));
+			cell.setCellStyle(style);
+			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("application.has_dyslexia", "Has dyslexia"));
+			cell.setCellStyle(style);
+			cell = row.createCell(iCell++);
+			cell.setCellValue(this.iwrb.getLocalizedString("application.payer_personal_id", "Payer personal ID"));
 			cell.setCellStyle(style);
 		}
 		
@@ -498,6 +506,21 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				Phone work = null;
 				Phone mobile = null;
 				Email email = null;
+				User payer = null;
+				if (application.getPayerPersonalID() != null) {
+					try {
+						payer = getUserBusiness(iwc).getUser(application.getPayerPersonalID());
+					}
+					catch (FinderException e) {
+						payer = application.getOwner();
+					}
+					catch (RemoteException re) {
+						throw new IBORuntimeException(re);
+					}
+				}
+				else {
+					payer = application.getOwner();
+				}
 
 				try {
 					work = this.userBusiness.getUsersWorkPhone(child);
@@ -538,11 +561,15 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				else {
 					iCell++;
 				}
+				row.createCell(iCell++).setCellValue(new IWTimestamp(application.getCreated()).getLocaleDate(locale, IWTimestamp.SHORT));
 				if (choice.hasDyslexia()) {
 					row.createCell(iCell++).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 				}
 				else {
 					row.createCell(iCell++).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+				}
+				if (payer != null) {
+					row.createCell(iCell++).setCellValue(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale()));
 				}
 			}
 		}

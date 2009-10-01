@@ -18,6 +18,7 @@ import com.idega.util.IWTimestamp;
 public class CourseComparator implements Comparator {
 
 	public static final int NAME_SORT = 1;
+	public static final int REVERSE_NAME_SORT = 8;
 	public static final int TYPE_SORT = 2;
 	public static final int YEAR_SORT = 3;
 	public static final int DATE_SORT = 4;
@@ -69,13 +70,17 @@ public class CourseComparator implements Comparator {
 				returner = freePlacesSort(course1, course2);
 				break;
 
+			case REVERSE_NAME_SORT:
+				returner = -nameSort(course1, course2);
+				break;
+
 			default:
 				returner = nameSort(course1, course2);
 				break;
 		}
 
 		if (returner == 0) {
-			returner = idSort(course1, course2);
+			returner = compareBy == REVERSE_NAME_SORT ? -idSort(course1, course2) : idSort(course1, course2);
 		}
 
 		return returner;

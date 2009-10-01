@@ -1047,7 +1047,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					}
 
 					if (useCourseOpen) {
-						if (course.isOpenForRegistration()) {
+						if ((course.isOpenForRegistration() || isAdmin) && ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
 							CourseDWR cDWR = getCourseDWR(locale, course);
 							map.put(course.getPrimaryKey(), cDWR);
 						}
@@ -1838,6 +1838,44 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	public void sendRegistrationMessage(CourseApplication application, CourseChoice choice, Locale locale) {
+		String subject = "";
+		String body = "";
+
+		User payer = null;
+		if (application.getPayerPersonalID() != null) {
+			try {
+				payer = getUserBusiness().getUser(application.getPayerPersonalID());
+			}
+			catch (FinderException e) {
+				e.printStackTrace();
+				payer = application.getOwner();
+			}
+			catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			}
+		}
+		else {
+			payer = application.getOwner();
+		}
+
+		User applicant = choice.getUser();
+		Course course = choice.getCourse();
+		School provider = course.getProvider();
+		Object[] arguments = { applicant.getName(), PersonalIDFormatter.format(applicant.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()), course.getName(), provider.getName(), payer.getName(), PersonalIDFormatter.format(payer.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()) };
+
+		subject = getLocalizedString("course_choice.choice_registration_subject", "Choice registered", locale);
+		body = MessageFormat.format(getLocalizedString("course_choice.choice_registration_body", "A choice for course {2} at {3} for {0}, {1} has been sent in", locale), arguments);
+
+		try {
+			String refundEmail = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_REGISTRATION_EMAIL, "fjarmaladeild@itr.is");
+			getMessageBusiness().sendMessage(refundEmail, subject, body);
+		}
+		catch (RemoteException re) {
+			throw new IBORuntimeException(re);
+		}
+	}
+
 	public void invalidateApplication(CourseApplication application, User performer, Locale locale) {
 		Collection choices = getCourseChoices(application);
 		Iterator iterator = choices.iterator();
@@ -1992,6 +2030,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				else if (paymentType.equals(CourseConstants.PAYMENT_TYPE_GIRO)) {
 					body = getLocalizedString("course_choice.giro_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received.  You will receive an invoice in a few days for the total amount of the registration.", locale);
 				}
+				else if (paymentType.equals(CourseConstants.PAYMENT_TYPE_BANK_TRANSFER)) {
+					body = getLocalizedString("course_choice.bank_registration_body", "Your registration for course {2} at {3} for {0}, {1} has been received.  If you have not already paid for the course, please do so within ten days of the course start.", locale);
+				}
 			}
 
 			Iterator iter = applications == null ? null : applications.values().iterator();
@@ -2019,6 +2060,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						choice.store();
 
 						sendMessageToParents(application, choice, subject, body, locale);
+						
+						/* Hack for NeSt */
+						if (holder.getCourse().getCourseType().getAbbreviation().equals("B")) {
+							sendRegistrationMessage(application, choice, locale);
+						}
 					}
 				}
 			}

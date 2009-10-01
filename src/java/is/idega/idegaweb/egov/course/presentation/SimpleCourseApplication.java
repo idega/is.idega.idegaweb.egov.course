@@ -596,8 +596,8 @@ public class SimpleCourseApplication extends ApplicationForm {
 			}
 			else {
 				Age age = new Age(dateOfBirth);
-				if (age.getYears() < 19) {
-					setError(ACTION_PHASE_3, PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("applicant_is_too_young", "Applicant is too young. Minimal age requirement is") + ": 19.");
+				if (age.getYears() < 20) {
+					setError(ACTION_PHASE_3, PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("applicant_is_too_young", "Applicant is too young. Minimal age requirement is") + ": 20.");
 				}
 			}
 			//	Checking if user already registered for current course
