@@ -22,5 +22,5 @@ public interface CourseCertificateHome extends IDOHome {
 	
 	public Collection findCertificatesByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException;
 
-	public CourseCertificate findHighestNumberByType(CourseCertificateType type) throws FinderException;
+	public CourseCertificate findHighestNumber() throws FinderException;
 }

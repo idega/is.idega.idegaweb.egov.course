@@ -53,9 +53,9 @@ public class CourseCertificateHomeImpl extends IDOFactory implements CourseCerti
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
-	public CourseCertificate findHighestNumberByType(CourseCertificateType type) throws FinderException {
+	public CourseCertificate findHighestNumber() throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Object pk = ((CourseCertificateBMPBean) entity).ejbFindHighestNumberByType(type);
+		Object pk = ((CourseCertificateBMPBean) entity).ejbFindHighestNumber();
 		this.idoCheckInPooledEntity(entity);
 		return this.findByPrimaryKey(pk);
 	}

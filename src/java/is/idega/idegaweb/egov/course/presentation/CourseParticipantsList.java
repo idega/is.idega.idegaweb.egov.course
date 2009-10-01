@@ -65,8 +65,6 @@ public class CourseParticipantsList extends CourseBlock {
 	
 	protected ICPage changeEmailResponsePage = null;
 
-	private boolean addCheckboxes = false;
-	
 	protected static final String PARAMETER_USER_PK = "cf_user_pk";
 	protected static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
 
@@ -85,21 +83,14 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 			form.add(getParticipants(iwc));
 
-			if (getBackPage() != null || addCheckboxes) {
+			if (getBackPage() != null) {
 				Layer buttonLayer = new Layer();
 				buttonLayer.setStyleClass("buttonLayer");
 				form.add(buttonLayer);
 
-				if (addCheckboxes) {
-					GenericButton back = new GenericButton(localize("save", "Save"));
-					back.setOnClick("alert('" + localize("changes_saved", "Changes saved") + "');");
-				}
-				
-				if (getBackPage() != null) {
-					GenericButton back = new GenericButton(localize("back", "Back"));
-					back.setPageToOpen(getBackPage());
-					buttonLayer.add(back);
-				}
+				GenericButton back = new GenericButton(localize("back", "Back"));
+				back.setPageToOpen(getBackPage());
+				buttonLayer.add(back);
 			}
 
 			add(form);
@@ -320,7 +311,6 @@ public class CourseParticipantsList extends CourseBlock {
 
 	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink, boolean addCheckboxes) throws RemoteException {
 		if (addCheckboxes) {
-			this.addCheckboxes  = addCheckboxes;
 			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, getBundle().getVirtualPathWithFileNameString("javascript/CourseParticipantsListHelper.js"));
 		}
 

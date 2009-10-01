@@ -10,9 +10,6 @@ import com.idega.company.data.Company;
 import com.idega.core.file.data.ICFile;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
-import com.idega.data.IDORelationshipException;
-import com.idega.data.query.MatchCriteria;
-import com.idega.data.query.OR;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.user.data.User;
@@ -158,27 +155,11 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 		return super.idoFindPKsByQuery(query);
 	}
 
-	public Object ejbFindHighestNumberByType(CourseCertificateType type) throws FinderException {
+	public Object ejbFindHighestNumber() throws FinderException {
 		Table table = new Table(this);
 		
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(table.getColumn(getIDColumnName()));
-		if (type.getType().intValue() == 1 || type.getType().intValue() == 2) {
-			Table types = new Table(CourseCertificateType.class);
-			try {
-				query.addJoin(table, types);
-			}
-			catch (IDORelationshipException ire) {
-				throw new FinderException(ire.getMessage());
-			}
-			
-			MatchCriteria crit1 = new MatchCriteria(types.getColumn("certificate_type"), MatchCriteria.EQUALS, 1);
-			MatchCriteria crit2 = new MatchCriteria(types.getColumn("certificate_type"), MatchCriteria.EQUALS, 2);
-			query.addCriteria(new OR(crit1, crit2));
-		}
-		else {
-			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_TYPE_OF_CERTIFICATE_ID), MatchCriteria.EQUALS, type));
-		}
 		query.addOrder(table, COLUMN_CERTIFICATE_NUMBER, false);
 		
 		return idoFindOnePKByQuery(query);
