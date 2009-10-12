@@ -1,0 +1,384 @@
+package is.idega.idegaweb.egov.course.presentation.rent;
+
+import is.idega.idegaweb.egov.application.IWBundleStarter;
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.rent.RentableItemServices;
+import is.idega.idegaweb.egov.course.data.rent.RentableItem;
+
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Currency;
+import java.util.List;
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.Block;
+import com.idega.presentation.IWContext;
+import com.idega.presentation.Image;
+import com.idega.presentation.Layer;
+import com.idega.presentation.Table2;
+import com.idega.presentation.TableBodyRowGroup;
+import com.idega.presentation.TableCell2;
+import com.idega.presentation.TableHeaderCell;
+import com.idega.presentation.TableHeaderRowGroup;
+import com.idega.presentation.TableRow;
+import com.idega.presentation.text.Heading2;
+import com.idega.presentation.text.Link;
+import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.BackButton;
+import com.idega.presentation.ui.DoubleInput;
+import com.idega.presentation.ui.Form;
+import com.idega.presentation.ui.IntegerInput;
+import com.idega.presentation.ui.Label;
+import com.idega.presentation.ui.SubmitButton;
+import com.idega.presentation.ui.TextInput;
+import com.idega.util.CoreConstants;
+import com.idega.util.ListUtil;
+import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
+
+public abstract class RentableItemEditor extends Block {
+
+	private static final String PARAMETER_ACTION = "prmAction";
+	private static final String PARAMETER_ITEM_ID = "prmRentableItemId";
+	private static final String PARAMETER_ACTION_SAVE = "prmSaveRentableItem";
+	private static final String PARAMETER_ACTION_DELETE = "prmDeleteRentableItem";
+	
+	private static final String PARAMETER_NAME = "prmRentableItemName";
+	private static final String PARAMETER_RENT_PRICE = "prmRentableItemRentPrice";
+	private static final String PARAMETER_QUANTITY = "prmRentableItemQuantity";
+	private static final String PARAMETER_RENTED = "prmRentableItemRented";
+
+	@Autowired
+	private RentableItemServices rentableItemServices;
+	
+	private IWBundle bundle;
+	private IWResourceBundle iwrb;
+	
+	private NumberFormat currencyformatter;
+	private Currency currency;
+	
+	private List<String> errorMessages;
+	private List<String> successMessages;
+	
+	private Form form;
+	
+	@Override
+	public void main(IWContext iwc) throws Exception {
+		ELUtil.getInstance().autowire(this);
+		
+		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER)
+				.getVirtualPathWithFileNameString("style/application.css"));
+		
+		form = new Form();
+		add(form);
+		
+		bundle = getBundle(iwc);
+		iwrb = bundle.getResourceBundle(iwc);
+		
+		Locale locale = iwc.getCurrentLocale();
+		currencyformatter = NumberFormat.getCurrencyInstance(locale);
+		try {
+			currency = Currency.getInstance(locale);
+		} catch (Exception e) {}
+		
+		Boolean showList = null;
+		if (iwc.isParameterSet(PARAMETER_ACTION_SAVE)) {
+			showList = doSave(iwc);
+		} else if (iwc.isParameterSet(PARAMETER_ACTION_DELETE)) {
+			doDelete(iwc);
+		}
+		
+		printErrorMessages();
+		printSuccessMessages();
+		
+		if (showList != null && !showList) {
+			editOrCreateItem(iwc);
+			return;
+		}
+		
+		switch (getAction(iwc)) {
+		case 1:
+			editOrCreateItem(iwc);
+			break;
+		default:
+			listItems(iwc);
+			break;
+		}
+	}
+	
+	private void printErrorMessages() {
+		printMessages("errorMessages", errorMessages);
+	}
+	
+	private void printSuccessMessages() {
+		printMessages("successMessages", successMessages);
+	}
+	
+	private void printMessages(String styleClass, List<String> messages) {
+		if (ListUtil.isEmpty(messages)) {
+			return;
+		}
+		
+		Layer messagesContainer = new Layer();
+		form.add(messagesContainer);
+		messagesContainer.setStyleClass(styleClass);
+		
+		for (String message: messages) {
+			messagesContainer.add(new Heading2(message));
+		}
+	}
+	
+	private boolean doDelete(IWContext iwc) throws Exception {
+		if (rentableItemServices.deleteItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID))) {
+			addSuccessMessage(iwrb.getLocalizedString("rentable_item.success_deleting_item", "Item was successfully deleted"));
+			return true;
+		} else {
+			addErrorMessage(iwrb.getLocalizedString("rentable_item.error_deleting_item", "Some error occurred while deleting item"));
+			return false;
+		}
+	}
+	
+	private boolean doSave(IWContext iwc) throws Exception {
+		String type = getRentableItemType();
+		
+		String name = iwc.getParameter(PARAMETER_NAME);
+		if (StringUtil.isEmpty(name)) {
+			addErrorMessage(iwrb.getLocalizedString("rentable_item.name_must_be_provided", "Please, provide item's name"));
+			return false;
+		}
+		
+		Double rentPrice = null;
+		try {
+			rentPrice = iwc.isParameterSet(PARAMETER_RENT_PRICE) ? Double.valueOf(iwc.getParameter(PARAMETER_RENT_PRICE)) : null;
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		
+		Integer quantity = null;
+		try {
+			quantity = iwc.isParameterSet(PARAMETER_QUANTITY) ? Integer.valueOf(iwc.getParameter(PARAMETER_QUANTITY)) : null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Integer rented = null;
+		try {
+			rented = iwc.isParameterSet(PARAMETER_RENTED) ? Integer.valueOf(iwc.getParameter(PARAMETER_RENTED)) : null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		if (iwc.isParameterSet(PARAMETER_ITEM_ID)) {
+			if (rentableItemServices.editItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID), name, rentPrice, quantity, rented)) {
+				addSuccessMessage(iwrb.getLocalizedString("rentable_item.success_editing_item", "Item was successfully modified"));
+			} else {
+				addErrorMessage(iwrb.getLocalizedString("rentable_item.error_editing_item", "Some error occured while editing item"));
+				return false;
+			}
+		} else {
+			if (rentableItemServices.createItem(getItemClass(), type, name, rentPrice, quantity, rented) == null) {
+				addErrorMessage(iwrb.getLocalizedString("rentable_item.error_creating_item", "Some error occurred while creating item"));
+				return false;
+			} else {
+				addSuccessMessage(iwrb.getLocalizedString("rentable_item.success_creating_item", "Item was created successfully"));
+			}
+		}
+		
+		return true;
+	}
+	
+	private void addErrorMessage(String message) {
+		if (errorMessages == null) {
+			errorMessages = new ArrayList<String>();
+		}
+		errorMessages.add(message);
+	}
+	
+	private void addSuccessMessage(String message) {
+		if (successMessages == null) {
+			successMessages = new ArrayList<String>();
+		}
+		successMessages.add(message);
+	}
+	
+	private void editOrCreateItem(IWContext iwc) throws Exception {
+		RentableItem item = null;
+		if (iwc.isParameterSet(PARAMETER_ITEM_ID)) {
+			item = rentableItemServices.getItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID));
+		}
+		
+		if (item != null) {
+			form.addParameter(PARAMETER_ITEM_ID, item.getPrimaryKey().toString());
+		}
+		
+		Layer inputs = new Layer();
+		form.add(inputs);
+		inputs.setStyleClass("formSection");
+		
+		Layer formItem = new Layer();
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("required");
+		inputs.add(formItem);
+		TextInput name = new TextInput(PARAMETER_NAME, item == null ? CoreConstants.EMPTY : item.getName());
+		Label nameLabel = new Label(iwrb.getLocalizedString("rentable_item.name", "Name"), name);
+		formItem.add(nameLabel);
+		formItem.add(name);
+		
+		formItem = new Layer();
+		formItem.setStyleClass("formItem");
+		inputs.add(formItem);
+		Double rentPrice = item == null ? null : item.getRentPrice();
+		DoubleInput rentPriceInput = new DoubleInput(PARAMETER_RENT_PRICE, rentPrice == null ? 0 : rentPrice);
+		rentPriceInput.setAsDouble(iwrb.getLocalizedString("rentable_item.please_use_numbers_only", "Please, use correct value for rent price"),
+				currency == null ? -1 : currency.getDefaultFractionDigits());
+		StringBuilder rentPriceTitle = new StringBuilder(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price"));
+		if (currency != null) {
+			rentPriceTitle.append(" (").append(currency.getSymbol()).append(")");
+		}
+		Label rentPriceLabel = new Label(rentPriceTitle.toString(), rentPriceInput);
+		formItem.add(rentPriceLabel);
+		formItem.add(rentPriceInput);
+		
+		formItem = new Layer();
+		formItem.setStyleClass("formItem");
+		inputs.add(formItem);
+		Integer quantity = item == null ? null : item.getQuantity();
+		IntegerInput quantityInput = new IntegerInput(PARAMETER_QUANTITY, quantity == null ? 0 : quantity);
+		quantityInput.setAsIntegers(iwrb.getLocalizedString("rentable_item.please_use_numbers_only_quantity", "Please, use correct value for quantity"));
+		Label quantityLabel = new Label(iwrb.getLocalizedString("rentable_item.quantity", "Quantity"), quantityInput);
+		formItem.add(quantityLabel);
+		formItem.add(quantityInput);
+		
+		formItem = new Layer();
+		formItem.setStyleClass("formItem");
+		inputs.add(formItem);
+		Integer rented = item == null ? null : item.getRentedAmount();
+		IntegerInput rentedInput = new IntegerInput(PARAMETER_RENTED, rented == null ? 0 : rented);
+		rentedInput.setAsIntegers(iwrb.getLocalizedString("rentable_item.please_use_numbers_only_rented", "Please, use correct value for rented amount"));
+		Label rentedLabel = new Label(iwrb.getLocalizedString("rentable_item.rented", "Rented"), rentedInput);
+		formItem.add(rentedLabel);
+		formItem.add(rentedInput);
+		
+		Layer buttons = new Layer();
+		form.add(buttons);
+		BackButton back = new BackButton(iwrb.getLocalizedString("back", "Back"));
+		buttons.add(back);
+		SubmitButton save = new SubmitButton(iwrb.getLocalizedString("save", "Save"), PARAMETER_ACTION_SAVE, Boolean.TRUE.toString());
+		buttons.add(save);
+	}
+	
+	public abstract String getRentableItemType();
+	
+	public abstract Class<? extends RentableItem> getItemClass();
+	
+	private void listItems(IWContext iwc) throws Exception {
+		Collection<? extends RentableItem> allItems = rentableItemServices.getItemsByType(getItemClass(), getRentableItemType());
+		if (ListUtil.isEmpty(allItems)) {
+			form.add(new Heading2(iwrb.getLocalizedString("rentable_item.there_are_no_items_yet", "There are no items yet")));
+		} else {
+			String editTitle = iwrb.getLocalizedString("rentable_item.edit", "Edit");
+			String deleteTitle = iwrb.getLocalizedString("rentable_item.delete", "Delete");
+			
+			Layer tableContainer = new Layer();
+			form.add(tableContainer);
+			Table2 table = new Table2();
+			tableContainer.add(table);
+			TableHeaderRowGroup header = table.createHeaderRowGroup();
+			TableRow headerRow = header.createRow();
+			TableHeaderCell headerCell = headerRow.createHeaderCell();
+			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.nr", "Nr.")));
+			
+			headerCell = headerRow.createHeaderCell();
+			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.name", "Name")));
+			
+			headerCell = headerRow.createHeaderCell();
+			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price")));
+			
+			headerCell = headerRow.createHeaderCell();
+			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.quantity", "Quantity")));
+			
+			headerCell = headerRow.createHeaderCell();
+			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.rented", "Rented")));
+			
+			headerCell = headerRow.createHeaderCell();
+			headerCell.add(new Text(editTitle));
+			
+			headerCell = headerRow.createHeaderCell();
+			headerCell.add(new Text(deleteTitle));
+			
+			String editImageUri = bundle.getVirtualPathWithFileNameString("edit.png");
+			String deleteImageUri = bundle.getVirtualPathWithFileNameString("delete.png");
+	
+			String itemId = null;
+			
+			int index = 0;
+			TableBodyRowGroup body = table.createBodyRowGroup();
+			for (RentableItem item: allItems) {
+				itemId = item.getPrimaryKey().toString();
+				
+				TableRow row = body.createRow();
+				
+				TableCell2 cell = row.createCell();
+				cell.add(new Text(String.valueOf(index + 1)));
+				
+				cell = row.createCell();
+				cell.add(new Text(item.getName()));
+				
+				cell = row.createCell();
+				cell.add(new Text(currencyformatter.format(item.getRentPrice())));
+				
+				cell = row.createCell();
+				Integer quantity = item.getQuantity();
+				cell.add(new Text(quantity == null ? CoreConstants.EMPTY : quantity.toString()));
+				
+				cell = row.createCell();
+				Integer rented = item.getRentedAmount();
+				cell.add(new Text(rented == null ? CoreConstants.EMPTY : rented.toString()));
+				
+				Link edit = new Link(new Image(editImageUri));
+				edit.setParameter(PARAMETER_ACTION, String.valueOf(1));
+				edit.setParameter(PARAMETER_ITEM_ID, itemId);
+				edit.setTitle(editTitle);
+				cell = row.createCell();
+				cell.add(edit);
+				
+				Link delete = new Link(new Image(deleteImageUri));
+				delete.setParameter(PARAMETER_ACTION_DELETE, Boolean.TRUE.toString());
+				delete.setParameter(PARAMETER_ITEM_ID, itemId);
+				delete.setTitle(deleteTitle);
+				cell = row.createCell();
+				cell.add(delete);
+			}
+		}
+		
+		Layer buttons = new Layer();
+		form.add(buttons);
+		BackButton back = new BackButton(iwrb.getLocalizedString("back", "Back"));
+		buttons.add(back);
+		SubmitButton create = new SubmitButton(iwrb.getLocalizedString("create_new", "Create"), PARAMETER_ACTION, String.valueOf(1));
+		buttons.add(create);
+	}
+	
+	private int getAction(IWContext iwc) {
+		if (iwc.isParameterSet(PARAMETER_ACTION)) {
+			try {
+				return Integer.valueOf(iwc.getParameter(PARAMETER_ACTION));
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+		}
+		return 0;
+	}
+	
+	@Override
+	public String getBundleIdentifier() {
+		return CourseConstants.IW_BUNDLE_IDENTIFIER;
+	}
+	
+}
