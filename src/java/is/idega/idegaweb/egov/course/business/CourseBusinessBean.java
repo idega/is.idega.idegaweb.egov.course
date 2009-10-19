@@ -636,8 +636,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price);
 	}
 
-	public void storeCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost, boolean openForRegistration) throws FinderException, CreateException {
-		createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration);
+	public Course storeCourse(Object pk, int courseNumber, String name, String user, Object courseTypePK, Object providerPK, Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, String accountingKey, int birthYearFrom, int birthYearTo, int maxPer, float price, float cost, boolean openForRegistration) throws FinderException, CreateException {
+		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {

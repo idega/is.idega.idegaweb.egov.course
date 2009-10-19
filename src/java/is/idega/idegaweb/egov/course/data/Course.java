@@ -1,9 +1,15 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.block.school.data.School;
+import is.idega.idegaweb.egov.course.data.rent.RentableItem;
+
 import java.sql.Timestamp;
+import java.util.Collection;
+
+import com.idega.block.school.data.School;
+import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOEntity;
+import com.idega.data.IDORemoveRelationshipException;
 
 public interface Course extends IDOEntity {
 
@@ -171,4 +177,10 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setOpenForRegistration
 	 */
 	public void setOpenForRegistration(boolean openForRegistration);
+	
+	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
+	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);
+	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException;
+	public void removeRentableItem(RentableItem item) throws IDORemoveRelationshipException;
+	public void removeAllRentableItems(Class<? extends RentableItem> itemClass) throws IDORemoveRelationshipException;
 }

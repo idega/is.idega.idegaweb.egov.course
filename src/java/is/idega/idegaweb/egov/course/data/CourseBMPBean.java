@@ -1,17 +1,24 @@
 package is.idega.idegaweb.egov.course.data;
 
+import is.idega.idegaweb.egov.course.data.rent.RentableItem;
+
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.ejb.FinderException;
+
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
+import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.query.Column;
 import com.idega.data.query.CountColumn;
 import com.idega.data.query.InCriteria;
@@ -19,8 +26,12 @@ import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.MaxColumn;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
+import com.idega.idegaweb.IWMainApplication;
+import com.idega.util.ListUtil;
 
 public class CourseBMPBean extends GenericEntity implements Course {
+
+	private static final long serialVersionUID = 8629779260677160057L;
 
 	private static final String ENTITY_NAME = "COU_COURSE";
 
@@ -48,6 +59,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return ENTITY_NAME;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
@@ -68,6 +80,20 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
 		addManyToOneRelationship(COLUMN_PROVIDER, School.class);
+		
+		Map<String, ? extends RentableItem> entities = null;
+		try {
+			entities = WebApplicationContextUtils.getWebApplicationContext(IWMainApplication.getDefaultIWMainApplication().getServletContext())
+				.getBeansOfType(RentableItem.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (entities == null || entities.isEmpty()) {
+			return;
+		}
+		for (RentableItem entity: entities.values()) {
+			addManyToManyRelationShip(entity.getClass());
+		}
 	}
 
 	// Getters
@@ -218,19 +244,22 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 	
 	// Finders
-	public Collection ejbFindAll() throws FinderException, IDORelationshipException {
+	public Collection<Integer> ejbFindAll() throws FinderException, IDORelationshipException {
 		return ejbFindAll(null, null, null, -1, null, null);
 	}
 
-	public Collection ejbFindAllByProvider(School provider) throws FinderException, IDORelationshipException {
+	public Collection<Integer> ejbFindAllByProvider(School provider) throws FinderException, IDORelationshipException {
 		return ejbFindAll(provider.getPrimaryKey(), null, null, -1, null, null);
 	}
 
-	public Collection ejbFindAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException {
+	public Collection<Integer> ejbFindAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException {
 		return ejbFindAll(null, null, null, birthYear, null, null);
 	}
 
-	public Collection ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
+	@SuppressWarnings("unchecked")
+	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate)
+		throws FinderException, IDORelationshipException {
+		
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -269,11 +298,14 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoFindPKsByQuery(query);
 	}
 
-	public Collection ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
+	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException,
+		IDORelationshipException {
+		
 		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
 	}
 
-	public Collection ejbFindAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
+	@SuppressWarnings("unchecked")
+	public Collection<Integer> ejbFindAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -299,7 +331,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoFindPKsByQuery(query);
 	}
 
-	public Collection ejbFindAllByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws FinderException {
+	@SuppressWarnings("unchecked")
+	public Collection<Integer> ejbFindAllByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate,
+			Date toDate) throws FinderException {
+		
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -387,7 +422,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoGetNumberOfRecords(query);
 	}
 
-	public int ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException {
+	public int ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate)
+		throws IDOException {
+		
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -426,7 +463,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoGetNumberOfRecords(query);
 	}
 	
-	public Collection ejbFindAllWithNoCourseNumber() throws FinderException {
+	@SuppressWarnings("unchecked")
+	public Collection<Integer> ejbFindAllWithNoCourseNumber() throws FinderException {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
@@ -436,7 +474,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return idoFindPKsByQuery(query);
 	}
 	
-	public Collection ejbFindAllByTypes(Collection<String> typesIds) throws FinderException {
+	@SuppressWarnings("unchecked")
+	public Collection<Integer> ejbFindAllByTypes(Collection<String> typesIds) throws FinderException {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
@@ -444,5 +483,56 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.addCriteria(new InCriteria(new Column(table, COLUMN_COURSE_TYPE), typesIds));
 		
 		return idoFindPKsByQuery(query);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
+		try {
+			return super.idoGetRelatedEntities(itemType);
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException {
+		super.idoAddTo(item);
+	}
+	
+	public void removeRentableItem(RentableItem item) throws IDORemoveRelationshipException {
+		super.idoRemoveFrom(item);
+	}
+
+	public void removeAllRentableItems(Class<? extends RentableItem> itemClass) throws IDORemoveRelationshipException {
+		Collection<? extends RentableItem> items = getRentableItems(itemClass);
+		if (ListUtil.isEmpty(items)) {
+			return;
+		}
+		
+		for (RentableItem item: items) {
+			removeRentableItem(item);
+		}
+		
+		store();
+	}
+
+	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException {
+		if (ListUtil.isEmpty(items)) {
+			return;
+		}
+		
+		Collection<? extends RentableItem> currentItems = getRentableItems(items.iterator().next().getClass());
+		
+		for (RentableItem item: items) {
+			boolean canAdd = true;
+			if (!ListUtil.isEmpty(currentItems) && currentItems.contains(item)) {
+				canAdd = false;
+			}
+			if (canAdd) {
+				addRentableItem(item);
+			}
+		}
+		
+		store();
 	}
 }

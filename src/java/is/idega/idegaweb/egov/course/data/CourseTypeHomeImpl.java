@@ -10,7 +10,10 @@ import com.idega.data.IDOFactory;
 
 public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 
-	public Class getEntityInterfaceClass() {
+	private static final long serialVersionUID = 156516411744536846L;
+
+	@Override
+	public Class<CourseType> getEntityInterfaceClass() {
 		return CourseType.class;
 	}
 
@@ -39,6 +42,13 @@ public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 	public CourseType findByAbbreviation(String abbreviation) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Object pk = ((CourseTypeBMPBean) entity).ejbFindByAbbreviation(abbreviation);
+		this.idoCheckInPooledEntity(entity);
+		return this.findByPrimaryKey(pk);
+	}
+
+	public CourseType findByName(String name) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Object pk = ((CourseTypeBMPBean) entity).ejbFindByName(name);
 		this.idoCheckInPooledEntity(entity);
 		return this.findByPrimaryKey(pk);
 	}

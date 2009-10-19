@@ -6,6 +6,7 @@ import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
 import com.idega.data.query.Column;
+import com.idega.data.query.InCriteria;
 import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
@@ -58,11 +59,11 @@ public abstract class RentableItemBMPBean extends GenericEntity implements Renta
 	}
 	
 	public Integer getQuantity() {
-		return getRealValue(COLUMN_QUANTITY);
+		return getRealValue(COLUMN_QUANTITY, 0);
 	}
 
 	public Integer getRentedAmount() {
-		return getRealValue(COLUMN_RENTED);
+		return getRealValue(COLUMN_RENTED, 0);
 	}
 
 	public void setQuantity(Integer quantity) {
@@ -88,6 +89,17 @@ public abstract class RentableItemBMPBean extends GenericEntity implements Renta
 		query.addColumn(new Column(table, getIDColumnName()));
 		
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_TYPE), MatchCriteria.EQUALS, type));
+		
+		return this.idoFindPKsByQuery(query);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Collection<Integer> ejbFindByIds(String[] ids) throws FinderException {
+		Table table = new Table(this);
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new Column(table, getIDColumnName()));
+		
+		query.addCriteria(new InCriteria(new Column(table, getIDColumnName()), ids));
 		
 		return this.idoFindPKsByQuery(query);
 	}

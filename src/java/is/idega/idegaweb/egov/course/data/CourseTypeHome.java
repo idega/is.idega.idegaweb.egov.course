@@ -18,4 +18,6 @@ public interface CourseTypeHome extends IDOHome {
 	public Collection<CourseType> findAllBySchoolType(Object schoolTypePK) throws FinderException, IDORelationshipException;
 
 	public CourseType findByAbbreviation(String abbreviation) throws FinderException;
+	
+	public CourseType findByName(String name) throws FinderException;
 }

@@ -16,4 +16,6 @@ public interface RentableItemHome extends IDOHome {
 	public Collection<? extends RentableItem> findByType(String type) throws FinderException;
 	
 	public RentableItem create() throws CreateException;
+	
+	public Collection<? extends RentableItem> findByIds(String[] ids) throws FinderException;
 }

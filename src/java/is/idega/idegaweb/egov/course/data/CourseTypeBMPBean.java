@@ -24,10 +24,12 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	private static final String COLUMN_ABBREVIATION = "ABBREVIATION";
 	private static final String COLUMN_SHOW_ABBREVIATION = "SHOW_ABBREVIATION";
 
+	@Override
 	public String getEntityName() {
 		return TABLE_NAME;
 	}
 
+	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		addAttribute(COLUMN_NAME, "Name", String.class, 50);
@@ -43,6 +45,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	}
 
 	// Getters
+	@Override
 	public String getName() {
 		return getStringColumnValue(COLUMN_NAME);
 	}
@@ -76,6 +79,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	}
 
 	// Setters
+	@Override
 	public void setName(String name) {
 		setColumn(COLUMN_NAME, name);
 	}
@@ -136,6 +140,16 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_ABBREVIATION), MatchCriteria.EQUALS, abbreviation));
+
+		return this.idoFindOnePKByQuery(query);
+	}
+	
+	public Object ejbFindByName(String name) throws FinderException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new Column(table, getIDColumnName()));
+		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_NAME), MatchCriteria.EQUALS, name));
 
 		return this.idoFindOnePKByQuery(query);
 	}
