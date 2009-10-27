@@ -10,6 +10,7 @@ import com.idega.company.data.Company;
 import com.idega.core.file.data.ICFile;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
+import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.user.data.User;
@@ -160,6 +161,7 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 		
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(table.getColumn(getIDColumnName()));
+		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_CERTIFICATE_NUMBER), true));
 		query.addOrder(table, COLUMN_CERTIFICATE_NUMBER, false);
 		
 		return idoFindOnePKByQuery(query);

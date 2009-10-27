@@ -469,6 +469,26 @@ public class CourseParticipantsList extends CourseBlock {
 
 				cell.add(link);
 			}
+			else if (addViewParticipantLink) {
+				Link view = new Link(name.getName(iwc.getCurrentLocale()));
+				if (courseId != null) {
+					view.addParameter(PARAMETER_COURSE_PK, courseId);
+				}
+				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
+				if (schoolId != null) {
+					view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
+				}
+				if (schoolTypeId != null) {
+					view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
+				}
+				if (courseTypeId != null) {
+					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
+				}
+				view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+				view.addParameter(PARAMETER_ACTION, 1);
+				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
+				cell.add(view);
+			}
 			else {
 				cell.add(new Text(name.getName(iwc.getCurrentLocale())));
 			}
