@@ -45,6 +45,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
 	private static final String COLUMN_CERTIFICATE_FEE = "course_certificate_fee";
 	private static final String COLUMN_WAITING_LIST = "waiting_list";
+	private static final String COLUMN_NOTES = "notes";
 
 	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verific_from_goverment";
 	public static final String COLUMN_CERTIFICATE_OF_PROPERTY = "certificate_of_property";
@@ -71,6 +72,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_PASSED, "Has passed course", Boolean.class);
 		addAttribute(COLUMN_CREATE_LOGIN, "Create login for user", Boolean.class);
 		addAttribute(COLUMN_CERTIFICATE_FEE, "Course certificate fee", Float.class);
+		addAttribute(COLUMN_NOTES, "Notes", String.class, 4000);
 
 		addAttribute(COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE, "Verfication from government office", Boolean.class);
 		addAttribute(COLUMN_CERTIFICATE_OF_PROPERTY, "Certificate of property", Boolean.class);
@@ -133,6 +135,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return getBooleanColumnValue(COLUMN_CREATE_LOGIN, false);
 	}
 	
+	public String getNotes() {
+		return getStringColumnValue(COLUMN_NOTES);
+	}
+	
 	// Setters
 	public void setApplication(CourseApplication application) {
 		setColumn(COLUMN_APPLICATION, application);
@@ -176,6 +182,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 	public void setHasCreateLogin(boolean createLogin) {
 		setColumn(COLUMN_CREATE_LOGIN, createLogin);
+	}
+	
+	public void setNotes(String notes) {
+		setColumn(COLUMN_NOTES, notes);
 	}
 	
 	//Finders

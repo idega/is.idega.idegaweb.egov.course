@@ -2740,6 +2740,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		return time;
 	}
+	
+	public boolean storeNotes(Integer courseChoiceID, String notes) {
+		CourseChoice choice = getCourseChoice(courseChoiceID);
+		if (choice == null) {
+			return false;
+		}
+
+		choice.setNotes(notes);
+		choice.store();
+		return true;
+	}
 
 	public boolean manageCourseChoiceSettings(String courseChoiceId,
 			String columnName, boolean value) {
@@ -2915,40 +2926,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) {
 		List info = new ArrayList();
 
-		/* 5 > 1 */info
-				.add(new AdvancedProperty(
-						iwrb == null ? null : iwrb.getLocalizedString(
-								"need_verification_from_goverment_office",
-								"Needs verification from goverment office"),
-						CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
-		/* 1 > 2 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("verification_from_goverment_office",
-						"Verfication from government office"),
-				CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
-		/* 2 > 3 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("certificate_of_property",
-						"Certificate of property"),
-				CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
-		/* 3 > 4 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("criminal_record", "Criminal record"),
-				CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
-		/* 4 > 5 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("verification_of_payment",
-						"Verification of payment"),
-				CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
-		/* 8 > 6 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("limited_certificate",
-						"Limited certificate"),
-				CourseChoiceBMPBean.COLUMN_LIMITED_CERTIFICATE));
-		/* 7 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("did_not_show_up", "Did not show up"),
-				CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
-		/* 8 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("passed_course", "Has passed course"),
-				CourseChoiceBMPBean.COLUMN_PASSED));
-		/* 9 */info.add(new AdvancedProperty(iwrb == null ? null : iwrb
-				.getLocalizedString("create_login", "Create login"),
-				CourseChoiceBMPBean.COLUMN_CREATE_LOGIN));
+		info.add(new AdvancedProperty("need_verification_from_goverment_office", CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		info.add(new AdvancedProperty("verification_from_goverment_office", CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
+		info.add(new AdvancedProperty("certificate_of_property", CourseChoiceBMPBean.COLUMN_CERTIFICATE_OF_PROPERTY));
+		info.add(new AdvancedProperty("criminal_record", CourseChoiceBMPBean.COLUMN_CRIMINAL_RECORD));
+		info.add(new AdvancedProperty("verification_of_payment", CourseChoiceBMPBean.COLUMN_VERIFICATION_OF_PAYMENT));
+		info.add(new AdvancedProperty("limited_certificate", CourseChoiceBMPBean.COLUMN_LIMITED_CERTIFICATE));
+		info.add(new AdvancedProperty("did_not_show_up", CourseChoiceBMPBean.COLUMN_DID_NOT_SHOW_UP));
+		info.add(new AdvancedProperty("passed_course", CourseChoiceBMPBean.COLUMN_PASSED));
+		info.add(new AdvancedProperty("create_login", CourseChoiceBMPBean.COLUMN_CREATE_LOGIN));
 
 		return info;
 	}

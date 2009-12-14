@@ -39,7 +39,6 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import com.idega.business.IBOLookup;
-import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.file.util.MimeTypeUtil;
@@ -281,10 +280,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell.setCellValue(this.iwrb.getLocalizedString("register_date", "Register date"));
 			cell.setCellStyle(style);
 			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("application.has_dyslexia", "Has dyslexia"));
+			cell.setCellValue(this.iwrb.getLocalizedString("application.payer_personal_id", "Payer personal ID"));
 			cell.setCellStyle(style);
 			cell = row.createCell(iCell++);
-			cell.setCellValue(this.iwrb.getLocalizedString("application.payer_personal_id", "Payer personal ID"));
+			cell.setCellValue(this.iwrb.getLocalizedString("application.payer_name", "Payer name"));
+			cell.setCellStyle(style);
+			cell = row.createCell(iCell++);
+			cell.setCellValue(this.iwrb.getLocalizedString("application.reference_number", "Reference number"));
 			cell.setCellStyle(style);
 		}
 		
@@ -394,8 +396,8 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					Phone work = null;
 					Phone mobile = null;
 					Email email = null;
-					String relation = this.iwrb.getLocalizedString("relation." + child.getRelation(element));
-					String maritalStatus = this.iwrb.getLocalizedString("marital_status." + element.getMaritalStatus());
+					String relation = this.iwrb.getLocalizedString("relation." + child.getRelation(element), "relation." + child.getRelation(element));
+					String maritalStatus = this.iwrb.getLocalizedString("marital_status." + element.getMaritalStatus(), "marital_status." + element.getMaritalStatus());
 	
 					try {
 						phone = this.userBusiness.getUsersHomePhone(element);
@@ -491,7 +493,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				iterator = relatives.iterator();
 				while (iterator.hasNext()) {
 					Relative element = (Relative) iterator.next();
-					String relation = this.iwrb.getLocalizedString("relation." + element.getRelation());
+					String relation = this.iwrb.getLocalizedString("relation." + element.getRelation(), "relation." + element.getRelation());
 	
 					row.createCell(iCell++).setCellValue(relation);
 					row.createCell(iCell++).setCellValue(element.getName());
@@ -506,20 +508,17 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				Phone work = null;
 				Phone mobile = null;
 				Email email = null;
-				User payer = null;
+				
+				String payerName = null;
+				String payerPersonalID = null;
 				if (application.getPayerPersonalID() != null) {
-					try {
-						payer = getUserBusiness(iwc).getUser(application.getPayerPersonalID());
-					}
-					catch (FinderException e) {
-						payer = application.getOwner();
-					}
-					catch (RemoteException re) {
-						throw new IBORuntimeException(re);
-					}
+					payerPersonalID = PersonalIDFormatter.format(application.getPayerPersonalID(), locale);
+					payerName = application.getPayerName();
 				}
 				else {
-					payer = application.getOwner();
+					User payer = application.getOwner();
+					payerName = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName()).getName(locale);
+					payerPersonalID = PersonalIDFormatter.format(payer.getPersonalID(), locale);
 				}
 
 				try {
@@ -562,14 +561,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					iCell++;
 				}
 				row.createCell(iCell++).setCellValue(new IWTimestamp(application.getCreated()).getLocaleDate(locale, IWTimestamp.SHORT));
-				if (choice.hasDyslexia()) {
-					row.createCell(iCell++).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+				row.createCell(iCell++).setCellValue(payerPersonalID);
+				row.createCell(iCell++).setCellValue(payerName);
+				if (application.getReferenceNumber() != null) {
+					row.createCell(iCell++).setCellValue(application.getReferenceNumber());
 				}
 				else {
-					row.createCell(iCell++).setCellValue(this.iwrb.getLocalizedString("no", "No"));
-				}
-				if (payer != null) {
-					row.createCell(iCell++).setCellValue(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale()));
+					iCell++;
 				}
 			}
 		}

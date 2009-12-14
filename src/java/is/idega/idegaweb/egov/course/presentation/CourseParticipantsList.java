@@ -9,6 +9,7 @@ package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.citizen.presentation.CitizenFinder;
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseChoiceComparator;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCertificate;
@@ -41,6 +42,7 @@ import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
 import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
+import com.idega.presentation.text.Abbreviation;
 import com.idega.presentation.text.DownloadLink;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
@@ -50,6 +52,7 @@ import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
+import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
@@ -67,7 +70,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 	protected static final String PARAMETER_USER_PK = "cf_user_pk";
 	protected static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
-
+	protected static final String PARAMETER_SORTING = "prm_sorting";
 
 	@Override
 	public void present(IWContext iwc) {
@@ -245,6 +248,11 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 		}
 
+		DropdownMenu sorting = new DropdownMenu(PARAMETER_SORTING);
+		sorting.addMenuElement(CourseChoiceComparator.NAME_SORT, getResourceBundle().getLocalizedString("sort.name", "Name (A-Z)"));
+		sorting.addMenuElement(CourseChoiceComparator.DATE_SORT, getResourceBundle().getLocalizedString("sort.date", "Date"));
+		sorting.keepStatusOnAction(true);
+		
 		if (showTypes) {
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -278,6 +286,21 @@ public class CourseParticipantsList extends CourseBlock {
 		label = new Label(getResourceBundle().getLocalizedString("course", "Course"), course);
 		formItem.add(label);
 		formItem.add(course);
+		layer.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(getResourceBundle().getLocalizedString("sorting", "Sorting"), sorting);
+		formItem.add(label);
+		formItem.add(sorting);
+		layer.add(formItem);
+
+		SubmitButton fetch = new SubmitButton(getResourceBundle().getLocalizedString("get", "Get"));
+		fetch.setStyleClass("indentedButton");
+		fetch.setStyleClass("button");
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.add(fetch);
 		layer.add(formItem);
 
 		Layer clearLayer = new Layer(Layer.DIV);
@@ -379,6 +402,11 @@ public class CourseParticipantsList extends CourseBlock {
 
 		List checkboxesInfo = null;
 		if (addCheckboxes) {
+			cell = row.createHeaderCell();
+			cell.setStyleClass("created");
+			cell.add(new Text(getResourceBundle().getLocalizedString("register_date", "Register date")));
+			columns++;
+
 			checkboxesInfo = getBusiness().getCheckBoxesForCourseParticipants(getResourceBundle());
 			AdvancedProperty info = null;
 			for (int i = 0; i < checkboxesInfo.size(); i++) {
@@ -390,7 +418,17 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 				cell.setStyleClass(info.getValue());
 				cell.setStyleClass("courseChoiceManagement");
-				cell.add(new Text(info.getId()));
+				cell.add(new Abbreviation(getResourceBundle().getLocalizedString(info.getId() + "_abbr", info.getId() + "_abbr"), getResourceBundle().getLocalizedString(info.getId(), info.getId())));
+				columns++;
+			}
+
+			if (showCertificates) {
+				cell = row.createHeaderCell();
+				if (!addViewParticipantLink) {
+					cell.setStyleClass("lastColumn");
+				}
+				cell.setStyleClass("certificate");
+				cell.add(new Text(getResourceBundle().getLocalizedString("pdf", "PDF")));
 				columns++;
 			}
 		}
@@ -410,14 +448,15 @@ public class CourseParticipantsList extends CourseBlock {
 
 		Course course = null;
 		CourseType type = null;
-		Collection choices = new ArrayList();
+		List choices = new ArrayList();
 		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
-			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), false);
+			choices = new ArrayList(getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), false));
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 			type = course.getCourseType();
 			if (type.getAbbreviation() != null) {
 				table.setStyleClass("abbr_" + type.getAbbreviation());
 			}
+			Collections.sort(choices, new CourseChoiceComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : CourseChoiceComparator.DATE_SORT));
 		}
 
 		String courseId = course == null ? null : course.getPrimaryKey().toString();
@@ -571,6 +610,10 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 			}
 			if (addCheckboxes) {
+				cell = row.createCell();
+				cell.setStyleClass("created");
+				cell.add(new Text(new IWTimestamp(choice.getApplication().getCreated()).getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT)));
+
 				AdvancedProperty info = null;
 				CheckBox box = null;
 				boolean disabled = false;
@@ -602,6 +645,30 @@ public class CourseParticipantsList extends CourseBlock {
 					}
 					else {
 						cell.add(new Text(CoreConstants.MINUS));
+					}
+				}
+
+				if (showCertificates) {
+					cell = row.createCell();
+					if (!addViewParticipantLink) {
+						cell.setStyleClass("lastColumn");
+					}
+					cell.setStyleClass("certificate");
+
+					ICFile file = null;
+					CourseCertificate certificate = getBusiness().getUserCertificate(user, course);
+					if (certificate != null) {
+						file = certificate.getCertificateFile();
+					}
+
+					if (file == null) {
+						cell.add(new Text("-"));
+					}
+					else {
+						Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
+						printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
+						printCertificate.setFile(file);
+						cell.add(printCertificate);
 					}
 				}
 			}

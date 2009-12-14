@@ -163,7 +163,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private Form getForm(IWContext iwc, int state) {
 		Form form = new Form();
-		form.setID("simpleCourseApplication");
+		form.setStyleClass("simpleCourseApplication");
 		if (state != ACTION_PHASE_1) {
 			form.maintainParameter(PARAMETER_COURSE);
 			form.maintainParameter(PARAMETER_CATEGORY);
@@ -186,7 +186,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private void showPhaseOne(IWContext iwc) throws RemoteException {
 		Form form = getForm(iwc, ACTION_PHASE_1);
-		form.setId("course_step_1");
+		form.setStyleClass("step_1");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1)));
 
 		addDefaulScriptFiles(iwc);
@@ -212,7 +212,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		script4.append("var getProvider = function(course) { return course.provider };\n");
 		script4.append("var getRadioButton = function(course) { return getRadio(course); };\n");
 
-		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getName, getTimeframe, getProvider], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
+		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getTimeframe, getProvider], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
 		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
@@ -370,9 +370,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		cell.setStyleClass("column0");
 
 		cell = row.createHeaderCell();
-		cell.setStyleClass("column1");
-		cell.add(new Text(iwrb.getLocalizedString("course", "Course")));
-		cell = row.createHeaderCell();
 		cell.setStyleClass("column2");
 		cell.add(new Text(iwrb.getLocalizedString("date", "Date")));
 		cell = row.createHeaderCell();
@@ -400,10 +397,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 				radio.setStyleClass("checkbox");
 				radio.keepStatusOnAction(true);
 				cell.add(radio);
-
-				cell = row.createCell();
-				cell.setStyleClass("column1");
-				cell.add(new Text(course.getName()));
 
 				cell = row.createCell();
 				cell.setStyleClass("column2");
@@ -461,7 +454,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		}
 
 		Form form = getForm(iwc, ACTION_PHASE_2);
-		form.setId("course_step_2");
+		form.setStyleClass("step_2");
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_2)));
 
 		addDefaulScriptFiles(iwc);

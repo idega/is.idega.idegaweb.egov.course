@@ -217,4 +217,14 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setBooleanValueForColumn
 	 */
 	public void setBooleanValueForColumn(boolean value, String columnName);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#getNotes
+	 */
+	public String getNotes();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setNotes
+	 */
+	public void setNotes(String notes);
 }

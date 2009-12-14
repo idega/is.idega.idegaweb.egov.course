@@ -25,6 +25,7 @@ public class CourseComparator implements Comparator {
 	public static final int PLACES_SORT = 5;
 	public static final int FREE_PLACES_SORT = 6;
 	public static final int ID_SORT = 7;
+	public static final int REVERSE_ID_SORT = 9;
 
 	private Locale locale;
 	private int compareBy = NAME_SORT;
@@ -46,6 +47,10 @@ public class CourseComparator implements Comparator {
 				returner = idSort(course1, course2);
 				break;
 
+			case REVERSE_ID_SORT:
+				returner = -idSort(course1, course2);
+				break;
+				
 			case NAME_SORT:
 				returner = nameSort(course1, course2);
 				break;

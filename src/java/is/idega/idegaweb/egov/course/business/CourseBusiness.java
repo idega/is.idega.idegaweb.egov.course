@@ -686,6 +686,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 */
 	public IWTimestamp getLatestValidCertificate(List certificates)
 			throws RemoteException;
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeNotes
+	 */
+	public boolean storeNotes(Integer courseChoiceID, String notes) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#manageCourseChoiceSettings

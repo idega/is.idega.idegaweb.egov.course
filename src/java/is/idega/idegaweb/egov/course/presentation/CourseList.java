@@ -172,6 +172,7 @@ public class CourseList extends CourseBlock {
 
 		DropdownMenu sorting = new DropdownMenu(PARAMETER_SORTING);
 		sorting.addMenuElement(CourseComparator.ID_SORT, getResourceBundle().getLocalizedString("sort.id", "ID"));
+		sorting.addMenuElement(CourseComparator.REVERSE_ID_SORT, getResourceBundle().getLocalizedString("sort.reverse_id", "reverse ID"));
 		sorting.addMenuElement(CourseComparator.NAME_SORT, getResourceBundle().getLocalizedString("sort.name", "Name (A-Z)"));
 		sorting.addMenuElement(CourseComparator.REVERSE_NAME_SORT, getResourceBundle().getLocalizedString("sort.reverse_name", "Name (Z-A)"));
 		sorting.addMenuElement(CourseComparator.TYPE_SORT, getResourceBundle().getLocalizedString("sort.type", "Type"));
