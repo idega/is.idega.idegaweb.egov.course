@@ -46,6 +46,7 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 				iSchoolProvider = new Boolean(false);
 			}
 		}
+		
 		return iSchoolProvider.booleanValue();
 	}
 
@@ -75,7 +76,14 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 	private School getSchoolIDFromUser(User user) throws RemoteException {
 		if (user != null) {
 			try {
-				School school = getSchoolUserBusiness().getFirstManagingChildCareForUser(user);
+				School school = null;
+				try {
+					school = getSchoolUserBusiness().getFirstManagingChildCareForUser(user);
+				} catch(Exception e) {
+				}
+				if (school == null) {
+					school = getSchoolUserBusiness().getFirstManagingSchoolForUser(user);
+				}
 				if (school != null) {
 					this.iProvider = school;
 				}

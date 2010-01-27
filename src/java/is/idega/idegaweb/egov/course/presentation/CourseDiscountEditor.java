@@ -345,6 +345,7 @@ public class CourseDiscountEditor extends CourseBlock {
 		DropdownMenu inputType = new DropdownMenu(PARAMETER_TYPE);
 		inputType.addMenuElement(CourseConstants.DISCOUNT_SIBLING, localize("discount_type." + CourseConstants.DISCOUNT_SIBLING, CourseConstants.DISCOUNT_SIBLING));
 		inputType.addMenuElement(CourseConstants.DISCOUNT_QUANTITY, localize("discount_type." + CourseConstants.DISCOUNT_QUANTITY, CourseConstants.DISCOUNT_QUANTITY));
+		inputType.addMenuElement(CourseConstants.DISCOUNT_SPOUSE, localize("discount_type." + CourseConstants.DISCOUNT_SPOUSE, CourseConstants.DISCOUNT_SPOUSE));
 
 		if (discount != null) {
 			inputName.setContent(discount.getName());

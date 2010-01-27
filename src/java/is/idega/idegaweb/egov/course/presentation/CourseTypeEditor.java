@@ -7,10 +7,12 @@ import is.idega.idegaweb.egov.course.data.CourseType;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
+import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -47,36 +49,44 @@ public class CourseTypeEditor extends CourseBlock {
 	private static final int ACTION_SAVE = 4;
 	private static final int ACTION_DELETE = 5;
 
+	private String category = null;
+
 	public void present(IWContext iwc) {
 		try {
 			switch (parseAction(iwc)) {
-				case ACTION_VIEW:
-					showList(iwc);
-					break;
+			case ACTION_VIEW:
+				showList(iwc);
+				break;
 
-				case ACTION_EDIT:
-					Object typePK = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
-					showEditor(iwc, typePK);
-					break;
+			case ACTION_EDIT:
+				Object typePK = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
+				showEditor(iwc, typePK);
+				break;
 
-				case ACTION_NEW:
-					showEditor(iwc, null);
-					break;
+			case ACTION_NEW:
+				showEditor(iwc, null);
+				break;
 
-				case ACTION_SAVE:
-					saveType(iwc);
-					showList(iwc);
-					break;
+			case ACTION_SAVE:
+				saveType(iwc);
+				showList(iwc);
+				break;
 
-				case ACTION_DELETE:
-					if (!getCourseBusiness(iwc).deleteCourseType(iwc.getParameter(PARAMETER_COURSE_TYPE_PK))) {
-						PresentationUtil.addJavascriptAlertOnLoad(iwc, getResourceBundle().getLocalizedString("course_type.remove_error", "You can not remove a course type that has courses or prices attached to it."));
-					}
-					showList(iwc);
-					break;
+			case ACTION_DELETE:
+				if (!getCourseBusiness(iwc).deleteCourseType(
+						iwc.getParameter(PARAMETER_COURSE_TYPE_PK))) {
+					PresentationUtil
+							.addJavascriptAlertOnLoad(
+									iwc,
+									getResourceBundle()
+											.getLocalizedString(
+													"course_type.remove_error",
+													"You can not remove a course type that has courses or prices attached to it."));
+				}
+				showList(iwc);
+				break;
 			}
-		}
-		catch (RemoteException re) {
+		} catch (RemoteException re) {
 			throw new IBORuntimeException(re);
 		}
 	}
@@ -98,21 +108,20 @@ public class CourseTypeEditor extends CourseBlock {
 
 		if (name != null && !"".equals(name.trim())) {
 			try {
-				getCourseBusiness(iwc).storeCourseType(pk, name, description, localizationKey, schoolTypePK, accountingKey);
-			}
-			catch (CreateException ce) {
+				getCourseBusiness(iwc).storeCourseType(pk, name, description,
+						localizationKey, schoolTypePK, accountingKey);
+			} catch (CreateException ce) {
 				add(ce.getMessage());
-			}
-			catch (FinderException fe) {
+			} catch (FinderException fe) {
 				fe.printStackTrace();
-			}
-			catch (RemoteException re) {
+			} catch (RemoteException re) {
 				throw new IBORuntimeException(re);
 			}
 		}
 	}
 
-	public void showEditor(IWContext iwc, Object courseTypePK) throws java.rmi.RemoteException {
+	public void showEditor(IWContext iwc, Object courseTypePK)
+			throws java.rmi.RemoteException {
 		Form form = new Form();
 		form.setStyleClass("adminForm");
 
@@ -122,7 +131,8 @@ public class CourseTypeEditor extends CourseBlock {
 
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(localize("course_type.course_type_editor_help", "Fill in the desired values and click 'Save'.")));
+		helpLayer.add(new Text(localize("course_type.course_type_editor_help",
+				"Fill in the desired values and click 'Save'.")));
 		section.add(helpLayer);
 
 		CourseType type = getCourseBusiness(iwc).getCourseType(courseTypePK);
@@ -130,8 +140,14 @@ public class CourseTypeEditor extends CourseBlock {
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		TextInput inputLocalization = new TextInput(PARAMETER_LOCALIZATION_KEY);
 		TextArea inputDesc = new TextArea(PARAMETER_DESCRIPTION);
-		Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
-		DropdownMenu inputSchoolTypes = new DropdownMenu(schoolTypes, PARAMETER_SCHOOL_TYPE_PK);
+		Collection schoolTypes = null;
+		if (category == null) {
+			schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
+		} else {
+			schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes(category);			
+		}
+		DropdownMenu inputSchoolTypes = new DropdownMenu(schoolTypes,
+				PARAMETER_SCHOOL_TYPE_PK);
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
 
 		if (type != null) {
@@ -140,13 +156,15 @@ public class CourseTypeEditor extends CourseBlock {
 			inputDesc.setContent(type.getDatasource());
 			CourseCategory category = type.getCourseCategory();
 			if (category != null) {
-				inputSchoolTypes.setSelectedElement(category.getPrimaryKey().toString());
+				inputSchoolTypes.setSelectedElement(category.getPrimaryKey()
+						.toString());
 			}
 			if (type.getAccountingKey() != null) {
 				inputAccounting.setValue(type.getAccountingKey());
 			}
 
-			form.add(new HiddenInput(PARAMETER_COURSE_TYPE_PK, courseTypePK.toString()));
+			form.add(new HiddenInput(PARAMETER_COURSE_TYPE_PK, courseTypePK
+					.toString()));
 		}
 
 		Layer layer;
@@ -163,7 +181,8 @@ public class CourseTypeEditor extends CourseBlock {
 		layer = new Layer(Layer.DIV);
 		layer.setID("localization");
 		layer.setStyleClass("formItem");
-		label = new Label(localize("localization_key", "Key"), inputLocalization);
+		label = new Label(localize("localization_key", "Key"),
+				inputLocalization);
 		layer.add(label);
 		layer.add(inputLocalization);
 		section.add(layer);
@@ -187,7 +206,8 @@ public class CourseTypeEditor extends CourseBlock {
 		layer = new Layer(Layer.DIV);
 		layer.setID("accountingKey");
 		layer.setStyleClass("formItem");
-		label = new Label(localize("accounting_key", "Accounting key"), inputAccounting);
+		label = new Label(localize("accounting_key", "Accounting key"),
+				inputAccounting);
 		layer.add(label);
 		layer.add(inputAccounting);
 		section.add(layer);
@@ -201,8 +221,10 @@ public class CourseTypeEditor extends CourseBlock {
 		buttonLayer.setStyleClass("buttonLayer");
 		form.add(buttonLayer);
 
-		SubmitButton save = new SubmitButton(localize("save", "Save"), PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
-		SubmitButton cancel = new SubmitButton(localize("cancel", "Cancel"), PARAMETER_ACTION, String.valueOf(ACTION_VIEW));
+		SubmitButton save = new SubmitButton(localize("save", "Save"),
+				PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
+		SubmitButton cancel = new SubmitButton(localize("cancel", "Cancel"),
+				PARAMETER_ACTION, String.valueOf(ACTION_VIEW));
 
 		buttonLayer.add(cancel);
 		buttonLayer.add(save);
@@ -229,9 +251,18 @@ public class CourseTypeEditor extends CourseBlock {
 
 		Collection courseTypes = null;
 		try {
-			courseTypes = getCourseBusiness(iwc).getAllCourseTypes();
-		}
-		catch (RemoteException rex) {
+			if (category != null) {
+				Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes(category);
+				Iterator it = schoolTypes.iterator();
+				courseTypes = new ArrayList();
+				while (it.hasNext()) {
+					SchoolType type = (SchoolType) it.next();
+					courseTypes.addAll(getCourseBusiness(iwc).getAllCourseTypes((Integer) type.getPrimaryKey()));
+				}
+			} else {
+				courseTypes = getCourseBusiness(iwc).getAllCourseTypes();
+			}
+		} catch (RemoteException rex) {
 			courseTypes = new ArrayList();
 		}
 
@@ -271,14 +302,22 @@ public class CourseTypeEditor extends CourseBlock {
 			row = group.createRow();
 
 			try {
-				Link edit = new Link(getBundle().getImage("edit.png", localize("edit", "Edit")));
-				edit.addParameter(PARAMETER_COURSE_TYPE_PK, cType.getPrimaryKey().toString());
+				Link edit = new Link(getBundle().getImage("edit.png",
+						localize("edit", "Edit")));
+				edit.addParameter(PARAMETER_COURSE_TYPE_PK, cType
+						.getPrimaryKey().toString());
 				edit.addParameter(PARAMETER_ACTION, ACTION_EDIT);
 
-				Link delete = new Link(getBundle().getImage("delete.png", localize("delete", "Delete")));
-				delete.addParameter(PARAMETER_COURSE_TYPE_PK, cType.getPrimaryKey().toString());
+				Link delete = new Link(getBundle().getImage("delete.png",
+						localize("delete", "Delete")));
+				delete.addParameter(PARAMETER_COURSE_TYPE_PK, cType
+						.getPrimaryKey().toString());
 				delete.addParameter(PARAMETER_ACTION, ACTION_DELETE);
-				delete.setClickConfirmation(getResourceBundle().getLocalizedString("course_type.confirm_delete", "Are you sure you want to delete the course type selected?"));
+				delete
+						.setClickConfirmation(getResourceBundle()
+								.getLocalizedString(
+										"course_type.confirm_delete",
+										"Are you sure you want to delete the course type selected?"));
 
 				cell = row.createCell();
 				cell.setStyleClass("firstColumn");
@@ -288,8 +327,7 @@ public class CourseTypeEditor extends CourseBlock {
 				cell.setId("description");
 				if (cType.getDescription() != null) {
 					cell.add(new Text(cType.getDescription()));
-				}
-				else {
+				} else {
 					cell.add(new Text("-"));
 				}
 
@@ -298,9 +336,9 @@ public class CourseTypeEditor extends CourseBlock {
 				CourseCategory category = cType.getCourseCategory();
 				if (category != null) {
 					if (category.getLocalizationKey() != null) {
-						cell.add(new Text(localize(category.getLocalizationKey(), category.getName())));
-					}
-					else {
+						cell.add(new Text(localize(category
+								.getLocalizationKey(), category.getName())));
+					} else {
 						cell.add(new Text(category.getName()));
 					}
 				}
@@ -309,8 +347,7 @@ public class CourseTypeEditor extends CourseBlock {
 				cell.setId("accountingKey");
 				if (cType.getAccountingKey() != null) {
 					cell.add(new Text(cType.getAccountingKey()));
-				}
-				else {
+				} else {
 					cell.add(new Text("-"));
 				}
 
@@ -325,12 +362,10 @@ public class CourseTypeEditor extends CourseBlock {
 
 				if (iRow % 2 == 0) {
 					row.setStyleClass("even");
-				}
-				else {
+				} else {
 					row.setStyleClass("odd");
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 			iRow++;
@@ -347,7 +382,9 @@ public class CourseTypeEditor extends CourseBlock {
 			buttonLayer.add(back);
 		}
 
-		SubmitButton newLink = new SubmitButton(localize("type.new", "New type"), PARAMETER_ACTION, String.valueOf(ACTION_NEW));
+		SubmitButton newLink = new SubmitButton(
+				localize("type.new", "New type"), PARAMETER_ACTION, String
+						.valueOf(ACTION_NEW));
 		buttonLayer.add(newLink);
 
 		add(form);
@@ -355,10 +392,18 @@ public class CourseTypeEditor extends CourseBlock {
 
 	public CourseBusiness getCourseBusiness(IWContext iwc) {
 		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
-		}
-		catch (IBOLookupException e) {
+			return (CourseBusiness) IBOLookup.getServiceInstance(iwc,
+					CourseBusiness.class);
+		} catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
 		}
+	}
+
+	public String getSchoolCategory() {
+		return this.category;
+	}
+
+	public void setSchoolCategory(String category) {
+		this.category = category;
 	}
 }

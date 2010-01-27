@@ -1531,6 +1531,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	public Collection getAllCourseTypes(Integer schoolTypePK) {
+		try {			
+			return getCourseTypeHome().findAllBySchoolType(schoolTypePK);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ArrayList();
+	}
+
+	
 	public Collection getAllSchoolTypes() {
 		try {
 			Collection schoolTypes = getSchoolBusiness()
@@ -1552,6 +1562,26 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	public Collection getAllSchoolTypes(String category) {
+		try {
+			Collection schoolTypes = getSchoolBusiness()
+					.findAllSchoolTypesInCategory(category);
+
+			Object typePK = getIWApplicationContext().getApplicationSettings()
+					.getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
+			if (typePK != null) {
+				SchoolType type = getSchoolBusiness().getSchoolType(
+						new Integer(typePK.toString()));
+				schoolTypes.remove(type);
+			}
+
+			return schoolTypes;
+		} catch (RemoteException re) {
+			throw new IBORuntimeException(re);
+		}
+	}
+
+	
 	public Collection getSchoolAreas() {
 		try {
 			return getSchoolBusiness().getSchoolAreaHome().findAllSchoolAreas(
@@ -1583,10 +1613,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				Iterator iterator = schoolTypes.iterator();
 				while (iterator.hasNext()) {
 					SchoolType type = (SchoolType) iterator.next();
-					if (type.getCategory().equals(
-							getSchoolBusiness().getCategoryAfterSchoolCare())) {
+					/*if (type.getCategory().equals(
+							getSchoolBusiness().getCategoryAfterSchoolCare())) {*/
 						types.add(type);
-					}
+					//}
 				}
 			} catch (IDORelationshipException e) {
 				e.printStackTrace();
@@ -1639,6 +1669,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	public Collection getProviders(String category) {
+		try {
+			return getSchoolBusiness()
+					.findAllSchoolsByType(getAllSchoolTypes(category));
+		} catch (RemoteException re) {
+			throw new IBORuntimeException(re);
+		}
+	}
+	
 	public Collection getProviders(SchoolArea area, SchoolType type) {
 		try {
 			return getSchoolBusiness().findAllSchoolsByAreaAndType(
@@ -2299,9 +2338,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 								body, locale);
 
 						/* Hack for NeSt */
-						if (holder.getCourse().getCourseType()
-								.getAbbreviation().equals("B")) {
-							sendRegistrationMessage(application, choice, locale);
+						if (holder != null && holder.getCourse() != null && holder.getCourse().getCourseType() != null && holder.getCourse().getCourseType().getAbbreviation() != null) {
+							if (holder.getCourse().getCourseType()
+									.getAbbreviation().equals("B")) {
+								sendRegistrationMessage(application, choice, locale);
+							}
 						}
 					}
 				}

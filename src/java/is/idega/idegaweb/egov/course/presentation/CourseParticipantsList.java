@@ -211,7 +211,7 @@ public class CourseParticipantsList extends CourseBlock {
 			yearMenu.setOnChange("changeCourseValues();");
 			yearMenu.setSelectedElement(year);
 			
-			for (int i = inceptionYear; i <= currentYear; i++) {
+			for (int i = inceptionYear; i <= currentYear + 1; i++) {
 				yearMenu.addMenuElement(i, String.valueOf(i));
 			}
 		}

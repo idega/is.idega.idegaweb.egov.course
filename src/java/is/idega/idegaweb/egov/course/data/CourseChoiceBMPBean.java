@@ -257,6 +257,8 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		query.addOrder(new Order(table.getColumn(COLUMN_PAYMENT_TIMESTAMP), true));
 		query.addOrder(new Order(table.getColumn(getIDColumnName()), true));
 
+		System.out.println("query = " + query.toString());
+		
 		return idoFindPKsByQuery(query);
 	}
 

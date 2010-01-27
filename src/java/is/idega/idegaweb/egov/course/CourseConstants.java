@@ -59,6 +59,7 @@ public class CourseConstants {
 
 	public static final String DISCOUNT_SIBLING = "sibling";
 	public static final String DISCOUNT_QUANTITY = "quantity";
+	public static final String DISCOUNT_SPOUSE = "spouse";
 
 	public static final String COURSE_PREFIX = "course_";
 	
