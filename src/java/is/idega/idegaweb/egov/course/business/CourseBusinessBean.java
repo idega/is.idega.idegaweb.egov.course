@@ -907,7 +907,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		boolean showIDInName = getIWApplicationContext()
 				.getApplicationSettings().getBoolean(
 						CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-
+		
 		Date fromDate = null;
 		Date toDate = null;
 
