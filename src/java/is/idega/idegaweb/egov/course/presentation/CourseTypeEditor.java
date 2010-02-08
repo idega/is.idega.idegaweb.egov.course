@@ -214,7 +214,6 @@ public class CourseTypeEditor extends CourseBlock {
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
-
 		section.add(clearLayer);
 
 		Layer buttonLayer = new Layer(Layer.DIV);

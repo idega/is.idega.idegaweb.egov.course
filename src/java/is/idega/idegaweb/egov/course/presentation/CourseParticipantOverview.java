@@ -132,9 +132,6 @@ public class CourseParticipantOverview extends CourseBlock {
 			form.add(linkToPrintOut);
 		}
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-
 		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
 		
 		int count = 1;
@@ -231,6 +228,8 @@ public class CourseParticipantOverview extends CourseBlock {
 			formItem.add(span);
 			section.add(formItem);
 
+			Layer clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 
 			Table2 table = new Table2();

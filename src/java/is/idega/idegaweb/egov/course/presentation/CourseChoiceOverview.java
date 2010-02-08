@@ -141,9 +141,6 @@ public class CourseChoiceOverview extends CourseBlock {
 		Child child = getUserBusiness().getMemberFamilyLogic().getChild(applicant);
 		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.course_information", "Course information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
@@ -197,6 +194,8 @@ public class CourseChoiceOverview extends CourseBlock {
 		formItem.add(span);
 		section.add(formItem);
 
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		heading = new Heading1(getResourceBundle().getLocalizedString("application.payment_information", "Payment information"));
@@ -272,6 +271,8 @@ public class CourseChoiceOverview extends CourseBlock {
 			section.add(formItem);
 		}
 
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		Age age = new Age(child.getDateOfBirth());
@@ -329,6 +330,8 @@ public class CourseChoiceOverview extends CourseBlock {
 
 			addChildInformationOverview(iwc, section, getResourceBundle(), owner, child);
 
+			clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 		}
 		
@@ -349,6 +352,8 @@ public class CourseChoiceOverview extends CourseBlock {
 			paragraph.add(new Text(getResourceBundle().getLocalizedString("choice.accepted_info", "The course choice has been accepted and moved to the participants list.")));
 			textLayer.add(paragraph);
 
+			clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
 			layer.add(clearLayer);
 		}
 
@@ -407,9 +412,6 @@ public class CourseChoiceOverview extends CourseBlock {
 		// User user = iwc.getCurrentUser();
 		User applicant = choice.getUser();
 		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
-
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
 
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.creditcard_information", "Creditcard information"));
 		heading.setStyleClass("subHeader");
@@ -492,6 +494,8 @@ public class CourseChoiceOverview extends CourseBlock {
 		formItem.add(refundAmount);
 		section.add(formItem);
 
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		Layer bottom = new Layer(Layer.DIV);

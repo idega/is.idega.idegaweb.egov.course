@@ -588,6 +588,8 @@ public class CourseApplication extends ApplicationForm {
 			formItem.add(postal);
 			section.add(formItem);
 
+			clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 		}
 
@@ -647,9 +649,6 @@ public class CourseApplication extends ApplicationForm {
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("application.custodian_information", "Custodian information"), 2, getNumberOfPhases(iwc)));
 
 		form.add(getPersonInfo(iwc, applicant));
-
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
 
 		Collection custodians = null;
 		try {
@@ -714,9 +713,6 @@ public class CourseApplication extends ApplicationForm {
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-
 		List relatives = new ArrayList();
 		relatives.add(child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		relatives.addAll(child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
@@ -770,7 +766,6 @@ public class CourseApplication extends ApplicationForm {
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
-
 		form.add(clearLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -1078,7 +1073,6 @@ public class CourseApplication extends ApplicationForm {
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
-
 		form.add(clearLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -1765,9 +1759,6 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.amount_information_help", "This is the total amount due for all selected courses.")));
@@ -1881,8 +1872,9 @@ public class CourseApplication extends ApplicationForm {
 
 		section.add(table);
 
-		clearLayer = new Layer(Layer.DIV);
+		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
+		section.add(clearLayer);
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.payer_information", "Payer information"));
 		heading.setStyleClass("subHeader");
@@ -1958,6 +1950,8 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(payerName);
 		section.add(formItem);
 
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.payment_information", "Payment information"));
@@ -2012,6 +2006,8 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(label);
 		section.add(formItem);
 
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
@@ -2128,6 +2124,8 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(validYear);
 		section.add(formItem);
 
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
@@ -2159,6 +2157,8 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(label);
 		section.add(formItem);
 
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -2384,9 +2384,6 @@ public class CourseApplication extends ApplicationForm {
 		Child child = getMemberFamilyLogic(iwc).getChild(user);
 		User owner = getUser(iwc);
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("child.has_growth_deviation", "Has growth deviation"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
@@ -2446,6 +2443,8 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(label);
 		section.add(formItem);
 
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		Paragraph paragraph = new Paragraph();
@@ -2515,6 +2514,8 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(label);
 		section.add(formItem);
 
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		paragraph = new Paragraph();

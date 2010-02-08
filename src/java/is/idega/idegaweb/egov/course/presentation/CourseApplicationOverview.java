@@ -126,9 +126,6 @@ public class CourseApplicationOverview extends CourseBlock {
 
 		form.add(getPersonInfo(iwc, null, false));
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.application_information", "Application information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
@@ -198,6 +195,8 @@ public class CourseApplicationOverview extends CourseBlock {
 		formItem.add(span);
 		section.add(formItem);
 
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		Map applications = getBusiness().getApplicationMap(application);
@@ -402,6 +401,8 @@ public class CourseApplicationOverview extends CourseBlock {
 			section.add(formItem);
 		}
 
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -461,9 +462,6 @@ public class CourseApplicationOverview extends CourseBlock {
 		form.add(getHeader(getResourceBundle().getLocalizedString("application.course_choice_overview", "Course choice overview")));
 
 		form.add(getPersonInfo(iwc, null, false));
-
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
 
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.creditcard_information", "Creditcard information"));
 		heading.setStyleClass("subHeader");
@@ -564,6 +562,8 @@ public class CourseApplicationOverview extends CourseBlock {
 		formItem.add(refundAmount);
 		section.add(formItem);
 
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		Layer bottom = new Layer(Layer.DIV);

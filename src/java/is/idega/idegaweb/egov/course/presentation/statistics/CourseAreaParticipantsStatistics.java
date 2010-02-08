@@ -77,9 +77,6 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				section.setStyleClass("statisticsLayer");
 				form.add(section);
 
-				Layer clearLayer = new Layer(Layer.DIV);
-				clearLayer.setStyleClass("Clear");
-
 				Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_participants_statistics", "Course participants statistics"));
 				section.add(heading);
 
@@ -102,6 +99,9 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 					Collection courses = getBusiness().getCourses(provider, type, fromDate, toDate);
 
 					addResults(iwc, iwrb, type, courses, section, provider.getName(), fromDate, toDate);
+
+					Layer clearLayer = new Layer(Layer.DIV);
+					clearLayer.setStyleClass("Clear");
 					section.add(clearLayer);
 				}
 			}

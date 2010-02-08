@@ -887,9 +887,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		section.setStyleClass("formTableSection");
 		form.add(section);
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.amount_information_help", "This is the total amount due for all selected courses.")));
@@ -1043,6 +1040,8 @@ public class SimpleCourseApplication extends ApplicationForm {
 		formItem.add(referenceNumber);
 		section.add(formItem);
 
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
 		if (this.iCompanyRegistration || this.iUseSessionUser || !iwc.isLoggedOn()) {
@@ -1089,6 +1088,8 @@ public class SimpleCourseApplication extends ApplicationForm {
 			formItem.add(payerName);
 			section.add(formItem);
 
+			clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 		}
 		else {
