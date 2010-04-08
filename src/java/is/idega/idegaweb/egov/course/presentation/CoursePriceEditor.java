@@ -174,44 +174,44 @@ public class CoursePriceEditor extends CourseBlock {
 		TableRow row = group.createRow();
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
-		cell.setId("name");
+		cell.setStyleClass("name");
 		cell.add(new Text(localize("name", "Name")));
 
 		cell = row.createHeaderCell();
-		cell.setId("length");
+		cell.setStyleClass("length");
 		cell.add(new Text(localize("length", "Length")));
 
 		cell = row.createHeaderCell();
-		cell.setId("area");
+		cell.setStyleClass("area");
 		cell.add(new Text(localize("school_area", "School area")));
 
 		cell = row.createHeaderCell();
-		cell.setId("category");
+		cell.setStyleClass("category");
 		cell.add(new Text(localize("category", "Category")));
 
 		cell = row.createHeaderCell();
-		cell.setId("type");
+		cell.setStyleClass("type");
 		cell.add(new Text(localize("type", "Type")));
 
 		cell = row.createHeaderCell();
-		cell.setId("valid_from");
+		cell.setStyleClass("valid_from");
 		cell.add(new Text(localize("valid_from", "Valid from")));
 
 		cell = row.createHeaderCell();
-		cell.setId("valid_to");
+		cell.setStyleClass("valid_to");
 		cell.add(new Text(localize("valid_to", "Valid to")));
 
 		cell = row.createHeaderCell();
-		cell.setId("price");
+		cell.setStyleClass("price");
 		cell.add(new Text(localize("price", "Price")));
 
 		cell = row.createHeaderCell();
-		cell.setId("edit");
+		cell.setStyleClass("edit");
 		cell.add(new Text(localize("edit", "Edit")));
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("lastColumn");
-		cell.setId("delete");
+		cell.setStyleClass("delete");
 		cell.add(new Text(localize("delete", "Delete")));
 
 		group = table.createBodyRowGroup();
@@ -239,11 +239,11 @@ public class CoursePriceEditor extends CourseBlock {
 				cell.add(new Text(cPrice.getName()));
 
 				cell = row.createCell();
-				cell.setId("length");
+				cell.setStyleClass("length");
 				cell.add(new Text(Integer.toString(cPrice.getNumberOfDays()) + " " + localize("days", "days")));
 
 				cell = row.createCell();
-				cell.setId("area");
+				cell.setStyleClass("area");
 				if (area != null) {
 					cell.add(new Text(area.getSchoolAreaName()));
 				}
@@ -252,7 +252,7 @@ public class CoursePriceEditor extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				cell.setId("category");
+				cell.setStyleClass("category");
 				if (courseCategory.getLocalizationKey() != null) {
 					cell.add(new Text(localize(courseCategory.getLocalizationKey(), courseCategory.getName())));
 				}
@@ -261,7 +261,7 @@ public class CoursePriceEditor extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				cell.setId("type");
+				cell.setStyleClass("type");
 				if (type.getLocalizationKey() != null) {
 					cell.add(new Text(localize(type.getLocalizationKey(), type.getName())));
 				}
@@ -270,23 +270,23 @@ public class CoursePriceEditor extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				cell.setId("valid_from");
+				cell.setStyleClass("valid_from");
 				cell.add(new Text(new IWTimestamp(cPrice.getValidFrom()).getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
 
 				cell = row.createCell();
-				cell.setId("valid_to");
+				cell.setStyleClass("valid_to");
 				cell.add(new Text(new IWTimestamp(cPrice.getValidTo()).getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
 
 				cell = row.createCell();
-				cell.setId("price");
+				cell.setStyleClass("price");
 				cell.add(new Text(Integer.toString(cPrice.getPrice())));
 
 				cell = row.createCell();
-				cell.setId("edit");
+				cell.setStyleClass("edit");
 				cell.add(edit);
 
 				cell = row.createCell();
-				cell.setId("delete");
+				cell.setStyleClass("delete");
 				cell.setStyleClass("lastColumn");
 				cell.add(delete);
 

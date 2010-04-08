@@ -610,11 +610,11 @@ public class CourseEditor extends CourseBlock {
 				cell.add(new Text(String.valueOf(course.getMax())));
 
 				cell = row.createCell();
-				cell.setId("edit");
+				cell.setStyleClass("edit");
 				cell.add(edit);
 
 				cell = row.createCell();
-				cell.setId("delete");
+				cell.setStyleClass("delete");
 				cell.setStyleClass("lastColumn");
 				cell.add(delete);
 

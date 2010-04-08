@@ -159,32 +159,32 @@ public class CourseDiscountEditor extends CourseBlock {
 		TableRow row = group.createRow();
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
-		cell.setId("name");
+		cell.setStyleClass("name");
 		cell.add(new Text(localize("name", "Name")));
 
 		cell = row.createHeaderCell();
-		cell.setId("type");
+		cell.setStyleClass("type");
 		cell.add(new Text(localize("discount_type", "Type")));
 
 		cell = row.createHeaderCell();
-		cell.setId("valid_from");
+		cell.setStyleClass("valid_from");
 		cell.add(new Text(localize("valid_from", "Valid from")));
 
 		cell = row.createHeaderCell();
-		cell.setId("valid_to");
+		cell.setStyleClass("valid_to");
 		cell.add(new Text(localize("valid_to", "Valid to")));
 
 		cell = row.createHeaderCell();
-		cell.setId("discount");
+		cell.setStyleClass("discount");
 		cell.add(new Text(localize("discount", "Discount")));
 
 		cell = row.createHeaderCell();
-		cell.setId("edit");
+		cell.setStyleClass("edit");
 		cell.add(new Text(localize("edit", "Edit")));
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("lastColumn");
-		cell.setId("delete");
+		cell.setStyleClass("delete");
 		cell.add(new Text(localize("delete", "Delete")));
 
 		group = table.createBodyRowGroup();
@@ -209,27 +209,27 @@ public class CourseDiscountEditor extends CourseBlock {
 				cell.add(new Text(cDiscount.getName()));
 
 				cell = row.createCell();
-				cell.setId("type");
+				cell.setStyleClass("type");
 				cell.add(new Text(localize("discount_type." + cDiscount.getType(), cDiscount.getType())));
 
 				cell = row.createCell();
-				cell.setId("valid_from");
+				cell.setStyleClass("valid_from");
 				cell.add(new Text(new IWTimestamp(cDiscount.getValidFrom()).getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
 
 				cell = row.createCell();
-				cell.setId("valid_to");
+				cell.setStyleClass("valid_to");
 				cell.add(new Text(new IWTimestamp(cDiscount.getValidTo()).getDateString("dd.MM.yyyy", iwc.getCurrentLocale())));
 
 				cell = row.createCell();
-				cell.setId("discount");
+				cell.setStyleClass("discount");
 				cell.add(new Text(Float.toString(cDiscount.getDiscount())));
 
 				cell = row.createCell();
-				cell.setId("edit");
+				cell.setStyleClass("edit");
 				cell.add(edit);
 
 				cell = row.createCell();
-				cell.setId("delete");
+				cell.setStyleClass("delete");
 				cell.setStyleClass("lastColumn");
 				cell.add(delete);
 

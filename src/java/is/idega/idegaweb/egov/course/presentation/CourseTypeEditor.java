@@ -269,28 +269,28 @@ public class CourseTypeEditor extends CourseBlock {
 		TableRow row = group.createRow();
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
-		cell.setId("name");
+		cell.setStyleClass("name");
 		cell.add(new Text(localize("name", "Name")));
 
 		cell = row.createHeaderCell();
-		cell.setId("description");
+		cell.setStyleClass("description");
 		cell.add(new Text(localize("info", "Info")));
 
 		cell = row.createHeaderCell();
-		cell.setId("schoolCategory");
+		cell.setStyleClass("schoolCategory");
 		cell.add(new Text(localize("category", "Category")));
 
 		cell = row.createHeaderCell();
-		cell.setId("accountingKey");
+		cell.setStyleClass("accountingKey");
 		cell.add(new Text(localize("accounting_key", "Accounting key")));
 
 		cell = row.createHeaderCell();
-		cell.setId("edit");
+		cell.setStyleClass("edit");
 		cell.add(new Text(localize("edit", "Edit")));
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("lastColumn");
-		cell.setId("delete");
+		cell.setStyleClass("delete");
 		cell.add(new Text(localize("delete", "Delete")));
 
 		group = table.createBodyRowGroup();
@@ -323,7 +323,7 @@ public class CourseTypeEditor extends CourseBlock {
 				cell.add(new Text(cType.getName()));
 
 				cell = row.createCell();
-				cell.setId("description");
+				cell.setStyleClass("description");
 				if (cType.getDescription() != null) {
 					cell.add(new Text(cType.getDescription()));
 				} else {
@@ -331,7 +331,7 @@ public class CourseTypeEditor extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				cell.setId("category");
+				cell.setStyleClass("category");
 				CourseCategory category = cType.getCourseCategory();
 				if (category != null) {
 					if (category.getLocalizationKey() != null) {
@@ -343,7 +343,7 @@ public class CourseTypeEditor extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				cell.setId("accountingKey");
+				cell.setStyleClass("accountingKey");
 				if (cType.getAccountingKey() != null) {
 					cell.add(new Text(cType.getAccountingKey()));
 				} else {
@@ -351,11 +351,11 @@ public class CourseTypeEditor extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				cell.setId("edit");
+				cell.setStyleClass("edit");
 				cell.add(edit);
 
 				cell = row.createCell();
-				cell.setId("delete");
+				cell.setStyleClass("delete");
 				cell.setStyleClass("lastColumn");
 				cell.add(delete);
 
