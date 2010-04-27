@@ -11,6 +11,7 @@
       <include method="getCoursesDWR" />
       <include method="getCoursesMapDWR" />
       <include method="getPriceDWR" />
+      <include method="getProvidersDWR" />
       <include method="getUserDWR" />
       <include method="getUserDWRByRelation" />
       <include method="manageCourseChoiceSettings" />

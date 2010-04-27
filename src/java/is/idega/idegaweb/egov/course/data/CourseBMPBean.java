@@ -422,6 +422,37 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoGetNumberOfRecords(query);
 	}
 
+	public int ejbHomeGetCountBySchoolAndBirthYear(Object schoolPK, int birthYear, Date fromDate) throws IDOException {
+		return ejbHomeGetCountBySchoolAndCourseTypeAndBirthYear(schoolPK, null, birthYear, fromDate);
+	}
+	
+	public int ejbHomeGetCountBySchoolAndCourseTypeAndBirthYear(Object schoolPK, Object courseTypePK, int birthYear, Date fromDate) throws IDOException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new CountColumn(table, getIDColumnName()));
+
+		if (schoolPK != null) {
+			query.addCriteria(new MatchCriteria(table, COLUMN_PROVIDER, MatchCriteria.EQUALS, schoolPK));
+		}
+		if (courseTypePK != null) {
+			query.addCriteria(new MatchCriteria(table, COLUMN_COURSE_TYPE, MatchCriteria.EQUALS, courseTypePK));
+		}
+
+		if (birthYear > 0) {
+			Column bFrom = new Column(table, COLUMN_BIRTHYEAR_FROM);
+			Column yFrom = new Column(table, COLUMN_BIRTHYEAR_TO);
+			query.addCriteria(new MatchCriteria(bFrom, MatchCriteria.LESSEQUAL, birthYear));
+			query.addCriteria(new MatchCriteria(yFrom, MatchCriteria.GREATEREQUAL, birthYear));
+		}
+
+		if (fromDate != null) {
+			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.GREATEREQUAL, fromDate));
+		}
+
+		return this.idoGetNumberOfRecords(query);
+	}
+
 	public int ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate)
 		throws IDOException {
 		

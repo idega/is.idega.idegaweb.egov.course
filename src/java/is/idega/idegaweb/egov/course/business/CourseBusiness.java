@@ -468,6 +468,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersDWR
+	 */
+	public Map getProvidersDWR(int userPK, int typePK, String country) throws RemoteException;
+	
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersForUser
 	 */
 	public Collection getProvidersForUser(User user) throws RemoteException;
@@ -524,6 +529,16 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public boolean hasAvailableCourses(User user, CourseType type)
 			throws RemoteException;
 
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasAvailableCourses
+	 */
+	public boolean hasAvailableCourses(User user, School school) throws RemoteException;
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasAvailableCourses
+	 */
+	public boolean hasAvailableCourses(User user, School school, CourseType type) throws RemoteException;
+	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getTimeoutDay
 	 */

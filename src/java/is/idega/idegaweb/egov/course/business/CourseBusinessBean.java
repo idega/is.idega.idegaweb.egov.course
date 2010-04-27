@@ -896,6 +896,41 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
+	public Map getProvidersDWR(int userPK, int typePK, String country) {
+		Collection coll = getProviders();
+		Map map = new LinkedHashMap();
+
+		Locale locale = new Locale(country, country.toUpperCase());
+		map.put(new Integer(-1), getLocalizedString("all_providers",
+				"All providers", locale));
+
+		CourseType type = null;
+		if (typePK > 0) {
+			type = getCourseType(typePK);
+		}
+		
+		User user = null;
+		try {
+			user = getUser(new Integer(userPK));
+		}
+		catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		catch (FinderException e) {
+			e.printStackTrace();
+		}
+		
+		if (coll != null) {
+			Iterator iter = coll.iterator();
+			while (iter.hasNext()) {
+				School provider = (School) iter.next();
+				if (hasAvailableCourses(user, provider, type))
+				map.put(provider.getPrimaryKey(), provider.getSchoolName());
+			}
+		}
+		return map;
+	}
+
 	public Map getCourseMapDWR(int providerPK, int schoolTypePK,
 			int courseTypePK, String country) {
 		return getCoursesMapDWR(providerPK, schoolTypePK, courseTypePK, -1,
@@ -1918,6 +1953,33 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
 			IWTimestamp stampNow = new IWTimestamp();
 			return getCourseHome().getCountByCourseTypeAndBirthYear(
+					type != null ? type.getPrimaryKey() : null,
+					stamp.getYear(), stampNow.getDate()) > 0;
+		} catch (IDOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean hasAvailableCourses(User user, School school) {
+		try {
+			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
+			IWTimestamp stampNow = new IWTimestamp();
+			return getCourseHome().getCountBySchoolAndBirthYear(
+					school != null ? school.getPrimaryKey() : null,
+					stamp.getYear(), stampNow.getDate()) > 0;
+		} catch (IDOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean hasAvailableCourses(User user, School school, CourseType type) {
+		try {
+			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
+			IWTimestamp stampNow = new IWTimestamp();
+			return getCourseHome().getCountBySchoolAndCourseTypeAndBirthYear(
+					school != null ? school.getPrimaryKey() : null,
 					type != null ? type.getPrimaryKey() : null,
 					stamp.getYear(), stampNow.getDate()) > 0;
 		} catch (IDOException e) {
