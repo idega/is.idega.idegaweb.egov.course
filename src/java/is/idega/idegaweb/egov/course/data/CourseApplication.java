@@ -59,6 +59,11 @@ public interface CourseApplication extends IDOEntity, Case {
 	public String getPayerPersonalID();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getPrefix
+	 */
+	public String getPrefix();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#getAmount
 	 */
 	public float getAmount();
@@ -127,6 +132,11 @@ public interface CourseApplication extends IDOEntity, Case {
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setPayerPersonalID
 	 */
 	public void setPayerPersonalID(String personalID);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setPrefix
+	 */
+	public void setPrefix(String prefix);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseApplicationBMPBean#setAmount

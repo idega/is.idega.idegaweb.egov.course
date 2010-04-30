@@ -161,6 +161,7 @@ public class CourseApplication extends ApplicationForm {
 	private CourseCategory iCategory;
 	private boolean hasCare = true;
 	private boolean allowsAllChildren = true;
+	private String prefix = "";
 
 	private IWBundle iwb = null;
 	private IWResourceBundle iwrb = null;
@@ -1092,7 +1093,7 @@ public class CourseApplication extends ApplicationForm {
 
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString(hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare", "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString(getPrefix() + (hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare"), "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
 		section.add(helpLayer);
 
 		Layer clearLayer = new Layer(Layer.DIV);
@@ -1986,7 +1987,8 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		boolean creditcardPayment = true;
+		boolean hasPrefix = getPrefix().length() > 0;
+		boolean creditcardPayment = !hasPrefix;
 		if (iwc.isParameterSet(PARAMETER_CREDITCARD_PAYMENT)) {
 			creditcardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		}
@@ -2014,14 +2016,16 @@ public class CourseApplication extends ApplicationForm {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.payment_information_help", "Please select which type of payment you will be using to pay for the service.")));
 		section.add(helpLayer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("application.payment_creditcard", "Payment with creditcard"), creditcard);
-		formItem.add(creditcard);
-		formItem.add(label);
-		section.add(formItem);
-
+		if (!hasPrefix) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("application.payment_creditcard", "Payment with creditcard"), creditcard);
+			formItem.add(creditcard);
+			formItem.add(label);
+			section.add(formItem);
+		}
+		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
@@ -2034,124 +2038,126 @@ public class CourseApplication extends ApplicationForm {
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.creditcard_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
-		section.add(helpLayer);
-
-		Collection images = getCourseBusiness(iwc).getCreditCardImages();
-		Iterator iterator = images.iterator();
-		while (iterator.hasNext()) {
-			Image image = (Image) iterator.next();
-			image.setStyleClass("creditCardImage");
-			helpLayer.add(image);
-		}
-
-		DropdownMenu cardType = new DropdownMenu(PARAMETER_CARD_TYPE);
-		cardType.addMenuElement(CourseConstants.CARD_TYPE_EUROCARD, this.iwrb.getLocalizedString("application.eurocard", "Eurocard"));
-		cardType.addMenuElement(CourseConstants.CARD_TYPE_VISA, this.iwrb.getLocalizedString("application.visa", "Visa"));
-		cardType.keepStatusOnAction(true);
-		cardType.setDisabled(!creditcardPayment);
-
-		TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
-		cardOwner.keepStatusOnAction(true);
-		cardOwner.setDisabled(!creditcardPayment);
-
-		TextInput cardNumber = new TextInput(PARAMETER_CARD_NUMBER, null);
-		cardNumber.setLength(16);
-		cardNumber.setMaxlength(16);
-		cardNumber.keepStatusOnAction(true);
-		cardNumber.setDisabled(!creditcardPayment);
-
-		TextInput ccNumber = new TextInput(PARAMETER_CCV, null);
-		ccNumber.setLength(3);
-		ccNumber.setMaxlength(3);
-		ccNumber.keepStatusOnAction(true);
-		ccNumber.setDisabled(!creditcardPayment);
-
-		DropdownMenu validMonth = new DropdownMenu(PARAMETER_VALID_MONTH);
-		validMonth.setWidth("45px");
-		validMonth.keepStatusOnAction(true);
-		for (int a = 1; a <= 12; a++) {
-			validMonth.addMenuElement(TextSoap.addZero(a), TextSoap.addZero(a));
-		}
-		validMonth.setDisabled(!creditcardPayment);
-
-		IWTimestamp stamp = new IWTimestamp();
-		DropdownMenu validYear = new DropdownMenu(PARAMETER_VALID_YEAR);
-		validYear.setWidth("60px");
-		validYear.keepStatusOnAction(true);
-		int year = stamp.getYear();
-		for (int a = year; a <= year + 10; a++) {
-			validYear.addMenuElement(String.valueOf(stamp.getYear()), String.valueOf(stamp.getYear()));
-			stamp.addYears(1);
-		}
-		validYear.setDisabled(!creditcardPayment);
-
-		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
-
-		if (useDirectPayment) {
+		if (!hasPrefix) {
+			heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
+	
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+	
+			helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.creditcard_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
+			section.add(helpLayer);
+	
+			Collection images = getCourseBusiness(iwc).getCreditCardImages();
+			Iterator iterator = images.iterator();
+			while (iterator.hasNext()) {
+				Image image = (Image) iterator.next();
+				image.setStyleClass("creditCardImage");
+				helpLayer.add(image);
+			}
+	
+			DropdownMenu cardType = new DropdownMenu(PARAMETER_CARD_TYPE);
+			cardType.addMenuElement(CourseConstants.CARD_TYPE_EUROCARD, this.iwrb.getLocalizedString("application.eurocard", "Eurocard"));
+			cardType.addMenuElement(CourseConstants.CARD_TYPE_VISA, this.iwrb.getLocalizedString("application.visa", "Visa"));
+			cardType.keepStatusOnAction(true);
+			cardType.setDisabled(!creditcardPayment);
+	
+			TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
+			cardOwner.keepStatusOnAction(true);
+			cardOwner.setDisabled(!creditcardPayment);
+	
+			TextInput cardNumber = new TextInput(PARAMETER_CARD_NUMBER, null);
+			cardNumber.setLength(16);
+			cardNumber.setMaxlength(16);
+			cardNumber.keepStatusOnAction(true);
+			cardNumber.setDisabled(!creditcardPayment);
+	
+			TextInput ccNumber = new TextInput(PARAMETER_CCV, null);
+			ccNumber.setLength(3);
+			ccNumber.setMaxlength(3);
+			ccNumber.keepStatusOnAction(true);
+			ccNumber.setDisabled(!creditcardPayment);
+	
+			DropdownMenu validMonth = new DropdownMenu(PARAMETER_VALID_MONTH);
+			validMonth.setWidth("45px");
+			validMonth.keepStatusOnAction(true);
+			for (int a = 1; a <= 12; a++) {
+				validMonth.addMenuElement(TextSoap.addZero(a), TextSoap.addZero(a));
+			}
+			validMonth.setDisabled(!creditcardPayment);
+	
+			IWTimestamp stamp = new IWTimestamp();
+			DropdownMenu validYear = new DropdownMenu(PARAMETER_VALID_YEAR);
+			validYear.setWidth("60px");
+			validYear.keepStatusOnAction(true);
+			int year = stamp.getYear();
+			for (int a = year; a <= year + 10; a++) {
+				validYear.addMenuElement(String.valueOf(stamp.getYear()), String.valueOf(stamp.getYear()));
+				stamp.addYears(1);
+			}
+			validYear.setDisabled(!creditcardPayment);
+	
+			boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
+	
+			if (useDirectPayment) {
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				formItem.setStyleClass("required");
+				label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_owner", "Card owner"))), cardOwner);
+				formItem.add(label);
+				formItem.add(cardOwner);
+				section.add(formItem);
+			}
+			
+			if (!useDirectPayment) {
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				formItem.setStyleClass("required");
+				label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_type", "Card type"))), cardType);
+				formItem.add(label);
+				formItem.add(cardType);
+				section.add(formItem);
+			}
+	
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("required");
-			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_owner", "Card owner"))), cardOwner);
+			if (hasError(PARAMETER_CARD_NUMBER)) {
+				formItem.setStyleClass("hasError");
+			}
+			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_number", "Card number"))), cardNumber);
 			formItem.add(label);
-			formItem.add(cardOwner);
+			formItem.add(cardNumber);
 			section.add(formItem);
+	
+			if (useDirectPayment) {
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				formItem.setStyleClass("required");
+				label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.ccv_number", "Credit card verification number"))), ccNumber);
+				formItem.add(label);
+				formItem.add(ccNumber);
+				section.add(formItem);
+			}
+			
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("required");
+			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_valid_time", "Card valid through"))), validMonth);
+			formItem.add(label);
+			formItem.add(validMonth);
+			formItem.add(validYear);
+			section.add(formItem);
+	
+			clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
+			section.add(clearLayer);
 		}
 		
-		if (!useDirectPayment) {
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			formItem.setStyleClass("required");
-			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_type", "Card type"))), cardType);
-			formItem.add(label);
-			formItem.add(cardType);
-			section.add(formItem);
-		}
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_CARD_NUMBER)) {
-			formItem.setStyleClass("hasError");
-		}
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_number", "Card number"))), cardNumber);
-		formItem.add(label);
-		formItem.add(cardNumber);
-		section.add(formItem);
-
-		if (useDirectPayment) {
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			formItem.setStyleClass("required");
-			label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.ccv_number", "Credit card verification number"))), ccNumber);
-			formItem.add(label);
-			formItem.add(ccNumber);
-			section.add(formItem);
-		}
-		
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("application.card_valid_time", "Card valid through"))), validMonth);
-		formItem.add(label);
-		formItem.add(validMonth);
-		formItem.add(validYear);
-		section.add(formItem);
-
-		clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-		section.add(clearLayer);
-
 		heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
@@ -2166,7 +2172,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Paragraph paragraph = new Paragraph();
 		paragraph.setStyleClass("agreement");
-		paragraph.add(new Text(this.iwrb.getLocalizedString("application.agreement", "Agreement text")));
+		paragraph.add(new Text(this.iwrb.getLocalizedString(getPrefix() + "application.agreement", "Agreement text")));
 		section.add(paragraph);
 
 		formItem = new Layer(Layer.DIV);
@@ -2299,7 +2305,7 @@ public class CourseApplication extends ApplicationForm {
 
 		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
 		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, getUser(iwc), iwc.isLoggedOn() ? iwc.getCurrentUser() : null, iwc.getCurrentLocale());
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, prefix, getUser(iwc), iwc.isLoggedOn() ? iwc.getCurrentUser() : null, iwc.getCurrentLocale());
 		if (application != null && creditCardPayment) {
 			if (useDirectPayment) {
 				try {
@@ -2551,7 +2557,7 @@ public class CourseApplication extends ApplicationForm {
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("child.other_information", "Other information"));
+		heading = new Heading1(this.iwrb.getLocalizedString(getPrefix() + "child.other_information", "Other information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
 
@@ -2783,5 +2789,16 @@ public class CourseApplication extends ApplicationForm {
 
 	public void setApplicationPK(String applicationPK) {
 		this.iApplicationPK = applicationPK;
+	}
+
+	private String getPrefix() {
+		if (prefix.length() > 0) {
+			return prefix + ".";
+		}
+		return prefix;
+	}
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
 	}
 }

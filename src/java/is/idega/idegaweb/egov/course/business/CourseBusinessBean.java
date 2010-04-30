@@ -128,12 +128,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			Integer numberOfChoices = (Integer) courseMap.get(course);
 			numberOfChoices = new Integer(numberOfChoices.intValue() + 1);
 			courseMap.put(course, numberOfChoices);
-			// System.out.println("Reserving course " + course.getName() + " ("
-			// + course.getPrimaryKey() + "): " + numberOfChoices);
 		} else {
 			courseMap.put(course, new Integer(1));
-			// System.out.println("Reserving course " + course.getName() + " ("
-			// + course.getPrimaryKey() + "): " + 1);
 		}
 
 		getIWApplicationContext().setApplicationAttribute(
@@ -2214,7 +2210,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		sendMessageToParents(application, choice, subject, body, locale);
 	}
 
-	public CourseApplication saveApplication(Map applications, User performer,
+	public CourseApplication saveApplication(Map applications, String prefix, User performer,
 			Locale locale) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
@@ -2227,14 +2223,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					e.printStackTrace();
 				}
 			}
+			application.setPrefix(prefix);
 			application.setOwner(performer);
 			changeCaseStatus(application, getCaseStatusOpen(), performer);
 
 			String subject = getLocalizedString(
-					"course_choice.registration_received",
+					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.registration_received",
 					"Your registration for course has been received", locale);
 			String body = getLocalizedString(
-					"course_choice.card_registration_body",
+					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.card_registration_body",
 					"Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card",
 					locale);
 
@@ -2299,7 +2296,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public CourseApplication saveApplication(Map applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
-			User owner, User performer, Locale locale, float certificateFee) {
+			String prefix, User owner, User performer, Locale locale, float certificateFee) {
 		try {
 			boolean useWaitingList = getIWApplicationContext()
 					.getApplicationSettings().getBoolean(
@@ -2315,6 +2312,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			if (merchantType != null) {
 				application.setCreditCardMerchantType(merchantType);
 			}
+			application.setPrefix(prefix);
 			application.setPaymentType(paymentType);
 			if (paymentType != null) {
 				application.setPaid(paymentType
@@ -2344,7 +2342,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			changeCaseStatus(application, getCaseStatusOpen(), owner);
 
 			String subject = getLocalizedString(
-					"course_choice.registration_received",
+					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.registration_received",
 					"Your registration for course has been received", locale);
 			String body = "";
 			if (paymentType != null) {
@@ -2356,7 +2354,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				} else if (paymentType
 						.equals(CourseConstants.PAYMENT_TYPE_GIRO)) {
 					body = getLocalizedString(
-							"course_choice.giro_registration_body",
+							(prefix.length() > 0 ? prefix + "." : "") + "course_choice.giro_registration_body",
 							"Your registration for course {2} at {3} for {0}, {1} has been received.  You will receive an invoice in a few days for the total amount of the registration.",
 							locale);
 				} else if (paymentType
@@ -2420,10 +2418,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public CourseApplication saveApplication(Map applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
-			User owner, User performer, Locale locale) {
+			String prefix, User owner, User performer, Locale locale) {
 		return saveApplication(applications, merchantID, amount, merchantType,
 				paymentType, referenceNumber, payerName, payerPersonalID,
-				owner, performer, locale, 0);
+				prefix, owner, performer, locale, 0);
 	}
 
 	private void sendMessageToParents(CourseApplication application,

@@ -1167,7 +1167,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			return;
 		}
 
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), -1, (float) amount, null, CourseConstants.PAYMENT_TYPE_BANK_TRANSFER, referenceNumber, payerName, payerPersonalID, getUser(iwc), iwc.isLoggedOn() ? iwc.getCurrentUser() : null, iwc.getCurrentLocale(), certificateFees);
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), -1, (float) amount, null, CourseConstants.PAYMENT_TYPE_BANK_TRANSFER, referenceNumber, payerName, payerPersonalID, "", getUser(iwc), iwc.isLoggedOn() ? iwc.getCurrentUser() : null, iwc.getCurrentLocale(), certificateFees);
 
 		if (hasErrors()) {
 			showPhaseFive(iwc);

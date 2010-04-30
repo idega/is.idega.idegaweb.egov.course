@@ -34,6 +34,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 	private final static String COLUMN_PAYER_PERSONAL_ID = "payer_personal_id";
 	private static final String COLUMN_AMOUNT = "amount";
 	private static final String COLUMN_COMPANY = "company_id";
+	private static final String COLUMN_PREFIX = "prefix";
 
 	private final static String COLUMN_CARD_TYPE = "card_type";
 	private final static String COLUMN_CARD_NUMBER = "card_number";
@@ -68,6 +69,7 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		addAttribute(COLUMN_AMOUNT, "Amount", Float.class);
 		addAttribute(COLUMN_PAYER_PERSONAL_ID, "Payer personal ID", String.class);
 		addAttribute(COLUMN_PAYER_NAME, "Payer name", String.class);
+		addAttribute(COLUMN_PREFIX, "Prefix", String.class);
 
 		addAttribute(COLUMN_CARD_TYPE, "Card type", String.class);
 		addAttribute(COLUMN_CARD_NUMBER, "Card number", String.class);
@@ -108,6 +110,10 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public String getPayerPersonalID() {
 		return getStringColumnValue(COLUMN_PAYER_PERSONAL_ID);
+	}
+	
+	public String getPrefix() {
+		return getStringColumnValue(COLUMN_PREFIX);
 	}
 
 	public float getAmount() {
@@ -165,6 +171,10 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 
 	public void setPayerPersonalID(String personalID) {
 		setColumn(COLUMN_PAYER_PERSONAL_ID, personalID);
+	}
+	
+	public void setPrefix(String prefix) {
+		setColumn(COLUMN_PREFIX, prefix);
 	}
 
 	public void setAmount(float amount) {
