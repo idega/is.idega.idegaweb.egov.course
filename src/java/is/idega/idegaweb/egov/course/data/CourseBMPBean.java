@@ -270,13 +270,13 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addJoin(table, courseTypeTable);
 
-		if (providerPK != null) {
+		if (providerPK != null && providerPK.toString().length() > 0) {
 			query.addCriteria(new MatchCriteria(providerId, MatchCriteria.EQUALS, providerPK));
 		}
-		if (schoolTypePK != null) {
+		if (schoolTypePK != null && schoolTypePK.toString().length() > 0) {
 			query.addCriteria(new MatchCriteria(schoolTypeId, MatchCriteria.EQUALS, schoolTypePK));
 		}
-		if (courseTypePK != null) {
+		if (courseTypePK != null && schoolTypePK.toString().length() > 0) {
 			query.addCriteria(new MatchCriteria(courseTypeId, MatchCriteria.EQUALS, courseTypePK));
 		}
 
