@@ -25,6 +25,7 @@ import com.idega.data.query.OR;
 import com.idega.data.query.Order;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
@@ -257,7 +258,9 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		query.addOrder(new Order(table.getColumn(COLUMN_PAYMENT_TIMESTAMP), true));
 		query.addOrder(new Order(table.getColumn(getIDColumnName()), true));
 
-		System.out.println("query = " + query.toString());
+		if (IWMainApplication.isDebugActive()) {
+			System.out.println("query = " + query.toString());
+		}
 		
 		return idoFindPKsByQuery(query);
 	}
@@ -338,7 +341,9 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 		/*@TODO add handling for dates, join with course and use the date there */
 		
-		System.out.println("sql = " + query.toString());
+		if (IWMainApplication.isDebugActive()) {
+			System.out.println("sql = " + query.toString());
+		}
 		
 		return idoFindPKsByQuery(query);
 	}
