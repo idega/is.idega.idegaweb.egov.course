@@ -74,10 +74,10 @@ public class CourseEditor extends CourseBlock {
 
 	private static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
 
-	private static final int ACTION_VIEW = 1;
+	protected static final int ACTION_VIEW = 1;
 	protected static final int ACTION_EDIT = 2;
 	protected static final int ACTION_NEW = 3;
-	private static final int ACTION_SAVE = 4;
+	protected static final int ACTION_SAVE = 4;
 	protected static final int ACTION_DELETE = 5;
 
 	private SchoolType type = null;
@@ -131,7 +131,7 @@ public class CourseEditor extends CourseBlock {
 		}
 	}
 
-	private int parseAction(IWContext iwc) {
+	protected int parseAction(IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			return Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
