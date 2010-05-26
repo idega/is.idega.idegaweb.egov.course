@@ -1,7 +1,5 @@
 package is.idega.idegaweb.egov.course.business;
 
-import com.idega.util.IWTimestamp;
-
 public class CourseDWR {
 
 	private String name;
@@ -14,7 +12,6 @@ public class CourseDWR {
 	private String price;
 	private String provider;
 	private boolean isfull = false;
-	private IWTimestamp fromStamp;
 
 	public String getName() {
 		return name;
@@ -94,13 +91,5 @@ public class CourseDWR {
 
 	public void setFull(boolean isFull) {
 		this.isfull = isFull;
-	}
-	
-	public IWTimestamp getFirstDateOfCourse() {
-		return this.fromStamp;
-	}
-	
-	public void setFirstDateOfCourse(IWTimestamp date) {
-		this.fromStamp = date;
 	}
 }
