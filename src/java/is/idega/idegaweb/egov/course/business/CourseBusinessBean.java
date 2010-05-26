@@ -1279,8 +1279,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		String dayS = "";
 		CoursePrice price = course.getPrice();
 		if (from != null && price != null) {
-			IWTimestamp toDate = new IWTimestamp(getEndDate(price, from
-					.getDate()));
+			IWTimestamp toDate = new IWTimestamp(getEndDate(price, from.getDate()));
 			dayS = Integer.toString(price.getNumberOfDays());
 			if (showYear) {
 				toS = toDate.getDateString("dd.MM.yyyy", locale);
@@ -1289,14 +1288,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			}
 			cDWR.setPrice(price.getPrice() + " ISK");
 			if (showYear) {
-				cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale)
-						+ " - " + toS);
+				cDWR.setTimeframe(from.getDateString("dd.MM.yyyy", locale) + " - " + toS);
 			} else {
-				cDWR.setTimeframe(from.getDateString("dd.MM", locale) + " - "
-						+ toS);
+				cDWR.setTimeframe(from.getDateString("dd.MM", locale) + " - " + toS);
 			}
-
-			cDWR.setFirstDateOfCourse(from);
 		} else if (from != null && course.getEndDate() != null) {
 			IWTimestamp toDate = new IWTimestamp(course.getEndDate());
 			toS = toDate.getDateString("d. MMMM yyyy", locale);
@@ -1304,11 +1299,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			NumberFormat format = NumberFormat.getCurrencyInstance(locale);
 			format.setMaximumFractionDigits(0);
 			cDWR.setPrice(format.format(course.getCoursePrice()));
-			cDWR.setTimeframe(from.getDateString("d. MMMM yyyy", locale)
-					+ (from.equals(toDate) ? "" : " - " + toS));
-
-			cDWR.setFirstDateOfCourse(from);
-
+			cDWR.setTimeframe(from.getDateString("d. MMMM yyyy", locale) + (from.equals(toDate) ? "" : " - " + toS));
 		}
 		cDWR.setDays(dayS);
 		return cDWR;

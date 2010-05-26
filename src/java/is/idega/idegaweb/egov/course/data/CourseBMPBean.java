@@ -295,6 +295,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.addOrder(table, COLUMN_START_DATE, true);
 		query.addOrder(table, COLUMN_NAME, true);
 
+		System.out.println(query.toString());
 		return this.idoFindPKsByQuery(query);
 	}
 
