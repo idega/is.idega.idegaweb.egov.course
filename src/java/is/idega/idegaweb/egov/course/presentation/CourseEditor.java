@@ -81,9 +81,11 @@ public class CourseEditor extends CourseBlock {
 	protected static final int ACTION_DELETE = 5;
 
 	private SchoolType type = null;
+	
 	private boolean showTypes = true;
 	private boolean showCourseCategory = true;
 	private boolean showCourseType = true;
+	private Boolean useFixedPrice = null;
 
 	private Course course;
 
@@ -579,20 +581,24 @@ public class CourseEditor extends CourseBlock {
 	}
 
 	private boolean isUseFixedPrices() {
-		try {
-			if (getSession().getProvider() != null) {
-				Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
-				if (schoolTypes.size() == 1) {
-					SchoolType type = (SchoolType) schoolTypes.iterator().next();
-					CourseCategory c = getBusiness().getCourseCategory(type.getPrimaryKey());
-					return c.useFixedPricing();
+		if (useFixedPrice == null) {
+			try {
+				if (getSession().getProvider() != null) {
+					Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+					if (schoolTypes.size() == 1) {
+						SchoolType type = schoolTypes.iterator().next();
+						CourseCategory c = getBusiness().getCourseCategory(type.getPrimaryKey());
+						useFixedPrice = c.useFixedPricing();
+						return useFixedPrice;
+					}
 				}
+			} catch (Exception e) {
 			}
-		} catch (Exception e) {
-
+	
+			useFixedPrice = IWMainApplication.getDefaultIWApplicationContext().getApplicationSettings()
+				.getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 		}
-
-		return IWMainApplication.getDefaultIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+		return useFixedPrice;
 	}
 
 	protected Course getCourse(Object courseId) throws RemoteException {
@@ -736,8 +742,10 @@ public class CourseEditor extends CourseBlock {
 		if (course != null) {
 			CourseType type = course.getCourseType();
 			CourseCategory category = type.getCourseCategory();
-			useFixedPrices = category == null ? false : category.useFixedPricing();
-
+			if (this.useFixedPrice == null) {
+				useFixedPrices = category == null ? false : category.useFixedPricing();
+			}
+			
 			School provider = course.getProvider();
 			CoursePrice coursePrice = course.getPrice();
 
@@ -793,6 +801,11 @@ public class CourseEditor extends CourseBlock {
 
 					courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 				}
+			} else if (course.getCoursePrice() >= 0) {
+				price.setContent(String.valueOf((int) course.getCoursePrice()));
+				price.setDisabled(false);
+
+				courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 			}
 
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
@@ -1111,5 +1124,13 @@ public class CourseEditor extends CourseBlock {
 
 	protected String getCourseTypeId(IWContext iwc) {
 		return iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null;
+	}
+
+	public Boolean getUseFixedPrice() {
+		return useFixedPrice;
+	}
+
+	public void setUseFixedPrice(Boolean useFixedPrice) {
+		this.useFixedPrice = useFixedPrice;
 	}
 }
