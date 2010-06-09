@@ -3043,7 +3043,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			String subject = getLocalizedString(
 					"course_choice.accepted_subject", "Course choice accepted",
 					locale);
-			String body = getLocalizedString(
+			
+			String prefix = application.getPrefix();
+			prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+			
+			String body = getLocalizedString(prefix +
 					"course_choice.accepted_body",
 					"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
 					locale);
