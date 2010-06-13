@@ -18,4 +18,5 @@ public interface CourseServices {
 	
 	public Collection<Course> getCoursesByType(String courseType);
 	
+	public Course getCourseById(String courseId);
 }
