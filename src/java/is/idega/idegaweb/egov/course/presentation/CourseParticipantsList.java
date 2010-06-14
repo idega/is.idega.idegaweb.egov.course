@@ -62,6 +62,9 @@ import com.idega.util.text.Name;
 
 public class CourseParticipantsList extends CourseBlock {
 
+	private static final int ACTION_VIEW = 1;
+	private static final int ACTION_STORE = 2;
+
 	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
 
 	protected SchoolType type = null;
@@ -71,14 +74,18 @@ public class CourseParticipantsList extends CourseBlock {
 	protected static final String PARAMETER_USER_PK = "cf_user_pk";
 	protected static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
 	protected static final String PARAMETER_SORTING = "prm_sorting";
+	protected static final String PARAMETER_COURSE_PARTICIPANT_PAYMENT = "cf_participant_payment_";
 
 	@Override
 	public void present(IWContext iwc) {
 		try {
+			parseAction(iwc);
+			
 			Form form = new Form();
 			form.setID("courseList");
 			form.setStyleClass("adminForm");
 			form.setEventListener(this.getClass());
+			form.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_VIEW));
 
 			form.add(getNavigation(iwc));
 			if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
@@ -86,20 +93,41 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 			form.add(getParticipants(iwc));
 
-			if (getBackPage() != null) {
-				Layer buttonLayer = new Layer();
-				buttonLayer.setStyleClass("buttonLayer");
-				form.add(buttonLayer);
+			Layer buttonLayer = new Layer();
+			buttonLayer.setStyleClass("buttonLayer");
+			form.add(buttonLayer);
 
+			boolean showNoPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_NO_PAYMENT, false);
+			if (getBackPage() != null) {
 				GenericButton back = new GenericButton(localize("back", "Back"));
 				back.setPageToOpen(getBackPage());
 				buttonLayer.add(back);
 			}
-
+			if (iwc.isParameterSet(PARAMETER_COURSE_PK) && iwc.hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY) && showNoPayment) {
+				SubmitButton store = new SubmitButton(localize("store", "Store"));
+				store.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_STORE));
+				buttonLayer.add(store);
+			}
+			
 			add(form);
 		}
 		catch (RemoteException re) {
 			throw new IBORuntimeException(re);
+		}
+	}
+	
+	private void parseAction(IWContext iwc) throws RemoteException {
+		int action = ACTION_VIEW;
+		if (iwc.isParameterSet(PARAMETER_ACTION)) {
+			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
+		}
+		
+		if (action == ACTION_STORE) {
+			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
+			for (String choice : choices) {
+				boolean noPayment = iwc.isParameterSet(PARAMETER_COURSE_PARTICIPANT_PAYMENT + choice);
+				getBusiness().setNoPayment(choice, noPayment);
+			}
 		}
 	}
 
@@ -338,6 +366,7 @@ public class CourseParticipantsList extends CourseBlock {
 		}
 
 		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
+		boolean showNoPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_NO_PAYMENT, false) && iwc.hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY);
 
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
@@ -377,12 +406,22 @@ public class CourseParticipantsList extends CourseBlock {
 			columns++;
 
 			cell = row.createHeaderCell();
-			if (!addViewParticipantLink && !showCertificates) {
+			if (!addViewParticipantLink && !showCertificates && !showNoPayment) {
 				cell.setStyleClass("lastColumn");
 			}
 			cell.setStyleClass("homePhone");
 			cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
 			columns++;
+			
+			if (showNoPayment) {
+				cell = row.createHeaderCell();
+				if (!addViewParticipantLink && !showCertificates) {
+					cell.setStyleClass("lastColumn");
+				}
+				cell.setStyleClass("noPayment");
+				cell.add(new Text(getResourceBundle().getLocalizedString("no_payment", "No payment")));
+				columns++;
+			}
 
 			if (showCertificates) {
 				cell = row.createHeaderCell();
@@ -496,6 +535,7 @@ public class CourseParticipantsList extends CourseBlock {
 			cell.setStyleClass("firstColumn");
 			cell.setStyleClass("number");
 			cell.add(new Text(String.valueOf(iRow)));
+			cell.add(new HiddenInput(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString()));
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
 
@@ -570,7 +610,7 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 
 				cell = row.createCell();
-				if (!addViewParticipantLink && !showCertificates) {
+				if (!addViewParticipantLink && !showCertificates && !showNoPayment) {
 					cell.setStyleClass("lastColumn");
 				}
 				cell.setStyleClass("homePhone");
@@ -579,6 +619,18 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 				else {
 					cell.add(new Text(CoreConstants.MINUS));
+				}
+
+				if (showNoPayment) {
+					cell = row.createCell();
+					if (!addViewParticipantLink && !showCertificates) {
+						cell.setStyleClass("lastColumn");
+					}
+					cell.setStyleClass("noPayment");
+					
+					CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PAYMENT + choice.getPrimaryKey().toString());
+					box.setChecked(choice.isNoPayment());
+					cell.add(box);
 				}
 
 				if (showCertificates) {
