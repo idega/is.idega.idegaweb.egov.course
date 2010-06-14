@@ -237,6 +237,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				Iterator iter = choices.iterator();
 				while (iter.hasNext()) {
 					CourseChoice choice = (CourseChoice) iter.next();
+					if (choice.isNoPayment()) {
+						continue;
+					}
 					Course course = choice.getCourse();
 					School provider = course.getProvider();
 					SchoolArea area = provider.getSchoolArea();
@@ -3057,6 +3060,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 
 		return false;
+	}
+	
+	public void setNoPayment(Object courseChoicePK, boolean noPayment) {
+		CourseChoice choice = getCourseChoice(courseChoicePK);
+		choice.setNoPayment(noPayment);
+		choice.store();
 	}
 
 	public void removeCertificate(Object certificatePK) {

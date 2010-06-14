@@ -49,6 +49,11 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public void reserveCourse(Course course) throws RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#setNoPayment
+	 */
+	public void setNoPayment(Object courseChoicePK, boolean noPayment);
+	
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#removeReservation
 	 */
 	public void removeReservation(Course course) throws RemoteException;

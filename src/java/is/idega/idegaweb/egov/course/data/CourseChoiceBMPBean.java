@@ -46,6 +46,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_DYSLEXIA = "has_dyslexia";
 	private static final String COLUMN_CERTIFICATE_FEE = "course_certificate_fee";
 	private static final String COLUMN_WAITING_LIST = "waiting_list";
+	private static final String COLUMN_NO_PAYMENT = "no_payment";
 	private static final String COLUMN_NOTES = "notes";
 
 	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verific_from_goverment";
@@ -85,6 +86,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		
 		addAttribute(COLUMN_WAITING_LIST, "Waiting list", Boolean.class);
 		addAttribute(COLUMN_HAS_RECEIVED_REMINDER, "Has received reminder", Boolean.class);
+		addAttribute(COLUMN_NO_PAYMENT, "No payment", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
 		addManyToOneRelationship(COLUMN_COURSE, Course.class);
@@ -126,6 +128,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	
 	public boolean isOnWaitingList() {
 		return getBooleanColumnValue(COLUMN_WAITING_LIST, false);
+	}
+	
+	public boolean isNoPayment() {
+		return getBooleanColumnValue(COLUMN_NO_PAYMENT, false);
 	}
 	
 	public boolean hasReceivedReminder() {
@@ -175,6 +181,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	
 	public void setWaitingList(boolean waitingList) {
 		setColumn(COLUMN_WAITING_LIST, waitingList);
+	}
+	
+	public void setNoPayment(boolean noPayment) {
+		setColumn(COLUMN_NO_PAYMENT, noPayment);
 	}
 	
 	public void setReceivedReminder(boolean hasReceivedReminder) {

@@ -35,6 +35,7 @@ public class CourseConstants {
 	public static final String PROPERTY_INCEPTION_YEAR = "egov.course.inception.year";
 	public static final String PROPERTY_SHOW_ALL_COURSES = "egov.course.show.all.courses";
 	public static final String PROPERTY_SHOW_CERTIFICATES = "egov.course.show.certificates";
+	public static final String PROPERTY_SHOW_NO_PAYMENT = "egov.course.show.no.payment";
 	public static final String PROPERTY_BACK_MONTHS = "egov.course.back.months";
 	public static final String PROPERTY_USE_WAITING_LIST = "egov.course.use.waiting.list";
 	public static final String PROPERTY_USE_DIRECT_PAYMENT = "egov.course.use.direct.payment";
