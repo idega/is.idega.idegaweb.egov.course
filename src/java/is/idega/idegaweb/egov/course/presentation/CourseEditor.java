@@ -58,26 +58,26 @@ import com.idega.util.StringUtil;
 
 public class CourseEditor extends CourseBlock {
 
-	private static final String PARAMETER_COURSE_PRICE_PK = "prm_course_price";
-	private static final String PARAMETER_COURSE_NUMBER = "prm_course_number";
-	private static final String PARAMETER_NAME = "prm_name";
-	private static final String PARAMETER_VALID_FROM = "prm_valid_from";
-	private static final String PARAMETER_VALID_TO = "prm_valid_to";
-	private static final String PARAMETER_ACCOUNTING_KEY = "prm_accounting_key";
-	private static final String PARAMETER_USER = "prm_user";
-	private static final String PARAMETER_YEAR_FROM = "prm_year_from";
-	private static final String PARAMETER_YEAR_TO = "prm_year_to";
-	private static final String PARAMETER_MAX_PER = "prm_max_participants";
-	private static final String PARAMETER_PRICE = "prm_price";
-	private static final String PARAMETER_COST = "prm_cost";
-	private static final String PARAMETER_OPEN_FOR_REGISTRATION = "prm_open_for_registration";
+	protected static final String PARAMETER_COURSE_PRICE_PK = "prm_course_price";
+	protected static final String PARAMETER_COURSE_NUMBER = "prm_course_number";
+	protected static final String PARAMETER_NAME = "prm_name";
+	protected static final String PARAMETER_VALID_FROM = "prm_valid_from";
+	protected static final String PARAMETER_VALID_TO = "prm_valid_to";
+	protected static final String PARAMETER_ACCOUNTING_KEY = "prm_accounting_key";
+	protected static final String PARAMETER_USER = "prm_user";
+	protected static final String PARAMETER_YEAR_FROM = "prm_year_from";
+	protected static final String PARAMETER_YEAR_TO = "prm_year_to";
+	protected static final String PARAMETER_MAX_PER = "prm_max_participants";
+	protected static final String PARAMETER_PRICE = "prm_price";
+	protected static final String PARAMETER_COST = "prm_cost";
+	protected static final String PARAMETER_OPEN_FOR_REGISTRATION = "prm_open_for_registration";
 
-	private static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
+	protected static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
 
-	private static final int ACTION_VIEW = 1;
+	protected static final int ACTION_VIEW = 1;
 	protected static final int ACTION_EDIT = 2;
 	protected static final int ACTION_NEW = 3;
-	private static final int ACTION_SAVE = 4;
+	protected static final int ACTION_SAVE = 4;
 	protected static final int ACTION_DELETE = 5;
 
 	private SchoolType type = null;
@@ -85,7 +85,7 @@ public class CourseEditor extends CourseBlock {
 	private boolean showTypes = true;
 	private boolean showCourseCategory = true;
 	private boolean showCourseType = true;
-	private Boolean useFixedPrice = null;
+	protected Boolean useFixedPrice = null;
 
 	private Course course;
 
@@ -126,7 +126,7 @@ public class CourseEditor extends CourseBlock {
 		}
 	}
 
-	private int parseAction(IWContext iwc) {
+	protected int parseAction(IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			return Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
@@ -580,7 +580,7 @@ public class CourseEditor extends CourseBlock {
 		return buttonLayer;
 	}
 
-	private boolean isUseFixedPrices() {
+	protected boolean isUseFixedPrices() {
 		if (useFixedPrice == null) {
 			try {
 				if (getSession().getProvider() != null) {
