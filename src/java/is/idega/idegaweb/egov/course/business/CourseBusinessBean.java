@@ -237,9 +237,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				Iterator iter = choices.iterator();
 				while (iter.hasNext()) {
 					CourseChoice choice = (CourseChoice) iter.next();
-					if (choice.isNoPayment()) {
-						continue;
-					}
+					boolean noPayment = choice.isNoPayment();
 					Course course = choice.getCourse();
 					School provider = course.getProvider();
 					SchoolArea area = provider.getSchoolArea();
@@ -344,6 +342,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 						if (entry.getAmount() > 0) {
 							entries.add(entry);
+							if (noPayment) {
+								AccountingEntry cloneEntry = getClonedEntry(entry);
+								if (cloneEntry != null) {
+									entries.add(cloneEntry);
+								}
+							}
 						}
 					} catch (InstantiationException e) {
 						e.printStackTrace();
@@ -408,6 +412,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 							if (entry.getAmount() > 0) {
 								entries.add(entry);
+								if (noPayment) {
+									AccountingEntry cloneEntry = getClonedEntry(entry);
+									if (cloneEntry != null) {
+										entries.add(cloneEntry);
+									}
+								}
 							}
 						} catch (InstantiationException e) {
 							e.printStackTrace();
@@ -424,6 +434,45 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 
 		return (AccountingEntry[]) entries.toArray(new AccountingEntry[0]);
+	}
+	
+	private AccountingEntry getClonedEntry(AccountingEntry entry) {
+		try {
+			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
+			AccountingEntry clone = (AccountingEntry) implementor.newInstance();
+			clone.setAmount(-entry.getAmount());
+			clone.setCardExpirationMonth(entry.getCardExpirationMonth());
+			clone.setCardExpirationYear(entry.getCardExpirationYear());
+			clone.setCardNumber(entry.getCardNumber());
+			clone.setCardType(entry.getCardType());
+			clone.setEndDate(entry.getEndDate());
+			clone.setName(entry.getName());
+			clone.setPayerPersonalId(entry.getPayerPersonalId());
+			clone.setPaymentMethod(entry.getPaymentMethod());
+			clone.setProductCode(entry.getProductCode());
+			clone.setProjectCode(entry.getProjectCode());
+			clone.setProviderCode(entry.getProviderCode());
+			clone.setStartDate(entry.getStartDate());
+			clone.setUnitPrice(entry.getUnitPrice());
+			clone.setUnits(entry.getUnits());
+			
+			AccountingEntry extraEntry = (AccountingEntry) entry.getExtraInformation();
+			AccountingEntry extraClone = (AccountingEntry) implementor.newInstance();
+			extraClone.setStartDate(extraEntry.getStartDate());
+			extraClone.setProductCode(extraEntry.getProductCode());
+			extraClone.setProjectCode(extraEntry.getProjectCode());
+			extraClone.setProviderCode(extraEntry.getProviderCode());
+			extraClone.setExtraInformation(extraEntry.getExtraInformation());
+			clone.setExtraInformation(extraClone);
+			return clone;
+		}
+		catch (InstantiationException e) {
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
