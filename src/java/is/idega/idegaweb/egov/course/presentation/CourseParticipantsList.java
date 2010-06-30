@@ -352,9 +352,6 @@ public class CourseParticipantsList extends CourseBlock {
 		link.setStyleClass("xls");
 		link.setTarget(Link.TARGET_NEW_WINDOW);
 		link.maintainParameter(PARAMETER_COURSE_PK, iwc);
-		if (iwc.isParameterSet(PARAMETER_COURSE_PARTICIPANT_PK)) {
-			link.maintainParameter(PARAMETER_COURSE_PARTICIPANT_PK, iwc);
-		}
 		link.setMediaWriterClass(CourseParticipantsWriter.class);
 
 		return link;
