@@ -68,7 +68,6 @@ import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.RadioButton;
-import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextArea;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoEmailFoundException;
@@ -1478,7 +1477,6 @@ public class CourseApplication extends ApplicationForm {
 		}
 
 		TextInput personalID = null;
-		SubmitButton search = null;
 		if (!editable) {
 			personalID = new TextInput("personalID", PersonalIDFormatter.format(custodian.getPersonalID(), iwc.getCurrentLocale()));
 			personalID.setDisabled(true);
@@ -1504,9 +1502,6 @@ public class CourseApplication extends ApplicationForm {
 		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("personal_id", "Personal ID"))), personalID);
 		formItem.add(label);
 		formItem.add(personalID);
-		if (search != null) {
-			formItem.add(search);
-		}
 		section.add(formItem);
 
 		TextInput addr = new TextInput("address");
