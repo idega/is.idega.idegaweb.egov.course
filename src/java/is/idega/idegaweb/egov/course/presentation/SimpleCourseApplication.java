@@ -587,7 +587,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			if (dateOfBirth == null) {
 				setError(ACTION_PHASE_3, PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("unknown_age_for_applicant", "Unkown age of applicant."));
 			}
-			else {
+			else if (!iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY)) {
 				Age age = new Age(dateOfBirth);
 				if (age.getYears() < 20) {
 					setError(ACTION_PHASE_3, PARAMETER_APPLICANT_AGE, this.iwrb.getLocalizedString("applicant_is_too_young", "Applicant is too young. Minimal age requirement is") + ": 20.");
