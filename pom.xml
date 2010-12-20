@@ -95,10 +95,5 @@
       <groupId>com.idega.block.egov</groupId>
 	  <artifactId>is.idega.idegaweb.egov.message</artifactId>
     </dependency>
-    <dependency>
-      <groupId>poi</groupId>
-      <artifactId>poi</artifactId>
-      <version>2.5-final-20040428</version>
-    </dependency>
   </dependencies>
 </project>
