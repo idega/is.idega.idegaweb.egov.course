@@ -523,6 +523,11 @@ public class SimpleCourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		form.add(section);
 
+		Layer helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_applicant_helper", "Please select an applicant by writing in the personal ID in the field to the left.")));
+		section.add(helpLayer);
+
 		TextInput personalID = new TextInput(PARAMETER_PERSONAL_ID);
 		personalID.setMaxlength(10);
 		if (!iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
@@ -535,11 +540,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 		formItem.add(label);
 		formItem.add(personalID);
 		section.add(formItem);
-
-		Layer helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_applicant_helper", "Please select an applicant by writing in the personal ID in the field to the left.")));
-		section.add(helpLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
