@@ -76,7 +76,6 @@ import com.idega.user.business.UserSession;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.CoreConstants;
-import com.idega.util.CreditCardChecker;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
@@ -2055,9 +2054,7 @@ public class CourseApplication extends ApplicationForm {
 				helpLayer.add(image);
 			}
 	
-			DropdownMenu cardType = new DropdownMenu(PARAMETER_CARD_TYPE);
-			cardType.addMenuElement(CourseConstants.CARD_TYPE_EUROCARD, this.iwrb.getLocalizedString("application.eurocard", "Eurocard"));
-			cardType.addMenuElement(CourseConstants.CARD_TYPE_VISA, this.iwrb.getLocalizedString("application.visa", "Visa"));
+			DropdownMenu cardType = getCardTypeDropdown(iwc.getCurrentLocale(), PARAMETER_CARD_TYPE);
 			cardType.keepStatusOnAction(true);
 			cardType.setDisabled(!creditcardPayment);
 	
@@ -2275,7 +2272,7 @@ public class CourseApplication extends ApplicationForm {
 				if (!iwc.isParameterSet(PARAMETER_CARD_NUMBER)) {
 					setError(ACTION_PHASE_7, PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("must_enter_card_number", "You must enter credit card number"));
 				}
-				else if (!CreditCardChecker.isValid(iwc.getParameter(PARAMETER_CARD_NUMBER))) {
+				else if (!validateCardNumber(iwc.getParameter(PARAMETER_CARD_NUMBER))) {
 					setError(ACTION_PHASE_7, PARAMETER_CARD_NUMBER, this.iwrb.getLocalizedString("invalid_credit_card_number", "Invalid credit card number"));
 				}
 
