@@ -28,6 +28,13 @@ public class CourseChoiceHomeImpl extends IDOFactory implements
 		return (CourseChoice) super.findByPrimaryKeyIDO(pk);
 	}
 
+	public CourseChoice findByUniqueID(String uniqueID) throws FinderException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		Object pk = ((CourseChoiceBMPBean) entity).ejbFindByUniqueID(uniqueID);
+		this.idoCheckInPooledEntity(entity);
+		return this.findByPrimaryKey(pk);
+	}
+
 	public Collection findAllByApplication(CourseApplication application)
 			throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();

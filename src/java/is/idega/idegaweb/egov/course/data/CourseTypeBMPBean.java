@@ -8,6 +8,7 @@ import com.idega.data.GenericEntity;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.query.Column;
 import com.idega.data.query.MatchCriteria;
+import com.idega.data.query.OR;
 import com.idega.data.query.Order;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
@@ -23,6 +24,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	private static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
 	private static final String COLUMN_ABBREVIATION = "ABBREVIATION";
 	private static final String COLUMN_SHOW_ABBREVIATION = "SHOW_ABBREVIATION";
+	private static final String COLUMN_DISABLED = "IS_DISABLED";
 
 	@Override
 	public String getEntityName() {
@@ -39,6 +41,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		addAttribute(COLUMN_ACCOUNTING_KEY, "Accounting key", String.class, 30);
 		addAttribute(COLUMN_ABBREVIATION, "Abbreviation", String.class, 1);
 		addAttribute(COLUMN_SHOW_ABBREVIATION, "Show abbreviation", Boolean.class);
+		addAttribute(COLUMN_DISABLED, "Is disabled", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_SCHOOL_TYPE, CourseCategory.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
@@ -78,6 +81,10 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		return getBooleanColumnValue(COLUMN_SHOW_ABBREVIATION, false);
 	}
 
+	public boolean isDisabled() {
+		return getBooleanColumnValue(COLUMN_DISABLED, false);
+	}
+
 	// Setters
 	@Override
 	public void setName(String name) {
@@ -111,24 +118,34 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	public void setShowAbbreviation(boolean showAbbreviation) {
 		setColumn(COLUMN_SHOW_ABBREVIATION, showAbbreviation);
 	}
+	
+	public void setDisabled(boolean disabled) {
+		setColumn(COLUMN_DISABLED, disabled);
+	}
 
 	// Finders
-	public Collection ejbFindAll() throws FinderException {
+	public Collection ejbFindAll(boolean valid) throws FinderException {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
+		if (valid) {
+			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, true)));
+		}
 		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
 
 		return this.idoFindPKsByQuery(query);
 	}
 
-	public Collection ejbFindAllBySchoolType(Object schoolTypePK) throws FinderException, IDORelationshipException {
+	public Collection ejbFindAllBySchoolType(Object schoolTypePK, boolean valid) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_SCHOOL_TYPE), MatchCriteria.EQUALS, schoolTypePK));
+		if (valid) {
+			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, true)));
+		}
 		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
 
 		return this.idoFindPKsByQuery(query);

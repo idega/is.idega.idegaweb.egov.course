@@ -81,6 +81,7 @@ import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
+import com.idega.core.idgenerator.business.IdGeneratorFactory;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
 import com.idega.data.IDOException;
@@ -630,7 +631,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	public void storeCourseType(Object pk, String name, String description,
-			String localizationKey, Object schoolTypePK, String accountingKey)
+			String localizationKey, Object schoolTypePK, String accountingKey, boolean disabled)
 			throws FinderException, CreateException {
 		CourseType type = null;
 		if (pk == null) {
@@ -652,6 +653,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			type.setLocalizationKey(localizationKey);
 		}
 
+		type.setDisabled(disabled);
 		type.setAccountingKey(accountingKey);
 
 		if (schoolTypePK != null) {
@@ -693,6 +695,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
 			String accountingKey, int birthYearFrom, int birthYearTo,
 			int maxPer, float price, float cost, boolean openForRegistration)
+			throws FinderException, CreateException {
+		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, null);
+	}
+	
+	public Course createCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration, IWTimestamp registrationEnd)
 			throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
@@ -736,6 +747,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		if (endDate != null) {
 			course.setEndDate(endDate.getTimestamp());
+		}
+		
+		if (registrationEnd != null) {
+			course.setRegistrationEnd(registrationEnd.getTimestamp());
 		}
 
 		if (accountingKey != null) {
@@ -787,6 +802,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				providerPK, coursePricePK, startDate, endDate, accountingKey,
 				birthYearFrom, birthYearTo, maxPer, price, cost,
 				openForRegistration);
+	}
+
+	public Course storeCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, IWTimestamp registrationEnd,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration)
+			throws FinderException, CreateException {
+		return createCourse(pk, courseNumber, name, user, courseTypePK,
+				providerPK, coursePricePK, startDate, endDate, accountingKey,
+				birthYearFrom, birthYearTo, maxPer, price, cost,
+				openForRegistration, registrationEnd);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
@@ -913,10 +940,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		courseDiscount.store();
 	}
 
-	public Collection getCourseTypes(Integer schoolTypePK) {
+	public Collection getCourseTypes(Integer schoolTypePK, boolean valid) {
 		try {
 			Collection coll = getCourseTypeHome().findAllBySchoolType(
-					schoolTypePK);
+					schoolTypePK, valid);
 			return coll;
 		} catch (IDORelationshipException e) {
 			e.printStackTrace();
@@ -927,7 +954,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	public Map getCourseTypesDWR(int schoolTypePK, String country) {
-		Collection coll = getCourseTypes(new Integer(schoolTypePK));
+		Collection coll = getCourseTypes(new Integer(schoolTypePK), true);
 		Map map = new LinkedHashMap();
 
 		Locale locale = new Locale(country, country.toUpperCase());
@@ -1249,17 +1276,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				Iterator iter = courses.iterator();
 				while (iter.hasNext()) {
 					Course course = (Course) iter.next();
-					IWTimestamp start = new IWTimestamp(course.getStartDate());
-					if (getTimeoutDay() > 0) {
-						int day = getTimeoutDay();
-						while (start.getDayOfWeek() != day) {
-							start.addDays(-1);
-						}
-					}
-					if (getTimeoutHour() > 0) {
-						start.setHour(getTimeoutHour());
-						start.setMinute(0);
-					}
+					IWTimestamp start = getRegistrationTimeoutForCourse(course);
 
 					if (useCourseOpen) {
 						if ((course.isOpenForRegistration() || isAdmin)
@@ -1278,9 +1295,30 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				}
 			}
 			return map.values();
-		} catch (RemoteException re) {
+		}
+		catch (RemoteException re) {
 			throw new IBORuntimeException(re);
 		}
+	}
+	
+	private IWTimestamp getRegistrationTimeoutForCourse(Course course) {
+		if (course.getRegistrationEnd() != null) {
+			return new IWTimestamp(course.getRegistrationEnd());
+		}
+		
+		IWTimestamp start = new IWTimestamp(course.getStartDate());
+		if (getTimeoutDay() > 0) {
+			int day = getTimeoutDay();
+			while (start.getDayOfWeek() != day) {
+				start.addDays(-1);
+			}
+		}
+		if (getTimeoutHour() > 0) {
+			start.setHour(getTimeoutHour());
+			start.setMinute(0);
+		}
+		
+		return start;
 	}
 
 	public boolean isFull(Course course) {
@@ -1596,18 +1634,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
-	public Collection getAllCourseTypes() {
+	public Collection getAllCourseTypes(boolean valid) {
 		try {
-			return getCourseTypeHome().findAll();
+			return getCourseTypeHome().findAll(valid);
 		} catch (FinderException e) {
 			e.printStackTrace();
 		}
 		return new ArrayList();
 	}
 
-	public Collection getAllCourseTypes(Integer schoolTypePK) {
+	public Collection getAllCourseTypes(Integer schoolTypePK, boolean valid) {
 		try {			
-			return getCourseTypeHome().findAllBySchoolType(schoolTypePK);
+			return getCourseTypeHome().findAllBySchoolType(schoolTypePK, valid);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1828,6 +1866,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				holder.setDaycare(choice.getDayCare());
 				holder.setPickedUp(new Boolean(choice.isPickedUp()));
 				holder.setChoice(choice);
+				holder.setOnWaitingList(choice.isOnWaitingList());
 
 				Collection holders = null;
 				if (map.containsKey(user)) {
@@ -1880,9 +1919,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			int totalCost = 0;
 			while (iter.hasNext()) {
 				ApplicationHolder holder = (ApplicationHolder) iter.next();
-				totalPrice += holder.getPrice();
-				totalCost += holder.getCourse().getCourseCost() > -1 ? holder
-						.getCourse().getCourseCost() : 0;
+				if (!holder.isOnWaitingList()) {
+					totalPrice += holder.getPrice();
+					totalCost += holder.getCourse().getCourseCost() > -1 ? holder
+							.getCourse().getCourseCost() : 0;
+				}
 			}
 
 			PriceHolder priceHolder = new PriceHolder();
@@ -2277,6 +2318,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.card_registration_body",
 					"Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card",
 					locale);
+			String waitingListBody = getLocalizedString(
+					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.waitinglist_registration_body",
+					"Your registration for course {2} at {3} for {0}, {1} has been received and added to the waiting list",
+					locale);
 
 			Iterator iter = applications == null ? null : applications.values()
 					.iterator();
@@ -2295,7 +2340,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.store();
 
 						sendMessageToApplicationOwner(application, choice,
-								subject, body, locale);
+								subject, holder.isOnWaitingList() ? waitingListBody : body, locale);
 					}
 				}
 			}
@@ -2423,7 +2468,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setApplication(application);
 						choice.setCourse(holder.getCourse());
 						choice.setDayCare(holder.getDaycare());
-						choice.setWaitingList(useWaitingList);
+						if (useWaitingList) {
+							choice.setWaitingList(holder.isOnWaitingList());
+						}
 						if (holder.getPickedUp() != null) {
 							choice.setPickedUp(holder.getPickedUp()
 									.booleanValue());
@@ -2474,6 +2521,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				locale = getIWApplicationContext().getApplicationSettings()
 						.getDefaultLocale();
 			}
+			
+			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, "");
 
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
@@ -2489,7 +2538,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					new IWTimestamp(course.getEndDate() != null ? course
 							.getEndDate() : getEndDate(course.getPrice(),
 							startDate.getDate())).getLocaleDate(locale,
-							IWTimestamp.SHORT) };
+							IWTimestamp.SHORT),
+					acceptURL,
+					choice.getUniqueID()};
 
 			User appParent = application.getOwner();
 			if (appParent != null) {
@@ -2522,6 +2573,39 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				}
 			}
 		} catch (RemoteException re) {
+			re.printStackTrace();
+		}
+	}
+
+	public void sendMessageToProvider(CourseChoice choice,
+			String subject, String message, User sender, Locale locale) {
+		try {
+			CourseApplication application = choice.getApplication();
+			Course course = choice.getCourse();
+			School school = choice.getCourse().getProvider();
+			User child = choice.getUser();
+
+			Object[] arguments = {
+					child.getName(),
+					PersonalIDFormatter.format(child.getPersonalID(),
+							locale),
+					course.getName()
+			};
+
+			Collection users = getSchoolBusiness().getAllSchoolUsers(school);
+			if (users != null) {
+				CommuneMessageBusiness messageBiz = getMessageBusiness();
+				Iterator it = users.iterator();
+				while (it.hasNext()) {
+					SchoolUser providerUser = (SchoolUser) it.next();
+					User user = providerUser.getUser();
+					messageBiz.createUserMessage(application, user, sender,
+							MessageFormat.format(subject, arguments),
+							MessageFormat.format(message, arguments), false);
+				}
+			}
+		}
+		catch (RemoteException re) {
 			re.printStackTrace();
 		}
 	}
@@ -3085,30 +3169,51 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	public boolean acceptChoice(Object courseChoicePK, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
+		choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
+		choice.store();
+
+		CourseApplication application = choice.getApplication();
+		String subject = getLocalizedString(
+				"course_choice.accepted_subject", "Course choice accepted",
+				locale);
+		
+		String prefix = application.getPrefix();
+		prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+		
+		String body = getLocalizedString(prefix +
+				"course_choice.accepted_body",
+				"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
+				locale);
+
+		sendMessageToParents(application, choice, subject, body, locale);
+
+		return true;
+	}
+	
+	public boolean parentsAcceptChoice(Object courseChoicePK, User performer, Locale locale) {
+		CourseChoice choice = getCourseChoice(courseChoicePK);
+		choice.setWaitingList(false);
+		choice.store();
+		
 		Course course = choice.getCourse();
+		course.getProvider();
 
-		if (!isFull(course)) {
-			choice.setWaitingList(false);
-			choice.store();
+		CourseApplication application = choice.getApplication();
+		String subject = getLocalizedString(
+				"course_choice.parent_accepted_subject", "Course choice accepted",
+				locale);
+		
+		String prefix = application.getPrefix();
+		prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+		
+		String body = getLocalizedString(prefix +
+				"course_choice.parent_accepted_body",
+				"Registration to course {2} at for {0}, {1} has been accepted by parents.",
+				locale);
 
-			CourseApplication application = choice.getApplication();
-			String subject = getLocalizedString(
-					"course_choice.accepted_subject", "Course choice accepted",
-					locale);
-			
-			String prefix = application.getPrefix();
-			prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
-			
-			String body = getLocalizedString(prefix +
-					"course_choice.accepted_body",
-					"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
-					locale);
+		sendMessageToProvider(choice, subject, body, performer, locale);
 
-			sendMessageToParents(application, choice, subject, body, locale);
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 	
 	public void setNoPayment(Object courseChoicePK, boolean noPayment) {

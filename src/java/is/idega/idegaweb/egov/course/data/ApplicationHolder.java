@@ -14,6 +14,7 @@ public class ApplicationHolder {
 	private float price = 0;
 	private boolean hasDyslexia = false;
 	private CourseChoice choice = null;
+	private boolean isOnWaitingList = false;
 
 	public CourseChoice getChoice() {
 		return choice;
@@ -92,6 +93,14 @@ public class ApplicationHolder {
 
 	public void setHasDyslexia(boolean hasDyslexia) {
 		this.hasDyslexia = hasDyslexia;
+	}
+
+	public boolean isOnWaitingList() {
+		return isOnWaitingList;
+	}
+
+	public void setOnWaitingList(boolean isOnWaitingList) {
+		this.isOnWaitingList = isOnWaitingList;
 	}
 
 	public boolean equals(Object obj) {

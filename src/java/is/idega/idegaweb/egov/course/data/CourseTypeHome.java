@@ -13,9 +13,9 @@ public interface CourseTypeHome extends IDOHome {
 
 	public CourseType findByPrimaryKey(Object pk) throws FinderException;
 
-	public Collection<CourseType> findAll() throws FinderException;
+	public Collection<CourseType> findAll(boolean valid) throws FinderException;
 
-	public Collection<CourseType> findAllBySchoolType(Object schoolTypePK) throws FinderException, IDORelationshipException;
+	public Collection<CourseType> findAllBySchoolType(Object schoolTypePK, boolean valid) throws FinderException, IDORelationshipException;
 
 	public CourseType findByAbbreviation(String abbreviation) throws FinderException;
 	

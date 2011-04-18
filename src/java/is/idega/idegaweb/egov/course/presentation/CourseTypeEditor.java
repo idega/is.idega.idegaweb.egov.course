@@ -26,6 +26,7 @@ import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
@@ -42,6 +43,7 @@ public class CourseTypeEditor extends CourseBlock {
 	private static final String PARAMETER_DESCRIPTION = "CTE_d";
 	private static final String PARAMETER_LOCALIZATION_KEY = "CTE_l";
 	private static final String PARAMETER_ACCOUNTING_KEY = "prm_accounting_key";
+	private static final String PARAMETER_DISABLED = "prm_disabled";
 
 	private static final int ACTION_VIEW = 1;
 	private static final int ACTION_EDIT = 2;
@@ -105,11 +107,12 @@ public class CourseTypeEditor extends CourseBlock {
 		String localizationKey = iwc.getParameter(PARAMETER_LOCALIZATION_KEY);
 		String schoolTypePK = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
 		String accountingKey = iwc.getParameter(PARAMETER_ACCOUNTING_KEY);
+		boolean disabled = iwc.isParameterSet(PARAMETER_DISABLED);
 
 		if (name != null && !"".equals(name.trim())) {
 			try {
 				getCourseBusiness(iwc).storeCourseType(pk, name, description,
-						localizationKey, schoolTypePK, accountingKey);
+						localizationKey, schoolTypePK, accountingKey, disabled);
 			} catch (CreateException ce) {
 				add(ce.getMessage());
 			} catch (FinderException fe) {
@@ -149,6 +152,7 @@ public class CourseTypeEditor extends CourseBlock {
 		DropdownMenu inputSchoolTypes = new DropdownMenu(schoolTypes,
 				PARAMETER_SCHOOL_TYPE_PK);
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
+		CheckBox disabled = new CheckBox(PARAMETER_DISABLED);
 
 		if (type != null) {
 			inputName.setContent(type.getName());
@@ -162,6 +166,7 @@ public class CourseTypeEditor extends CourseBlock {
 			if (type.getAccountingKey() != null) {
 				inputAccounting.setValue(type.getAccountingKey());
 			}
+			disabled.setChecked(type.isDisabled());
 
 			form.add(new HiddenInput(PARAMETER_COURSE_TYPE_PK, courseTypePK
 					.toString()));
@@ -212,6 +217,15 @@ public class CourseTypeEditor extends CourseBlock {
 		layer.add(inputAccounting);
 		section.add(layer);
 
+		layer = new Layer(Layer.DIV);
+		layer.setID("disabled");
+		layer.setStyleClass("formItem");
+		layer.setStyleClass("radioButtonItem");
+		label = new Label(localize("disabled", "Disabled"), disabled);
+		layer.add(disabled);
+		layer.add(label);
+		section.add(layer);
+
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
@@ -256,10 +270,10 @@ public class CourseTypeEditor extends CourseBlock {
 				courseTypes = new ArrayList();
 				while (it.hasNext()) {
 					SchoolType type = (SchoolType) it.next();
-					courseTypes.addAll(getCourseBusiness(iwc).getAllCourseTypes((Integer) type.getPrimaryKey()));
+					courseTypes.addAll(getCourseBusiness(iwc).getAllCourseTypes((Integer) type.getPrimaryKey(), false));
 				}
 			} else {
-				courseTypes = getCourseBusiness(iwc).getAllCourseTypes();
+				courseTypes = getCourseBusiness(iwc).getAllCourseTypes(false);
 			}
 		} catch (RemoteException rex) {
 			courseTypes = new ArrayList();

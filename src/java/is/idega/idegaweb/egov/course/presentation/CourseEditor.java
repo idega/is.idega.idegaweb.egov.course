@@ -71,6 +71,7 @@ public class CourseEditor extends CourseBlock {
 	protected static final String PARAMETER_PRICE = "prm_price";
 	protected static final String PARAMETER_COST = "prm_cost";
 	protected static final String PARAMETER_OPEN_FOR_REGISTRATION = "prm_open_for_registration";
+	private static final String PARAMETER_REGISTRATION_END = "prm_registration_end";
 
 	protected static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
 
@@ -145,10 +146,12 @@ public class CourseEditor extends CourseBlock {
 		String yearFrom = iwc.getParameter(PARAMETER_YEAR_FROM);
 		String yearTo = iwc.getParameter(PARAMETER_YEAR_TO);
 		String max = iwc.getParameter(PARAMETER_MAX_PER);
+		String registrationEnd = iwc.isParameterSet(PARAMETER_REGISTRATION_END) ? iwc.getParameter(PARAMETER_REGISTRATION_END) : null;
 
 		try {
 			IWTimestamp startDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(sStartDate));
 			IWTimestamp endDate = sEndDate != null ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(sEndDate)) : null;
+			IWTimestamp regEnd = registrationEnd != null ? new IWTimestamp(IWDatePickerHandler.getParsedTimestampByCurrentLocale(registrationEnd)) : null;
 			int courseNumber = iwc.isParameterSet(PARAMETER_COURSE_NUMBER) ? Integer.parseInt(iwc.getParameter(PARAMETER_COURSE_NUMBER)) : -1;
 			int birthYearFrom = StringUtil.isEmpty(yearFrom) ? -1 : Integer.parseInt(yearFrom);
 			int birthYearTo = StringUtil.isEmpty(yearTo) ? -1 : Integer.parseInt(yearTo);
@@ -157,7 +160,7 @@ public class CourseEditor extends CourseBlock {
 			float cost = iwc.isParameterSet(PARAMETER_COST) ? Float.parseFloat(iwc.getParameter(PARAMETER_COST)) : 0;
 			boolean openForRegistration = iwc.isParameterSet(PARAMETER_OPEN_FOR_REGISTRATION);
 			Object provider = getSession().getProvider() == null ? null : getSession().getProvider().getPrimaryKey();
-			return getCourseBusiness().storeCourse(pk, courseNumber, name, user, courseTypePK, provider, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration);
+			return getCourseBusiness().storeCourse(pk, courseNumber, name, user, courseTypePK, provider, coursePricePK, startDate, endDate, regEnd, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -241,10 +244,10 @@ public class CourseEditor extends CourseBlock {
 		courseType.keepStatusOnAction(true);
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)));
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
 			courseType.addMenuElements(courseTypes);
 		} else if (type != null) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()));
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -685,6 +688,9 @@ public class CourseEditor extends CourseBlock {
 		inputYearTo.setMaxlength(4);
 		IntegerInput inputMaxPer = new IntegerInput(PARAMETER_MAX_PER);
 		TextInput inputUser = new TextInput(PARAMETER_USER);
+		IWDatePicker registrationEnd = new IWDatePicker(PARAMETER_REGISTRATION_END);
+		registrationEnd.setShowTime(true);
+		registrationEnd.setUseCurrentDateIfNotSet(false);
 
 		TextInput price = new TextInput(PARAMETER_PRICE);
 		price.setId("price");
@@ -773,9 +779,13 @@ public class CourseEditor extends CourseBlock {
 			inputMaxPer.setValue(course.getMax());
 
 			if (isShowCourseType()) {
-				cargoTypes = getCourseBusiness().getCourseTypes(new Integer(stID));
+				cargoTypes = getCourseBusiness().getCourseTypes(new Integer(stID), true);
 				courseTypeID.addMenuElements(cargoTypes);
 				courseTypeID.setSelectedElement(type.getPrimaryKey().toString());
+			}
+			
+			if (course.getRegistrationEnd() != null) {
+				registrationEnd.setDate(new IWTimestamp(course.getRegistrationEnd()).getDate());
 			}
 
 			openForRegistration.setChecked(course.isOpenForRegistration());
@@ -811,7 +821,7 @@ public class CourseEditor extends CourseBlock {
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
 		} else {
 			if (isShowCourseType() && schoolTypes != null && schoolTypes.iterator().hasNext()) {
-				cargoTypes = getCourseBusiness().getCourseTypes((Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey());
+				cargoTypes = getCourseBusiness().getCourseTypes((Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey(), true);
 				courseTypeID.addMenuElements(cargoTypes);
 			}
 
@@ -829,7 +839,7 @@ public class CourseEditor extends CourseBlock {
 			useFixedPrices = category.useFixedPricing();
 			price.setDisabled(!useFixedPrices);
 
-			cargoTypes = getCourseBusiness().getCourseTypes(new Integer(category.getPrimaryKey().toString()));
+			cargoTypes = getCourseBusiness().getCourseTypes(new Integer(category.getPrimaryKey().toString()), true);
 			courseTypeID.removeElements();
 			courseTypeID.addMenuElements(cargoTypes);
 			if (course != null) {
@@ -964,6 +974,13 @@ public class CourseEditor extends CourseBlock {
 		}
 
 		if (useBirthYears) {
+			layer = new Layer(Layer.DIV);
+			layer.setStyleClass("formItem");
+			label = new Label(localize("registration_end", "Registration end"), registrationEnd);
+			layer.add(label);
+			layer.add(registrationEnd);
+			section.add(layer);
+
 			layer = new Layer(Layer.DIV);
 			layer.setID("year_from");
 			layer.setStyleClass("formItem");

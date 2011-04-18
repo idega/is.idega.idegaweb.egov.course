@@ -46,6 +46,11 @@ public interface CourseType extends IDOEntity {
 	public boolean showAbbreviation();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#isDisabled
+	 */
+	public boolean isDisabled();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setName
 	 */
 	public void setName(String name);
@@ -84,4 +89,9 @@ public interface CourseType extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setShowAbbreviation
 	 */
 	public void setShowAbbreviation(boolean showAbbreviation);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setDisabled
+	 */
+	public void setDisabled(boolean disabled);
 }

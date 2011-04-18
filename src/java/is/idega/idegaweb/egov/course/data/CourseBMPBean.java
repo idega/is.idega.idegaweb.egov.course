@@ -49,6 +49,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	private static final String COLUMN_START_DATE = "START_DATE";
 	private static final String COLUMN_END_DATE = "END_DATE";
+	private static final String COLUMN_REGISTRATION_END = "REGISTRATION_END";
 	private static final String COLUMN_BIRTHYEAR_FROM = "BIRTHYEAR_FROM";
 	private static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
 	private static final String COLUMN_MAX_PARTICIPANTS = "MAX_PER";
@@ -69,6 +70,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_DESCRIPTION, "Description", String.class);
 		addAttribute(COLUMN_START_DATE, "Start date", Timestamp.class);
 		addAttribute(COLUMN_END_DATE, "End date", Timestamp.class);
+		addAttribute(COLUMN_REGISTRATION_END, "Registration end", Timestamp.class);
 		addAttribute(COLUMN_ACCOUNTING_KEY, "Accounting key", String.class, 30);
 		addAttribute(COLUMN_BIRTHYEAR_FROM, "Birthyear from", Integer.class);
 		addAttribute(COLUMN_BIRTHYEAR_TO, "Birthyear from", Integer.class);
@@ -140,6 +142,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public Timestamp getEndDate() {
 		return getTimestampColumnValue(COLUMN_END_DATE);
+	}
+
+	public Timestamp getRegistrationEnd() {
+		return getTimestampColumnValue(COLUMN_REGISTRATION_END);
 	}
 
 	public int getBirthyearFrom() {
@@ -221,6 +227,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public void setEndDate(Timestamp endDate) {
 		setColumn(COLUMN_END_DATE, endDate);
+	}
+
+	public void setRegistrationEnd(Timestamp registrationEnd) {
+		setColumn(COLUMN_REGISTRATION_END, registrationEnd);
 	}
 
 	public void setBirthyearFrom(int from) {

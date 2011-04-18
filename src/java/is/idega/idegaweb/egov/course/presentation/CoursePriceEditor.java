@@ -454,7 +454,7 @@ public class CoursePriceEditor extends CourseBlock {
 				schoolArea.setSelectedElement(area.getPrimaryKey().toString());
 			}
 
-			cargoTypes = getCourseBusiness(iwc).getCourseTypes(new Integer(stID));
+			cargoTypes = getCourseBusiness(iwc).getCourseTypes(new Integer(stID), true);
 			courseTypeID.addMenuElements(cargoTypes);
 			courseTypeID.setSelectedElement(type.getPrimaryKey().toString());
 
@@ -462,7 +462,7 @@ public class CoursePriceEditor extends CourseBlock {
 
 		}
 		else {
-			cargoTypes = getCourseBusiness(iwc).getCourseTypes((Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey());
+			cargoTypes = getCourseBusiness(iwc).getCourseTypes((Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey(), true);
 			courseTypeID.addMenuElements(cargoTypes);
 		}
 

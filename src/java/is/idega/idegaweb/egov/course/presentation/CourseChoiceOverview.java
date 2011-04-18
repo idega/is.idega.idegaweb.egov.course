@@ -49,6 +49,8 @@ import com.idega.util.text.TextSoap;
 
 public class CourseChoiceOverview extends CourseBlock {
 
+	private static final String PARAMETER_UNIQUE_ID = "prm_uuid";
+	
 	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
 	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
 	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
@@ -59,6 +61,8 @@ public class CourseChoiceOverview extends CourseBlock {
 	protected static final int ACTION_REFUND_FORM = 2;
 	public static final int ACTION_REFUND = 3;
 	protected static final int ACTION_ACCEPT = 4;
+	protected static final int ACTION_PARENT_ACCEPT_FORM = 5;
+	protected static final int ACTION_PARENT_ACCEPT = 6;
 
 	protected List parametersToMaintainBackButton = null;
 	private boolean useBackPage = true;
@@ -69,6 +73,14 @@ public class CourseChoiceOverview extends CourseBlock {
 			if (iwc.isParameterSet(PARAMETER_CHOICE_PK)) {
 				try {
 					choice = getBusiness().getCourseChoiceHome().findByPrimaryKey(iwc.getParameter(PARAMETER_CHOICE_PK));
+				}
+				catch (FinderException fe) {
+					fe.printStackTrace();
+				}
+			}
+			else if (iwc.isParameterSet(PARAMETER_UNIQUE_ID)) {
+				try {
+					choice = getBusiness().getCourseChoiceHome().findByUniqueID(iwc.getParameter(PARAMETER_UNIQUE_ID));
 				}
 				catch (FinderException fe) {
 					fe.printStackTrace();
@@ -95,6 +107,16 @@ public class CourseChoiceOverview extends CourseBlock {
 					case ACTION_ACCEPT:
 						acceptChoice(iwc, choice);
 						getViewerForm(iwc, choice);
+						break;
+						
+					case ACTION_PARENT_ACCEPT_FORM:
+						getParentAcceptForm(iwc, choice);
+						break;
+
+					case ACTION_PARENT_ACCEPT:
+						parentAcceptChoice(iwc, choice);
+						getViewerForm(iwc, choice);
+						break;
 				}
 			}
 			else {
@@ -121,6 +143,10 @@ public class CourseChoiceOverview extends CourseBlock {
 	
 	private void acceptChoice(IWContext iwc, CourseChoice choice) throws RemoteException {
 		getBusiness().acceptChoice(choice.getPrimaryKey(), iwc.getCurrentLocale());
+	}
+
+	private void parentAcceptChoice(IWContext iwc, CourseChoice choice) throws RemoteException {
+		getBusiness().parentsAcceptChoice(choice.getPrimaryKey(), iwc.getCurrentUser(), iwc.getCurrentLocale());
 	}
 
 	protected void getViewerForm(IWContext iwc, CourseChoice choice) throws RemoteException {
@@ -350,6 +376,27 @@ public class CourseChoiceOverview extends CourseBlock {
 
 			Paragraph paragraph = new Paragraph();
 			paragraph.add(new Text(getResourceBundle().getLocalizedString("choice.accepted_info", "The course choice has been accepted and moved to the participants list.")));
+			textLayer.add(paragraph);
+
+			clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
+			layer.add(clearLayer);
+		}
+		if (iwc.isParameterSet(PARAMETER_ACTION) && Integer.parseInt(iwc.getParameter(PARAMETER_ACTION)) == ACTION_PARENT_ACCEPT) {
+			Layer layer = new Layer(Layer.DIV);
+			layer.setStyleClass("attention");
+			section.add(layer);
+
+			Layer imageLayer = new Layer(Layer.DIV);
+			imageLayer.setStyleClass("attentionImage");
+			layer.add(imageLayer);
+
+			Layer textLayer = new Layer(Layer.DIV);
+			textLayer.setStyleClass("attentionText");
+			layer.add(textLayer);
+
+			Paragraph paragraph = new Paragraph();
+			paragraph.add(new Text(getResourceBundle().getLocalizedString("choice.parent_accepted_info", "The course choice has been accepted and moved to the participants list.")));
 			textLayer.add(paragraph);
 
 			clearLayer = new Layer(Layer.DIV);
@@ -601,6 +648,183 @@ public class CourseChoiceOverview extends CourseBlock {
 		bottom.add(link);
 
 		return true;
+	}
+	
+	private Form getParentAcceptForm(IWContext iwc, CourseChoice choice) throws RemoteException {
+		Form form = new Form();
+		form.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
+
+		form.add(getHeader(getResourceBundle().getLocalizedString("application.parent_accept_overview", "Parent accept overview")));
+
+		Course course = choice.getCourse();
+		CourseType type = course.getCourseType();
+		is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
+		School provider = course.getProvider();
+
+		User applicant = choice.getUser();
+		form.add(getPersonInfo(iwc, applicant, true));
+
+		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.course_information", "Course information"));
+		heading.setStyleClass("subHeader");
+		heading.setStyleClass("topSubHeader");
+		form.add(heading);
+
+		Layer section = new Layer(Layer.DIV);
+		section.setStyleClass("formSection");
+		form.add(section);
+
+		Layer formItem = new Layer(Layer.DIV);
+		Label label = new Label();
+		Layer span = new Layer();
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.course_name", "Course name")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(course.getName()));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.course_type", "Course type")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(type.getName()));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.provider", "Provider")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(provider.getSchoolName()));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.choice_date", "Choice date")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(new IWTimestamp(application.getCreated()).getLocaleDateAndTime(iwc.getCurrentLocale(), IWTimestamp.SHORT, IWTimestamp.SHORT)));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
+		section.add(clearLayer);
+
+		heading = new Heading1(getResourceBundle().getLocalizedString("application.payment_information", "Payment information"));
+		heading.setStyleClass("subHeader");
+		form.add(heading);
+
+		section = new Layer(Layer.DIV);
+		section.setStyleClass("formSection");
+		form.add(section);
+
+		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
+
+		User payer = null;
+		if (application.getPayerPersonalID() != null) {
+			try {
+				payer = getUserBusiness().getUser(application.getPayerPersonalID());
+			}
+			catch (FinderException e) {
+				e.printStackTrace();
+				payer = application.getOwner();
+			}
+			catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			}
+		}
+		else if (useFixedPrices) {
+			payer = applicant;
+		}
+		else {
+			payer = application.getOwner();
+		}
+		Name name = new Name(payer.getFirstName(), payer.getMiddleName(), payer.getLastName());
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.payer_name", "Payer name")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(name.getName(iwc.getCurrentLocale())));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.payer_personal_id", "Payer personal ID")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(PersonalIDFormatter.format(payer.getPersonalID(), iwc.getCurrentLocale())));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.payment_type", "Payment type")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(getResourceBundle().getLocalizedString("payment_type." + application.getPaymentType(), application.getPaymentType())));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
+		section.add(clearLayer);
+		
+		Layer layer = new Layer(Layer.DIV);
+		layer.setStyleClass("attention");
+		section.add(layer);
+
+		Layer imageLayer = new Layer(Layer.DIV);
+		imageLayer.setStyleClass("attentionImage");
+		layer.add(imageLayer);
+
+		Layer textLayer = new Layer(Layer.DIV);
+		textLayer.setStyleClass("attentionText");
+		layer.add(textLayer);
+
+		Paragraph paragraph = new Paragraph();
+		paragraph.add(new Text(getResourceBundle().getLocalizedString("choice.parent_accept_info", "The course choice has been approved and needs your verification.")));
+		textLayer.add(paragraph);
+
+		clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
+		layer.add(clearLayer);
+
+		Layer bottom = new Layer(Layer.DIV);
+		bottom.setStyleClass("bottom");
+		form.add(bottom);
+
+		Link home = getButtonLink(getResourceBundle().getLocalizedString("back", "Back"));
+		home.setStyleClass("buttonHome");
+		if (getResponsePage() != null) {
+			home.setPage(getResponsePage());
+		}
+		home.addParameter(getBusiness().getSelectedCaseParameter(), application.getPrimaryKey().toString());
+		bottom.add(home);
+
+		Link accept = getButtonLink(getResourceBundle().getLocalizedString("parent_accept", "Parent accept"));
+		accept.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_PARENT_ACCEPT));
+		accept.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+		bottom.add(accept);
+
+		return form;
 	}
 	
 	public void setParametersToMaintainBackButton(List parametersToMaintainBackButton) {

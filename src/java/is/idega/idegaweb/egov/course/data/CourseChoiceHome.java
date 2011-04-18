@@ -18,6 +18,8 @@ public interface CourseChoiceHome extends IDOHome {
 
 	public CourseChoice findByPrimaryKey(Object pk) throws FinderException;
 
+	public CourseChoice findByUniqueID(String uniqueID) throws FinderException;
+
 	public Collection findAllByApplication(CourseApplication application)
 			throws FinderException;
 

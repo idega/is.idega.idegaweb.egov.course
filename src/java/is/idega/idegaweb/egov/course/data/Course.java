@@ -69,6 +69,11 @@ public interface Course extends IDOEntity {
 	public Timestamp getEndDate();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getRegistrationEnd
+	 */
+	public Timestamp getRegistrationEnd();
+	
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getBirthyearFrom
 	 */
 	public int getBirthyearFrom();
@@ -152,6 +157,11 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setEndDate
 	 */
 	public void setEndDate(Timestamp endDate);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setRegistrationEnd
+	 */
+	public void setRegistrationEnd(Timestamp registrationEnd);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setBirthyearFrom

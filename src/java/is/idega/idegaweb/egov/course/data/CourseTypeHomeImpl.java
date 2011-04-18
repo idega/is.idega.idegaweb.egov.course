@@ -25,16 +25,16 @@ public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 		return (CourseType) super.findByPrimaryKeyIDO(pk);
 	}
 
-	public Collection findAll() throws FinderException {
+	public Collection findAll(boolean valid) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseTypeBMPBean) entity).ejbFindAll();
+		Collection ids = ((CourseTypeBMPBean) entity).ejbFindAll(valid);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
-	public Collection findAllBySchoolType(Object schoolTypePK) throws FinderException, IDORelationshipException {
+	public Collection findAllBySchoolType(Object schoolTypePK, boolean valid) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseTypeBMPBean) entity).ejbFindAllBySchoolType(schoolTypePK);
+		Collection ids = ((CourseTypeBMPBean) entity).ejbFindAllBySchoolType(schoolTypePK, valid);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

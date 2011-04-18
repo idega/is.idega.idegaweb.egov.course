@@ -234,7 +234,17 @@ public interface CourseChoice extends IDOEntity {
 	public String getNotes();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#getUniqueID
+	 */
+	public String getUniqueID();
+	
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setNotes
 	 */
 	public void setNotes(String notes);
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setUniqueID
+	 */
+	public void setUniqueID(String uniqueID);
 }

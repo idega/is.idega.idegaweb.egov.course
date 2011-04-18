@@ -48,6 +48,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_WAITING_LIST = "waiting_list";
 	private static final String COLUMN_NO_PAYMENT = "no_payment";
 	private static final String COLUMN_NOTES = "notes";
+	private static final String COLUMN_UNIQUE_ID = "unique_id";
 
 	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verific_from_goverment";
 	public static final String COLUMN_CERTIFICATE_OF_PROPERTY = "certificate_of_property";
@@ -87,6 +88,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		addAttribute(COLUMN_WAITING_LIST, "Waiting list", Boolean.class);
 		addAttribute(COLUMN_HAS_RECEIVED_REMINDER, "Has received reminder", Boolean.class);
 		addAttribute(COLUMN_NO_PAYMENT, "No payment", Boolean.class);
+		addAttribute(COLUMN_UNIQUE_ID, "Unique ID", String.class);
 
 		addManyToOneRelationship(COLUMN_APPLICATION, CourseApplication.class);
 		addManyToOneRelationship(COLUMN_COURSE, Course.class);
@@ -146,6 +148,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return getStringColumnValue(COLUMN_NOTES);
 	}
 	
+	public String getUniqueID() {
+		return getStringColumnValue(COLUMN_UNIQUE_ID);
+	}
+	
 	// Setters
 	public void setApplication(CourseApplication application) {
 		setColumn(COLUMN_APPLICATION, application);
@@ -197,6 +203,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	
 	public void setNotes(String notes) {
 		setColumn(COLUMN_NOTES, notes);
+	}
+	
+	public void setUniqueID(String uniqueID) {
+		setColumn(COLUMN_UNIQUE_ID, uniqueID);
 	}
 	
 	//Finders
@@ -356,6 +366,16 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		}
 		
 		return idoFindPKsByQuery(query);
+	}
+	
+	public Object ejbFindByUniqueID(String uniqueID) throws FinderException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(table.getColumn(getIDColumnName()));
+		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_UNIQUE_ID), MatchCriteria.EQUALS, uniqueID));
+
+		return idoFindOnePKByQuery(query);
 	}
 	
 	public int ejbHomeGetCountByUserAndProviders(User user, Collection providers) throws IDOException {

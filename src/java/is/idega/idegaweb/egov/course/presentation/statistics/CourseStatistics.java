@@ -71,7 +71,7 @@ public class CourseStatistics extends CourseBlock {
 			section.add(heading);
 
 			SchoolType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(schoolTypePK.toString()));
+			Collection courseTypes = getBusiness().getCourseTypes(new Integer(schoolTypePK.toString()), false);
 			Collection areas = getBusiness().getSchoolAreas();
 
 			Collection userProviders = null;

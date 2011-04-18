@@ -929,7 +929,7 @@ public class CourseApplication extends ApplicationForm {
 
 		DropdownMenu typeMenu = new DropdownMenu(PARAMETER_COURSE_TYPE);
 		typeMenu.setId(PARAMETER_COURSE_TYPE);
-		Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK);
+		Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK, true);
 		Iterator iter = courseTypes.iterator();
 		while (iter.hasNext()) {
 			CourseType courseType = (CourseType) iter.next();
@@ -1084,15 +1084,16 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.add(table);
-		section.add(formItem);
-
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString(getPrefix() + (hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare"), "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
 		section.add(helpLayer);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("formItemBig");
+		formItem.add(table);
+		section.add(formItem);
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -1190,6 +1191,7 @@ public class CourseApplication extends ApplicationForm {
 		table.setCellpadding(0);
 		table.setCellspacing(0);
 		table.setBorder(0);
+		table.setWidth("100%");
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
 		row.setStyleClass("header");
@@ -1319,6 +1321,11 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSectionBig");
 		form.add(section);
 		
+		Layer helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_daycare_and_trip_home_options_nocare", "Select daycare and trip home options.")));
+		section.add(helpLayer);
+
 		if (isFull) {
 			section.add(getAttentionLayer(this.iwrb.getLocalizedString("selected_course_full", "The course/s you have selected is/are already full.  If you choose to continue with the registration they will be added to waiting list.")));
 		}
@@ -1328,11 +1335,6 @@ public class CourseApplication extends ApplicationForm {
 		formItem.setStyleClass("formItemBig");
 		formItem.add(table);
 		section.add(formItem);
-
-		Layer helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_daycare_and_trip_home_options_nocare", "Select daycare and trip home options.")));
-		section.add(helpLayer);
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
@@ -1789,6 +1791,7 @@ public class CourseApplication extends ApplicationForm {
 		table.setCellpadding(0);
 		table.setCellspacing(0);
 		table.setBorder(0);
+		table.setStyleClass("100%");
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
 		row.setStyleClass("header");
@@ -2358,6 +2361,7 @@ public class CourseApplication extends ApplicationForm {
 			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
 
+		boolean useWaitingList = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_WAITING_LIST, false);
 		String[] pks = iwc.getParameterValues(PARAMETER_COURSE);
 		String[] daycare = iwc.getParameterValues(PARAMETER_DAYCARE);
 		String[] pickedUp = iwc.getParameterValues(PARAMETER_TRIPHOME);
@@ -2367,6 +2371,9 @@ public class CourseApplication extends ApplicationForm {
 				Course course = getCourseBusiness(iwc).getCourse(new Integer(pks[i]));
 				holder.setCourse(course);
 				holder.setUser(getApplicant(iwc));
+				if (useWaitingList) {
+					holder.setOnWaitingList(getCourseBusiness(iwc).isFull(course));
+				}
 				boolean addApplication = true;
 				if (hasCare) {
 					if (pickedUp[i].length() > 0) {

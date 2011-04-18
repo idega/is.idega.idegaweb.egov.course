@@ -318,7 +318,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		DropdownMenu typeMenu = new DropdownMenu(PARAMETER_COURSE_TYPE);
 		typeMenu.setId(PARAMETER_COURSE_TYPE);
 		if (schoolTypePK != null) {
-			Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK);
+			Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK, true);
 			typeMenu.addMenuElements(courseTypes);
 		}
 		typeMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("select_course_type", "Select course type"));
