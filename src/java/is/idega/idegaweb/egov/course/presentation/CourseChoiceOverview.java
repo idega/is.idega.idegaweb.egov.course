@@ -110,11 +110,18 @@ public class CourseChoiceOverview extends CourseBlock {
 						break;
 						
 					case ACTION_PARENT_ACCEPT_FORM:
-						getParentAcceptForm(iwc, choice);
+						if (iwc.isParameterSet(PARAMETER_UNIQUE_ID) && iwc.getParameter(PARAMETER_UNIQUE_ID).equals(choice.getUniqueID())) {
+							getParentAcceptForm(iwc, choice);
+						}
+						else {
+							getViewerForm(iwc, choice);
+						}
 						break;
 
 					case ACTION_PARENT_ACCEPT:
-						parentAcceptChoice(iwc, choice);
+						if (iwc.isParameterSet(PARAMETER_UNIQUE_ID) && iwc.getParameter(PARAMETER_UNIQUE_ID).equals(choice.getUniqueID())) {
+							parentAcceptChoice(iwc, choice);
+						}
 						getViewerForm(iwc, choice);
 						break;
 				}
@@ -650,8 +657,9 @@ public class CourseChoiceOverview extends CourseBlock {
 		return true;
 	}
 	
-	private Form getParentAcceptForm(IWContext iwc, CourseChoice choice) throws RemoteException {
+	private void getParentAcceptForm(IWContext iwc, CourseChoice choice) throws RemoteException {
 		Form form = new Form();
+		form.maintainParameter(PARAMETER_UNIQUE_ID);
 		form.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
 		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
 
@@ -824,7 +832,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		accept.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
 		bottom.add(accept);
 
-		return form;
+		add(form);
 	}
 	
 	public void setParametersToMaintainBackButton(List parametersToMaintainBackButton) {

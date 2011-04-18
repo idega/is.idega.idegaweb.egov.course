@@ -277,9 +277,6 @@ public class CourseApplicationOverview extends CourseBlock {
 			while (iter.hasNext()) {
 				row = group.createRow();
 				ApplicationHolder appHolder = (ApplicationHolder) iter.next();
-				if (appHolder.isOnWaitingList()) {
-					continue;
-				}
 
 				Course course = appHolder.getCourse();
 				School provider = course.getProvider();

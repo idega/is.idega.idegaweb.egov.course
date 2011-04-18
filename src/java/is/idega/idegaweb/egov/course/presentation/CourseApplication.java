@@ -1140,15 +1140,20 @@ public class CourseApplication extends ApplicationForm {
 			}
 			
 			IWTimestamp start = new IWTimestamp(course.getStartDate());
-			if (getCourseBusiness(iwc).getTimeoutDay() > 0) {
-				int day = getCourseBusiness(iwc).getTimeoutDay();
-				while (start.getDayOfWeek() != day) {
-					start.addDays(-1);
-				}
+			if (course.getRegistrationEnd() != null) {
+				start = new IWTimestamp(course.getRegistrationEnd());
 			}
-			if (getCourseBusiness(iwc).getTimeoutHour() > 0) {
-				start.setHour(getCourseBusiness(iwc).getTimeoutHour());
-				start.setMinute(0);
+			else {
+				if (getCourseBusiness(iwc).getTimeoutDay() > 0) {
+					int day = getCourseBusiness(iwc).getTimeoutDay();
+					while (start.getDayOfWeek() != day) {
+						start.addDays(-1);
+					}
+				}
+				if (getCourseBusiness(iwc).getTimeoutHour() > 0) {
+					start.setHour(getCourseBusiness(iwc).getTimeoutHour());
+					start.setMinute(0);
+				}
 			}
 			
 			if (!iUseSessionUser ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true) && getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
@@ -1157,7 +1162,7 @@ public class CourseApplication extends ApplicationForm {
 				getCourseApplicationSession(iwc).addApplication(applicant, h);
 			}
 
-			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) || stamp.isLaterThan(start)) {
+			if (!getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) || (stamp.isLaterThan(start) && !iUseSessionUser)) {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.old_course_selected", "You have selected a course that has already started or finished: ") + course.getName());
 			}
 			if (getCourseBusiness(iwc).isRegistered(applicant, course)) {
@@ -2361,7 +2366,6 @@ public class CourseApplication extends ApplicationForm {
 			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
 
-		boolean useWaitingList = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_WAITING_LIST, false);
 		String[] pks = iwc.getParameterValues(PARAMETER_COURSE);
 		String[] daycare = iwc.getParameterValues(PARAMETER_DAYCARE);
 		String[] pickedUp = iwc.getParameterValues(PARAMETER_TRIPHOME);
@@ -2371,9 +2375,6 @@ public class CourseApplication extends ApplicationForm {
 				Course course = getCourseBusiness(iwc).getCourse(new Integer(pks[i]));
 				holder.setCourse(course);
 				holder.setUser(getApplicant(iwc));
-				if (useWaitingList) {
-					holder.setOnWaitingList(getCourseBusiness(iwc).isFull(course));
-				}
 				boolean addApplication = true;
 				if (hasCare) {
 					if (pickedUp[i].length() > 0) {

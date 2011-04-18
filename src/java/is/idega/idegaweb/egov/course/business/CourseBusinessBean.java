@@ -1919,11 +1919,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			int totalCost = 0;
 			while (iter.hasNext()) {
 				ApplicationHolder holder = (ApplicationHolder) iter.next();
-				if (!holder.isOnWaitingList()) {
-					totalPrice += holder.getPrice();
-					totalCost += holder.getCourse().getCourseCost() > -1 ? holder
-							.getCourse().getCourseCost() : 0;
-				}
+				totalPrice += holder.getPrice();
+				totalCost += holder.getCourse().getCourseCost() > -1 ? holder
+						.getCourse().getCourseCost() : 0;
 			}
 
 			PriceHolder priceHolder = new PriceHolder();
@@ -2318,10 +2316,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.card_registration_body",
 					"Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card",
 					locale);
-			String waitingListBody = getLocalizedString(
-					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.waitinglist_registration_body",
-					"Your registration for course {2} at {3} for {0}, {1} has been received and added to the waiting list",
-					locale);
 
 			Iterator iter = applications == null ? null : applications.values()
 					.iterator();
@@ -2340,7 +2334,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.store();
 
 						sendMessageToApplicationOwner(application, choice,
-								subject, holder.isOnWaitingList() ? waitingListBody : body, locale);
+								subject, body, locale);
 					}
 				}
 			}
@@ -2453,6 +2447,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 							locale);
 				}
 			}
+			
+			String waitingListBody = getLocalizedString(
+					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.waitinglist_registration_body",
+					"Your registration for course {2} at {3} for {0}, {1} has been received and added to the waiting list",
+					locale);
+
+			IWTimestamp stamp = new IWTimestamp();
 
 			Iterator iter = applications == null ? null : applications.values()
 					.iterator();
@@ -2469,7 +2470,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setCourse(holder.getCourse());
 						choice.setDayCare(holder.getDaycare());
 						if (useWaitingList) {
-							choice.setWaitingList(holder.isOnWaitingList());
+							choice.setWaitingList(holder.getCourse().getFreePlaces() <= 0);
 						}
 						if (holder.getPickedUp() != null) {
 							choice.setPickedUp(holder.getPickedUp()
@@ -2485,7 +2486,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.store();
 
 						sendMessageToParents(application, choice, subject,
-								body, locale);
+								choice.isOnWaitingList() ? waitingListBody : body, locale);
+						
+						if (getRegistrationTimeoutForCourse(holder.getCourse()).isEarlierThan(stamp)) {
+							String timeoutSubject = getLocalizedString("course_choice.timeout_registration_subject", "A timeout registration has been received", locale);
+							String timeoutBody = getLocalizedString("course_choice.timeout_registration_body", "A registration has been received for {0}, {1} for {2}.", locale);
+							sendMessageToProvider(choice, timeoutSubject, timeoutBody, null, locale);
+						}
 
 						/* Hack for NeSt */
 						if (holder != null && holder.getCourse() != null && holder.getCourse().getCourseType() != null && holder.getCourse().getCourseType().getAbbreviation() != null) {

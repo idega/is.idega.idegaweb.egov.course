@@ -390,6 +390,7 @@ public class CourseWaitingList extends CourseBlock {
 			Phone phone = getUserBusiness().getChildHomePhone(user);
 			
 			CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString());
+			box.setDisabled(choice.getUniqueID() != null);
 
 			if (iRow == course.getMax()) {
 				row.setStyleClass("lastAvailable");
@@ -400,6 +401,9 @@ public class CourseWaitingList extends CourseBlock {
 
 			if (iRow > course.getMax()) {
 				row.setStyleClass("exceedingParticipant");
+			}
+			if (choice.getUniqueID() != null) {
+				row.setStyleClass("hasOffer");
 			}
 
 			cell = row.createCell();
