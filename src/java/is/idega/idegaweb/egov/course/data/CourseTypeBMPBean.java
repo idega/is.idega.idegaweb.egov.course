@@ -130,7 +130,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
 		if (valid) {
-			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, true)));
+			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, false)));
 		}
 		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
 
@@ -144,7 +144,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_SCHOOL_TYPE), MatchCriteria.EQUALS, schoolTypePK));
 		if (valid) {
-			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, true)));
+			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, false)));
 		}
 		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
 
