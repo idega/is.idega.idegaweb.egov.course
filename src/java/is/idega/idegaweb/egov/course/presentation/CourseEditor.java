@@ -1098,9 +1098,6 @@ public class CourseEditor extends CourseBlock {
 		save.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
 		if (!isUseFixedPrices()) {
 			save.setId("SAVE_BTN_ID");
-			if (course == null) {
-				save.setDisabled(true);
-			}
 		}
 		buttonLayer.add(save);
 

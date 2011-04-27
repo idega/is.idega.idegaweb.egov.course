@@ -1919,9 +1919,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			int totalCost = 0;
 			while (iter.hasNext()) {
 				ApplicationHolder holder = (ApplicationHolder) iter.next();
-				totalPrice += holder.getPrice();
-				totalCost += holder.getCourse().getCourseCost() > -1 ? holder
-						.getCourse().getCourseCost() : 0;
+				if (!holder.isOnWaitingList()) {
+					totalPrice += holder.getPrice();
+					totalCost += holder.getCourse().getCourseCost() > -1 ? holder
+							.getCourse().getCourseCost() : 0;
+				}
 			}
 
 			PriceHolder priceHolder = new PriceHolder();

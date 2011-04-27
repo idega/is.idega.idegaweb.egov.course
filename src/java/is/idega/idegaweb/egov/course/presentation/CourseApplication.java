@@ -198,7 +198,7 @@ public class CourseApplication extends ApplicationForm {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user was found with the given personal ID"));
 						canContinue = false;
 					}
-					else if (!getApplicationBusiness(iwc).canApplyForApplication(getCaseCode(), applicant)) {
+					else if (!iUseSessionUser && !getApplicationBusiness(iwc).canApplyForApplication(getCaseCode(), applicant)) {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.user_not_applicable", "The user you selected is not applicable for this application"));
 						canContinue = false;
 					}
@@ -1135,7 +1135,7 @@ public class CourseApplication extends ApplicationForm {
 		for (int i = 0; courses != null && i < courses.length; i++) {
 			ApplicationHolder h = new ApplicationHolder();
 			Course course = getCourseBusiness(iwc).getCourse(new Integer(courses[i]));
-			if (course.getFreePlaces() <= 0) {
+			if (getCourseBusiness(iwc).isFull(course)) {
 				isFull = true;
 			}
 			
@@ -1159,6 +1159,7 @@ public class CourseApplication extends ApplicationForm {
 			if (!iUseSessionUser ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true) && getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				h.setUser(applicant);
 				h.setCourse(course);
+				h.setOnWaitingList(isFull);
 				getCourseApplicationSession(iwc).addApplication(applicant, h);
 			}
 
@@ -1796,7 +1797,7 @@ public class CourseApplication extends ApplicationForm {
 		table.setCellpadding(0);
 		table.setCellspacing(0);
 		table.setBorder(0);
-		table.setStyleClass("100%");
+		table.setWidth("100%");
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
 		row.setStyleClass("header");
@@ -1852,6 +1853,33 @@ public class CourseApplication extends ApplicationForm {
 			}
 			else {
 				row.setStyleClass("odd");
+			}
+			
+			Collection<ApplicationHolder> holders = (Collection<ApplicationHolder>) applications.get(user);
+			for (ApplicationHolder applicationHolder : holders) {
+				row = group.createRow();
+				row.setStyleClass("subRow");
+				
+				Course course = applicationHolder.getCourse();
+				
+				cell = row.createCell();
+				cell.setStyleClass("name");
+				cell.add(new Text(course.getName()));
+
+				cell = row.createCell();
+				cell.setStyleClass("startDate");
+				cell.add(new Text(new IWTimestamp(course.getStartDate()).getLocaleDate(iwc.getCurrentLocale())));
+
+				cell = row.createCell();
+				cell.setStyleClass("status");
+				if (applicationHolder.isOnWaitingList()) {
+					cell.setStyleClass("waitingList");
+					cell.add(new Text(iwrb.getLocalizedString("application_status.waiting_list", "Waiting list")));
+				}
+				else {
+					cell.setStyleClass("registered");
+					cell.add(new Text(format.format(holder.getPrice())));
+				}
 			}
 		}
 
@@ -2373,6 +2401,7 @@ public class CourseApplication extends ApplicationForm {
 			for (int i = 0; i < pks.length; i++) {
 				ApplicationHolder holder = new ApplicationHolder();
 				Course course = getCourseBusiness(iwc).getCourse(new Integer(pks[i]));
+				holder.setOnWaitingList(getCourseBusiness(iwc).isFull(course));
 				holder.setCourse(course);
 				holder.setUser(getApplicant(iwc));
 				boolean addApplication = true;

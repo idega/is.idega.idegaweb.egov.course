@@ -97,3 +97,19 @@ ul.legend li.openForRegistration {
 #courseParticipantOverview table.choices tr.waitlisted td, #courseParticipantOverview table.choices tr.waitlisted td a {
 	color: #a0a0a0;
 }
+
+table.coursesPhaseSeven tr.subRow td {
+	font-size: 0.9167em;
+}
+
+table.coursesPhaseSeven tr.subRow td.name {
+	padding-left: 24px
+}
+
+table.coursesPhaseSeven tr.subRow td.waitingList {
+	color: #a00;	
+}
+
+table.coursesPhaseSeven tr.subRow td.registered {
+	color: #0a0;	
+}

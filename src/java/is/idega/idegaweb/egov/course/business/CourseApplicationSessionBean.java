@@ -52,9 +52,15 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 
 	public void addApplication(User user, ApplicationHolder holder) {
 		if (getMap().containsKey(user)) {
-			Collection applications = (Collection) getMap().get(user);
+			Collection<ApplicationHolder> applications = (Collection) getMap().get(user);
 			if (applications.contains(holder)) {
+				for (ApplicationHolder object : applications) {
+					if (object.equals(holder)) {
+						holder.setOnWaitingList(object.isOnWaitingList());
+					}
+				}
 				applications.remove(holder);
+				
 				try {
 					getCourseBusiness(getIWApplicationContext()).removeReservation(holder.getCourse());
 				}
