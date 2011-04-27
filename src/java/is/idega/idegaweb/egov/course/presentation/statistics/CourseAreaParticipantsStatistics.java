@@ -87,7 +87,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				SchoolArea area = getSchoolBusiness(iwc).getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
 				Collection providers = getBusiness().getProviders(area, type);
 
-				if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
 					Collection userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
 					providers.retainAll(userProviders);
 				}
