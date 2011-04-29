@@ -1878,7 +1878,7 @@ public class CourseApplication extends ApplicationForm {
 				}
 				else {
 					cell.setStyleClass("registered");
-					cell.add(new Text(format.format(holder.getPrice())));
+					cell.add(new Text(format.format(applicationHolder.getPrice())));
 				}
 			}
 		}

@@ -17,6 +17,7 @@ public class CourseCategoryBMPBean extends SchoolTypeBMPBean implements CourseCa
 	public static final String ALLOWS_ALL_CHILDREN = "allows_all_children";
 	public static final String HAS_CARE = "has_care";
 	public static final String USE_FIXED_PRICING = "use_fixed_pricing";
+	public static final String SEND_REMINDER_EMAIL = "send_reminder_email";
 
 	public void initializeAttributes() {
 		super.initializeAttributes();
@@ -24,6 +25,7 @@ public class CourseCategoryBMPBean extends SchoolTypeBMPBean implements CourseCa
 		this.addAttribute(ALLOWS_ALL_CHILDREN, "Allow all children", Boolean.class);
 		this.addAttribute(HAS_CARE, "Has care", Boolean.class);
 		this.addAttribute(USE_FIXED_PRICING, "Use fixed pricing", Boolean.class);
+		this.addAttribute(SEND_REMINDER_EMAIL, "Send reminder email", Boolean.class);
 	}
 
 	//Getters
@@ -38,6 +40,10 @@ public class CourseCategoryBMPBean extends SchoolTypeBMPBean implements CourseCa
 	public boolean useFixedPricing() {
 		return getBooleanColumnValue(USE_FIXED_PRICING, false);
 	}
+	
+	public boolean sendReminderEmail() {
+		return getBooleanColumnValue(SEND_REMINDER_EMAIL, true);
+	}
 
 	//Setters
 	public void setAllowsAllChildren(boolean allowAll) {
@@ -50,5 +56,9 @@ public class CourseCategoryBMPBean extends SchoolTypeBMPBean implements CourseCa
 
 	public void setUseFixedPricing(boolean useFixedPricing) {
 		setColumn(USE_FIXED_PRICING, useFixedPricing);
+	}
+	
+	public void setSendReminderEmail(boolean sendReminderEmail) {
+		setColumn(SEND_REMINDER_EMAIL, sendReminderEmail);
 	}
 }

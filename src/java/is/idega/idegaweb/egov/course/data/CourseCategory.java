@@ -22,6 +22,11 @@ public interface CourseCategory extends IDOEntity, SchoolType {
 	public boolean useFixedPricing();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseCategoryBMPBean#sendReminderEmail
+	 */
+	public boolean sendReminderEmail();
+	
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseCategoryBMPBean#setAllowsAllChildren
 	 */
 	public void setAllowsAllChildren(boolean allowAll);
@@ -35,4 +40,9 @@ public interface CourseCategory extends IDOEntity, SchoolType {
 	 * @see is.idega.idegaweb.egov.course.data.CourseCategoryBMPBean#setUseFixedPricing
 	 */
 	public void setUseFixedPricing(boolean useFixedPricing);
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseCategoryBMPBean#setSendReminderEmail
+	 */
+	public void setSendReminderEmail(boolean sendReminderEmail);
 }

@@ -3267,18 +3267,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					null, -1, fromDate.getDate(), toDate.getDate());
 			int count = 0;
 			for (Course course : courses) {
-				Collection<CourseChoice> choices = getCourseChoiceHome()
-						.findAllByCourse(course, false);
-				for (CourseChoice choice : choices) {
-					if (!choice.hasReceivedReminder()) {
-						CourseApplication application = choice.getApplication();
-
-						sendMessageToParents(application, choice, subject,
-								body, locale);
-
-						choice.setReceivedReminder(true);
-						choice.store();
-						count++;
+				CourseType type = course.getCourseType();
+				CourseCategory category = type.getCourseCategory();
+				
+				if (category.sendReminderEmail()) {
+					Collection<CourseChoice> choices = getCourseChoiceHome()
+							.findAllByCourse(course, false);
+					for (CourseChoice choice : choices) {
+						if (!choice.hasReceivedReminder()) {
+							CourseApplication application = choice.getApplication();
+	
+							sendMessageToParents(application, choice, subject,
+									body, locale);
+	
+							choice.setReceivedReminder(true);
+							choice.store();
+							count++;
+						}
 					}
 				}
 			}
