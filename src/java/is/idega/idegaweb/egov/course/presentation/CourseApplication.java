@@ -1253,15 +1253,15 @@ public class CourseApplication extends ApplicationForm {
 			daycare.setOnFocus("this.style.width='225px';");
 			daycare.setOnBlur("this.style.width='';");
 			daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
-			if (provider.hasPreCare()) {
+			if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPreCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
 			}
-			if (provider.hasPostCare()) {
+			if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPostCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
 			}
-			if (provider.hasPreCare() && provider.hasPostCare()) {
+			if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
 			}
