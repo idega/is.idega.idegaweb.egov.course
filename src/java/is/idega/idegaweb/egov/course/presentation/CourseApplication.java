@@ -983,6 +983,7 @@ public class CourseApplication extends ApplicationForm {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("providerItem");
 		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("provider", "Provider"))), providerMenu);
 		formItem.add(label);
 		formItem.add(providerMenu);

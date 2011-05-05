@@ -442,13 +442,6 @@ public class CourseChoiceOverview extends CourseBlock {
 				invalidate.setClickConfirmation(getResourceBundle().getLocalizedString("confirm_invalidation", "Are you sure you want to invalidate this registration?"));
 			}
 			bottom.add(invalidate);
-			
-			if (choice.isOnWaitingList()) {
-				Link accept = getButtonLink(getResourceBundle().getLocalizedString("accept_choices", "Accept choices"));
-				accept.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_ACCEPT));
-				accept.maintainParameter(PARAMETER_CHOICE_PK, iwc);
-				bottom.add(accept);
-			}
 		}
 
 		add(form);

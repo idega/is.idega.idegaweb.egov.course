@@ -2333,6 +2333,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setApplication(application);
 						choice.setCourse(holder.getCourse());
 						choice.setUser(holder.getUser());
+						choice.setUniqueID(null);
 						choice.store();
 
 						sendMessageToApplicationOwner(application, choice,

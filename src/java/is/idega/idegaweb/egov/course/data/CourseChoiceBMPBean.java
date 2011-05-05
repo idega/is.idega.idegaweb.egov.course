@@ -291,7 +291,11 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new CountColumn(getIDColumnName()));
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE), MatchCriteria.EQUALS, course));
-		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, false), new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST))));
+		
+		OR or1 = new OR(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, false), new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST)));
+		OR or2 = new OR(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_UNIQUE_ID), true));
+		
+		query.addCriteria(new OR(or1, or2));
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
 
 		return idoGetNumberOfRecords(query);
