@@ -108,7 +108,7 @@ public class CourseWaitingList extends CourseBlock {
 		if (action == ACTION_ACCEPT) {
 			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
 			Course course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
-			if (course.getFreePlaces() >= choices.length) {
+			if (course.getFreePlaces(false) >= choices.length) {
 				for (String choice : choices) {
 					getBusiness().acceptChoice(choice, iwc.getCurrentLocale());
 				}

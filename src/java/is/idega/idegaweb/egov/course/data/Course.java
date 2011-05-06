@@ -94,6 +94,11 @@ public interface Course extends IDOEntity {
 	public int getFreePlaces();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getFreePlaces
+	 */
+	public int getFreePlaces(boolean countOffers);
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCourseNumber
 	 */
 	public int getCourseNumber();

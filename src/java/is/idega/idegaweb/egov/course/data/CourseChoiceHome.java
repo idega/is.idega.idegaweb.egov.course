@@ -33,6 +33,7 @@ public interface CourseChoiceHome extends IDOHome {
 			throws FinderException;
 
 	public int getCountByCourse(Course course) throws IDOException;
+	public int getCountByCourse(Course course, boolean countOffers) throws IDOException;
 
 	public Collection findAllByUser(User user) throws FinderException;
 

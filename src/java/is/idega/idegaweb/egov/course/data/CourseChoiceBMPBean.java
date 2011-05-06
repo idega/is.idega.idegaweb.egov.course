@@ -48,7 +48,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_WAITING_LIST = "waiting_list";
 	private static final String COLUMN_NO_PAYMENT = "no_payment";
 	private static final String COLUMN_NOTES = "notes";
-	private static final String COLUMN_UNIQUE_ID = "unique_id";
+	private static final String COLUMN_UNIQUE_ID = "choice_unique_id";
 
 	public static final String COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE = "verific_from_goverment";
 	public static final String COLUMN_CERTIFICATE_OF_PROPERTY = "certificate_of_property";
@@ -286,6 +286,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	}
 
 	public int ejbHomeGetCountByCourse(Course course) throws IDOException {
+		return ejbHomeGetCountByCourse(course, true);
+	}
+	
+	public int ejbHomeGetCountByCourse(Course course, boolean countOffers) throws IDOException {
 		Table table = new Table(this);
 
 		SelectQuery query = new SelectQuery(table);
@@ -295,7 +299,12 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		OR or1 = new OR(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, false), new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST)));
 		OR or2 = new OR(new MatchCriteria(table.getColumn(COLUMN_WAITING_LIST), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_UNIQUE_ID), true));
 		
-		query.addCriteria(new OR(or1, or2));
+		if (countOffers) {
+			query.addCriteria(new OR(or1, or2));
+		}
+		else {
+			query.addCriteria(or1);
+		}
 		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
 
 		return idoGetNumberOfRecords(query);

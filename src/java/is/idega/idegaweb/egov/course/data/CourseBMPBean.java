@@ -160,10 +160,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return getIntColumnValue(COLUMN_MAX_PARTICIPANTS);
 	}
 
-	public int getFreePlaces() {
+	public int getFreePlaces(boolean countOffers) {
 		try {
 			CourseChoiceHome home = (CourseChoiceHome) getIDOHome(CourseChoice.class);
-			return getMax() - home.getCountByCourse(this);
+			return getMax() - home.getCountByCourse(this, countOffers);
 		}
 		catch (IDOLookupException e) {
 			e.printStackTrace();
@@ -173,6 +173,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		}
 
 		return getMax();
+	}
+	
+	public int getFreePlaces() {
+		return getFreePlaces(true);
 	}
 	
 	public int getCourseNumber() {

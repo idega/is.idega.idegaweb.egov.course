@@ -79,6 +79,14 @@ public class CourseChoiceHomeImpl extends IDOFactory implements
 		return theReturn;
 	}
 
+	public int getCountByCourse(Course course, boolean countOffers) throws IDOException {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		int theReturn = ((CourseChoiceBMPBean) entity)
+				.ejbHomeGetCountByCourse(course, countOffers);
+		this.idoCheckInPooledEntity(entity);
+		return theReturn;
+	}
+
 	public Collection findAllByUser(User user) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseChoiceBMPBean) entity).ejbFindAllByUser(user);
