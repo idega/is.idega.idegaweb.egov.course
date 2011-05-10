@@ -3202,6 +3202,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public boolean parentsAcceptChoice(Object courseChoicePK, User performer, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
 		choice.setWaitingList(false);
+		choice.setUniqueID(null);
 		choice.store();
 		
 		Course course = choice.getCourse();

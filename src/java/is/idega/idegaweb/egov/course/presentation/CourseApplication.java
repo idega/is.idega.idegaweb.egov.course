@@ -1139,6 +1139,9 @@ public class CourseApplication extends ApplicationForm {
 			if (getCourseBusiness(iwc).isFull(course)) {
 				isFull = true;
 			}
+			else {
+				isFull = false;
+			}
 			
 			IWTimestamp start = new IWTimestamp(course.getStartDate());
 			if (course.getRegistrationEnd() != null) {

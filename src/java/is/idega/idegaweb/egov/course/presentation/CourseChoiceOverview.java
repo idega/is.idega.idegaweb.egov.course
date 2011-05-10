@@ -823,6 +823,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		Link accept = getButtonLink(getResourceBundle().getLocalizedString("parent_accept", "Parent accept"));
 		accept.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_PARENT_ACCEPT));
 		accept.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+		accept.maintainParameter(PARAMETER_UNIQUE_ID, iwc);
 		bottom.add(accept);
 
 		add(form);

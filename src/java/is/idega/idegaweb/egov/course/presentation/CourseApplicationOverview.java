@@ -335,7 +335,14 @@ public class CourseApplicationOverview extends CourseBlock {
 				
 				cell = row.createCell();
 				cell.setStyleClass("amount");
-				cell.add(new Text(format.format(appHolder.getPrice())));
+				if (appHolder.isOnWaitingList()) {
+					cell.setStyleClass("waitingList");
+					cell.add(new Text(getResourceBundle().getLocalizedString("application_status.waiting_list", "Waiting list")));
+				}
+				else {
+					cell.setStyleClass("registered");
+					cell.add(new Text(format.format(appHolder.getPrice())));
+				}
 
 				if (counter++ % 2 == 0) {
 					row.setStyleClass("even");
