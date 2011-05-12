@@ -52,7 +52,7 @@ public class PriceHolder implements Comparable {
 		PriceHolder obj = (PriceHolder) arg0;
 		int compare = (int) -(obj.getPrice() - getPrice());
 		if (compare == 0) {
-			compare = ((Integer) getUser().getPrimaryKey()).intValue() - ((Integer) obj.getUser().getPrimaryKey()).intValue();
+			compare = ((Integer) obj.getUser().getPrimaryKey()).intValue() - ((Integer) getUser().getPrimaryKey()).intValue();
 		}
 
 		return compare;

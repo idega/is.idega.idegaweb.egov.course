@@ -983,12 +983,11 @@ public class CourseApplication extends ApplicationForm {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("providerItem");
 		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("provider", "Provider"))), providerMenu);
 		formItem.add(label);
 		formItem.add(providerMenu);
 		section.add(formItem);
-
+		
 		Integer courseTypePK = null;
 		if (iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
 			courseTypePK = new Integer(iwc.getParameter(PARAMETER_COURSE_TYPE));
@@ -1237,6 +1236,7 @@ public class CourseApplication extends ApplicationForm {
 		NumberFormat format = NumberFormat.getCurrencyInstance(iwc.getCurrentLocale());
 		int counter = 0;
 		Iterator iter = applications.iterator();
+		hasCare = false;
 		while (iter.hasNext()) {
 			row = group.createRow();
 			if (counter++ % 2 == 0) {
@@ -1260,14 +1260,17 @@ public class CourseApplication extends ApplicationForm {
 			if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPreCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
+				hasCare = true;
 			}
 			if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPostCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
+				hasCare = true;
 			}
 			if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
+				hasCare = true;
 			}
 			daycare.keepStatusOnAction(true);
 
@@ -1290,7 +1293,7 @@ public class CourseApplication extends ApplicationForm {
 			cell = row.createCell();
 			cell.setStyleClass("column0");
 			cell.add(new Text(holder.getProvider().getName()));
-
+			
 			cell = row.createCell();
 			cell.setStyleClass("column1");
 			cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
