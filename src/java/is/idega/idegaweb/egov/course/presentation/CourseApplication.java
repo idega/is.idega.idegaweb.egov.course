@@ -1236,7 +1236,7 @@ public class CourseApplication extends ApplicationForm {
 		NumberFormat format = NumberFormat.getCurrencyInstance(iwc.getCurrentLocale());
 		int counter = 0;
 		Iterator iter = applications.iterator();
-		hasCare = false;
+		boolean showAlert = false;
 		while (iter.hasNext()) {
 			row = group.createRow();
 			if (counter++ % 2 == 0) {
@@ -1260,17 +1260,17 @@ public class CourseApplication extends ApplicationForm {
 			if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPreCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
-				hasCare = true;
+				showAlert = true;
 			}
 			if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPostCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
-				hasCare = true;
+				showAlert = true;
 			}
 			if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
 				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
 				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
-				hasCare = true;
+				showAlert = true;
 			}
 			daycare.keepStatusOnAction(true);
 
@@ -1355,7 +1355,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_7));
-		if (hasCare) {
+		if (showAlert) {
 			next.setClickConfirmation(this.iwrb.getLocalizedString("confirm.care_option", "Are you sure you have selected the correct care options?"));
 		}
 		next.setToFormSubmit(form);
@@ -1363,7 +1363,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Link newAppl = getButtonLink(this.iwrb.getLocalizedString("another_applicant", "Another applicant"));
 		newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
-		if (hasCare) {
+		if (showAlert) {
 			newAppl.setClickConfirmation(this.iwrb.getLocalizedString("confirm.care_option", "Are you sure you have selected the correct care options?"));
 		}
 		newAppl.setToFormSubmit(form);
