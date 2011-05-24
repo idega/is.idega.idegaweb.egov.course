@@ -146,6 +146,16 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			throws FinderException, CreateException, RemoteException;
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#createCourse
+	 */
+	public Course createCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration, IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare)
+			throws FinderException, CreateException;
+	
+	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
 	 */
 	public void storeCourse(Object pk, int courseNumber, String name,
@@ -175,6 +185,16 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			int maxPer, float price, float cost, boolean openForRegistration)
 			throws FinderException, CreateException, RemoteException;
 			
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
+	 */
+	public Course storeCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, IWTimestamp registrationEnd,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration, boolean hasPreCare, boolean hasPostCare)
+			throws FinderException, CreateException, RemoteException;
+	
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#deleteCoursePrice
 	 */

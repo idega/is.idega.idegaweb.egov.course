@@ -109,6 +109,21 @@ public interface Course extends IDOEntity {
 	public boolean isOpenForRegistration();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#hasPreCare
+	 */
+	public boolean hasPreCare();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#hasPostCare
+	 */
+	public boolean hasPostCare();
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#hasPreAndPostCarehasPreAndPostCare
+	 */
+	public boolean hasPreAndPostCare();
+	
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setName
 	 */
 	public void setName(String name);
@@ -192,6 +207,16 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setOpenForRegistration
 	 */
 	public void setOpenForRegistration(boolean openForRegistration);
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setHasPreCare
+	 */
+	public void setHasPreCare(boolean hasPreCare);
+	
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setHasPostCare
+	 */
+	public void setHasPostCare(boolean hasPostCare);
 	
 	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);

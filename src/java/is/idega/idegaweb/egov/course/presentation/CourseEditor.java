@@ -40,6 +40,7 @@ import com.idega.presentation.text.Link;
 import com.idega.presentation.text.ListItem;
 import com.idega.presentation.text.Lists;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.BooleanInput;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
@@ -71,6 +72,8 @@ public class CourseEditor extends CourseBlock {
 	protected static final String PARAMETER_PRICE = "prm_price";
 	protected static final String PARAMETER_COST = "prm_cost";
 	protected static final String PARAMETER_OPEN_FOR_REGISTRATION = "prm_open_for_registration";
+	private static final String PARAMETER_HAS_PRE_CARE = "prm_has_pre_care";
+	private static final String PARAMETER_HAS_POST_CARE = "prm_has_pre_care";
 	private static final String PARAMETER_REGISTRATION_END = "prm_registration_end";
 
 	protected static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
@@ -159,8 +162,10 @@ public class CourseEditor extends CourseBlock {
 			float price = iwc.isParameterSet(PARAMETER_PRICE) ? Float.parseFloat(iwc.getParameter(PARAMETER_PRICE)) : 0;
 			float cost = iwc.isParameterSet(PARAMETER_COST) ? Float.parseFloat(iwc.getParameter(PARAMETER_COST)) : 0;
 			boolean openForRegistration = iwc.isParameterSet(PARAMETER_OPEN_FOR_REGISTRATION);
+			boolean hasPreCare = iwc.isParameterSet(PARAMETER_HAS_PRE_CARE) ? BooleanInput.getBooleanReturnValue(iwc.getParameter(PARAMETER_HAS_PRE_CARE)) : true;
+			boolean hasPostCare = iwc.isParameterSet(PARAMETER_HAS_POST_CARE) ? BooleanInput.getBooleanReturnValue(iwc.getParameter(PARAMETER_HAS_POST_CARE)) : true;
 			Object provider = getSession().getProvider() == null ? null : getSession().getProvider().getPrimaryKey();
-			return getCourseBusiness().storeCourse(pk, courseNumber, name, user, courseTypePK, provider, coursePricePK, startDate, endDate, regEnd, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration);
+			return getCourseBusiness().storeCourse(pk, courseNumber, name, user, courseTypePK, provider, coursePricePK, startDate, endDate, regEnd, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, hasPreCare, hasPostCare);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -627,6 +632,7 @@ public class CourseEditor extends CourseBlock {
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 		boolean showIDInput = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 		boolean showOpenForRegistration = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false);
+		boolean showCareOptions = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CARE_OPTIONS, false);
 
 		Form form = new Form();
 		form.setID("courseEditor");
@@ -705,6 +711,12 @@ public class CourseEditor extends CourseBlock {
 		TextInput postCarePrice = new TextInput("postCarePrice");
 		postCarePrice.setId("postCarePrice");
 		postCarePrice.setDisabled(true);
+		
+		BooleanInput hasPreCare = new BooleanInput(PARAMETER_HAS_PRE_CARE);
+		hasPreCare.setSelected(true);
+		
+		BooleanInput hasPostCare = new BooleanInput(PARAMETER_HAS_POST_CARE);
+		hasPostCare.setSelected(true);
 
 		DropdownMenu schoolTypeID = null;
 		if (isShowCourseCategory()) {
@@ -789,6 +801,8 @@ public class CourseEditor extends CourseBlock {
 			}
 
 			openForRegistration.setChecked(course.isOpenForRegistration());
+			hasPreCare.setSelected(course.hasPreCare());
+			hasPostCare.setSelected(course.hasPostCare());
 
 			if (coursePrice != null) {
 				if (!useFixedPrices) {
@@ -1014,6 +1028,24 @@ public class CourseEditor extends CourseBlock {
 			label = new Label(localize("open_for_registration", "Open for registration"), openForRegistration);
 			layer.add(openForRegistration);
 			layer.add(label);
+			section.add(layer);
+		}
+		
+		if (showCareOptions) {
+			layer = new Layer();
+			layer.setStyleClass("formItem");
+			layer.setStyleClass("checkboxFormItem");
+			label = new Label(localize("has_pre_care", "Has pre care"), hasPreCare);
+			layer.add(label);
+			layer.add(hasPreCare);
+			section.add(layer);
+
+			layer = new Layer();
+			layer.setStyleClass("formItem");
+			layer.setStyleClass("checkboxFormItem");
+			label = new Label(localize("has_post_care", "Has post care"), hasPostCare);
+			layer.add(label);
+			layer.add(hasPostCare);
 			section.add(layer);
 		}
 

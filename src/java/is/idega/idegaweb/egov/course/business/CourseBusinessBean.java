@@ -705,6 +705,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			String accountingKey, int birthYearFrom, int birthYearTo,
 			int maxPer, float price, float cost, boolean openForRegistration, IWTimestamp registrationEnd)
 			throws FinderException, CreateException {
+		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, registrationEnd, true, true);
+	}
+	
+	public Course createCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration, IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare)
+			throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(
@@ -776,6 +785,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			course.setCourseCost(cost);
 		}
 		course.setOpenForRegistration(openForRegistration);
+		course.setHasPostCare(hasPostCare);
+		course.setHasPreCare(hasPreCare);
 
 		course.store();
 
@@ -814,6 +825,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				providerPK, coursePricePK, startDate, endDate, accountingKey,
 				birthYearFrom, birthYearTo, maxPer, price, cost,
 				openForRegistration, registrationEnd);
+	}
+	
+	public Course storeCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, IWTimestamp registrationEnd,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration, boolean hasPreCare, boolean hasPostCare)
+			throws FinderException, CreateException {
+		return createCourse(pk, courseNumber, name, user, courseTypePK,
+				providerPK, coursePricePK, startDate, endDate, accountingKey,
+				birthYearFrom, birthYearTo, maxPer, price, cost,
+				openForRegistration, registrationEnd, hasPreCare, hasPostCare);
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {

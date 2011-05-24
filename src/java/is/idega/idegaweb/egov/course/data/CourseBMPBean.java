@@ -46,6 +46,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_COURSE_PRICE = "COU_COURSE_PRICE_ID";
 	private static final String COLUMN_PRICE = "COURSE_PRICE";
 	private static final String COLUMN_COST = "COURSE_COST";
+	private static final String COLUMN_PRE_CARE = "HAS_PRE_CARE";
+	private static final String COLUMN_POST_CARE = "HAS_POST_CARE";
 
 	private static final String COLUMN_START_DATE = "START_DATE";
 	private static final String COLUMN_END_DATE = "END_DATE";
@@ -78,6 +80,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_PRICE, "Price", Float.class);
 		addAttribute(COLUMN_COST, "Cost", Float.class);
 		addAttribute(COLUMN_OPEN_FOR_REGISTRATION, "Open for registration", Boolean.class);
+		addAttribute(COLUMN_PRE_CARE, "Has pre care", Boolean.class);
+		addAttribute(COLUMN_POST_CARE, "Has post care", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
@@ -186,6 +190,18 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public boolean isOpenForRegistration() {
 		return getBooleanColumnValue(COLUMN_OPEN_FOR_REGISTRATION, true);
 	}
+	
+	public boolean hasPreCare() {
+		return getBooleanColumnValue(COLUMN_PRE_CARE, true);
+	}
+
+	public boolean hasPostCare() {
+		return getBooleanColumnValue(COLUMN_POST_CARE, true);
+	}
+	
+	public boolean hasPreAndPostCare() {
+		return hasPreCare() && hasPostCare();
+	}
 
 	// Setters
 	@Override
@@ -257,6 +273,14 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		setColumn(COLUMN_OPEN_FOR_REGISTRATION, openForRegistration);
 	}
 	
+	public void setHasPreCare(boolean hasPreCare) {
+		setColumn(COLUMN_PRE_CARE, hasPreCare);
+	}
+	
+	public void setHasPostCare(boolean hasPostCare) {
+		setColumn(COLUMN_POST_CARE, hasPostCare);
+	}
+	
 	// Finders
 	public Collection<Integer> ejbFindAll() throws FinderException, IDORelationshipException {
 		return ejbFindAll(null, null, null, -1, null, null);
@@ -309,7 +333,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.addOrder(table, COLUMN_START_DATE, true);
 		query.addOrder(table, COLUMN_NAME, true);
 
-		System.out.println(query.toString());
 		return this.idoFindPKsByQuery(query);
 	}
 
