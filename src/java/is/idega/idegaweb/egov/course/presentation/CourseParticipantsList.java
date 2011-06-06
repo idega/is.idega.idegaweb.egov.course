@@ -15,7 +15,9 @@ import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
 import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 
 import java.rmi.RemoteException;
@@ -25,7 +27,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 
+import com.ibm.icu.text.NumberFormat;
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolType;
 import com.idega.builder.bean.AdvancedProperty;
@@ -364,6 +369,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
 		boolean showNoPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_NO_PAYMENT, false) && iwc.hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY);
+		boolean showPrice = iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY);
 
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
@@ -380,6 +386,9 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.add(Text.getNonBrakingSpace());
 
 		int columns = 1;
+		float totalPrice = 0;
+		NumberFormat format = NumberFormat.getCurrencyInstance(iwc.getCurrentLocale());
+		format.setMaximumFractionDigits(2);
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("name");
@@ -432,6 +441,14 @@ public class CourseParticipantsList extends CourseBlock {
 				}
 				cell.setStyleClass("certificate");
 				cell.add(new Text(getResourceBundle().getLocalizedString("pdf", "PDF")));
+				columns++;
+			}
+			
+			if (showPrice) {
+				cell = row.createHeaderCell();
+				cell.setStyleClass("lastColumn");
+				cell.setStyleClass("price");
+				cell.add(new Text(getResourceBundle().getLocalizedString("price", "Price")));
 				columns++;
 			}
 		}
@@ -743,6 +760,43 @@ public class CourseParticipantsList extends CourseBlock {
 				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
 				cell.add(view);
 			}
+			
+			if (showPrice) {
+				is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
+				float userPrice = 0;
+				if (choice.isNoPayment()) {
+					userPrice = 0;
+				}
+				else {
+					Map applicationMap = getBusiness().getApplicationMap(application, new Boolean(false));
+					SortedSet prices = getBusiness().calculatePrices(applicationMap);
+					Map discounts = getBusiness().getDiscounts(prices, applicationMap);
+					CoursePrice price = course.getPrice();
+					
+					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());			
+					
+					float carePrice = 0;
+					if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
+						carePrice = price.getPreCarePrice();
+					}
+					else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
+						carePrice = price.getPostCarePrice();
+					}
+					else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+						carePrice = price.getPreCarePrice() + price.getPostCarePrice();
+					}
+					carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+					
+					userPrice = carePrice + coursePrice;
+				}
+				
+				cell = row.createCell();
+				cell.setStyleClass("price");
+				cell.setStyleClass("lastColumn");
+				cell.add(new Text(format.format(userPrice)));
+				
+				totalPrice += userPrice;
+			}
 
 			if (iRow % 2 == 0) {
 				row.setStyleClass("evenRow");
@@ -758,8 +812,14 @@ public class CourseParticipantsList extends CourseBlock {
 
 		cell = row.createCell();
 		cell.setStyleClass("numberOfParticipants");
-		cell.setColumnSpan(columns);
+		cell.setColumnSpan(showPrice ? columns - 1 : columns);
 		cell.add(new Text(getResourceBundle().getLocalizedString("number_of_participants", "Number of participants") + ": " + (iRow - 1)));
+		
+		if (showPrice) {
+			cell = row.createCell();
+			cell.setStyleClass("price");
+			cell.add(new Text(String.valueOf(format.format(totalPrice))));
+		}
 
 		return table;
 	}
