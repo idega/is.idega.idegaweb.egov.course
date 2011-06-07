@@ -15,6 +15,7 @@ public class CourseConstants {
 
 	public static final String ADMINISTRATOR_ROLE_KEY = "afterSchoolCareAdministrator";
 	public static final String SUPER_ADMINISTRATOR_ROLE_KEY = "superAfterSchoolCareAdministrator";
+	public static final String COURSE_ACCOUNTING_ROLE_KEY = "courseAccounting";
 
 	public static final int DAY_CARE_NONE = 0;
 	public static final int DAY_CARE_PRE = 1;

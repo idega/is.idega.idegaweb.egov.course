@@ -369,7 +369,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
 		boolean showNoPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_NO_PAYMENT, false) && iwc.hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY);
-		boolean showPrice = iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY);
+		boolean showPrice = iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY) || iwc.hasRole(CourseConstants.COURSE_ACCOUNTING_ROLE_KEY);
 
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");

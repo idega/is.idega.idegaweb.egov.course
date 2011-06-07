@@ -15,6 +15,8 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 import java.io.ByteArrayOutputStream;
@@ -27,6 +29,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.SortedSet;
 
 import javax.ejb.FinderException;
 import javax.servlet.http.HttpServletRequest;
@@ -124,7 +128,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 				Collection choices = getChoices(course, iwc, waitingList);
 
-				this.buffer = writeXLS(iwc, choices);
+				if (iwc.hasRole(CourseConstants.COURSE_ACCOUNTING_ROLE_KEY)) {
+					this.buffer = writeAccountingXLS(iwc, choices);
+				}
+				else {
+					this.buffer = writeXLS(iwc, choices);
+				}
 				String fileName = "participants.xls";
 				if (iwc.isParameterSet(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)) {
 					fileName = "participant.xls";
@@ -570,6 +579,126 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					iCell++;
 				}
 			}
+		}
+		wb.write(mos);
+		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
+		return buffer;
+	}
+
+	public MemoryFileBuffer writeAccountingXLS(IWContext iwc, Collection choices) throws Exception {
+		MemoryFileBuffer buffer = new MemoryFileBuffer();
+		MemoryOutputStream mos = new MemoryOutputStream(buffer);
+
+		HSSFWorkbook wb = new HSSFWorkbook();
+		HSSFSheet sheet = wb.createSheet(StringHandler.shortenToLength(this.courseName, 30));
+		sheet.setColumnWidth(0, (short) (30 * 256));
+		sheet.setColumnWidth(1, (short) (14 * 256));
+		sheet.setColumnWidth(2, (short) (30 * 256));
+		sheet.setColumnWidth(3, (short) (14 * 256));
+		sheet.setColumnWidth(4, (short) (14 * 256));
+		sheet.setColumnWidth(4, (short) (10 * 256));
+		HSSFFont font = wb.createFont();
+		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		font.setFontHeightInPoints((short) 12);
+		HSSFCellStyle style = wb.createCellStyle();
+		style.setFont(font);
+
+		HSSFFont bigFont = wb.createFont();
+		bigFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		bigFont.setFontHeightInPoints((short) 13);
+		HSSFCellStyle bigStyle = wb.createCellStyle();
+		bigStyle.setFont(bigFont);
+
+		int cellRow = 0;
+		HSSFRow row = sheet.createRow(cellRow++);
+		HSSFCell cell = row.createCell(0);
+		cell.setCellValue(this.courseName);
+		cell.setCellStyle(bigStyle);
+		
+		row = sheet.createRow(cellRow++);
+
+		int iCell = 0;
+		row = sheet.createRow(cellRow++);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
+		cell.setCellStyle(style);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("personal_id", "Personal ID"));
+		cell.setCellStyle(style);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("address", "Address"));
+		cell.setCellStyle(style);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("postal_code", "Postal code"));
+		cell.setCellStyle(style);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
+		cell.setCellStyle(style);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("price", "Price"));
+		cell.setCellStyle(style);
+
+		User user;
+		Address address;
+		PostalCode postalCode = null;
+		Phone phone;
+		CourseChoice choice;
+		CourseApplication application;
+
+		Iterator iter = choices.iterator();
+		while (iter.hasNext()) {
+			row = sheet.createRow(cellRow++);
+			choice = (CourseChoice) iter.next();
+			application = choice.getApplication();
+			user = choice.getUser();
+			address = this.userBusiness.getUsersMainAddress(user);
+			if (address != null) {
+				postalCode = address.getPostalCode();
+			}
+			phone = this.userBusiness.getChildHomePhone(user);
+			Course course = choice.getCourse();
+
+			application = choice.getApplication();
+			float userPrice = 0;
+			if (choice.isNoPayment()) {
+				userPrice = 0;
+			}
+			else {
+				Map applicationMap = getCourseBusiness(iwc).getApplicationMap(application, new Boolean(false));
+				SortedSet prices = getCourseBusiness(iwc).calculatePrices(applicationMap);
+				Map discounts = getCourseBusiness(iwc).getDiscounts(prices, applicationMap);
+				CoursePrice price = course.getPrice();
+				
+				float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());			
+				
+				float carePrice = 0;
+				if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
+					carePrice = price.getPreCarePrice();
+				}
+				else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
+					carePrice = price.getPostCarePrice();
+				}
+				else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+					carePrice = price.getPreCarePrice() + price.getPostCarePrice();
+				}
+				carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+				
+				userPrice = carePrice + coursePrice;
+			}
+			
+			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
+			row.createCell(0).setCellValue(name.getName(this.locale, true));
+			row.createCell(1).setCellValue(PersonalIDFormatter.format(user.getPersonalID(), this.locale));
+			if (address != null) {
+				row.createCell(2).setCellValue(address.getStreetAddress());
+				if (postalCode != null) {
+					row.createCell(3).setCellValue(postalCode.getPostalAddress());
+				}
+			}
+			if (phone != null) {
+				row.createCell(4).setCellValue(phone.getNumber());
+			}
+			row.createCell(5).setCellValue(userPrice);
 		}
 		wb.write(mos);
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
