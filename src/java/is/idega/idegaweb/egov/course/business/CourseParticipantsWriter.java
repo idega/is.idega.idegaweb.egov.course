@@ -637,6 +637,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		cell = row.createCell(iCell++);
 		cell.setCellValue(this.iwrb.getLocalizedString("price", "Price"));
 		cell.setCellStyle(style);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("payer_personal_id", "Payer personal ID"));
+		cell.setCellStyle(style);
+		cell = row.createCell(iCell++);
+		cell.setCellValue(this.iwrb.getLocalizedString("payer_name", "Payer name"));
+		cell.setCellStyle(style);
 
 		User user;
 		Address address;
@@ -657,6 +663,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			}
 			phone = this.userBusiness.getChildHomePhone(user);
 			Course course = choice.getCourse();
+			User owner = application.getOwner();
+			if (application.getPayerPersonalID() != null) {
+				User payer = getUserBusiness(iwc).getUser(application.getPayerPersonalID());
+				if (payer != null) {
+					owner = payer;
+				}
+			}
 
 			application = choice.getApplication();
 			float userPrice = 0;
@@ -699,6 +712,11 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				row.createCell(4).setCellValue(phone.getNumber());
 			}
 			row.createCell(5).setCellValue(userPrice);
+			
+			if (owner != null) {
+				row.createCell(6).setCellValue(owner.getPersonalID());
+				row.createCell(7).setCellValue(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(this.locale, true));
+			}
 		}
 		wb.write(mos);
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
