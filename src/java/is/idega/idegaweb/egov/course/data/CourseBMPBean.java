@@ -19,11 +19,13 @@ import com.idega.data.IDOException;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.data.query.AND;
 import com.idega.data.query.Column;
 import com.idega.data.query.CountColumn;
 import com.idega.data.query.InCriteria;
 import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.MaxColumn;
+import com.idega.data.query.OR;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.idegaweb.IWMainApplication;
@@ -454,7 +456,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		}
 
 		if (fromDate != null) {
-			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.GREATEREQUAL, fromDate));
+			AND and1 = new AND(new MatchCriteria(table.getColumn(COLUMN_REGISTRATION_END), false), new MatchCriteria(table.getColumn(COLUMN_REGISTRATION_END), MatchCriteria.GREATER, fromDate));
+			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.GREATEREQUAL, fromDate), and1));
 		}
 
 		return this.idoGetNumberOfRecords(query);

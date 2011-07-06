@@ -2254,7 +2254,7 @@ public class CourseApplication extends ApplicationForm {
 			if (!iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID)) {
 				setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_personal_id_empty", "Payer personal ID is empty"));
 			}
-			else if (!SocialSecurityNumber.isValidSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
+			else if (!SocialSecurityNumber.isValidSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale()) || !SocialSecurityNumber.isIndividualSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
 				setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
 			}
 			else {
