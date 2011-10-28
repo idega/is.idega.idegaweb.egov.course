@@ -446,6 +446,10 @@ public class CourseApplicationOverview extends CourseBlock {
 			formItem.add(label);
 			formItem.add(span);
 			section.add(formItem);
+			
+			Paragraph paragraph = new Paragraph();
+			paragraph.add(getResourceBundle().getLocalizedString("application.provider_general_info", "General info..."));
+			section.add(paragraph);
 
 			clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");

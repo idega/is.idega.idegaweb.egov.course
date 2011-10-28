@@ -1069,11 +1069,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 			payerPersonalID.setOnKeyUp("readUser();");
 			payerPersonalID.setOnChange("readUser();");
 			
-			if (!iwc.isLoggedOn()) {
-				payerPersonalID.setContent(applicant.getPersonalID());
-				payerName.setContent(new Name(applicant.getFirstName(), applicant.getMiddleName(), applicant.getLastName()).getName(iwc.getCurrentLocale()));
-			}
-
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			label = new Label(this.iwrb.getLocalizedString("application.payer_personal_id", "Personal ID"), payerPersonalID);
@@ -1156,8 +1151,14 @@ public class SimpleCourseApplication extends ApplicationForm {
 			return;
 		}
 
-		String payerPersonalID = iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID) : "";
-		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : "";
+		String payerPersonalID = iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID) : null;
+		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : null;
+		if (payerPersonalID == null || payerName == null) {
+			User user = iwc.getCurrentUser();
+			payerPersonalID = user.getPersonalID();
+			payerName = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(iwc.getCurrentLocale());
+		}
+		
 		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
 		float certificateFees = Float.parseFloat(iwc.getParameter(PARAMETER_AMOUNT_OF_CERTIFICATE_FEES));
 		String referenceNumber = iwc.getParameter(PARAMETER_REFERENCE_NUMBER);
