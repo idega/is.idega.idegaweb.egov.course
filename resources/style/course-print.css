@@ -1,0 +1,43 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+div.header h1 {
+	font-size: 16px !important;
+}
+
+table.choices {
+	width: 100%;
+	font-size: 12px;
+}
+
+table.choices th {
+	text-align: left;
+	border-bottom: 1px #ccc solid;
+	padding: 3px 5px;
+}
+
+table.choices td {
+	padding: 3px 5px;
+}
+
+table.choices tfoot td {
+	border-top: 1px #ccc solid;
+	font-weight: bold;
+}
+
+table.choices tfoot td.price {
+	text-align: right;
+}
+
+table.choices .certificateFee, table.choices .amount {
+	text-align: right;
+}
+
+div#personInfo {
+	display: none;
+}
+
+h1.subHeader {
+	line-height: 2em;
+}

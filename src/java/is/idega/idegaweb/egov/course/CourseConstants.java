@@ -46,6 +46,7 @@ public class CourseConstants {
 	public static final String PROPERTY_MANUALLY_OPEN_COURSES = "egov.course.manually.open";
 	public static final String PROPERTY_ACCEPT_URL = "egov.course.accept.url";
 	public static final String PROPERTY_SHOW_CARE_OPTIONS = "egov.course.show.care.options";
+	public static final String PROPERTY_SHOW_PROVIDER_INFORMATION = "egov.course.show.provider.info";
 
 	public static final String PROPERTY_TIMEOUT_DAY_OF_WEEK = "egov.course.timeout.day";
 	public static final String PROPERTY_TIMEOUT_HOUR = "egov.course.timeout.hour";

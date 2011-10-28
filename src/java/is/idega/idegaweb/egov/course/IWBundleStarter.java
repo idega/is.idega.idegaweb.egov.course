@@ -20,6 +20,8 @@ import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
+import com.idega.idegaweb.include.GlobalIncludeManager;
+import com.idega.idegaweb.include.PageResourceConstants;
 import com.idega.util.timer.PastDateException;
 import com.idega.util.timer.TimerEntry;
 import com.idega.util.timer.TimerListener;
@@ -35,6 +37,8 @@ public void start(IWBundle starterBundle) {
 		CaseCodeManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 		AccountingBusinessManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 
+		GlobalIncludeManager.getInstance().addBundleStyleSheet(CourseConstants.IW_BUNDLE_IDENTIFIER, "/style/course-print.css", PageResourceConstants.MEDIA_PRINT);
+		
 		//fixCourseApplicationReferenceStrings();
 		addCourseNumbers();
 		startMessageDaemon(starterBundle);

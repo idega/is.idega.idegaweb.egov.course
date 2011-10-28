@@ -78,7 +78,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			if (iwc.isParameterSet(getBusiness().getSelectedCaseParameter())) {
 				application = getBusiness().getCourseApplication(iwc.getParameter(getBusiness().getSelectedCaseParameter()));
 			}
-
+			
 			if (application != null) {
 				switch (parseAction(iwc)) {
 					case ACTION_VIEW:
@@ -122,8 +122,14 @@ public class CourseApplicationOverview extends CourseBlock {
 		form.maintainParameter(getBusiness().getSelectedCaseParameter());
 		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
 
-		form.add(getHeader(getResourceBundle().getLocalizedString("application.course_application_overview", "Course application overview")));
-
+		boolean showProviderInformation = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_PROVIDER_INFORMATION, false);
+		if (showProviderInformation && useInWindow) {
+			form.add(getHeader(getResourceBundle().getLocalizedString("application.course_invoice", "Course invoice")));
+		}
+		else {
+			form.add(getHeader(getResourceBundle().getLocalizedString("application.course_application_overview", "Course application overview")));
+		}
+		
 		form.add(getPersonInfo(iwc, null, false));
 
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.application_information", "Application information"));
@@ -356,7 +362,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			row = group.createRow();
 
 			cell = row.createCell();
-			cell.setColumnSpan(6);
+			cell.setColumnSpan(5);
 			cell.setStyleClass("totalPrice");
 			cell.add(new Text(getResourceBundle().getLocalizedString("total_amount", "Total amount")));
 
@@ -411,6 +417,40 @@ public class CourseApplicationOverview extends CourseBlock {
 		clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
+		
+		if (useInWindow && showProviderInformation) {
+			heading = new Heading1(getResourceBundle().getLocalizedString("application.provider_information", "Provider information"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
+
+			section = new Layer(Layer.DIV);
+			section.setStyleClass("formSection");
+			form.add(section);
+
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label();
+			label.add(new Text(getResourceBundle().getLocalizedString("application.provider_address", "Provider address")));
+			span = new Layer(Layer.SPAN);
+			span.add(new Text(getResourceBundle().getLocalizedString("application.provider_address_info", "Address info...")));
+			formItem.add(label);
+			formItem.add(span);
+			section.add(formItem);
+
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label();
+			label.add(new Text(getResourceBundle().getLocalizedString("application.provider_bank_account", "Provider bank account")));
+			span = new Layer(Layer.SPAN);
+			span.add(new Text(getResourceBundle().getLocalizedString("application.provider_bank_account_info", "Bank account info...")));
+			formItem.add(label);
+			formItem.add(span);
+			section.add(formItem);
+
+			clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
+			section.add(clearLayer);
+		}
 
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
