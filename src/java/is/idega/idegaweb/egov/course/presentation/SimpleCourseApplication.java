@@ -1153,7 +1153,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		String payerPersonalID = iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID) ? iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID) : null;
 		String payerName = iwc.isParameterSet(PARAMETER_PAYER_NAME) ? iwc.getParameter(PARAMETER_PAYER_NAME) : null;
-		if (payerPersonalID == null || payerName == null) {
+		if ((payerPersonalID == null || payerName == null) && iwc.isLoggedOn()) {
 			User user = iwc.getCurrentUser();
 			payerPersonalID = user.getPersonalID();
 			payerName = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(iwc.getCurrentLocale());
