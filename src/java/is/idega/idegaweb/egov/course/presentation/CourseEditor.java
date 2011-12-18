@@ -626,6 +626,14 @@ public class CourseEditor extends CourseBlock {
 		course = getCourseBusiness().getCourse(courseId);
 		return course;
 	}
+	
+	protected TextInput getUserInput(IWContext iwc, Course course) {
+		TextInput user = new TextInput(PARAMETER_USER);
+		if (course.getUser() != null) {
+			user.setContent(course.getUser());
+		}
+		return user;
+	}
 
 	protected Form getEditorForm(IWContext iwc, Object coursePK) throws RemoteException {
 		boolean useFixedPrices = isUseFixedPrices();
@@ -693,7 +701,7 @@ public class CourseEditor extends CourseBlock {
 		IntegerInput inputYearTo = new IntegerInput(PARAMETER_YEAR_TO);
 		inputYearTo.setMaxlength(4);
 		IntegerInput inputMaxPer = new IntegerInput(PARAMETER_MAX_PER);
-		TextInput inputUser = new TextInput(PARAMETER_USER);
+		TextInput inputUser = getUserInput(iwc, course);
 		IWDatePicker registrationEnd = new IWDatePicker(PARAMETER_REGISTRATION_END);
 		registrationEnd.setShowTime(true);
 		registrationEnd.setUseCurrentDateIfNotSet(false);
@@ -772,9 +780,7 @@ public class CourseEditor extends CourseBlock {
 			}
 
 			inputName.setContent(course.getName());
-			if (course.getUser() != null) {
-				inputUser.setContent(course.getUser());
-			}
+			
 			inputFrom.setDate(course.getStartDate());
 			if (course.getEndDate() != null) {
 				inputTo.setDate(course.getEndDate());
