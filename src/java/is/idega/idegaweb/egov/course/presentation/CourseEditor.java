@@ -86,9 +86,10 @@ public class CourseEditor extends CourseBlock {
 
 	private SchoolType type = null;
 	
-	private boolean showTypes = true;
-	private boolean showCourseCategory = true;
-	private boolean showCourseType = true;
+	private boolean showTypes = true,
+					showCourseCategory = true,
+					showCourseType = true,
+					showPrice = true;
 	protected Boolean useFixedPrice = null;
 
 	private Course course;
@@ -706,12 +707,16 @@ public class CourseEditor extends CourseBlock {
 		registrationEnd.setShowTime(true);
 		registrationEnd.setUseCurrentDateIfNotSet(false);
 
-		TextInput price = new TextInput(PARAMETER_PRICE);
-		price.setId("price");
-		price.setDisabled(!useFixedPrices);
-
-		TextInput courseCost = new TextInput(PARAMETER_COST);
-
+		TextInput price = null;
+		TextInput courseCost = null;
+		if (isShowPrice()) {
+			price = new TextInput(PARAMETER_PRICE);
+			price.setId("price");
+			price.setDisabled(!useFixedPrices);
+	
+			courseCost = new TextInput(PARAMETER_COST);
+		}
+		 
 		TextInput preCarePrice = new TextInput("preCarePrice");
 		preCarePrice.setId("preCarePrice");
 		preCarePrice.setDisabled(true);
@@ -759,10 +764,13 @@ public class CourseEditor extends CourseBlock {
 			}
 		}
 
-		DropdownMenu priceDrop = new DropdownMenu(PARAMETER_COURSE_PRICE_PK);
-		priceDrop.setId(PARAMETER_COURSE_PRICE_PK);
-		priceDrop.setOnChange("readPrice();");
-
+		DropdownMenu priceDrop = null;
+		if (isShowPrice()) {
+			priceDrop = new DropdownMenu(PARAMETER_COURSE_PRICE_PK);
+			priceDrop.setId(PARAMETER_COURSE_PRICE_PK);
+			priceDrop.setOnChange("readPrice();");
+		}
+		
 		CheckBox openForRegistration = new CheckBox(PARAMETER_OPEN_FOR_REGISTRATION);
 
 		if (course != null) {
@@ -810,32 +818,34 @@ public class CourseEditor extends CourseBlock {
 			hasPreCare.setSelected(course.hasPreCare());
 			hasPostCare.setSelected(course.hasPostCare());
 
-			if (coursePrice != null) {
-				if (!useFixedPrices) {
-					price.setContent(Integer.toString(coursePrice.getPrice()));
-					preCarePrice.setContent(coursePrice.getPreCarePrice() > 0 ? Integer.toString(coursePrice.getPreCarePrice()) : "0");
-					postCarePrice.setContent(coursePrice.getPostCarePrice() > 0 ? Integer.toString(coursePrice.getPostCarePrice()) : "0");
-
-					try {
-						Collection prices = getCourseBusiness().getCoursePriceHome().findAll(provider.getSchoolArea(), type);
-						priceDrop.addMenuElements(prices);
-						priceDrop.setSelectedElement(course.getPrice().getPrimaryKey().toString());
-					} catch (IDORelationshipException e) {
-						e.printStackTrace();
-					} catch (FinderException e) {
-						e.printStackTrace();
+			if (isShowPrice()) {
+				if (coursePrice != null) {
+					if (!useFixedPrices) {
+						price.setContent(Integer.toString(coursePrice.getPrice()));
+						preCarePrice.setContent(coursePrice.getPreCarePrice() > 0 ? Integer.toString(coursePrice.getPreCarePrice()) : "0");
+						postCarePrice.setContent(coursePrice.getPostCarePrice() > 0 ? Integer.toString(coursePrice.getPostCarePrice()) : "0");
+	
+						try {
+							Collection prices = getCourseBusiness().getCoursePriceHome().findAll(provider.getSchoolArea(), type);
+							priceDrop.addMenuElements(prices);
+							priceDrop.setSelectedElement(course.getPrice().getPrimaryKey().toString());
+						} catch (IDORelationshipException e) {
+							e.printStackTrace();
+						} catch (FinderException e) {
+							e.printStackTrace();
+						}
+					} else if (course.getCoursePrice() >= 0) {
+						price.setContent(String.valueOf((int) course.getCoursePrice()));
+						price.setDisabled(false);
+	
+						courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 					}
 				} else if (course.getCoursePrice() >= 0) {
 					price.setContent(String.valueOf((int) course.getCoursePrice()));
 					price.setDisabled(false);
-
+	
 					courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 				}
-			} else if (course.getCoursePrice() >= 0) {
-				price.setContent(String.valueOf((int) course.getCoursePrice()));
-				price.setDisabled(false);
-
-				courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 			}
 
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
@@ -845,8 +855,10 @@ public class CourseEditor extends CourseBlock {
 				courseTypeID.addMenuElements(cargoTypes);
 			}
 
-			priceDrop.addMenuElement("-1", localize("select_a_date_and_search", "Select a date and search"));
-			priceDrop.setDisabled(true);
+			if (priceDrop != null) {
+				priceDrop.addMenuElement("-1", localize("select_a_date_and_search", "Select a date and search"));
+				priceDrop.setDisabled(true);
+			}
 			inputCourseNumber.setContent(String.valueOf(getCourseBusiness().getNextCourseNumber()));
 		}
 
@@ -857,7 +869,8 @@ public class CourseEditor extends CourseBlock {
 		if (isShowCourseType() && schoolTypePK != null) {
 			CourseCategory category = getCourseBusiness().getCourseCategory(schoolTypePK);
 			useFixedPrices = category.useFixedPricing();
-			price.setDisabled(!useFixedPrices);
+			if (price != null)
+				price.setDisabled(!useFixedPrices);
 
 			cargoTypes = getCourseBusiness().getCourseTypes(new Integer(category.getPrimaryKey().toString()), true);
 			courseTypeID.removeElements();
@@ -1057,9 +1070,11 @@ public class CourseEditor extends CourseBlock {
 
 		section.add(new CSSSpacer());
 
-		heading = new Heading1(localize("price_selection", "Price selection"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
+		if (isShowPrice()) {
+			heading = new Heading1(localize("price_selection", "Price selection"));
+			heading.setStyleClass("subHeader");
+			form.add(heading);
+		}
 
 		section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
@@ -1074,37 +1089,39 @@ public class CourseEditor extends CourseBlock {
 		}
 		section.add(helpLayer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("coursePrice");
-		layer.setStyleClass("formItem");
-		label = new Label(localize("price", "Price"), price);
-		layer.add(label);
-		layer.add(price);
-		section.add(layer);
-
-		if (!useFixedPrices) {
+		if (isShowPrice()) {
 			layer = new Layer(Layer.DIV);
-			layer.setID("coursePeCarePrice");
+			layer.setID("coursePrice");
 			layer.setStyleClass("formItem");
-			label = new Label(localize("pre_care_price", "Pre care price"), preCarePrice);
+			label = new Label(localize("price", "Price"), price);
 			layer.add(label);
-			layer.add(preCarePrice);
+			layer.add(price);
 			section.add(layer);
-
-			layer = new Layer(Layer.DIV);
-			layer.setID("coursePostCarePrice");
-			layer.setStyleClass("formItem");
-			label = new Label(localize("post_care_price", "Post care price"), postCarePrice);
-			layer.add(label);
-			layer.add(postCarePrice);
-			section.add(layer);
-		} else {
-			layer = new Layer(Layer.DIV);
-			layer.setStyleClass("formItem");
-			label = new Label(localize("course_cost", "Course cost"), courseCost);
-			layer.add(label);
-			layer.add(courseCost);
-			section.add(layer);
+	
+			if (!useFixedPrices) {
+				layer = new Layer(Layer.DIV);
+				layer.setID("coursePeCarePrice");
+				layer.setStyleClass("formItem");
+				label = new Label(localize("pre_care_price", "Pre care price"), preCarePrice);
+				layer.add(label);
+				layer.add(preCarePrice);
+				section.add(layer);
+	
+				layer = new Layer(Layer.DIV);
+				layer.setID("coursePostCarePrice");
+				layer.setStyleClass("formItem");
+				label = new Label(localize("post_care_price", "Post care price"), postCarePrice);
+				layer.add(label);
+				layer.add(postCarePrice);
+				section.add(layer);
+			} else {
+				layer = new Layer(Layer.DIV);
+				layer.setStyleClass("formItem");
+				label = new Label(localize("course_cost", "Course cost"), courseCost);
+				layer.add(label);
+				layer.add(courseCost);
+				section.add(layer);
+			}
 		}
 
 		return form;
@@ -1185,4 +1202,13 @@ public class CourseEditor extends CourseBlock {
 	public void setUseFixedPrice(Boolean useFixedPrice) {
 		this.useFixedPrice = useFixedPrice;
 	}
+
+	public boolean isShowPrice() {
+		return showPrice;
+	}
+
+	public void setShowPrice(boolean showPrice) {
+		this.showPrice = showPrice;
+	}
+	
 }
