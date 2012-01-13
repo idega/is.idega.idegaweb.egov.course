@@ -1,8 +1,10 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.block.school.data.SchoolArea;
 import java.sql.Timestamp;
+
+import com.idega.block.school.data.SchoolArea;
+import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOEntity;
 
 public interface CoursePrice extends IDOEntity {
@@ -101,4 +103,7 @@ public interface CoursePrice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CoursePriceBMPBean#setPostCarePrice
 	 */
 	public void setPostCarePrice(int price);
+	
+	public SchoolType getSchoolType();
+	public void setSchoolType(SchoolType schoolType);
 }

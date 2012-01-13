@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.ejb.FinderException;
 
 import com.idega.block.school.data.SchoolArea;
+import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOCompositePrimaryKeyException;
 import com.idega.data.IDORelationshipException;
@@ -19,6 +20,8 @@ import com.idega.data.query.Table;
 
 public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 
+	private static final long serialVersionUID = 71798577475166280L;
+	
 	public static final String ENTITY_NAME = "COU_COURSE_PRICE";
 	public static final String COLUMN_NAME = "NAME";
 	public static final String COLUMN_SCHOOL_AREA = "SCHOOL_AREA";
@@ -29,12 +32,15 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 	public static final String COLUMN_NUMBER_OF_DAYS = "NUMBER_OF_DAYS";
 	public static final String COLUMN_PRICE = "PRICE";
 	public static final String COLUMN_PRE_CARE_PRICE = "PRE_CARE_PRICE";
-	public static final String COLUMN_POST_CARE_PRICE = "POST_CARE_PRICE";
+	public static final String COLUMN_POST_CARE_PRICE = "POST_CARE_PRICE",
+								COLUMN_SCHOOL_TYPE = "SCHOOL_TYPE";
 
+	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
 
+	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		addAttribute(COLUMN_NAME, "Name", String.class, 50);
@@ -46,12 +52,14 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		addAttribute(COLUMN_PRE_CARE_PRICE, "Pre care price", Integer.class);
 		addAttribute(COLUMN_POST_CARE_PRICE, "Post care price", Integer.class);
 
+		addOneToOneRelationship(COLUMN_SCHOOL_TYPE, SchoolType.class);
 		addManyToOneRelationship(COLUMN_SCHOOL_AREA, SchoolArea.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
 	}
 
 	// Getters
+	@Override
 	public String getName() {
 		return getStringColumnValue(COLUMN_NAME);
 	}
@@ -89,6 +97,7 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 	}
 
 	// Setters
+	@Override
 	public void setName(String name) {
 		setColumn(COLUMN_NAME, name);
 	}
@@ -177,5 +186,18 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		query.addOrder(new Order(courseTypeOrder, true));
 		query.addJoin(table, courseTypeTable);
 		return this.idoFindPKsByQuery(query);
+	}
+
+	@Override
+	public SchoolType getSchoolType() {
+		Object type = getColumnValue(COLUMN_SCHOOL_TYPE);
+		if (type instanceof SchoolType)
+			return (SchoolType) type;
+		return null;
+	}
+
+	@Override
+	public void setSchoolType(SchoolType schoolType) {
+		setColumn(COLUMN_SCHOOL_TYPE, schoolType);
 	}
 }
