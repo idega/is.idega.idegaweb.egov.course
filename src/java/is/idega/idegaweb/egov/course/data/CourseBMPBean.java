@@ -57,7 +57,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_BIRTHYEAR_FROM = "BIRTHYEAR_FROM";
 	private static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
 	private static final String COLUMN_MAX_PARTICIPANTS = "MAX_PER";
-	private static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION";
+	private static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION",
+								COLUMN_COURSE_PRICES = "COURSE_PRICES";
 
 	@Override
 	public String getEntityName() {
@@ -88,6 +89,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
 		addManyToOneRelationship(COLUMN_PROVIDER, School.class);
+		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
 		
 		Map<String, ? extends RentableItem> entities = null;
 		try {
@@ -345,7 +347,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Collection<Integer> ejbFindAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
+	public Collection<Integer> ejbFindAll(Collection<?> providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -603,6 +605,39 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			if (canAdd) {
 				addRentableItem(item);
 			}
+		}
+		
+		store();
+	}
+	
+	public void addPrice(CoursePrice price) throws IDOAddRelationshipException {
+		this.idoAddTo(price);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Collection<CoursePrice> getAllPrices() {
+		try {
+			return super.idoGetRelatedEntities(CoursePrice.class);
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
+		this.idoRemoveFrom(price);
+		
+	}
+
+	@Override
+	public void removeAllPrices() throws IDORemoveRelationshipException {
+		Collection<CoursePrice> prices = getAllPrices();
+		if (ListUtil.isEmpty(prices))
+			return;
+		
+		for (CoursePrice price: prices) {
+			removePrice(price);
 		}
 		
 		store();

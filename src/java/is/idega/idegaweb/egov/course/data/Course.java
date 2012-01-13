@@ -223,4 +223,9 @@ public interface Course extends IDOEntity {
 	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException;
 	public void removeRentableItem(RentableItem item) throws IDORemoveRelationshipException;
 	public void removeAllRentableItems(Class<? extends RentableItem> itemClass) throws IDORemoveRelationshipException;
+	
+	public void addPrice(CoursePrice price) throws IDOAddRelationshipException;
+	public Collection<CoursePrice> getAllPrices();
+	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException;
+	public void removeAllPrices() throws IDORemoveRelationshipException;
 }
