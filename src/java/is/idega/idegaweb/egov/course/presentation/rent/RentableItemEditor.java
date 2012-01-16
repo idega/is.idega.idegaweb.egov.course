@@ -61,7 +61,7 @@ public abstract class RentableItemEditor extends Block {
 	private IWBundle bundle;
 	private IWResourceBundle iwrb;
 	
-	private NumberFormat currencyformatter;
+	private NumberFormat currencyFormatter;
 	private Currency currency;
 	
 	private List<String> errorMessages;
@@ -88,7 +88,7 @@ public abstract class RentableItemEditor extends Block {
 		iwrb = bundle.getResourceBundle(iwc);
 		
 		Locale locale = iwc.getCurrentLocale();
-		currencyformatter = NumberFormat.getCurrencyInstance(locale);
+		currencyFormatter = NumberFormat.getCurrencyInstance(locale);
 		try {
 			currency = Currency.getInstance(locale);
 		} catch (Exception e) {}
@@ -348,7 +348,7 @@ public abstract class RentableItemEditor extends Block {
 				cell.add(new Text(item.getName()));
 				
 				cell = row.createCell();
-				cell.add(new Text(currencyformatter.format(item.getRentPrice())));
+				cell.add(new Text(currencyFormatter.format(item.getRentPrice())));
 				
 				cell = row.createCell();
 				Integer quantity = item.getQuantity();
