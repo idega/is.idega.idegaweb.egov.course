@@ -245,7 +245,7 @@ public abstract class RentableItemEditor extends Block {
 				currency == null ? -1 : currency.getDefaultFractionDigits());
 		StringBuilder rentPriceTitle = new StringBuilder(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price"));
 		if (currency != null) {
-			rentPriceTitle.append(" (").append(currency.getSymbol()).append(")");
+			rentPriceTitle.append(" (").append(currency.getCurrencyCode()).append(")");
 		}
 		Label rentPriceLabel = new Label(rentPriceTitle.toString(), rentPriceInput);
 		formItem.add(rentPriceLabel);
@@ -255,7 +255,7 @@ public abstract class RentableItemEditor extends Block {
 		formItem.setStyleClass("formItem");
 		inputs.add(formItem);
 		Integer quantity = item == null ? null : item.getQuantity();
-		IntegerInput quantityInput = new IntegerInput(PARAMETER_QUANTITY, quantity == null ? 0 : quantity);
+		IntegerInput quantityInput = new IntegerInput(PARAMETER_QUANTITY, quantity == null ? 100 : quantity);
 		quantityInput.setAsIntegers(iwrb.getLocalizedString("rentable_item.please_use_numbers_only_quantity", "Please, use correct value for quantity"));
 		Label quantityLabel = new Label(iwrb.getLocalizedString("rentable_item.quantity", "Quantity"), quantityInput);
 		formItem.add(quantityLabel);
