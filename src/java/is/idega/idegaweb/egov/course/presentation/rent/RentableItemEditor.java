@@ -32,6 +32,7 @@ import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.BackButton;
 import com.idega.presentation.ui.DoubleInput;
 import com.idega.presentation.ui.Form;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.IntegerInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
@@ -44,8 +45,8 @@ import com.idega.util.expression.ELUtil;
 
 public abstract class RentableItemEditor extends Block {
 
-	private static final String PARAMETER_ACTION = "prmAction";
-	private static final String PARAMETER_ITEM_ID = "prmRentableItemId";
+	public static final String PARAMETER_ACTION = "prmAction";
+	public static final String PARAMETER_ITEM_ID = "prmRentableItemId";
 	private static final String PARAMETER_ACTION_SAVE = "prmSaveRentableItem";
 	private static final String PARAMETER_ACTION_DELETE = "prmDeleteRentableItem";
 	
@@ -77,6 +78,11 @@ public abstract class RentableItemEditor extends Block {
 		
 		form = new Form();
 		add(form);
+		
+		if (Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button")))
+			form.add(new HiddenInput("hide_back_button", Boolean.TRUE.toString()));
+		if (Boolean.TRUE.toString().equals(iwc.getParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY)))
+			form.add(new HiddenInput(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY, Boolean.TRUE.toString()));
 		
 		bundle = getBundle(iwc);
 		iwrb = bundle.getResourceBundle(iwc);
@@ -267,8 +273,17 @@ public abstract class RentableItemEditor extends Block {
 		
 		Layer buttons = new Layer();
 		form.add(buttons);
-		BackButton back = new BackButton(iwrb.getLocalizedString("back", "Back"));
-		buttons.add(back);
+		if (!Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button"))) {
+			BackButton back = new BackButton(iwrb.getLocalizedString("back", "Back"));
+			buttons.add(back);
+		}
+		
+		if (item != null) {
+			SubmitButton delete = new SubmitButton(iwrb.getLocalizedString("delete", "Delete"), PARAMETER_ACTION_DELETE, Boolean.TRUE.toString());
+			delete.setOnClick("if (!window.confirm('" + iwrb.getLocalizedString("are_you_sure", "Are you sure?") + "')) return false;");
+			buttons.add(delete);
+		}
+		
 		SubmitButton save = new SubmitButton(iwrb.getLocalizedString("save", "Save"), PARAMETER_ACTION_SAVE, Boolean.TRUE.toString());
 		buttons.add(save);
 	}
@@ -319,6 +334,8 @@ public abstract class RentableItemEditor extends Block {
 			
 			int index = 0;
 			TableBodyRowGroup body = table.createBodyRowGroup();
+			boolean hideBackButton = Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button"));
+			boolean checkHTML = Boolean.TRUE.toString().equals(iwc.getParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY)); 
 			for (RentableItem item: allItems) {
 				itemId = item.getPrimaryKey().toString();
 				
@@ -344,6 +361,10 @@ public abstract class RentableItemEditor extends Block {
 				Link edit = new Link(new Image(editImageUri));
 				edit.setParameter(PARAMETER_ACTION, String.valueOf(1));
 				edit.setParameter(PARAMETER_ITEM_ID, itemId);
+				if (hideBackButton)
+					edit.setParameter("hide_back_button", Boolean.TRUE.toString());
+				if (checkHTML)
+					edit.setParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY, Boolean.TRUE.toString());
 				edit.setTitle(editTitle);
 				cell = row.createCell();
 				cell.add(edit);
@@ -351,7 +372,12 @@ public abstract class RentableItemEditor extends Block {
 				Link delete = new Link(new Image(deleteImageUri));
 				delete.setParameter(PARAMETER_ACTION_DELETE, Boolean.TRUE.toString());
 				delete.setParameter(PARAMETER_ITEM_ID, itemId);
+				if (hideBackButton)
+					delete.setParameter("hide_back_button", Boolean.TRUE.toString());
+				if (checkHTML)
+					delete.setParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY, Boolean.TRUE.toString());
 				delete.setTitle(deleteTitle);
+				delete.setOnClick("if (!window.confirm('" + iwrb.getLocalizedString("are_you_sure", "Are you sure?") + "')) return false;");
 				cell = row.createCell();
 				cell.add(delete);
 			}
@@ -359,8 +385,10 @@ public abstract class RentableItemEditor extends Block {
 		
 		Layer buttons = new Layer();
 		form.add(buttons);
-		BackButton back = new BackButton(iwrb.getLocalizedString("back", "Back"));
-		buttons.add(back);
+		if (!Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button"))) {
+			BackButton back = new BackButton(iwrb.getLocalizedString("back", "Back"));
+			buttons.add(back);
+		}
 		SubmitButton create = new SubmitButton(iwrb.getLocalizedString("create_new", "Create"), PARAMETER_ACTION, String.valueOf(1));
 		buttons.add(create);
 	}
