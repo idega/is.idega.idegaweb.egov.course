@@ -11,7 +11,6 @@ public abstract class RentableItemHomeImpl extends IDOFactory implements Rentabl
 
 	private static final long serialVersionUID = -6776203614254829879L;
 
-	@SuppressWarnings("unchecked")
 	public Collection<? extends RentableItem> findAll() throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection<Integer> ids = ((RentableItemBMPBean) entity).ejbFindAll();
@@ -19,7 +18,6 @@ public abstract class RentableItemHomeImpl extends IDOFactory implements Rentabl
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Collection<? extends RentableItem> findByType(String type) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection<Integer> ids = ((RentableItemBMPBean) entity).ejbFindByType(type);

@@ -213,7 +213,7 @@ public abstract class RentableItemEditor extends Block {
 		successMessages.add(message);
 	}
 	
-	private void editOrCreateItem(IWContext iwc) throws Exception {
+	protected RentableItem editOrCreateItem(IWContext iwc) throws Exception {
 		RentableItem item = null;
 		if (iwc.isParameterSet(PARAMETER_ITEM_ID)) {
 			item = rentableItemServices.getItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID));
@@ -270,14 +270,14 @@ public abstract class RentableItemEditor extends Block {
 		Label rentedLabel = new Label(iwrb.getLocalizedString("rentable_item.rented", "Rented"), rentedInput);
 		formItem.add(rentedLabel);
 		formItem.add(rentedInput);
-		
+
 		Layer buttons = new Layer();
 		form.add(buttons);
 		if (!Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button"))) {
 			BackButton back = new BackButton(iwrb.getLocalizedString("back", "Back"));
 			buttons.add(back);
 		}
-		
+
 		if (item != null) {
 			SubmitButton delete = new SubmitButton(iwrb.getLocalizedString("delete", "Delete"), PARAMETER_ACTION_DELETE, Boolean.TRUE.toString());
 			delete.setOnClick("if (!window.confirm('" + iwrb.getLocalizedString("are_you_sure", "Are you sure?") + "')) return false;");
@@ -286,8 +286,10 @@ public abstract class RentableItemEditor extends Block {
 		
 		SubmitButton save = new SubmitButton(iwrb.getLocalizedString("save", "Save"), PARAMETER_ACTION_SAVE, Boolean.TRUE.toString());
 		buttons.add(save);
+		
+		return item;
 	}
-	
+
 	public abstract String getRentableItemType();
 	
 	public abstract Class<? extends RentableItem> getItemClass();
@@ -408,5 +410,12 @@ public abstract class RentableItemEditor extends Block {
 	public String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
-	
+
+	/**
+	 * <p>Adds {@link Layer} to {@link RentableItemEditor} form.</p>
+	 * @param layer {@link Layer} to add.
+	 */
+	public void addToForm(Layer layer) {
+		this.form.add(layer);
+	}
 }
