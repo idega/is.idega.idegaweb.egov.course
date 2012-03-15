@@ -630,7 +630,7 @@ public class CourseEditor extends CourseBlock {
 	
 	protected TextInput getUserInput(IWContext iwc, Course course) {
 		TextInput user = new TextInput(PARAMETER_USER);
-		if (course.getUser() != null) {
+		if (course != null && course.getUser() != null) {
 			user.setContent(course.getUser());
 		}
 		return user;
