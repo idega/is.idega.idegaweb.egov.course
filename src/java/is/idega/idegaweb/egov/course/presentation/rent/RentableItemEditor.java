@@ -49,7 +49,7 @@ public abstract class RentableItemEditor extends Block {
 	public static final String PARAMETER_ITEM_ID = "prmRentableItemId";
 	private static final String PARAMETER_ACTION_SAVE = "prmSaveRentableItem";
 	private static final String PARAMETER_ACTION_DELETE = "prmDeleteRentableItem";
-	
+
 	private static final String PARAMETER_NAME = "prmRentableItemName";
 	private static final String PARAMETER_RENT_PRICE = "prmRentableItemRentPrice";
 	private static final String PARAMETER_QUANTITY = "prmRentableItemQuantity";
@@ -57,57 +57,59 @@ public abstract class RentableItemEditor extends Block {
 
 	@Autowired
 	private RentableItemServices rentableItemServices;
-	
+
 	private IWBundle bundle;
 	private IWResourceBundle iwrb;
-	
+
 	private NumberFormat currencyFormatter;
 	private Currency currency;
-	
+
 	private List<String> errorMessages;
 	private List<String> successMessages;
-	
+
 	private Form form;
-	
+
+	private boolean showQuantity = Boolean.TRUE, showRented = Boolean.TRUE;
+
 	@Override
 	public void main(IWContext iwc) throws Exception {
 		ELUtil.getInstance().autowire(this);
-		
+
 		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER)
 				.getVirtualPathWithFileNameString("style/application.css"));
-		
+
 		form = new Form();
 		add(form);
-		
+
 		if (Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button")))
 			form.add(new HiddenInput("hide_back_button", Boolean.TRUE.toString()));
 		if (Boolean.TRUE.toString().equals(iwc.getParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY)))
 			form.add(new HiddenInput(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY, Boolean.TRUE.toString()));
-		
+
 		bundle = getBundle(iwc);
 		iwrb = bundle.getResourceBundle(iwc);
-		
+
 		Locale locale = iwc.getCurrentLocale();
 		currencyFormatter = NumberFormat.getCurrencyInstance(locale);
 		try {
 			currency = Currency.getInstance(locale);
 		} catch (Exception e) {}
-		
+
 		Boolean showList = null;
 		if (iwc.isParameterSet(PARAMETER_ACTION_SAVE)) {
 			showList = doSave(iwc);
 		} else if (iwc.isParameterSet(PARAMETER_ACTION_DELETE)) {
 			doDelete(iwc);
 		}
-		
+
 		printErrorMessages();
 		printSuccessMessages();
-		
+
 		if (showList != null && !showList) {
 			editOrCreateItem(iwc);
 			return;
 		}
-		
+
 		switch (getAction(iwc)) {
 		case 1:
 			editOrCreateItem(iwc);
@@ -117,29 +119,29 @@ public abstract class RentableItemEditor extends Block {
 			break;
 		}
 	}
-	
+
 	private void printErrorMessages() {
 		printMessages("errorMessages", errorMessages);
 	}
-	
+
 	private void printSuccessMessages() {
 		printMessages("successMessages", successMessages);
 	}
-	
+
 	private void printMessages(String styleClass, List<String> messages) {
 		if (ListUtil.isEmpty(messages)) {
 			return;
 		}
-		
+
 		Layer messagesContainer = new Layer();
 		form.add(messagesContainer);
 		messagesContainer.setStyleClass(styleClass);
-		
+
 		for (String message: messages) {
 			messagesContainer.add(new Heading2(message));
 		}
 	}
-	
+
 	private boolean doDelete(IWContext iwc) throws Exception {
 		if (rentableItemServices.deleteItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID))) {
 			addSuccessMessage(iwrb.getLocalizedString("rentable_item.success_deleting_item", "Item was successfully deleted"));
@@ -149,37 +151,37 @@ public abstract class RentableItemEditor extends Block {
 			return false;
 		}
 	}
-	
+
 	private boolean doSave(IWContext iwc) throws Exception {
 		String type = getRentableItemType();
-		
+
 		String name = iwc.getParameter(PARAMETER_NAME);
 		if (StringUtil.isEmpty(name)) {
 			addErrorMessage(iwrb.getLocalizedString("rentable_item.name_must_be_provided", "Please, provide item's name"));
 			return false;
 		}
-		
+
 		Double rentPrice = null;
 		try {
 			rentPrice = iwc.isParameterSet(PARAMETER_RENT_PRICE) ? Double.valueOf(iwc.getParameter(PARAMETER_RENT_PRICE)) : null;
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
-		
+
 		Integer quantity = null;
 		try {
 			quantity = iwc.isParameterSet(PARAMETER_QUANTITY) ? Integer.valueOf(iwc.getParameter(PARAMETER_QUANTITY)) : null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		Integer rented = null;
 		try {
 			rented = iwc.isParameterSet(PARAMETER_RENTED) ? Integer.valueOf(iwc.getParameter(PARAMETER_RENTED)) : null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		if (iwc.isParameterSet(PARAMETER_ITEM_ID)) {
 			if (rentableItemServices.editItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID), name, rentPrice, quantity, rented)) {
 				addSuccessMessage(iwrb.getLocalizedString("rentable_item.success_editing_item", "Item was successfully modified"));
@@ -195,38 +197,38 @@ public abstract class RentableItemEditor extends Block {
 				addSuccessMessage(iwrb.getLocalizedString("rentable_item.success_creating_item", "Item was created successfully"));
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private void addErrorMessage(String message) {
 		if (errorMessages == null) {
 			errorMessages = new ArrayList<String>();
 		}
 		errorMessages.add(message);
 	}
-	
+
 	private void addSuccessMessage(String message) {
 		if (successMessages == null) {
 			successMessages = new ArrayList<String>();
 		}
 		successMessages.add(message);
 	}
-	
+
 	protected RentableItem editOrCreateItem(IWContext iwc) throws Exception {
 		RentableItem item = null;
 		if (iwc.isParameterSet(PARAMETER_ITEM_ID)) {
 			item = rentableItemServices.getItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID));
 		}
-		
+
 		if (item != null) {
 			form.addParameter(PARAMETER_ITEM_ID, item.getPrimaryKey().toString());
 		}
-		
+
 		Layer inputs = new Layer();
 		form.add(inputs);
 		inputs.setStyleClass("formSection");
-		
+
 		Layer formItem = new Layer();
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
@@ -235,7 +237,7 @@ public abstract class RentableItemEditor extends Block {
 		Label nameLabel = new Label(iwrb.getLocalizedString("rentable_item.name", "Name"), name);
 		formItem.add(nameLabel);
 		formItem.add(name);
-		
+
 		formItem = new Layer();
 		formItem.setStyleClass("formItem");
 		inputs.add(formItem);
@@ -250,26 +252,30 @@ public abstract class RentableItemEditor extends Block {
 		Label rentPriceLabel = new Label(rentPriceTitle.toString(), rentPriceInput);
 		formItem.add(rentPriceLabel);
 		formItem.add(rentPriceInput);
-		
-		formItem = new Layer();
-		formItem.setStyleClass("formItem");
-		inputs.add(formItem);
-		Integer quantity = item == null ? null : item.getQuantity();
-		IntegerInput quantityInput = new IntegerInput(PARAMETER_QUANTITY, quantity == null ? 100 : quantity);
-		quantityInput.setAsIntegers(iwrb.getLocalizedString("rentable_item.please_use_numbers_only_quantity", "Please, use correct value for quantity"));
-		Label quantityLabel = new Label(iwrb.getLocalizedString("rentable_item.quantity", "Quantity"), quantityInput);
-		formItem.add(quantityLabel);
-		formItem.add(quantityInput);
-		
-		formItem = new Layer();
-		formItem.setStyleClass("formItem");
-		inputs.add(formItem);
-		Integer rented = item == null ? null : item.getRentedAmount();
-		IntegerInput rentedInput = new IntegerInput(PARAMETER_RENTED, rented == null ? 0 : rented);
-		rentedInput.setAsIntegers(iwrb.getLocalizedString("rentable_item.please_use_numbers_only_rented", "Please, use correct value for rented amount"));
-		Label rentedLabel = new Label(iwrb.getLocalizedString("rentable_item.rented", "Rented"), rentedInput);
-		formItem.add(rentedLabel);
-		formItem.add(rentedInput);
+
+		if (isShowQuantity()) {
+			formItem = new Layer();
+			formItem.setStyleClass("formItem");
+			inputs.add(formItem);
+			Integer quantity = item == null ? null : item.getQuantity();
+			IntegerInput quantityInput = new IntegerInput(PARAMETER_QUANTITY, quantity == null ? 100 : quantity);
+			quantityInput.setAsIntegers(iwrb.getLocalizedString("rentable_item.please_use_numbers_only_quantity", "Please, use correct value for quantity"));
+			Label quantityLabel = new Label(iwrb.getLocalizedString("rentable_item.quantity", "Quantity"), quantityInput);
+			formItem.add(quantityLabel);
+			formItem.add(quantityInput);
+		}
+
+		if (isShowRented()) {
+			formItem = new Layer();
+			formItem.setStyleClass("formItem");
+			inputs.add(formItem);
+			Integer rented = item == null ? null : item.getRentedAmount();
+			IntegerInput rentedInput = new IntegerInput(PARAMETER_RENTED, rented == null ? 0 : rented);
+			rentedInput.setAsIntegers(iwrb.getLocalizedString("rentable_item.please_use_numbers_only_rented", "Please, use correct value for rented amount"));
+			Label rentedLabel = new Label(iwrb.getLocalizedString("rentable_item.rented", "Rented"), rentedInput);
+			formItem.add(rentedLabel);
+			formItem.add(rentedInput);
+		}
 
 		Layer buttons = new Layer();
 		form.add(buttons);
@@ -283,17 +289,17 @@ public abstract class RentableItemEditor extends Block {
 			delete.setOnClick("if (!window.confirm('" + iwrb.getLocalizedString("are_you_sure", "Are you sure?") + "')) return false;");
 			buttons.add(delete);
 		}
-		
+
 		SubmitButton save = new SubmitButton(iwrb.getLocalizedString("save", "Save"), PARAMETER_ACTION_SAVE, Boolean.TRUE.toString());
 		buttons.add(save);
-		
+
 		return item;
 	}
 
 	public abstract String getRentableItemType();
-	
+
 	public abstract Class<? extends RentableItem> getItemClass();
-	
+
 	private void listItems(IWContext iwc) throws Exception {
 		Collection<? extends RentableItem> allItems = rentableItemServices.getItemsByType(getItemClass(), getRentableItemType());
 		if (ListUtil.isEmpty(allItems)) {
@@ -301,7 +307,7 @@ public abstract class RentableItemEditor extends Block {
 		} else {
 			String editTitle = iwrb.getLocalizedString("rentable_item.edit", "Edit");
 			String deleteTitle = iwrb.getLocalizedString("rentable_item.delete", "Delete");
-			
+
 			Layer tableContainer = new Layer();
 			form.add(tableContainer);
 			Table2 table = new Table2();
@@ -310,56 +316,68 @@ public abstract class RentableItemEditor extends Block {
 			TableRow headerRow = header.createRow();
 			TableHeaderCell headerCell = headerRow.createHeaderCell();
 			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.nr", "Nr.")));
-			
+
+			//	Name
 			headerCell = headerRow.createHeaderCell();
 			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.name", "Name")));
-			
+
+			//	Price
 			headerCell = headerRow.createHeaderCell();
 			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price")));
-			
-			headerCell = headerRow.createHeaderCell();
-			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.quantity", "Quantity")));
-			
-			headerCell = headerRow.createHeaderCell();
-			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.rented", "Rented")));
-			
+
+			//	Quantity
+			if (isShowQuantity()) {
+				headerCell = headerRow.createHeaderCell();
+				headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.quantity", "Quantity")));
+			}
+
+			//	Rented
+			if (isShowRented()) {
+				headerCell = headerRow.createHeaderCell();
+				headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.rented", "Rented")));
+			}
+
 			headerCell = headerRow.createHeaderCell();
 			headerCell.add(new Text(editTitle));
-			
+
 			headerCell = headerRow.createHeaderCell();
 			headerCell.add(new Text(deleteTitle));
-			
+
 			String editImageUri = bundle.getVirtualPathWithFileNameString("edit.png");
 			String deleteImageUri = bundle.getVirtualPathWithFileNameString("delete.png");
-	
+
 			String itemId = null;
-			
+
 			int index = 0;
 			TableBodyRowGroup body = table.createBodyRowGroup();
 			boolean hideBackButton = Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button"));
-			boolean checkHTML = Boolean.TRUE.toString().equals(iwc.getParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY)); 
+			boolean checkHTML = Boolean.TRUE.toString().equals(iwc.getParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY));
 			for (RentableItem item: allItems) {
 				itemId = item.getPrimaryKey().toString();
-				
+
 				TableRow row = body.createRow();
-				
+
 				TableCell2 cell = row.createCell();
 				cell.add(new Text(String.valueOf(index + 1)));
-				
+
 				cell = row.createCell();
 				cell.add(new Text(item.getName()));
-				
+
 				cell = row.createCell();
 				cell.add(new Text(currencyFormatter.format(item.getRentPrice())));
-				
-				cell = row.createCell();
-				Integer quantity = item.getQuantity();
-				cell.add(new Text(quantity == null ? CoreConstants.EMPTY : quantity.toString()));
-				
-				cell = row.createCell();
-				Integer rented = item.getRentedAmount();
-				cell.add(new Text(rented == null ? CoreConstants.EMPTY : rented.toString()));
-				
+
+				if (isShowQuantity()) {
+					cell = row.createCell();
+					Integer quantity = item.getQuantity();
+					cell.add(new Text(quantity == null ? CoreConstants.EMPTY : quantity.toString()));
+				}
+
+				if (isShowRented()) {
+					cell = row.createCell();
+					Integer rented = item.getRentedAmount();
+					cell.add(new Text(rented == null ? CoreConstants.EMPTY : rented.toString()));
+				}
+
 				Link edit = new Link(new Image(editImageUri));
 				edit.setParameter(PARAMETER_ACTION, String.valueOf(1));
 				edit.setParameter(PARAMETER_ITEM_ID, itemId);
@@ -370,7 +388,7 @@ public abstract class RentableItemEditor extends Block {
 				edit.setTitle(editTitle);
 				cell = row.createCell();
 				cell.add(edit);
-				
+
 				Link delete = new Link(new Image(deleteImageUri));
 				delete.setParameter(PARAMETER_ACTION_DELETE, Boolean.TRUE.toString());
 				delete.setParameter(PARAMETER_ITEM_ID, itemId);
@@ -384,7 +402,7 @@ public abstract class RentableItemEditor extends Block {
 				cell.add(delete);
 			}
 		}
-		
+
 		Layer buttons = new Layer();
 		form.add(buttons);
 		if (!Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button"))) {
@@ -394,7 +412,7 @@ public abstract class RentableItemEditor extends Block {
 		SubmitButton create = new SubmitButton(iwrb.getLocalizedString("create_new", "Create"), PARAMETER_ACTION, String.valueOf(1));
 		buttons.add(create);
 	}
-	
+
 	private int getAction(IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			try {
@@ -405,7 +423,23 @@ public abstract class RentableItemEditor extends Block {
 		}
 		return 0;
 	}
-	
+
+	public boolean isShowQuantity() {
+		return showQuantity;
+	}
+
+	public void setShowQuantity(boolean showQuantity) {
+		this.showQuantity = showQuantity;
+	}
+
+	public boolean isShowRented() {
+		return showRented;
+	}
+
+	public void setShowRented(boolean showRented) {
+		this.showRented = showRented;
+	}
+
 	@Override
 	public String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
