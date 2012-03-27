@@ -624,13 +624,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return null;
 	}
 
-	@Override
 	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
 		this.idoRemoveFrom(price);
 		
 	}
 
-	@Override
 	public void removeAllPrices() throws IDORemoveRelationshipException {
 		Collection<CoursePrice> prices = getAllPrices();
 		if (ListUtil.isEmpty(prices))

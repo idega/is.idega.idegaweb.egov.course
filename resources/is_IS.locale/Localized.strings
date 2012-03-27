@@ -257,6 +257,7 @@ payer.applicant=\u00DE\u00E1tttakandi
 payer.logged_in_user=Innskr\u00E1\u00F0ur notandi
 payer.other_payer=Annar grei\u00F0andi
 payer_must_be_at_least_18_years_old=Grei\u00F0andinn sem \u00FE\u00FA valdir er yngri en 18 \u00E1ra
+payer_must_have_same_address=Grei\u00F0andinn ver\u00F0ur a\u00F0 hafa sama l\u00F6gheimili og innskr\u00E1\u00F0ur.
 payer_name_empty=\u00DE\u00FA ver\u00F0ur a\u00F0 setja inn nafn grei\u00F0anda
 payer_personal_id_empty=\u00DE\u00FA ver\u00F0ur a\u00F0 setja inn kennit\u00F6lu grei\u00F0anda
 payment_type.credit_card=Beingrei\u00F0sla me\u00F0 grei\u00F0slukorti

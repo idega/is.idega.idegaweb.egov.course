@@ -188,7 +188,6 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return this.idoFindPKsByQuery(query);
 	}
 
-	@Override
 	public SchoolType getSchoolType() {
 		Object type = getColumnValue(COLUMN_SCHOOL_TYPE);
 		if (type instanceof SchoolType)
@@ -196,7 +195,6 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return null;
 	}
 
-	@Override
 	public void setSchoolType(SchoolType schoolType) {
 		setColumn(COLUMN_SCHOOL_TYPE, schoolType);
 	}

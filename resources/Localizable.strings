@@ -313,6 +313,7 @@ payer.applicant=Applicant
 payer.logged_in_user=Logged in user
 payer.other_payer=Other payer
 payer_must_be_at_least_18_years_old=The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older.
+payer_must_have_same_address=The payer you select must live in the same building as you.
 payer_name_empty=Payer name is empty
 payer_personal_id_empty=Payer personal ID is empty
 payment_type.bank_transfer=bank_transfer
