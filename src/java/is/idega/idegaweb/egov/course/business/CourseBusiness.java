@@ -4,10 +4,14 @@ package is.idega.idegaweb.egov.course.business;
 import java.util.Map;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
+
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.CourseHome;
 import is.idega.idegaweb.egov.course.data.CourseCertificateType;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
+
 import com.idega.block.process.data.Case;
 import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import com.idega.util.IWTimestamp;
@@ -549,7 +553,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getDiscounts
 	 */
-	public Map getDiscounts(SortedSet userPrices, Map applications)
+	public Map getDiscounts(SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications)
 			throws RemoteException;
 
 	/**

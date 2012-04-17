@@ -131,6 +131,10 @@ public class CourseApplicationOverview extends CourseBlock {
 		}
 		
 		form.add(getPersonInfo(iwc, null, false));
+		
+		String paymentType = application.getCardNumber() != null && application.getCardNumber().length() > 0 ?
+				getResourceBundle().getLocalizedString("application.payment_creditcard", "Payment with creditcard") :
+				getResourceBundle().getLocalizedString("application.payment_giro", "Payment with giro");
 
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.application_information", "Application information"));
 		heading.setStyleClass("subHeader");
@@ -356,6 +360,34 @@ public class CourseApplicationOverview extends CourseBlock {
 				else {
 					row.setStyleClass("odd");
 				}
+				
+				if (appHolder.getDaycare() != CourseConstants.DAY_CARE_NONE) {
+					int colSpan = row.getCells().size();
+					
+					row = group.createRow();
+					row.setStyleClass("dayCare");
+					
+					cell = row.createCell();
+					cell.add(Text.getNonBrakingSpace());
+					
+					cell = row.createCell();
+					cell.setColumnSpan(colSpan - 1);
+					cell.add(new Text(getResourceBundle().getLocalizedString("daycare", "Day care") + ": "));
+					
+					switch (appHolder.getDaycare()) {
+						case CourseConstants.DAY_CARE_PRE:
+							cell.add(new Text(getResourceBundle().getLocalizedString("day_care.pre", "Morning")));
+							break;
+	
+						case CourseConstants.DAY_CARE_POST:
+							cell.add(new Text(getResourceBundle().getLocalizedString("day_care.post", "Afternoon")));
+							break;
+							
+						case CourseConstants.DAY_CARE_PRE_AND_POST:
+							cell.add(new Text(getResourceBundle().getLocalizedString("day_care.pre_and_post", "Morning and afternoon")));
+							break;
+					}
+				}
 			}
 
 			group = table.createFooterRowGroup();
@@ -385,6 +417,16 @@ public class CourseApplicationOverview extends CourseBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label();
+		label.add(new Text(getResourceBundle().getLocalizedString("application.payment_type", "Payment type")));
+		span = new Layer(Layer.SPAN);
+		span.add(new Text(paymentType));
+		formItem.add(label);
+		formItem.add(span);
+		section.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label();
 		label.add(new Text(getResourceBundle().getLocalizedString("application.total_price", "Total price")));
 		span = new Layer(Layer.SPAN);
 		span.add(new Text(format.format(totalPrice)));
@@ -396,7 +438,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			label = new Label();
-			label.add(new Text(getResourceBundle().getLocalizedString("application.payment_type", "Payment type")));
+			label.add(new Text(getResourceBundle().getLocalizedString("discount", "Discount")));
 			span = new Layer(Layer.SPAN);
 			span.add(new Text(format.format(discount)));
 			formItem.add(label);

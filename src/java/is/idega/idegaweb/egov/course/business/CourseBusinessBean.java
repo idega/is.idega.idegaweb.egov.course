@@ -227,9 +227,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					}
 				}
 
-				Map applicationMap = getApplicationMap(application,
+				Map<User, Collection<ApplicationHolder>> applicationMap = getApplicationMap(application,
 						new Boolean(false));
-				SortedSet prices = calculatePrices(applicationMap);
+				SortedSet<PriceHolder> prices = calculatePrices(applicationMap);
 				Map discounts = getDiscounts(prices, applicationMap);
 
 				User owner = application.getOwner();
@@ -1870,9 +1870,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return getApplicationMap(application, null);
 	}
 
-	public Map getApplicationMap(CourseApplication application,
+	public Map<User, Collection<ApplicationHolder>> getApplicationMap(CourseApplication application,
 			Boolean waitingList) {
-		Map map = new HashMap();
+		Map<User, Collection<ApplicationHolder>> map = new HashMap();
 
 		try {
 			Collection choices = getCourseChoiceHome().findAllByApplication(
@@ -1931,7 +1931,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	public SortedSet calculatePrices(Map applications) {
-		SortedSet userPrices = new TreeSet();
+		SortedSet<PriceHolder> userPrices = new TreeSet();
 
 		Iterator iterator = applications.keySet().iterator();
 		while (iterator.hasNext()) {
@@ -1992,7 +1992,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return fees;
 	}
 
-	public Map getDiscounts(SortedSet userPrices, Map applications) {
+	public Map getDiscounts(SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications) {
 		Map discountPrices = new HashMap();
 		Iterator iterator = userPrices.iterator();
 		boolean first = true;
@@ -2007,8 +2007,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 			if (!first) {
 				if (hasSiblingInSet(applications.keySet(), applicant)) {
-					discountHolder.setPrice(price * 0.2f);
-					discountHolder.setDiscount(0.2f);
+					boolean getsDiscount = false;
+					Collection<ApplicationHolder> userApplications = applications.get(applicant);
+					for (ApplicationHolder applicationHolder : userApplications) {
+						if (!applicationHolder.isOnWaitingList()) {
+							getsDiscount = true;
+						}
+					}
+					
+					if (getsDiscount) {
+						discountHolder.setPrice(price * 0.2f);
+						discountHolder.setDiscount(0.2f);
+					}
 				}
 			} else {
 				first = false;
