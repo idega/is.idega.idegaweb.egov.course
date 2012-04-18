@@ -132,10 +132,6 @@ public class CourseApplicationOverview extends CourseBlock {
 		
 		form.add(getPersonInfo(iwc, null, false));
 		
-		String paymentType = application.getCardNumber() != null && application.getCardNumber().length() > 0 ?
-				getResourceBundle().getLocalizedString("application.payment_creditcard", "Payment with creditcard") :
-				getResourceBundle().getLocalizedString("application.payment_giro", "Payment with giro");
-
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.application_information", "Application information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
@@ -419,7 +415,7 @@ public class CourseApplicationOverview extends CourseBlock {
 		label = new Label();
 		label.add(new Text(getResourceBundle().getLocalizedString("application.payment_type", "Payment type")));
 		span = new Layer(Layer.SPAN);
-		span.add(new Text(paymentType));
+		span.add(new Text(getResourceBundle().getLocalizedString("payment_type." + application.getPaymentType(), application.getPaymentType())));
 		formItem.add(label);
 		formItem.add(span);
 		section.add(formItem);

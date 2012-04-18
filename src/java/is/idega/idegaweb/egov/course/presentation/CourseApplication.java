@@ -159,6 +159,7 @@ public class CourseApplication extends ApplicationForm {
 	private CourseCategory iCategory;
 	private boolean hasCare = true;
 	private boolean allowsAllChildren = true;
+	private boolean showCreditCardPayment = true;
 	private String prefix = "";
 
 	private IWBundle iwb = null;
@@ -2026,15 +2027,15 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		boolean hasPrefix = getPrefix().length() > 0;
-		boolean creditcardPayment = !hasPrefix;
+		boolean showCreditCardPayment = isShowCreditCardPayment();
+		boolean isCreditCardPayment = showCreditCardPayment;
 		if (iwc.isParameterSet(PARAMETER_CREDITCARD_PAYMENT)) {
-			creditcardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
+			isCreditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		}
 
 		RadioButton giro = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.FALSE.toString());
 		giro.setStyleClass("radiobutton");
-		giro.setSelected(!creditcardPayment);
+		giro.setSelected(!isCreditCardPayment);
 		giro.keepStatusOnAction(true);
 		giro.setToDisableOnClick(PARAMETER_CARD_TYPE, true, false);
 		giro.setToDisableOnClick(PARAMETER_CARD_NUMBER, true);
@@ -2043,7 +2044,7 @@ public class CourseApplication extends ApplicationForm {
 
 		RadioButton creditcard = new RadioButton(PARAMETER_CREDITCARD_PAYMENT, Boolean.TRUE.toString());
 		creditcard.setStyleClass("radiobutton");
-		creditcard.setSelected(creditcardPayment);
+		creditcard.setSelected(isCreditCardPayment);
 		creditcard.keepStatusOnAction(true);
 		creditcard.setToDisableOnClick(PARAMETER_CARD_TYPE, false, false);
 		creditcard.setToDisableOnClick(PARAMETER_CARD_NUMBER, false);
@@ -2055,7 +2056,7 @@ public class CourseApplication extends ApplicationForm {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.payment_information_help", "Please select which type of payment you will be using to pay for the service.")));
 		section.add(helpLayer);
 
-		if (!hasPrefix) {
+		if (showCreditCardPayment) {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("radioButtonItem");
@@ -2077,7 +2078,7 @@ public class CourseApplication extends ApplicationForm {
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
-		if (!hasPrefix) {
+		if (showCreditCardPayment) {
 			heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
 			heading.setStyleClass("subHeader");
 			form.add(heading);
@@ -2101,23 +2102,23 @@ public class CourseApplication extends ApplicationForm {
 	
 			DropdownMenu cardType = getCardTypeDropdown(iwc.getCurrentLocale(), PARAMETER_CARD_TYPE);
 			cardType.keepStatusOnAction(true);
-			cardType.setDisabled(!creditcardPayment);
+			cardType.setDisabled(!showCreditCardPayment);
 	
 			TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
 			cardOwner.keepStatusOnAction(true);
-			cardOwner.setDisabled(!creditcardPayment);
+			cardOwner.setDisabled(!showCreditCardPayment);
 	
 			TextInput cardNumber = new TextInput(PARAMETER_CARD_NUMBER, null);
 			cardNumber.setLength(16);
 			cardNumber.setMaxlength(16);
 			cardNumber.keepStatusOnAction(true);
-			cardNumber.setDisabled(!creditcardPayment);
+			cardNumber.setDisabled(!showCreditCardPayment);
 	
 			TextInput ccNumber = new TextInput(PARAMETER_CCV, null);
 			ccNumber.setLength(3);
 			ccNumber.setMaxlength(3);
 			ccNumber.keepStatusOnAction(true);
-			ccNumber.setDisabled(!creditcardPayment);
+			ccNumber.setDisabled(!showCreditCardPayment);
 	
 			DropdownMenu validMonth = new DropdownMenu(PARAMETER_VALID_MONTH);
 			validMonth.setWidth("45px");
@@ -2125,7 +2126,7 @@ public class CourseApplication extends ApplicationForm {
 			for (int a = 1; a <= 12; a++) {
 				validMonth.addMenuElement(TextSoap.addZero(a), TextSoap.addZero(a));
 			}
-			validMonth.setDisabled(!creditcardPayment);
+			validMonth.setDisabled(!showCreditCardPayment);
 	
 			IWTimestamp stamp = new IWTimestamp();
 			DropdownMenu validYear = new DropdownMenu(PARAMETER_VALID_YEAR);
@@ -2136,7 +2137,7 @@ public class CourseApplication extends ApplicationForm {
 				validYear.addMenuElement(String.valueOf(stamp.getYear()), String.valueOf(stamp.getYear()));
 				stamp.addYears(1);
 			}
-			validYear.setDisabled(!creditcardPayment);
+			validYear.setDisabled(!showCreditCardPayment);
 	
 			boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 	
@@ -2373,7 +2374,7 @@ public class CourseApplication extends ApplicationForm {
 
 		if (application != null) {
 			getCourseApplicationSession(iwc).clear(iwc);
-			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString("application.application_send_confirmation" + (hasCare ? "" : "_nocare"), "Your course application has been received and will be processed."), 8, getNumberOfPhases(iwc));
+			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString(getPrefix() + "application.application_send_confirmation" + (hasCare ? "" : "_nocare"), "Your course application has been received and will be processed."), 8, getNumberOfPhases(iwc));
 
 			Layer clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
@@ -2846,5 +2847,13 @@ public class CourseApplication extends ApplicationForm {
 
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
+	}
+
+	public boolean isShowCreditCardPayment() {
+		return showCreditCardPayment;
+	}
+
+	public void setShowCreditCardPayment(boolean showCreditCardPayment) {
+		this.showCreditCardPayment = showCreditCardPayment;
 	}
 }

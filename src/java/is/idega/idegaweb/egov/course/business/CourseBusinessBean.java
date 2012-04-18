@@ -2005,12 +2005,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			discountHolder.setUser(applicant);
 			discountHolder.setPrice(0);
 
+			boolean firstOnWaitingList = true;
 			if (!first) {
 				if (hasSiblingInSet(applications.keySet(), applicant)) {
 					boolean getsDiscount = false;
 					Collection<ApplicationHolder> userApplications = applications.get(applicant);
 					for (ApplicationHolder applicationHolder : userApplications) {
-						if (!applicationHolder.isOnWaitingList()) {
+						if (!applicationHolder.isOnWaitingList() && !firstOnWaitingList) {
 							getsDiscount = true;
 						}
 					}
@@ -2022,6 +2023,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				}
 			} else {
 				first = false;
+
+				Collection<ApplicationHolder> userApplications = applications.get(applicant);
+				for (ApplicationHolder applicationHolder : userApplications) {
+					if (!applicationHolder.isOnWaitingList()) {
+						firstOnWaitingList = false;
+					}
+				}
 			}
 
 			discountPrices.put(applicant, discountHolder);
@@ -2210,7 +2218,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		try {
 			String refundEmail = getIWApplicationContext()
 					.getApplicationSettings().getProperty(
-							CourseConstants.PROPERTY_REFUND_EMAIL,
+							CourseConstants.PROPERTY_REFUND_EMAIL + (application.getPrefix() != null ? "." + application.getPrefix() : ""),
 							"fjarmaladeild@itr.is");
 			getMessageBusiness().sendMessage(refundEmail, subject, body);
 		} catch (RemoteException re) {
@@ -3289,12 +3297,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		Locale locale = getIWApplicationContext().getApplicationSettings()
 				.getDefaultLocale();
-		String subject = getLocalizedString("course_choice.reminder_subject",
-				"A reminder for course choice", locale);
-		String body = getLocalizedString(
-				"course_choice.reminder_body",
-				"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
-				locale);
 
 		try {
 			Collection<Course> courses = getCourseHome().findAll(null, null,
@@ -3311,6 +3313,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						if (!choice.hasReceivedReminder()) {
 							CourseApplication application = choice.getApplication();
 	
+							String subject = getLocalizedString((application.getPrefix() != null ? application.getPrefix() + "." : "") + "course_choice.reminder_subject",
+									"A reminder for course choice", locale);
+							String body = getLocalizedString(
+									(application.getPrefix() != null ? application.getPrefix() + "." : "") + 
+									"course_choice.reminder_body",
+									"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
+									locale);
+
 							sendMessageToParents(application, choice, subject,
 									body, locale);
 	

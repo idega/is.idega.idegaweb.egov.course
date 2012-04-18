@@ -10,9 +10,17 @@ form.simpleCourseApplication.step_1 div.info  {
 
 .courses thead tr th, .courses tfoot tr td {
 	font-weight: bold;
-	padding-left: 4px;
+	padding: 2px 4px;
 	text-align: left;
 	font-size: 11px;
+}
+
+.courses thead tr th {
+	border-bottom: 1px #ccc solid;
+}
+
+.courses tfoot tr:first-child td {
+	border-top: 1px #ccc solid;
 }
 
 .courses tbody tr td {
@@ -99,7 +107,8 @@ ul.legend li.openForRegistration {
 }
 
 table.coursesPhaseSeven tr.subRow td {
-	font-size: 0.9167em;
+	font-size: 0.85em;
+	font-style: italic;
 }
 
 table.coursesPhaseSeven tr.subRow td.name {
