@@ -1358,7 +1358,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_7));
-		if (showAlert) {
+		if (showAlert && hasCare) {
 			next.setClickConfirmation(this.iwrb.getLocalizedString("confirm.care_option", "Are you sure you have selected the correct care options?"));
 		}
 		next.setToFormSubmit(form);
@@ -1366,7 +1366,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Link newAppl = getButtonLink(this.iwrb.getLocalizedString("another_applicant", "Another applicant"));
 		newAppl.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_1));
-		if (showAlert) {
+		if (showAlert && hasCare) {
 			newAppl.setClickConfirmation(this.iwrb.getLocalizedString("confirm.care_option", "Are you sure you have selected the correct care options?"));
 		}
 		newAppl.setToFormSubmit(form);
@@ -2275,7 +2275,7 @@ public class CourseApplication extends ApplicationForm {
 						Address address2 = paymentUser.getUsersMainAddress();
 						
 						if (!address1.getStreetName().equals(address2.getStreetName()) || !address1.getStreetNumber().equals(address2.getStreetNumber()) || address1.getPostalCodeID() != address2.getPostalCodeID()) {
-							setError(PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));								
+							setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));								
 						}
 					} catch(FinderException fe) {
 						setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
