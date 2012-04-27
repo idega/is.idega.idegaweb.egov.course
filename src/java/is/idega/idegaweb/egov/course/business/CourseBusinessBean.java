@@ -2539,10 +2539,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 						/* Hack for NeSt */
 						if (holder != null && holder.getCourse() != null && holder.getCourse().getCourseType() != null && holder.getCourse().getCourseType().getAbbreviation() != null) {
-							if (holder.getCourse().getCourseType()
-									.getAbbreviation().equals("B")) {
-								sendRegistrationMessage(application, choice, locale);
-							}
+							sendRegistrationMessage(application, choice, locale);
 						}
 					}
 				}

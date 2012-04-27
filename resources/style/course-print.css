@@ -34,10 +34,6 @@ table.choices .certificateFee, table.choices .amount {
 	text-align: right;
 }
 
-div#personInfo {
-	display: none;
-}
-
 h1.subHeader {
 	line-height: 2em;
 }
