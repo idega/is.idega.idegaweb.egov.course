@@ -1996,6 +1996,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		Map discountPrices = new HashMap();
 		Iterator iterator = userPrices.iterator();
 		boolean first = true;
+		boolean firstOnWaitingList = true;
 		while (iterator.hasNext()) {
 			PriceHolder priceHolder = (PriceHolder) iterator.next();
 			User applicant = priceHolder.getUser();
@@ -2005,7 +2006,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			discountHolder.setUser(applicant);
 			discountHolder.setPrice(0);
 
-			boolean firstOnWaitingList = true;
 			if (!first) {
 				if (hasSiblingInSet(applications.keySet(), applicant)) {
 					boolean getsDiscount = false;
