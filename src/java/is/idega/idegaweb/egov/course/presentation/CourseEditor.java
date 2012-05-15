@@ -48,6 +48,7 @@ import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.IntegerInput;
+import com.idega.presentation.ui.InterfaceObject;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
@@ -85,7 +86,7 @@ public class CourseEditor extends CourseBlock {
 	protected static final int ACTION_DELETE = 5;
 
 	private SchoolType type = null;
-	
+
 	private boolean showTypes = true,
 					showCourseCategory = true,
 					showCourseType = true,
@@ -583,10 +584,14 @@ public class CourseEditor extends CourseBlock {
 			buttonLayer.add(back);
 		}
 
-		SubmitButton newLink = new SubmitButton(localize("course.new", "New course"), PARAMETER_ACTION, String.valueOf(ACTION_NEW));
+		SubmitButton newLink = new SubmitButton(getNewCourseButtonLabel(), PARAMETER_ACTION, String.valueOf(ACTION_NEW));
 		buttonLayer.add(newLink);
 
 		return buttonLayer;
+	}
+
+	protected String getNewCourseButtonLabel() {
+		return localize("course.new", "New course");
 	}
 
 	protected boolean isUseFixedPrices() {
@@ -603,7 +608,7 @@ public class CourseEditor extends CourseBlock {
 				}
 			} catch (Exception e) {
 			}
-	
+
 			useFixedPrice = IWMainApplication.getDefaultIWApplicationContext().getApplicationSettings()
 				.getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, true);
 		}
@@ -627,8 +632,8 @@ public class CourseEditor extends CourseBlock {
 		course = getCourseBusiness().getCourse(courseId);
 		return course;
 	}
-	
-	protected TextInput getUserInput(IWContext iwc, Course course) {
+
+	protected InterfaceObject getUserInput(IWContext iwc, Course course) {
 		TextInput user = new TextInput(PARAMETER_USER);
 		if (course != null && course.getUser() != null) {
 			user.setContent(course.getUser());
@@ -702,7 +707,7 @@ public class CourseEditor extends CourseBlock {
 		IntegerInput inputYearTo = new IntegerInput(PARAMETER_YEAR_TO);
 		inputYearTo.setMaxlength(4);
 		IntegerInput inputMaxPer = new IntegerInput(PARAMETER_MAX_PER);
-		TextInput inputUser = getUserInput(iwc, course);
+		InterfaceObject inputUser = getUserInput(iwc, course);
 		IWDatePicker registrationEnd = new IWDatePicker(PARAMETER_REGISTRATION_END);
 		registrationEnd.setShowTime(true);
 		registrationEnd.setUseCurrentDateIfNotSet(false);
@@ -713,10 +718,10 @@ public class CourseEditor extends CourseBlock {
 			price = new TextInput(PARAMETER_PRICE);
 			price.setId("price");
 			price.setDisabled(!useFixedPrices);
-	
+
 			courseCost = new TextInput(PARAMETER_COST);
 		}
-		 
+
 		TextInput preCarePrice = new TextInput("preCarePrice");
 		preCarePrice.setId("preCarePrice");
 		preCarePrice.setDisabled(true);
@@ -724,10 +729,10 @@ public class CourseEditor extends CourseBlock {
 		TextInput postCarePrice = new TextInput("postCarePrice");
 		postCarePrice.setId("postCarePrice");
 		postCarePrice.setDisabled(true);
-		
+
 		BooleanInput hasPreCare = new BooleanInput(PARAMETER_HAS_PRE_CARE);
 		hasPreCare.setSelected(true);
-		
+
 		BooleanInput hasPostCare = new BooleanInput(PARAMETER_HAS_POST_CARE);
 		hasPostCare.setSelected(true);
 
@@ -770,7 +775,7 @@ public class CourseEditor extends CourseBlock {
 			priceDrop.setId(PARAMETER_COURSE_PRICE_PK);
 			priceDrop.setOnChange("readPrice();");
 		}
-		
+
 		CheckBox openForRegistration = new CheckBox(PARAMETER_OPEN_FOR_REGISTRATION);
 
 		if (course != null) {
@@ -779,7 +784,7 @@ public class CourseEditor extends CourseBlock {
 			if (this.useFixedPrice == null) {
 				useFixedPrices = category == null ? false : category.useFixedPricing();
 			}
-			
+
 			School provider = course.getProvider();
 			CoursePrice coursePrice = course.getPrice();
 
@@ -788,7 +793,7 @@ public class CourseEditor extends CourseBlock {
 			}
 
 			inputName.setContent(course.getName());
-			
+
 			inputFrom.setDate(course.getStartDate());
 			if (course.getEndDate() != null) {
 				inputTo.setDate(course.getEndDate());
@@ -809,7 +814,7 @@ public class CourseEditor extends CourseBlock {
 				courseTypeID.addMenuElements(cargoTypes);
 				courseTypeID.setSelectedElement(type.getPrimaryKey().toString());
 			}
-			
+
 			if (course.getRegistrationEnd() != null) {
 				registrationEnd.setDate(new IWTimestamp(course.getRegistrationEnd()).getDate());
 			}
@@ -824,7 +829,7 @@ public class CourseEditor extends CourseBlock {
 						price.setContent(Integer.toString(coursePrice.getPrice()));
 						preCarePrice.setContent(coursePrice.getPreCarePrice() > 0 ? Integer.toString(coursePrice.getPreCarePrice()) : "0");
 						postCarePrice.setContent(coursePrice.getPostCarePrice() > 0 ? Integer.toString(coursePrice.getPostCarePrice()) : "0");
-	
+
 						try {
 							Collection prices = getCourseBusiness().getCoursePriceHome().findAll(provider.getSchoolArea(), type);
 							priceDrop.addMenuElements(prices);
@@ -837,13 +842,13 @@ public class CourseEditor extends CourseBlock {
 					} else if (course.getCoursePrice() >= 0) {
 						price.setContent(String.valueOf((int) course.getCoursePrice()));
 						price.setDisabled(false);
-	
+
 						courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 					}
 				} else if (course.getCoursePrice() >= 0) {
 					price.setContent(String.valueOf((int) course.getCoursePrice()));
 					price.setDisabled(false);
-	
+
 					courseCost.setContent(course.getCourseCost() > -1 ? String.valueOf((int) course.getCourseCost()) : "");
 				}
 			}
@@ -1049,7 +1054,7 @@ public class CourseEditor extends CourseBlock {
 			layer.add(label);
 			section.add(layer);
 		}
-		
+
 		if (showCareOptions) {
 			layer = new Layer();
 			layer.setStyleClass("formItem");
@@ -1097,7 +1102,7 @@ public class CourseEditor extends CourseBlock {
 			layer.add(label);
 			layer.add(price);
 			section.add(layer);
-	
+
 			if (!useFixedPrices) {
 				layer = new Layer(Layer.DIV);
 				layer.setID("coursePeCarePrice");
@@ -1106,7 +1111,7 @@ public class CourseEditor extends CourseBlock {
 				layer.add(label);
 				layer.add(preCarePrice);
 				section.add(layer);
-	
+
 				layer = new Layer(Layer.DIV);
 				layer.setID("coursePostCarePrice");
 				layer.setStyleClass("formItem");
@@ -1210,5 +1215,5 @@ public class CourseEditor extends CourseBlock {
 	public void setShowPrice(boolean showPrice) {
 		this.showPrice = showPrice;
 	}
-	
+
 }
