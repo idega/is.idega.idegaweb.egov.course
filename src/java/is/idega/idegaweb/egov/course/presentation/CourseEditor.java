@@ -167,7 +167,7 @@ public class CourseEditor extends CourseBlock {
 			boolean openForRegistration = iwc.isParameterSet(PARAMETER_OPEN_FOR_REGISTRATION);
 			boolean hasPreCare = iwc.isParameterSet(PARAMETER_HAS_PRE_CARE) ? BooleanInput.getBooleanReturnValue(iwc.getParameter(PARAMETER_HAS_PRE_CARE)) : true;
 			boolean hasPostCare = iwc.isParameterSet(PARAMETER_HAS_POST_CARE) ? BooleanInput.getBooleanReturnValue(iwc.getParameter(PARAMETER_HAS_POST_CARE)) : true;
-			Object provider = getSession().getProvider() == null ? null : getSession().getProvider().getPrimaryKey();
+			Object provider = getSession() == null ? null : getSession().getProvider() == null ? null : getSession().getProvider().getPrimaryKey();
 			return getCourseBusiness().storeCourse(pk, courseNumber, name, user, courseTypePK, provider, coursePricePK, startDate, endDate, regEnd, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, hasPreCare, hasPostCare);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -208,7 +208,8 @@ public class CourseEditor extends CourseBlock {
 			Collection<School> providersList = getBusiness().getProviders();
 			if (providersList.size() == 1) {
 				School school = providersList.iterator().next();
-				getSession().setProvider(school);
+				if (getSession() != null)
+					getSession().setProvider(school);
 				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
 			} else if (providers != null) {
 				providers.setToSubmit();
@@ -228,7 +229,7 @@ public class CourseEditor extends CourseBlock {
 		schoolType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_school_type", "Select school type"));
 		schoolType.keepStatusOnAction(true);
 
-		if (getSession().getProvider() != null) {
+		if (getSession() != null && getSession().getProvider() != null) {
 			Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
@@ -318,7 +319,7 @@ public class CourseEditor extends CourseBlock {
 		formItem.add(fetch);
 		layer.add(formItem);
 
-		if (getSession().getProvider() != null) {
+		if (getSession() != null && getSession().getProvider() != null) {
 			SubmitButton newLink = new SubmitButton(localize("course.new", "New course"), PARAMETER_ACTION, String.valueOf(ACTION_NEW));
 			newLink.setStyleClass("indentedButton");
 			newLink.setStyleClass("button");
@@ -374,7 +375,7 @@ public class CourseEditor extends CourseBlock {
 
 		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
 		List<Course> courses = new ArrayList<Course>();
-		if (getSession().getProvider() != null || showAllCourses) {
+		if (getSession() != null && getSession().getProvider() != null || showAllCourses) {
 			try {
 				courses = new ArrayList<Course>(getCourseBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey() : null), iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
 			} catch (RemoteException rex) {
@@ -568,7 +569,7 @@ public class CourseEditor extends CourseBlock {
 			list.add(item);
 		}
 
-		if (getSession().getProvider() != null) {
+		if (getSession() != null && getSession().getProvider() != null) {
 			form.add(getCoursesListButtons());
 		}
 
@@ -598,7 +599,7 @@ public class CourseEditor extends CourseBlock {
 	protected boolean isUseFixedPrices() {
 		if (useFixedPrice == null) {
 			try {
-				if (getSession().getProvider() != null) {
+				if (getSession() != null && getSession().getProvider() != null) {
 					Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 					if (schoolTypes.size() == 1) {
 						SchoolType type = schoolTypes.iterator().next();
@@ -764,7 +765,8 @@ public class CourseEditor extends CourseBlock {
 		Object schoolTypePK = null;
 
 		Collection cargoTypes = null;
-		Collection schoolTypes = getSession().getProvider() == null ? null : getCourseBusiness().getSchoolTypes(getSession().getProvider());
+		Collection schoolTypes = getSession() == null ? null : getSession().getProvider() == null ?
+				null : getCourseBusiness().getSchoolTypes(getSession().getProvider());
 		if (schoolTypes != null) {
 			if (schoolTypeID != null && schoolTypes.size() > 1) {
 				schoolTypeID.addMenuElements(schoolTypes);
