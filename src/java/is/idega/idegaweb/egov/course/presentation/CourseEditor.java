@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.business.CourseSession;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
@@ -691,8 +692,14 @@ public class CourseEditor extends CourseBlock {
 		}
 
 		Course course = getCourse(coursePK);
-		if (course != null && getSession().getProvider() == null) {
-			getSession().setProvider(course.getProvider());
+		if (course != null) {
+			try {
+				CourseSession session = getSession();
+				if (session != null && session.getProvider() == null)
+					session.setProvider(course.getProvider());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		TextInput inputCourseNumber = new TextInput(PARAMETER_COURSE_NUMBER);
