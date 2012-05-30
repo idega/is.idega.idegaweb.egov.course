@@ -2189,8 +2189,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 							getIWApplicationContext().getApplicationSettings()
 									.getDefaultLocale()) };
 
-			subject = getLocalizedString("course_choice.choice_refund_subject",
-					"Choice invalidated", locale);
+			subject = MessageFormat.format(getLocalizedString("course_choice.choice_refund_subject",
+					"Choice invalidated", locale), arguments);
 			body = MessageFormat
 					.format(
 							getLocalizedString(
