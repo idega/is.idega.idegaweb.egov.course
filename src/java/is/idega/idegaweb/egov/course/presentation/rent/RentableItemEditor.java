@@ -400,6 +400,8 @@ public abstract class RentableItemEditor extends Block {
 				delete.setOnClick("if (!window.confirm('" + iwrb.getLocalizedString("are_you_sure", "Are you sure?") + "')) return false;");
 				cell = row.createCell();
 				cell.add(delete);
+
+				index++;
 			}
 		}
 
