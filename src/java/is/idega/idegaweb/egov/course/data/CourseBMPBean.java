@@ -35,7 +35,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	private static final long serialVersionUID = 8629779260677160057L;
 
-	private static final String ENTITY_NAME = "COU_COURSE";
+	public static final String ENTITY_NAME = "COU_COURSE";
 
 	private static final String COLUMN_COURSE_NUMBER = "COURSE_NUMBER";
 	private static final String COLUMN_NAME = "NAME";
@@ -64,7 +64,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeAttributes() {
@@ -90,7 +90,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
 		addManyToOneRelationship(COLUMN_PROVIDER, School.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
-		
+
 		Map<String, ? extends RentableItem> entities = null;
 		try {
 			entities = WebApplicationContextUtils.getWebApplicationContext(IWMainApplication.getDefaultIWMainApplication().getServletContext())
@@ -112,62 +112,77 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return getStringColumnValue(COLUMN_NAME);
 	}
 
+	@Override
 	public String getUser() {
 		return getStringColumnValue(COLUMN_USER);
 	}
 
+	@Override
 	public String getDescription() {
 		return getStringColumnValue(COLUMN_DESCRIPTION);
 	}
 
+	@Override
 	public School getProvider() {
 		return (School) getColumnValue(COLUMN_PROVIDER);
 	}
 
+	@Override
 	public CourseType getCourseType() {
 		return (CourseType) getColumnValue(COLUMN_COURSE_TYPE);
 	}
 
+	@Override
 	public CoursePrice getPrice() {
 		return (CoursePrice) getColumnValue(COLUMN_COURSE_PRICE);
 	}
 
+	@Override
 	public float getCoursePrice() {
 		return getFloatColumnValue(COLUMN_PRICE, -1);
 	}
 
+	@Override
 	public float getCourseCost() {
 		return getFloatColumnValue(COLUMN_COST, -1);
 	}
 
+	@Override
 	public String getAccountingKey() {
 		return getStringColumnValue(COLUMN_ACCOUNTING_KEY);
 	}
 
+	@Override
 	public Timestamp getStartDate() {
 		return getTimestampColumnValue(COLUMN_START_DATE);
 	}
 
+	@Override
 	public Timestamp getEndDate() {
 		return getTimestampColumnValue(COLUMN_END_DATE);
 	}
 
+	@Override
 	public Timestamp getRegistrationEnd() {
 		return getTimestampColumnValue(COLUMN_REGISTRATION_END);
 	}
 
+	@Override
 	public int getBirthyearFrom() {
 		return getIntColumnValue(COLUMN_BIRTHYEAR_FROM);
 	}
 
+	@Override
 	public int getBirthyearTo() {
 		return getIntColumnValue(COLUMN_BIRTHYEAR_TO);
 	}
 
+	@Override
 	public int getMax() {
 		return getIntColumnValue(COLUMN_MAX_PARTICIPANTS);
 	}
 
+	@Override
 	public int getFreePlaces(boolean countOffers) {
 		try {
 			CourseChoiceHome home = (CourseChoiceHome) getIDOHome(CourseChoice.class);
@@ -182,27 +197,33 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return getMax();
 	}
-	
+
+	@Override
 	public int getFreePlaces() {
 		return getFreePlaces(true);
 	}
-	
+
+	@Override
 	public int getCourseNumber() {
 		return getIntColumnValue(COLUMN_COURSE_NUMBER);
 	}
-	
+
+	@Override
 	public boolean isOpenForRegistration() {
 		return getBooleanColumnValue(COLUMN_OPEN_FOR_REGISTRATION, true);
 	}
-	
+
+	@Override
 	public boolean hasPreCare() {
 		return getBooleanColumnValue(COLUMN_PRE_CARE, true);
 	}
 
+	@Override
 	public boolean hasPostCare() {
 		return getBooleanColumnValue(COLUMN_POST_CARE, true);
 	}
-	
+
+	@Override
 	public boolean hasPreAndPostCare() {
 		return hasPreCare() && hasPostCare();
 	}
@@ -213,78 +234,96 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		setColumn(COLUMN_NAME, name);
 	}
 
+	@Override
 	public void setUser(String user) {
 		setColumn(COLUMN_USER, user);
 	}
 
+	@Override
 	public void setDescription(String description) {
 		setColumn(COLUMN_DESCRIPTION, description);
 	}
 
+	@Override
 	public void setProvider(School provider) {
 		setColumn(COLUMN_PROVIDER, provider);
 	}
 
+	@Override
 	public void setCourseType(CourseType courseType) {
 		setColumn(COLUMN_COURSE_TYPE, courseType);
 	}
 
+	@Override
 	public void setPrice(CoursePrice price) {
 		setColumn(COLUMN_COURSE_PRICE, price);
 	}
 
+	@Override
 	public void setCoursePrice(float price) {
 		setColumn(COLUMN_PRICE, price);
 	}
 
+	@Override
 	public void setCourseCost(float cost) {
 		setColumn(COLUMN_COST, cost);
 	}
 
+	@Override
 	public void setAccountingKey(String key) {
 		setColumn(COLUMN_ACCOUNTING_KEY, key);
 	}
 
+	@Override
 	public void setStartDate(Timestamp startDate) {
 		setColumn(COLUMN_START_DATE, startDate);
 	}
 
+	@Override
 	public void setEndDate(Timestamp endDate) {
 		setColumn(COLUMN_END_DATE, endDate);
 	}
 
+	@Override
 	public void setRegistrationEnd(Timestamp registrationEnd) {
 		setColumn(COLUMN_REGISTRATION_END, registrationEnd);
 	}
 
+	@Override
 	public void setBirthyearFrom(int from) {
 		setColumn(COLUMN_BIRTHYEAR_FROM, from);
 	}
 
+	@Override
 	public void setBirthyearTo(int to) {
 		setColumn(COLUMN_BIRTHYEAR_TO, to);
 	}
 
+	@Override
 	public void setMax(int max) {
 		setColumn(COLUMN_MAX_PARTICIPANTS, max);
 	}
-	
+
+	@Override
 	public void setCourseNumber(int number) {
 		setColumn(COLUMN_COURSE_NUMBER, number);
 	}
-	
+
+	@Override
 	public void setOpenForRegistration(boolean openForRegistration) {
 		setColumn(COLUMN_OPEN_FOR_REGISTRATION, openForRegistration);
 	}
-	
+
+	@Override
 	public void setHasPreCare(boolean hasPreCare) {
 		setColumn(COLUMN_PRE_CARE, hasPreCare);
 	}
-	
+
+	@Override
 	public void setHasPostCare(boolean hasPostCare) {
 		setColumn(COLUMN_POST_CARE, hasPostCare);
 	}
-	
+
 	// Finders
 	public Collection<Integer> ejbFindAll() throws FinderException, IDORelationshipException {
 		return ejbFindAll(null, null, null, -1, null, null);
@@ -301,7 +340,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate)
 		throws FinderException, IDORelationshipException {
-		
+
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -342,7 +381,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException,
 		IDORelationshipException {
-		
+
 		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
 	}
 
@@ -376,7 +415,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAllByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate,
 			Date toDate) throws FinderException {
-		
+
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -468,7 +507,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public int ejbHomeGetCountBySchoolAndBirthYear(Object schoolPK, int birthYear, Date fromDate) throws IDOException {
 		return ejbHomeGetCountBySchoolAndCourseTypeAndBirthYear(schoolPK, null, birthYear, fromDate);
 	}
-	
+
 	public int ejbHomeGetCountBySchoolAndCourseTypeAndBirthYear(Object schoolPK, Object courseTypePK, int birthYear, Date fromDate) throws IDOException {
 		Table table = new Table(this);
 
@@ -498,7 +537,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public int ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate)
 		throws IDOException {
-		
+
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
@@ -527,7 +566,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return this.idoGetNumberOfRecords(query);
 	}
-	
+
 	public int ejbHomeGetHighestCourseNumber() throws IDOException {
 		Table table = new Table(this);
 
@@ -536,7 +575,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return this.idoGetNumberOfRecords(query);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAllWithNoCourseNumber() throws FinderException {
 		Table table = new Table(this);
@@ -544,10 +583,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE_NUMBER)));
-		
+
 		return idoFindPKsByQuery(query);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAllByTypes(Collection<String> typesIds) throws FinderException {
 		Table table = new Table(this);
@@ -555,10 +594,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
 		query.addCriteria(new InCriteria(new Column(table, COLUMN_COURSE_TYPE), typesIds));
-		
+
 		return idoFindPKsByQuery(query);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
 		try {
@@ -569,34 +609,38 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return null;
 	}
 
+	@Override
 	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException {
 		super.idoAddTo(item);
 	}
-	
+
+	@Override
 	public void removeRentableItem(RentableItem item) throws IDORemoveRelationshipException {
 		super.idoRemoveFrom(item);
 	}
 
+	@Override
 	public void removeAllRentableItems(Class<? extends RentableItem> itemClass) throws IDORemoveRelationshipException {
 		Collection<? extends RentableItem> items = getRentableItems(itemClass);
 		if (ListUtil.isEmpty(items)) {
 			return;
 		}
-		
+
 		for (RentableItem item: items) {
 			removeRentableItem(item);
 		}
-		
+
 		store();
 	}
 
+	@Override
 	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException {
 		if (ListUtil.isEmpty(items)) {
 			return;
 		}
-		
+
 		Collection<? extends RentableItem> currentItems = getRentableItems(items.iterator().next().getClass());
-		
+
 		for (RentableItem item: items) {
 			boolean canAdd = true;
 			if (!ListUtil.isEmpty(currentItems) && currentItems.contains(item)) {
@@ -606,14 +650,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				addRentableItem(item);
 			}
 		}
-		
+
 		store();
 	}
-	
+
+	@Override
 	public void addPrice(CoursePrice price) throws IDOAddRelationshipException {
 		this.idoAddTo(price);
 	}
-	
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<CoursePrice> getAllPrices() {
 		try {
@@ -624,20 +670,22 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return null;
 	}
 
+	@Override
 	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
 		this.idoRemoveFrom(price);
-		
+
 	}
 
+	@Override
 	public void removeAllPrices() throws IDORemoveRelationshipException {
 		Collection<CoursePrice> prices = getAllPrices();
 		if (ListUtil.isEmpty(prices))
 			return;
-		
+
 		for (CoursePrice price: prices) {
 			removePrice(price);
 		}
-		
+
 		store();
 	}
 }
