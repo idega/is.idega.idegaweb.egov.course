@@ -33,6 +33,7 @@ import is.idega.idegaweb.egov.course.data.CourseTypeHome;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
+import is.idega.idegaweb.egov.message.business.MessageValue;
 
 import java.rmi.RemoteException;
 import java.sql.Date;
@@ -2560,9 +2561,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				paymentType, referenceNumber, payerName, payerPersonalID,
 				prefix, owner, performer, locale, 0);
 	}
-
+	
 	private void sendMessageToParents(CourseApplication application,
 			CourseChoice choice, String subject, String body, Locale locale) {
+		sendMessageToParents(application, choice, subject, body, locale, null);
+	}
+
+	private void sendMessageToParents(CourseApplication application,
+			CourseChoice choice, String subject, String body, Locale locale, String bcc) {
 		try {
 			if (locale == null) {
 				locale = getIWApplicationContext().getApplicationSettings()
@@ -2592,10 +2598,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			User appParent = application.getOwner();
 			if (appParent != null) {
 				if (getFamilyLogic().isChildInCustodyOf(applicant, appParent)) {
-					getMessageBusiness()
-							.createUserMessage(application, appParent, subject,
-									MessageFormat.format(body, arguments),
-									false, false);
+					MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, appParent, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
+					msgValue.setBcc(bcc);
+					
+					getMessageBusiness().createUserMessage(msgValue);
 				}
 
 				try {
@@ -2606,17 +2612,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						User parent = (User) iter.next();
 						if (!getUserBusiness().haveSameAddress(parent,
 								appParent)) {
-							getMessageBusiness().createUserMessage(application,
-									parent, subject,
-									MessageFormat.format(body, arguments),
-									false, false);
+							MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, parent, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
+							msgValue.setBcc(bcc);
+
+							getMessageBusiness().createUserMessage(msgValue);
 						}
 					}
 				} catch (NoCustodianFound ncf) {
-					getMessageBusiness()
-							.createUserMessage(application, applicant, subject,
-									MessageFormat.format(body, arguments),
-									false, false);
+					MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, applicant, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
+					msgValue.setBcc(bcc);
+
+					getMessageBusiness().createUserMessage(msgValue);
 				}
 			}
 		} catch (RemoteException re) {
@@ -3232,7 +3238,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
 				locale);
 
-		sendMessageToParents(application, choice, subject, body, locale);
+		String bcc = getIWApplicationContext()
+				.getApplicationSettings().getProperty(
+						CourseConstants.PROPERTY_BCC_EMAIL + (application.getPrefix() != null ? "." + application.getPrefix() : ""),
+						"");
+
+		sendMessageToParents(application, choice, subject, body, locale, bcc);
 
 		return true;
 	}
