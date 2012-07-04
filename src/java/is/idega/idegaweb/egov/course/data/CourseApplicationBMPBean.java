@@ -22,6 +22,8 @@ import com.idega.user.data.User;
 
 public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Case, CourseApplication {
 
+	private static final long serialVersionUID = 2014702677766369538L;
+
 	private static final String ENTITY_NAME = "cou_course_application";
 
 	private static final String COLUMN_CREDITCARD_MERCHANT_ID = "merchant_id";
@@ -77,126 +79,158 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		addAttribute(COLUMN_CARD_VALID_YEAR, "Valid year", Integer.class);
 
 		addManyToOneRelationship(COLUMN_COMPANY, Company.class);
+
+		super.initializeAttributes();
 	}
 
 	// Getters
+	@Override
 	public int getCreditCardMerchantID() {
 		return getIntColumnValue(COLUMN_CREDITCARD_MERCHANT_ID);
 	}
 
+	@Override
 	public String getCreditCardMerchantType() {
 		return getStringColumnValue(COLUMN_CREDITCARD_MERCHANT_TYPE);
 	}
 
+	@Override
 	public String getReferenceNumber() {
 		return getStringColumnValue(COLUMN_REFERENCE_NUMBER);
 	}
 
+	@Override
 	public String getPaymentType() {
 		return getStringColumnValue(COLUMN_PAYMENT_TYPE);
 	}
 
+	@Override
 	public boolean isPaid() {
 		return getBooleanColumnValue(COLUMN_PAID, false);
 	}
 
+	@Override
 	public Timestamp getPaymentTimestamp() {
 		return getTimestampColumnValue(COLUMN_PAYMENT_TIMESTAMP);
 	}
 
+	@Override
 	public String getPayerName() {
 		return getStringColumnValue(COLUMN_PAYER_NAME);
 	}
 
+	@Override
 	public String getPayerPersonalID() {
 		return getStringColumnValue(COLUMN_PAYER_PERSONAL_ID);
 	}
-	
+
+	@Override
 	public String getPrefix() {
 		return getStringColumnValue(COLUMN_PREFIX);
 	}
 
+	@Override
 	public float getAmount() {
 		return getFloatColumnValue(COLUMN_AMOUNT);
 	}
 
+	@Override
 	public Company getCompany() {
 		return (Company) getColumnValue(COLUMN_COMPANY);
 	}
 
+	@Override
 	public String getCardType() {
 		return getStringColumnValue(COLUMN_CARD_TYPE);
 	}
 
+	@Override
 	public String getCardNumber() {
 		return getStringColumnValue(COLUMN_CARD_NUMBER);
 	}
 
+	@Override
 	public int getCardValidMonth() {
 		return getIntColumnValue(COLUMN_CARD_VALID_MONTH);
 	}
 
+	@Override
 	public int getCardValidYear() {
 		return getIntColumnValue(COLUMN_CARD_VALID_YEAR);
 	}
 
 	// Setters
+	@Override
 	public void setCreditCardMerchantID(int merchantID) {
 		setColumn(COLUMN_CREDITCARD_MERCHANT_ID, merchantID);
 	}
 
+	@Override
 	public void setCreditCardMerchantType(String merchantType) {
 		setColumn(COLUMN_CREDITCARD_MERCHANT_TYPE, merchantType);
 	}
 
+	@Override
 	public void setReferenceNumber(String referenceNumber) {
 		setColumn(COLUMN_REFERENCE_NUMBER, referenceNumber);
 	}
 
+	@Override
 	public void setPaymentType(String paymentType) {
 		setColumn(COLUMN_PAYMENT_TYPE, paymentType);
 	}
 
+	@Override
 	public void setPaid(boolean paid) {
 		setColumn(COLUMN_PAID, paid);
 	}
 
+	@Override
 	public void setPaymentTimestamp(Timestamp timestamp) {
 		setColumn(COLUMN_PAYMENT_TIMESTAMP, timestamp);
 	}
 
+	@Override
 	public void setPayerName(String name) {
 		setColumn(COLUMN_PAYER_NAME, name);
 	}
 
+	@Override
 	public void setPayerPersonalID(String personalID) {
 		setColumn(COLUMN_PAYER_PERSONAL_ID, personalID);
 	}
-	
+
+	@Override
 	public void setPrefix(String prefix) {
 		setColumn(COLUMN_PREFIX, prefix);
 	}
 
+	@Override
 	public void setAmount(float amount) {
 		setColumn(COLUMN_AMOUNT, amount);
 	}
 
+	@Override
 	public void setCompany(Company company) {
 		setColumn(COLUMN_COMPANY, company);
 	}
 
+	@Override
 	public void setCardType(String type) {
 		setColumn(COLUMN_CARD_TYPE, type);
 	}
 
+	@Override
 	public void setCardNumber(String number) {
 		setColumn(COLUMN_CARD_NUMBER, number);
 	}
 
+	@Override
 	public void setCardValidMonth(int month) {
 		setColumn(COLUMN_CARD_VALID_MONTH, month);
 	}
 
+	@Override
 	public void setCardValidYear(int year) {
 		setColumn(COLUMN_CARD_VALID_YEAR, year);
 	}
@@ -230,15 +264,18 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		return super.idoFindAllIDsBySQL();
 	}
 
+	@Override
 	public void addSubscriber(User subscriber)
 			throws IDOAddRelationshipException {
 		throw new UnsupportedOperationException("This method is not implemented!");
 	}
 
+	@Override
 	public Collection<User> getSubscribers() {
 		throw new UnsupportedOperationException("This method is not implemented!");
 	}
 
+	@Override
 	public void removeSubscriber(User subscriber)
 			throws IDORemoveRelationshipException {
 		throw new UnsupportedOperationException("This method is not implemented!");
