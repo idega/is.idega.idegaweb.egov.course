@@ -12,13 +12,10 @@ import com.idega.block.process.data.AbstractCaseBMPBean;
 import com.idega.block.process.data.Case;
 import com.idega.block.process.data.CaseStatus;
 import com.idega.company.data.Company;
-import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDORelationshipException;
-import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
-import com.idega.user.data.User;
 
 public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Case, CourseApplication {
 
@@ -264,20 +261,4 @@ public class CourseApplicationBMPBean extends AbstractCaseBMPBean implements Cas
 		return super.idoFindAllIDsBySQL();
 	}
 
-	@Override
-	public void addSubscriber(User subscriber)
-			throws IDOAddRelationshipException {
-		throw new UnsupportedOperationException("This method is not implemented!");
-	}
-
-	@Override
-	public Collection<User> getSubscribers() {
-		throw new UnsupportedOperationException("This method is not implemented!");
-	}
-
-	@Override
-	public void removeSubscriber(User subscriber)
-			throws IDORemoveRelationshipException {
-		throw new UnsupportedOperationException("This method is not implemented!");
-	}
 }
