@@ -12,6 +12,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,8 +20,12 @@ import java.util.List;
 
 import javax.ejb.FinderException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolType;
+import com.idega.block.web2.business.JQuery;
+import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -55,9 +60,11 @@ import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextInput;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 public class CourseEditor extends CourseBlock {
 
@@ -96,8 +103,38 @@ public class CourseEditor extends CourseBlock {
 
 	private Course course;
 
+	@Autowired
+	private JQuery jQuery;
+	@Autowired
+	private Web2Business web2;
+
+	private JQuery getJQuery() {
+		if (jQuery == null)
+			ELUtil.getInstance().autowire(this);
+		return jQuery;
+	}
+
+	private Web2Business getWeb2Business() {
+		if (web2 == null)
+			ELUtil.getInstance().autowire(this);
+		return web2;
+	}
+
 	@Override
 	public void present(IWContext iwc) {
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, Arrays.asList(
+				getJQuery().getBundleURIToJQueryLib(),
+				getWeb2Business().getBundleUriToHumanizedMessagesScript(),
+				getBundle().getVirtualPathWithFileNameString("javascript/egov_courses.js")
+		));
+		PresentationUtil.addStyleSheetToHeader(iwc, getWeb2Business().getBundleUriToHumanizedMessagesStyleSheet());
+		String action = "EGovCoursesHelper.initializeCourseEditor({invalidEndDate: '" +
+				getResourceBundle().getLocalizedString("invalid_end_date", "Invalid end date") +
+		"'})";
+		if (!CoreUtil.isSingleComponentRenderingProcess(iwc))
+			action = "jQuery(window).load(function() {" + action + "});";
+		PresentationUtil.addJavaScriptActionToBody(iwc, action);
+
 		try {
 			switch (parseAction(iwc)) {
 			case ACTION_VIEW:
@@ -722,6 +759,7 @@ public class CourseEditor extends CourseBlock {
 		inputFrom.setShowYearChange(true);
 		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
 		inputTo.setShowYearChange(true);
+		inputTo.setOnSelectAction("EGovCoursesHelper.validateCourseEndDate('#" + inputTo.getId() + "');");
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
 		IntegerInput inputYearFrom = new IntegerInput(PARAMETER_YEAR_FROM);
 		inputYearFrom.setMaxlength(4);
@@ -1163,12 +1201,12 @@ public class CourseEditor extends CourseBlock {
 		section.add(new CSSSpacer());
 
 		Course course = getCourse(coursePK);
-		form.add(getEditorButtons(course));
+		form.add(getEditorButtons(course, form.getId()));
 
 		add(form);
 	}
 
-	protected Layer getEditorButtons(Course course) {
+	protected Layer getEditorButtons(Course course, String formId) {
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
 
@@ -1176,8 +1214,8 @@ public class CourseEditor extends CourseBlock {
 		cancel.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_VIEW));
 		buttonLayer.add(cancel);
 
-		SubmitButton save = new SubmitButton(localize("save", "Save"));
-		save.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
+		GenericButton save = new GenericButton(localize("save", "Save"));
+		save.setOnClick("EGovCoursesHelper.saveCourse('" + formId + "', '" + PARAMETER_ACTION + "', '" + String.valueOf(ACTION_SAVE) + "')");
 		if (!isUseFixedPrices()) {
 			save.setId("SAVE_BTN_ID");
 		}
