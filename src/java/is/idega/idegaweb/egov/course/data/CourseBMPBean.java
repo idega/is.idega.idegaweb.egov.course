@@ -598,6 +598,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return idoFindPKsByQuery(query);
 	}
 
+	public Collection<?> ejbFindAllByUser(String user) throws FinderException {
+		Table table = new Table(this);
+
+		SelectQuery query = new SelectQuery(table);
+		query.addColumn(new Column(table, getIDColumnName()));
+		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_USER), MatchCriteria.EQUALS, user));
+
+		return idoFindPKsByQuery(query);
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
