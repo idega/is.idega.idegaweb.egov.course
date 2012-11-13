@@ -1017,29 +1017,6 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		section.add(table);
 
-		heading = new Heading1(this.iwrb.getLocalizedString("application.reference_number_information", "Reference number information"));
-		heading.setStyleClass("subHeader");
-		form.add(heading);
-
-		section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("application.reference_number_help", "Please enter information about reference number.")));
-		section.add(helpLayer);
-
-		TextInput referenceNumber = new TextInput(PARAMETER_REFERENCE_NUMBER, null);
-		referenceNumber.keepStatusOnAction(true);
-
-		Layer formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		Label label = new Label(this.iwrb.getLocalizedString("application.reference_number", "Reference number"), referenceNumber);
-		formItem.add(label);
-		formItem.add(referenceNumber);
-		section.add(formItem);
-
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
@@ -1069,9 +1046,9 @@ public class SimpleCourseApplication extends ApplicationForm {
 			payerPersonalID.setOnKeyUp("readUser();");
 			payerPersonalID.setOnChange("readUser();");
 			
-			formItem = new Layer(Layer.DIV);
+			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
-			label = new Label(this.iwrb.getLocalizedString("application.payer_personal_id", "Personal ID"), payerPersonalID);
+			Label label = new Label(this.iwrb.getLocalizedString("application.payer_personal_id", "Personal ID"), payerPersonalID);
 			formItem.add(label);
 			formItem.add(payerPersonalID);
 			section.add(formItem);

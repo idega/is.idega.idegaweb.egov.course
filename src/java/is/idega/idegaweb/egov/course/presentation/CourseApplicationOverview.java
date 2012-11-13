@@ -123,14 +123,17 @@ public class CourseApplicationOverview extends CourseBlock {
 		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
 
 		boolean showProviderInformation = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_PROVIDER_INFORMATION, false);
+		boolean showPersonInfo = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_PERSON_INFORMATION, true);
 		if (showProviderInformation && useInWindow) {
 			form.add(getHeader(getResourceBundle().getLocalizedString("application.course_invoice", "Course invoice")));
 		}
-		else {
+		else if (showPersonInfo) {
 			form.add(getHeader(getResourceBundle().getLocalizedString("application.course_application_overview", "Course application overview")));
 		}
 		
-		form.add(getPersonInfo(iwc, null, false));
+		if (showPersonInfo) {
+			form.add(getPersonInfo(iwc, null, false));
+		}
 		
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.application_information", "Application information"));
 		heading.setStyleClass("subHeader");
@@ -357,7 +360,7 @@ public class CourseApplicationOverview extends CourseBlock {
 					row.setStyleClass("odd");
 				}
 				
-				if (appHolder.getDaycare() != CourseConstants.DAY_CARE_NONE) {
+				if (showPersonInfo && appHolder.getDaycare() != CourseConstants.DAY_CARE_NONE) {
 					int colSpan = row.getCells().size();
 					
 					row = group.createRow();
