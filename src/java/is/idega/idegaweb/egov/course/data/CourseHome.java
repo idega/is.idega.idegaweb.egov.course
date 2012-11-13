@@ -1,15 +1,17 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.data.IDOException;
-import com.idega.block.school.data.School;
-import com.idega.data.IDORelationshipException;
-import java.util.Collection;
-import javax.ejb.CreateException;
-import com.idega.data.IDOHome;
-import com.idega.block.school.data.SchoolType;
-import javax.ejb.FinderException;
 import java.sql.Date;
+import java.util.Collection;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+
+import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolType;
+import com.idega.data.IDOException;
+import com.idega.data.IDOHome;
+import com.idega.data.IDORelationshipException;
 
 public interface CourseHome extends IDOHome {
 
@@ -46,4 +48,6 @@ public interface CourseHome extends IDOHome {
 	public Collection findAllWithNoCourseNumber() throws FinderException;
 
 	public Collection findAllByTypes(Collection<String> typesIds) throws FinderException;
+
+	public Collection<Course> findAllByUser(String user) throws FinderException;
 }
