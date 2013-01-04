@@ -118,6 +118,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
+	@Override
 	public void reserveCourse(Course course) {
 		Map courseMap = (Map) getIWApplicationContext()
 				.getApplicationAttribute(
@@ -138,6 +139,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
 	}
 
+	@Override
 	public void removeReservation(Course course) {
 		Map courseMap = (Map) getIWApplicationContext()
 				.getApplicationAttribute(
@@ -162,6 +164,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
 	}
 
+	@Override
 	public int getNumberOfReservations(Course course) {
 		Map courseMap = (Map) getIWApplicationContext()
 				.getApplicationAttribute(
@@ -178,6 +181,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return 0;
 	}
 
+	@Override
 	public void printReservations() {
 		Map courseMap = (Map) getIWApplicationContext()
 				.getApplicationAttribute(
@@ -196,6 +200,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public AccountingEntry[] getAccountingEntries(String productCode,
 			String providerCode, Date fromDate, Date toDate) {
 		Collection entries = new ArrayList();
@@ -437,7 +442,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		return (AccountingEntry[]) entries.toArray(new AccountingEntry[0]);
 	}
-	
+
 	private AccountingEntry getClonedEntry(AccountingEntry entry) {
 		try {
 			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
@@ -457,7 +462,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			clone.setStartDate(entry.getStartDate());
 			clone.setUnitPrice(entry.getUnitPrice());
 			clone.setUnits(entry.getUnits());
-			
+
 			AccountingEntry extraEntry = (AccountingEntry) entry.getExtraInformation();
 			AccountingEntry extraClone = (AccountingEntry) implementor.newInstance();
 			extraClone.setStartDate(extraEntry.getStartDate());
@@ -481,9 +486,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public String getLocalizedCaseDescription(Case theCase, Locale locale) {
 		/*
 		 * CourseApplication choice = getCourseApplicationInstance(theCase);
-		 * 
+		 *
 		 * Object[] arguments = { "" };
-		 * 
+		 *
 		 * String desc = super.getLocalizedCaseDescription(theCase, locale);
 		 * return MessageFormat.format(desc, arguments);
 		 */
@@ -499,6 +504,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public String finishPayment(String properties)
 			throws CreditCardAuthorizationException {
 		try {
@@ -514,6 +520,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public String authorizePayment(String nameOnCard, String cardNumber,
 			String monthExpires, String yearExpires, String ccVerifyNumber,
 			double amount, String currency, String referenceNumber)
@@ -533,6 +540,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public String refundPayment(CourseApplication application,
 			String cardNumber, String monthExpires, String yearExpires,
 			String ccVerifyNumber, double amount)
@@ -594,6 +602,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public Collection getCreditCardImages() {
 		try {
 			return getCreditCardBusiness().getCreditCardTypeImages(
@@ -614,6 +623,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public boolean deleteCourseType(Object pk) {
 		CourseType type = null;
 		try {
@@ -631,6 +641,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
+	@Override
 	public void storeCourseType(Object pk, String name, String description,
 			String localizationKey, Object schoolTypePK, String accountingKey, boolean disabled)
 			throws FinderException, CreateException {
@@ -665,6 +676,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		type.store();
 	}
 
+	@Override
 	public boolean deleteCourse(Object pk) throws RemoteException {
 		Course course = null;
 		try {
@@ -681,6 +693,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
+	@Override
 	public Course createCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
@@ -691,6 +704,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				birthYearFrom, birthYearTo, maxPer, price, -1, false);
 	}
 
+	@Override
 	public Course createCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
@@ -699,7 +713,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			throws FinderException, CreateException {
 		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, null);
 	}
-	
+
 	public Course createCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
@@ -708,7 +722,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			throws FinderException, CreateException {
 		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, registrationEnd, true, true);
 	}
-	
+
+	@Override
 	public Course createCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
@@ -758,7 +773,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		if (endDate != null) {
 			course.setEndDate(endDate.getTimestamp());
 		}
-		
+
 		if (registrationEnd != null) {
 			course.setRegistrationEnd(registrationEnd.getTimestamp());
 		}
@@ -794,6 +809,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return course;
 	}
 
+	@Override
 	public void storeCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
@@ -804,6 +820,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				birthYearFrom, birthYearTo, maxPer, price);
 	}
 
+	@Override
 	public Course storeCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
@@ -816,6 +833,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				openForRegistration);
 	}
 
+	@Override
 	public Course storeCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, IWTimestamp registrationEnd,
@@ -827,7 +845,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				birthYearFrom, birthYearTo, maxPer, price, cost,
 				openForRegistration, registrationEnd);
 	}
-	
+
+	@Override
 	public Course storeCourse(Object pk, int courseNumber, String name,
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate, IWTimestamp registrationEnd,
@@ -840,6 +859,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				openForRegistration, registrationEnd, hasPreCare, hasPostCare);
 	}
 
+	@Override
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
 		CoursePrice price = null;
 		try {
@@ -856,6 +876,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
+	@Override
 	public boolean deleteCourseDiscount(Object pk) throws RemoteException {
 		CourseDiscount discount = null;
 		try {
@@ -872,6 +893,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
+	@Override
 	public void storeCoursePrice(Object pk, String name, int numberOfDays,
 			Timestamp validFrom, Timestamp validTo, int iPrice,
 			int preCarePrice, int postCarePrice, Object schoolAreaPK,
@@ -928,6 +950,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		price.store();
 	}
 
+	@Override
 	public void storeCourseDiscount(Object pk, String name, String type,
 			Timestamp validFrom, Timestamp validTo, float discount)
 			throws CreateException, NumberFormatException, FinderException {
@@ -964,6 +987,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		courseDiscount.store();
 	}
 
+	@Override
 	public Collection getCourseTypes(Integer schoolTypePK, boolean valid) {
 		try {
 			Collection coll = getCourseTypeHome().findAllBySchoolType(
@@ -977,6 +1001,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public Map getCourseTypesDWR(int schoolTypePK, String country) {
 		Collection coll = getCourseTypes(new Integer(schoolTypePK), true);
 		Map map = new LinkedHashMap();
@@ -995,6 +1020,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
+	@Override
 	public Map getProvidersDWR(int userPK, int typePK, String country) {
 		Collection coll = getProviders();
 		Map map = new LinkedHashMap();
@@ -1007,7 +1033,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		if (typePK > 0) {
 			type = getCourseType(typePK);
 		}
-		
+
 		User user = null;
 		try {
 			user = getUser(new Integer(userPK));
@@ -1018,7 +1044,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		catch (FinderException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (coll != null) {
 			Iterator iter = coll.iterator();
 			while (iter.hasNext()) {
@@ -1030,18 +1056,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
+	@Override
 	public Map getCourseMapDWR(int providerPK, int schoolTypePK,
 			int courseTypePK, String country) {
 		return getCoursesMapDWR(providerPK, schoolTypePK, courseTypePK, -1,
 				country);
 	}
 
+	@Override
 	public Map getCoursesMapDWR(int providerPK, int schoolTypePK,
 			int courseTypePK, int year, String country) {
 		boolean showIDInName = getIWApplicationContext()
 				.getApplicationSettings().getBoolean(
 						CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-		
+
 		Date fromDate = null;
 		Date toDate = null;
 
@@ -1081,6 +1109,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
+	@Override
 	public Map getCoursePricesDWR(String date, int providerPK,
 			int courseTypePK, String country) {
 		Map map = new LinkedHashMap();
@@ -1121,6 +1150,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
+	@Override
 	public CoursePriceDWR getPriceDWR(int pricePK) {
 		try {
 			CoursePrice price = getCoursePriceHome().findByPrimaryKey(
@@ -1143,12 +1173,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge,
 			String country) {
 		return getUserDWRByRelation(personalID, childPK, minimumAge, country,
 				null);
 	}
 
+	@Override
 	public UserDWR getUserDWRByRelation(String personalID, int childPK,
 			int minimumAge, String country, String selectedRelation) {
 		Locale locale = new Locale(country, country.toUpperCase());
@@ -1253,6 +1285,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getCoursesDWR(int providerPK, int schoolTypePK,
 			int courseTypePK, int applicantPK, String country, boolean isAdmin) {
 		try {
@@ -1324,12 +1357,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			throw new IBORuntimeException(re);
 		}
 	}
-	
+
 	private IWTimestamp getRegistrationTimeoutForCourse(Course course) {
 		if (course.getRegistrationEnd() != null) {
 			return new IWTimestamp(course.getRegistrationEnd());
 		}
-		
+
 		IWTimestamp start = new IWTimestamp(course.getStartDate());
 		if (getTimeoutDay() > 0) {
 			int day = getTimeoutDay();
@@ -1341,16 +1374,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			start.setHour(getTimeoutHour());
 			start.setMinute(0);
 		}
-		
+
 		return start;
 	}
 
+	@Override
 	public boolean isFull(Course course) {
 		int freePlaces = course.getFreePlaces()
 				- getNumberOfReservations(course);
 		return freePlaces <= 0;
 	}
 
+	@Override
 	public boolean isRegistered(User user, Course course) {
 		try {
 			return getCourseChoiceHome().getCountByUserAndCourse(user, course) > 0;
@@ -1360,6 +1395,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public boolean hasNotStarted(Course course, boolean isAdmin) {
 		IWTimestamp stamp = new IWTimestamp();
 		IWTimestamp start = new IWTimestamp(course.getStartDate());
@@ -1367,16 +1403,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return !isAdmin ? start.isLaterThan(stamp) : true;
 	}
 
+	@Override
 	public boolean isOfAge(User user, Course course) {
 		IWTimestamp dateOfBirth = new IWTimestamp(user.getDateOfBirth());
 		return dateOfBirth.getYear() <= course.getBirthyearTo()
 				&& dateOfBirth.getYear() >= course.getBirthyearFrom();
 	}
 
+	@Override
 	public CourseDWR getCourseDWR(Locale locale, Course course) {
 		return getCourseDWR(locale, course, true);
 	}
 
+	@Override
 	public CourseDWR getCourseDWR(Locale locale, Course course, boolean showYear) {
 		CourseDWR cDWR = new CourseDWR();
 		cDWR.setName(course.getName());
@@ -1419,17 +1458,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return cDWR;
 	}
 
+	@Override
 	public Collection getCourses(int birthYear, Object schoolTypePK,
 			Object courseTypePK, Date fromDate, Date toDate) {
 		return getCourses(birthYear, null, schoolTypePK, courseTypePK,
 				fromDate, toDate);
 	}
 
+	@Override
 	public Collection getCourses(int birthYear, Object schoolTypePK,
 			Object courseTypePK) {
 		return getCourses(birthYear, null, schoolTypePK, courseTypePK);
 	}
 
+	@Override
 	public Collection getCourses(int birthYear, Object providerPK,
 			Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
 		Collection courses = new ArrayList();
@@ -1444,6 +1486,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return courses;
 	}
 
+	@Override
 	public Collection getCourses(Collection providers, Object schoolTypePK,
 			Object courseTypePK, Date fromDate, Date toDate) {
 		Collection courses = new ArrayList();
@@ -1458,6 +1501,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return courses;
 	}
 
+	@Override
 	public Collection getCourses(int birthYear, Object providerPK,
 			Object schoolTypePK, Object courseTypePK) {
 		Collection courses = new ArrayList();
@@ -1472,6 +1516,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return courses;
 	}
 
+	@Override
 	public Collection getCourses(Collection providers, Object schoolTypePK,
 			Object courseTypePK) {
 		Collection courses = new ArrayList();
@@ -1486,6 +1531,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return courses;
 	}
 
+	@Override
 	public CourseChoice getCourseChoice(Object courseChoicePK) {
 		try {
 			return getCourseChoiceHome().findByPrimaryKey(
@@ -1496,6 +1542,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getCourseChoices(Object coursePK, boolean waitingList) {
 		Course course = getCourse(coursePK);
 		if (course != null) {
@@ -1505,6 +1552,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public Collection getCourseChoices(Course course, boolean waitingList) {
 		try {
 			return getCourseChoiceHome().findAllByCourse(course, waitingList);
@@ -1514,6 +1562,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getCourseChoices(CourseApplication application) {
 		return getCourseChoices(application, null);
 	}
@@ -1529,6 +1578,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getCourseChoices(User user) {
 		try {
 			return getCourseChoiceHome().findAllByUser(user);
@@ -1538,6 +1588,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseDiscount getCourseDiscount(Object pk) {
 		if (pk != null) {
 			try {
@@ -1549,6 +1600,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public CoursePrice getCoursePrice(Object pk) {
 		if (pk != null) {
 			try {
@@ -1560,6 +1612,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public Collection getCoursePrices(Date fromDate, Date toDate) {
 		try {
 			return getCoursePriceHome().findAll(fromDate, toDate);
@@ -1571,6 +1624,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public Collection getCourseDiscounts(Date fromDate, Date toDate) {
 		try {
 			return getCourseDiscountHome().findAll(fromDate, toDate);
@@ -1580,6 +1634,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public Course getCourse(Object pk) {
 		if (pk != null) {
 			try {
@@ -1591,6 +1646,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public int getNextCourseNumber() {
 		try {
 			return getCourseHome().getHighestCourseNumber() + 1;
@@ -1600,6 +1656,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseType getCourseType(Object pk) {
 		if (pk != null) {
 			try {
@@ -1613,6 +1670,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public CourseCategory getCourseCategory(Object pk) {
 		if (pk != null) {
 			try {
@@ -1626,6 +1684,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public CourseApplication getCourseApplication(Object courseApplicationPK) {
 		try {
 			return getCourseApplicationHome().findByPrimaryKey(
@@ -1636,6 +1695,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getAllCourses() {
 		try {
 			return getCourseHome().findAll();
@@ -1647,6 +1707,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public Collection getAllCourses(School provider) {
 		try {
 			return getCourseHome().findAllByProvider(provider);
@@ -1658,6 +1719,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public Collection getAllCourseTypes(boolean valid) {
 		try {
 			return getCourseTypeHome().findAll(valid);
@@ -1667,8 +1729,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public Collection getAllCourseTypes(Integer schoolTypePK, boolean valid) {
-		try {			
+		try {
 			return getCourseTypeHome().findAllBySchoolType(schoolTypePK, valid);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1676,7 +1739,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
-	
+
+	@Override
 	public Collection getAllSchoolTypes() {
 		try {
 			Collection schoolTypes = getSchoolBusiness()
@@ -1698,6 +1762,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getAllSchoolTypes(String category) {
 		try {
 			Collection schoolTypes = getSchoolBusiness()
@@ -1717,7 +1782,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	
+
+	@Override
 	public Collection getSchoolAreas() {
 		try {
 			return getSchoolBusiness().getSchoolAreaHome().findAllSchoolAreas(
@@ -1730,6 +1796,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public Collection getSchoolTypes(School provider) {
 		try {
 			Collection types = new ArrayList();
@@ -1764,6 +1831,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getAllCoursePrices() {
 		try {
 			return getCoursePriceHome().findAll();
@@ -1775,6 +1843,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
+	@Override
 	public boolean isRegisteredAtProviders(User user, Collection providers) {
 		try {
 			return getCourseChoiceHome().getCountByUserAndProviders(user,
@@ -1785,6 +1854,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public int getNumberOfFreePlaces(Course course) {
 		try {
 			return course.getMax()
@@ -1796,6 +1866,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return course.getMax();
 	}
 
+	@Override
 	public Collection getProviders() {
 		try {
 			return getSchoolBusiness()
@@ -1805,6 +1876,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getProviders(String category) {
 		try {
 			return getSchoolBusiness()
@@ -1813,7 +1885,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			throw new IBORuntimeException(re);
 		}
 	}
-	
+
+	@Override
 	public Collection getProviders(SchoolArea area, SchoolType type) {
 		try {
 			return getSchoolBusiness().findAllSchoolsByAreaAndType(
@@ -1824,6 +1897,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getProvidersForUser(User user) {
 		try {
 			SchoolUser schoolUser = getSchoolUserBusiness().getSchoolUserHome()
@@ -1840,6 +1914,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Map getApplicationMap(User user, Collection schools) {
 		Map map = new LinkedHashMap();
 		try {
@@ -1867,10 +1942,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
+	@Override
 	public Map getApplicationMap(CourseApplication application) {
 		return getApplicationMap(application, null);
 	}
 
+	@Override
 	public Map<User, Collection<ApplicationHolder>> getApplicationMap(CourseApplication application,
 			Boolean waitingList) {
 		Map<User, Collection<ApplicationHolder>> map = new HashMap();
@@ -1894,7 +1971,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 				Collection holders = null;
 				if (map.containsKey(user)) {
-					holders = (Collection) map.get(user);
+					holders = map.get(user);
 				} else {
 					holders = new ArrayList();
 				}
@@ -1909,6 +1986,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
+	@Override
 	public float calculateRefund(CourseChoice choice) {
 		User user = choice.getUser();
 		Course course = choice.getCourse();
@@ -1931,6 +2009,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return price;
 	}
 
+	@Override
 	public SortedSet calculatePrices(Map applications) {
 		SortedSet<PriceHolder> userPrices = new TreeSet();
 
@@ -1960,6 +2039,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return userPrices;
 	}
 
+	@Override
 	public float getCalculatedCourseCertificateFees(Map applications) {
 		if (applications == null || applications.isEmpty()) {
 			return 0;
@@ -1993,6 +2073,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return fees;
 	}
 
+	@Override
 	public Map getDiscounts(SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications) {
 		Map discountPrices = new HashMap();
 		Iterator iterator = userPrices.iterator();
@@ -2016,7 +2097,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 							getsDiscount = true;
 						}
 					}
-					
+
 					if (getsDiscount) {
 						discountHolder.setPrice(price * 0.2f);
 						discountHolder.setDiscount(0.2f);
@@ -2057,6 +2138,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
+	@Override
 	public boolean hasAvailableCourses(User user, SchoolType type) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
@@ -2070,6 +2152,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public boolean hasAvailableCourses(User user, CourseType type) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
@@ -2083,6 +2166,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public boolean hasAvailableCourses(User user, School school) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
@@ -2096,6 +2180,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public boolean hasAvailableCourses(User user, School school, CourseType type) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
@@ -2117,6 +2202,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return interval;
 	}
 
+	@Override
 	public int getTimeoutDay() {
 		int day = Integer.parseInt(getIWApplicationContext()
 				.getApplicationSettings().getProperty(
@@ -2124,6 +2210,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return day;
 	}
 
+	@Override
 	public int getTimeoutHour() {
 		int hour = Integer.parseInt(getIWApplicationContext()
 				.getApplicationSettings().getProperty(
@@ -2131,6 +2218,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return hour;
 	}
 
+	@Override
 	public boolean canInvalidate(CourseChoice choice) {
 		IWTimestamp startDate = new IWTimestamp(choice.getCourse()
 				.getStartDate());
@@ -2143,6 +2231,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
+	@Override
 	public boolean canInvalidate(CourseApplication application) {
 		try {
 			CourseChoice choice = getCourseChoiceHome()
@@ -2154,6 +2243,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
+	@Override
 	public void sendRefundMessage(CourseApplication application,
 			CourseChoice choice, Locale locale) {
 		String subject = "";
@@ -2227,6 +2317,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public void sendRegistrationMessage(CourseApplication application,
 			CourseChoice choice, Locale locale) {
 		String subject = "";
@@ -2281,6 +2372,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public void invalidateApplication(CourseApplication application,
 			User performer, Locale locale) {
 		Collection choices = getCourseChoices(application);
@@ -2293,6 +2385,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		changeCaseStatus(application, getCaseStatusCancelled(), performer);
 	}
 
+	@Override
 	public void invalidateChoice(CourseApplication application,
 			CourseChoice choice, Locale locale) {
 		choice.setValid(false);
@@ -2336,6 +2429,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		sendMessageToParents(application, choice, subject, body, locale);
 	}
 
+	@Override
 	public CourseApplication saveApplication(Map applications, String prefix, User performer,
 			Locale locale) {
 		try {
@@ -2344,7 +2438,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				try {
 					performer = getIWApplicationContext()
 							.getIWMainApplication().getAccessController()
-							.getAdministratorUser();
+							.getAdministratorUserLegacy();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -2419,6 +2513,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseApplication saveApplication(Map applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
@@ -2455,7 +2550,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			if (owner == null) {
 				try {
 					owner = getIWApplicationContext().getIWMainApplication()
-							.getAccessController().getAdministratorUser();
+							.getAccessController().getAdministratorUserLegacy();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -2491,7 +2586,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 							locale);
 				}
 			}
-			
+
 			String waitingListBody = getLocalizedString(
 					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.waitinglist_registration_body",
 					"Your registration for course {2} at {3} for {0}, {1} has been received and added to the waiting list",
@@ -2531,7 +2626,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 						sendMessageToParents(application, choice, subject,
 								choice.isOnWaitingList() ? waitingListBody : body, locale);
-						
+
 						if (getRegistrationTimeoutForCourse(holder.getCourse()).isEarlierThan(stamp)) {
 							String timeoutSubject = getLocalizedString("course_choice.timeout_registration_subject", "A timeout registration has been received", locale);
 							String timeoutBody = getLocalizedString("course_choice.timeout_registration_body", "A registration has been received for {0}, {1} for {2}.", locale);
@@ -2553,6 +2648,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public CourseApplication saveApplication(Map applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
@@ -2561,7 +2657,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				paymentType, referenceNumber, payerName, payerPersonalID,
 				prefix, owner, performer, locale, 0);
 	}
-	
+
 	private void sendMessageToParents(CourseApplication application,
 			CourseChoice choice, String subject, String body, Locale locale) {
 		sendMessageToParents(application, choice, subject, body, locale, null);
@@ -2574,7 +2670,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				locale = getIWApplicationContext().getApplicationSettings()
 						.getDefaultLocale();
 			}
-			
+
 			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, "");
 
 			User applicant = choice.getUser();
@@ -2600,7 +2696,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				if (getFamilyLogic().isChildInCustodyOf(applicant, appParent)) {
 					MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, appParent, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
 					msgValue.setBcc(bcc);
-					
+
 					getMessageBusiness().createUserMessage(msgValue);
 				}
 
@@ -2663,6 +2759,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public int getNumberOfCourses(School provider, SchoolType schoolType,
 			CourseType courseType, Date fromDate, Date toDate) {
 		try {
@@ -2675,6 +2772,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public int getNumberOfChoices(School provider, SchoolType schoolType,
 			Gender gender, Date fromDate, Date toDate) {
 		try {
@@ -2687,6 +2785,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public int getNumberOfChoices(Course course, Gender gender) {
 		try {
 			return getCourseChoiceHome().getCountByCourseAndGender(course,
@@ -2697,6 +2796,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getCourses(School provider, SchoolType schoolType,
 			Date fromDate, Date toDate) {
 		try {
@@ -2708,6 +2808,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Date getEndDate(CoursePrice price, Date startDate) {
 		Collection holidays = getPublicHolidays();
 		IWTimestamp stamp = new IWTimestamp(startDate);
@@ -2756,6 +2857,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return collection;
 	}
 
+	@Override
 	public CoursePriceHome getCoursePriceHome() {
 		try {
 			return (CoursePriceHome) IDOLookup.getHome(CoursePrice.class);
@@ -2764,6 +2866,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseDiscountHome getCourseDiscountHome() {
 		try {
 			return (CourseDiscountHome) IDOLookup.getHome(CourseDiscount.class);
@@ -2772,6 +2875,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseCategoryHome getCourseCategoryHome() {
 		try {
 			return (CourseCategoryHome) IDOLookup.getHome(CourseCategory.class);
@@ -2780,6 +2884,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseTypeHome getCourseTypeHome() {
 		try {
 			return (CourseTypeHome) IDOLookup.getHome(CourseType.class);
@@ -2788,6 +2893,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseHome getCourseHome() {
 		try {
 			return (CourseHome) IDOLookup.getHome(Course.class);
@@ -2796,6 +2902,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseChoiceHome getCourseChoiceHome() {
 		try {
 			return (CourseChoiceHome) IDOLookup.getHome(CourseChoice.class);
@@ -2804,6 +2911,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseApplicationHome getCourseApplicationHome() {
 		try {
 			return (CourseApplicationHome) IDOLookup
@@ -2875,6 +2983,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseCertificate getCertificate(Object certificatePK) {
 		try {
 			return getCertificateHome().findByPrimaryKey(
@@ -2885,6 +2994,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public CourseCertificateType getCourseCertificateType(String id) {
 		if (id == null) {
 			return null;
@@ -2902,6 +3012,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public CourseCertificateType getCourseCertificateTypeByType(String type) {
 		if (type == null) {
 			return null;
@@ -2917,6 +3028,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public List getUserCertificates(User user) {
 		if (user == null) {
 			return null;
@@ -2940,6 +3052,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList(userCertificates);
 	}
 
+	@Override
 	public CourseCertificate getUserCertificate(User user, Course course) {
 		try {
 			return ((CourseCertificateHome) getIDOHome(CourseCertificate.class))
@@ -2953,6 +3066,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	@Override
 	public List getUserCertificatesByCourse(User user, Course course) {
 		if (user == null || course == null) {
 			return null;
@@ -2974,6 +3088,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList(certificates);
 	}
 
+	@Override
 	public IWTimestamp getLatestExpirationDateOfCertificate(List certificates) {
 		if (certificates == null || certificates.isEmpty()) {
 			return null;
@@ -2998,6 +3113,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return time;
 	}
 
+	@Override
 	public IWTimestamp getLatestValidCertificate(List certificates) {
 		if (certificates == null || certificates.isEmpty()) {
 			return null;
@@ -3021,7 +3137,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		return time;
 	}
-	
+
+	@Override
 	public boolean storeNotes(Integer courseChoiceID, String notes) {
 		CourseChoice choice = getCourseChoice(courseChoiceID);
 		if (choice == null) {
@@ -3033,6 +3150,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return true;
 	}
 
+	@Override
 	public boolean manageCourseChoiceSettings(String courseChoiceId,
 			String columnName, boolean value) {
 		if (courseChoiceId == null || columnName == null) {
@@ -3095,6 +3213,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return true;
 	}
 
+	@Override
 	public List getCourseParticipantListRowData(CourseChoice choice,
 			IWResourceBundle iwrb) {
 		if (choice == null) {
@@ -3204,6 +3323,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return data;
 	}
 
+	@Override
 	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) {
 		List info = new ArrayList();
 
@@ -3220,6 +3340,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return info;
 	}
 
+	@Override
 	public boolean acceptChoice(Object courseChoicePK, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
 		choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
@@ -3229,10 +3350,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		String subject = getLocalizedString(
 				"course_choice.accepted_subject", "Course choice accepted",
 				locale);
-		
+
 		String prefix = application.getPrefix();
 		prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
-		
+
 		String body = getLocalizedString(prefix +
 				"course_choice.accepted_body",
 				"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
@@ -3247,13 +3368,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		return true;
 	}
-	
+
+	@Override
 	public boolean parentsAcceptChoice(Object courseChoicePK, User performer, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
 		choice.setWaitingList(false);
 		choice.setUniqueID(null);
 		choice.store();
-		
+
 		Course course = choice.getCourse();
 		course.getProvider();
 
@@ -3261,10 +3383,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		String subject = getLocalizedString(
 				"course_choice.parent_accepted_subject", "Course choice accepted",
 				locale);
-		
+
 		String prefix = application.getPrefix();
 		prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
-		
+
 		String body = getLocalizedString(prefix +
 				"course_choice.parent_accepted_body",
 				"Registration to course {2} at for {0}, {1} has been accepted by parents.",
@@ -3274,13 +3396,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		return true;
 	}
-	
+
+	@Override
 	public void setNoPayment(Object courseChoicePK, boolean noPayment) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
 		choice.setNoPayment(noPayment);
 		choice.store();
 	}
 
+	@Override
 	public void removeCertificate(Object certificatePK) {
 		CourseCertificate certificate = getCertificate(certificatePK);
 		if (certificate != null) {
@@ -3292,6 +3416,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public void sendNextCoursesMessages() {
 		IWTimestamp fromDate = new IWTimestamp();
 		if (fromDate.getDayOfWeek() == Calendar.SUNDAY) {
@@ -3313,25 +3438,25 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			for (Course course : courses) {
 				CourseType type = course.getCourseType();
 				CourseCategory category = type.getCourseCategory();
-				
+
 				if (category.sendReminderEmail()) {
 					Collection<CourseChoice> choices = getCourseChoiceHome()
 							.findAllByCourse(course, false);
 					for (CourseChoice choice : choices) {
 						if (!choice.hasReceivedReminder()) {
 							CourseApplication application = choice.getApplication();
-	
+
 							String subject = getLocalizedString((application.getPrefix() != null ? application.getPrefix() + "." : "") + "course_choice.reminder_subject",
 									"A reminder for course choice", locale);
 							String body = getLocalizedString(
-									(application.getPrefix() != null ? application.getPrefix() + "." : "") + 
+									(application.getPrefix() != null ? application.getPrefix() + "." : "") +
 									"course_choice.reminder_body",
 									"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
 									locale);
 
 							sendMessageToParents(application, choice, subject,
 									body, locale);
-	
+
 							choice.setReceivedReminder(true);
 							choice.store();
 							count++;
@@ -3352,6 +3477,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection getAllChoicesByCourseAndDate(Object coursePK,
 			IWTimestamp fromDate, IWTimestamp toDate) {
 		Course course = null;
@@ -3368,6 +3494,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	@Override
 	public Collection<Course> getCoursesByTypes(Collection<String> typesIds)
 			throws RemoteException {
 		if (ListUtil.isEmpty(typesIds)) {
