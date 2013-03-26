@@ -125,7 +125,7 @@ public class CourseEditor extends CourseBlock {
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, Arrays.asList(
 				getJQuery().getBundleURIToJQueryLib(),
 				getWeb2Business().getBundleUriToHumanizedMessagesScript(),
-				getBundle().getVirtualPathWithFileNameString("javascript/egov_courses.js")
+				iwc.getIWMainApplication().getBundle(CourseConstants.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/egov_courses.js")
 		));
 		PresentationUtil.addStyleSheetToHeader(iwc, getWeb2Business().getBundleUriToHumanizedMessagesStyleSheet());
 		String action = "EGovCoursesHelper.initializeCourseEditor({invalidEndDate: '" +
