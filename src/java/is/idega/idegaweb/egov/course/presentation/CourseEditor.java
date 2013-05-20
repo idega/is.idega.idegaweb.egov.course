@@ -82,7 +82,7 @@ public class CourseEditor extends CourseBlock {
 	protected static final String PARAMETER_COST = "prm_cost";
 	protected static final String PARAMETER_OPEN_FOR_REGISTRATION = "prm_open_for_registration";
 	private static final String PARAMETER_HAS_PRE_CARE = "prm_has_pre_care";
-	private static final String PARAMETER_HAS_POST_CARE = "prm_has_pre_care";
+	private static final String PARAMETER_HAS_POST_CARE = "prm_has_post_care";
 	private static final String PARAMETER_REGISTRATION_END = "prm_registration_end";
 
 	protected static final String PARAMETER_VALID_FROM_ID = "prm_valid_from_id";
