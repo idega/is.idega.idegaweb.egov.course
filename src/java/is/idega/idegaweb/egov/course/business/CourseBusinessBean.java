@@ -3343,6 +3343,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	@Override
 	public boolean acceptChoice(Object courseChoicePK, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
+		choice.setWaitingList(false);
 		choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
 		choice.store();
 
