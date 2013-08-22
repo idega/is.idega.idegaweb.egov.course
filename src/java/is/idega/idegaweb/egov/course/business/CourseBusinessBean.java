@@ -275,12 +275,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					} else {
 						payerPId = owner.getPersonalID();
 					}
-					if (payerPId.length() > 10) {
+					if (payerPId != null && payerPId.length() > 10) {
 						payerPId = payerPId.trim();
 						payerPId = StringHandler.replace(payerPId, "-", "");
 						if (payerPId.length() > 10) {
 							payerPId = payerPId.substring(0, 10);
 						}
+					}
+					if (payerPId == null) {
+						payerPId = "";
 					}
 
 					String studentPId = student.getPersonalID();
