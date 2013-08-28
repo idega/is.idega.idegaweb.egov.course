@@ -614,14 +614,14 @@ public class CourseApplication extends ApplicationForm {
 		form.addParameter(PARAMETER_ACTION, ACTION_PHASE_2);
 		form.maintainParameter(PARAMETER_COURSE);
 
+		Custodian custodian = null;
 		User applicant = getApplicant(iwc);
 		Child child = getMemberFamilyLogic(iwc).getChild(applicant);
 		if (iwc.isParameterSet(PARAMETER_REMOVE_CUSTODIAN)) {
 			child.removeExtraCustodian();
 		}
-
-		Custodian custodian = child.getExtraCustodian();
-		if (iwc.isParameterSet(PARAMETER_PERSONAL_ID) && !iwc.isParameterSet(PARAMETER_REMOVE_CUSTODIAN)) {
+		else if (iwc.isParameterSet(PARAMETER_PERSONAL_ID)) {
+			custodian = child.getExtraCustodian();
 			saveCustodianInfo(iwc, false);
 
 			String personalID = iwc.getParameter(PARAMETER_PERSONAL_ID);
