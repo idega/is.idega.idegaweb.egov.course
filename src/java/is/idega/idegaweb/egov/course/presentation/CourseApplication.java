@@ -68,6 +68,7 @@ import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.RadioButton;
+import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.TextArea;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoEmailFoundException;
@@ -103,6 +104,7 @@ public class CourseApplication extends ApplicationForm {
 	private static final String PARAMETER_CHILD_PERSONAL_ID = "prm_child_personal_id";
 
 	private static final String PARAMETER_USER = "prm_user_id";
+	private static final String PARAMETER_REMOVE_CUSTODIAN = "prm_remove_custodian";
 	private static final String PARAMETER_RELATIVE = "prm_relative_user_id";
 	private static final String PARAMETER_PERSONAL_ID = "prm_personal_id";
 	private static final String PARAMETER_HOME_PHONE = "prm_home";
@@ -612,10 +614,14 @@ public class CourseApplication extends ApplicationForm {
 		form.addParameter(PARAMETER_ACTION, ACTION_PHASE_2);
 		form.maintainParameter(PARAMETER_COURSE);
 
+		Custodian custodian = null;
 		User applicant = getApplicant(iwc);
 		Child child = getMemberFamilyLogic(iwc).getChild(applicant);
-		Custodian custodian = child.getExtraCustodian();
-		if (iwc.isParameterSet(PARAMETER_PERSONAL_ID)) {
+		if (iwc.isParameterSet(PARAMETER_REMOVE_CUSTODIAN)) {
+			child.removeExtraCustodian();
+		}
+		else if (iwc.isParameterSet(PARAMETER_PERSONAL_ID)) {
+			custodian = child.getExtraCustodian();
 			saveCustodianInfo(iwc, false);
 
 			String personalID = iwc.getParameter(PARAMETER_PERSONAL_ID);
@@ -1483,6 +1489,15 @@ public class CourseApplication extends ApplicationForm {
 		label = new Label(this.iwrb.getLocalizedString("name", "Name"), name);
 		formItem.add(label);
 		formItem.add(name);
+		if (editable && custodian != null) {
+			HiddenInput hidden = new HiddenInput(PARAMETER_REMOVE_CUSTODIAN, "");
+			formItem.add(hidden);
+			
+			SubmitButton remove = new SubmitButton(this.iwrb.getLocalizedString("remove_custodian", "Remove custodian"));
+			remove.setValueOnClick(PARAMETER_REMOVE_CUSTODIAN, Boolean.TRUE.toString());
+			remove.setStyleClass("button");
+			formItem.add(remove);
+		}
 		section.add(formItem);
 
 		if (custodian != null || isExtraCustodian) {

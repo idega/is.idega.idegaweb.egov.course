@@ -357,7 +357,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		if (schoolTypePK != null && schoolTypePK.toString().length() > 0) {
 			query.addCriteria(new MatchCriteria(schoolTypeId, MatchCriteria.EQUALS, schoolTypePK));
 		}
-		if (courseTypePK != null && schoolTypePK.toString().length() > 0) {
+		if (courseTypePK != null && courseTypePK.toString().length() > 0) {
 			query.addCriteria(new MatchCriteria(courseTypeId, MatchCriteria.EQUALS, courseTypePK));
 		}
 
@@ -378,6 +378,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return this.idoFindPKsByQuery(query);
 	}
+	
 
 	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException,
 		IDORelationshipException {
