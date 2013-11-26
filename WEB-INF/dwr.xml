@@ -21,6 +21,56 @@
 	<convert converter="bean" match="is.idega.idegaweb.egov.course.business.CoursePriceDWR"/>
 	<convert converter="bean" match="is.idega.idegaweb.egov.course.business.UserDWR"/>
 	<convert match="is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData" converter="bean" />
+	<create
+		creator="jsf" 
+		javascript="CourseProviderViewerBean">
+		<param 
+			name="managedBeanName" 
+			value="courseProviderViewerBean" />
+		<param 
+			name="class" 
+			value="is.idega.idegaweb.egov.course.presentation.bean.CourseProviderViewerBean" />
+		<include 
+			method="remove" />
+	</create>
+	<create
+		creator="jsf" 
+		javascript="CourseProviderAreasViewerBean">
+		<param 
+			name="managedBeanName" 
+			value="courseProviderAreasViewerBean" />
+		<param 
+			name="class" 
+			value="is.idega.idegaweb.egov.course.presentation.bean.CourseProviderAreasViewerBean" />
+		<include 
+			method="remove" />
+	</create>
+	<create
+		creator="jsf" 
+		javascript="CourseProviderUsersViewerBean">
+		<param 
+			name="managedBeanName" 
+			value="courseProviderUsersViewerBean" />
+		<param 
+			name="class" 
+			value="is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUsersViewerBean" />
+		<include 
+			method="remove" />
+		<include
+			method="getAutocompleteMails"/>
+	</create>
+	<create
+		creator="jsf" 
+		javascript="CourseProviderUserTypesViewerBean">
+		<param 
+			name="managedBeanName" 
+			value="courseProviderUserTypesViewerBean" />
+		<param 
+			name="class" 
+			value="is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUserTypesViewerBean" />
+		<include 
+			method="remove" />
+	</create>
   </allow>
   <signatures>
   	<![CDATA[
