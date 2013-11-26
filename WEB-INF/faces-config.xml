@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<faces-config 
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+	version="1.2">
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProvidersViewer</component-class>
+		<component-type>Course providers viewer</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderViewerBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderViewerBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProviderEditor</component-class>
+		<component-type>Course provider editor</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProviderAreasViewer</component-class>
+		<component-type>Course provider areas viewer</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderAreasViewerBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderAreasViewerBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProviderAreaEditor</component-class>
+		<component-type>Course provider area editor</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderAreaBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderAreaBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProviderUsersViewer</component-class>
+		<component-type>Course provider users viewer</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderUsersViewerBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUsersViewerBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProviderUserEditor</component-class>
+		<component-type>Course provider user editor</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderUserBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUserBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProviderUserTypesViewer</component-class>
+		<component-type>Course provider user types viewer</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderUserTypesViewerBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUserTypesViewerBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProviderUserTypeEditor</component-class>
+		<component-type>Course provider user type editor</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderUserTypeBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUserTypeBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<component>
+		<component-class>is.idega.idegaweb.egov.course.presentation.CourseProvidersUsersFilter</component-class>
+		<component-type>Filter for course provider users viewer </component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>courseProviderUsersFilterBean</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUsersFilterBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+</faces-config>
