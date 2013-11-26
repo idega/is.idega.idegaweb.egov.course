@@ -6,9 +6,7 @@ import is.idega.block.family.data.Child;
 import is.idega.block.family.data.Custodian;
 import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
 import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
-import is.idega.idegaweb.egov.accounting.business.AccountingKeyBusiness;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
-import is.idega.idegaweb.egov.accounting.data.SchoolCode;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
@@ -28,6 +26,12 @@ import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
 import is.idega.idegaweb.egov.course.data.CourseHome;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CoursePriceHome;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
+import is.idega.idegaweb.egov.course.data.CourseProviderUser;
+import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
@@ -43,6 +47,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -53,6 +58,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -68,12 +74,6 @@ import com.idega.block.creditcard.data.TPosAuthorisationEntriesBean;
 import com.idega.block.process.business.CaseBusiness;
 import com.idega.block.process.business.CaseBusinessBean;
 import com.idega.block.process.data.Case;
-import com.idega.block.school.business.SchoolBusiness;
-import com.idega.block.school.business.SchoolUserBusiness;
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolArea;
-import com.idega.block.school.data.SchoolType;
-import com.idega.block.school.data.SchoolUser;
 import com.idega.block.trade.data.CreditCardInformation;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
@@ -104,6 +104,8 @@ import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
+//import is.idega.idegaweb.egov.accounting.business.AccountingKeyBusiness;
+//import is.idega.idegaweb.egov.accounting.data.SchoolCode;
 
 public class CourseBusinessBean extends CaseBusinessBean implements
 		CaseBusiness, CourseBusiness, AccountingBusiness {
@@ -241,8 +243,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					CourseChoice choice = (CourseChoice) iter.next();
 					boolean noPayment = choice.isNoPayment();
 					Course course = choice.getCourse();
-					School provider = course.getProvider();
-					SchoolArea area = provider.getSchoolArea();
+					CourseProvider provider = course.getProvider();
+					CourseProviderArea area = provider.getCourseProviderArea();
 					CourseType courseType = course.getCourseType();
 					CourseCategory schoolType = courseType.getCourseCategory();
 					if (category != null && !schoolType.equals(category)) {
@@ -295,10 +297,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						}
 					}
 
-					SchoolCode schoolCode = getAccountingBusiness()
-							.getSchoolCode(provider, schoolType);
-					providerCode = schoolCode != null ? schoolCode
-							.getSchoolCode() : provider.getOrganizationNumber();
+//					TODO
+//					SchoolCode schoolCode = getAccountingBusiness()
+//							.getSchoolCode(provider, schoolType);
+//					providerCode = schoolCode != null ? schoolCode
+//							.getSchoolCode() : provider.getOrganizationNumber();
 
 					String typeCode = courseType.getAccountingKey() != null ? courseType
 							.getAccountingKey()
@@ -739,12 +742,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 
 		if (providerPK != null) {
-			try {
-				School provider = getSchoolBusiness().getSchool(providerPK);
-				course.setProvider(provider);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+			CourseProvider provider = getSchoolBusiness().getSchool(providerPK);
+			course.setProvider(provider);
 		}
 		course.setUser(user);
 
@@ -914,13 +913,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 
 		if (schoolAreaPK != null) {
-			try {
-				SchoolArea area = getSchoolBusiness().getSchoolArea(
-						schoolAreaPK);
-				price.setSchoolArea(area);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+			CourseProviderArea area = getSchoolBusiness().getSchoolArea(schoolAreaPK);
+			price.setSchoolArea(area);
 		}
 
 		if (courseTypePK != null) {
@@ -980,30 +974,30 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
-	public Map getCourseTypesDWR(int schoolTypePK, String country) {
-		Collection coll = getCourseTypes(new Integer(schoolTypePK), true);
-		Map map = new LinkedHashMap();
+	public Map<String, String> getCourseTypesDWR(int schoolTypePK, String country) {
+		Collection<CourseType> coll = getCourseTypes(new Integer(schoolTypePK), true);
+		Map<String, String> map = new LinkedHashMap<String, String>();
 
 		Locale locale = new Locale(country, country.toUpperCase());
-		map.put(new Integer(-1), getLocalizedString("select_course_type",
+		map.put(new Integer(-1).toString(), getLocalizedString("select_course_type",
 				"Select course type", locale));
 
 		if (coll != null) {
-			Iterator iter = coll.iterator();
+			Iterator<CourseType> iter = coll.iterator();
 			while (iter.hasNext()) {
-				CourseType type = (CourseType) iter.next();
-				map.put(type.getPrimaryKey(), type.getName());
+				CourseType type = iter.next();
+				map.put(type.getPrimaryKey().toString(), type.getName());
 			}
 		}
 		return map;
 	}
 
-	public Map getProvidersDWR(int userPK, int typePK, String country) {
-		Collection coll = getProviders();
-		Map map = new LinkedHashMap();
+	public Map<String, String> getProvidersDWR(int userPK, int typePK, String country) {
+		Collection<? extends CourseProvider> coll = getProviders();
+		Map<String, String> map = new LinkedHashMap<String, String>();
 
 		Locale locale = new Locale(country, country.toUpperCase());
-		map.put(new Integer(-1), getLocalizedString("all_providers",
+		map.put(new Integer(-1).toString(), getLocalizedString("all_providers",
 				"All providers", locale));
 
 		CourseType type = null;
@@ -1023,11 +1017,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 		
 		if (coll != null) {
-			Iterator iter = coll.iterator();
+			Iterator<? extends CourseProvider> iter = coll.iterator();
 			while (iter.hasNext()) {
-				School provider = (School) iter.next();
+				CourseProvider provider = (CourseProvider) iter.next();
 				if (hasAvailableCourses(user, provider, type))
-				map.put(provider.getPrimaryKey(), provider.getSchoolName());
+				map.put(provider.getPrimaryKey().toString(), provider.getSchoolName());
 			}
 		}
 		return map;
@@ -1084,27 +1078,27 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return map;
 	}
 
-	public Map getCoursePricesDWR(String date, int providerPK,
+	public Map<String, String> getCoursePricesDWR(String date, int providerPK,
 			int courseTypePK, String country) {
-		Map map = new LinkedHashMap();
+		Map<String, String> map = new LinkedHashMap<String, String>();
 		CourseType cType = getCourseType(new Integer(courseTypePK));
 		try {
-			School provider = getSchoolBusiness().getSchool(
+			CourseProvider provider = getSchoolBusiness().getSchool(
 					new Integer(providerPK));
 
-			Collection prices = getCoursePriceHome().findAll(
-					provider.getSchoolArea(), cType);
+			Collection<CoursePrice> prices = getCoursePriceHome().findAll(
+					provider.getCourseProviderArea(), cType);
 			IWTimestamp stamp = null;
 			if (prices != null) {
 				Locale locale = new Locale(country, country.toUpperCase());
 				map.put("", getLocalizedString("select_course_price",
 						"Select course price", locale));
 
-				Iterator iter = prices.iterator();
+				Iterator<CoursePrice> iter = prices.iterator();
 				stamp = new IWTimestamp(IWDatePickerHandler.getParsedDate(date,
 						locale));
 				while (iter.hasNext()) {
-					CoursePrice price = (CoursePrice) iter.next();
+					CoursePrice price = iter.next();
 					IWTimestamp from = new IWTimestamp(price.getValidFrom());
 					IWTimestamp to = new IWTimestamp(price.getValidTo());
 					if (stamp.isLaterThanOrEquals(from)
@@ -1118,9 +1112,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			e.printStackTrace();
 		} catch (FinderException e) {
 			e.printStackTrace();
-		} catch (RemoteException e) {
-			e.printStackTrace();
 		}
+
 		return map;
 	}
 
@@ -1650,7 +1643,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
-	public Collection getAllCourses(School provider) {
+	public Collection<Course> getAllCourses(CourseProvider provider) {
 		try {
 			return getCourseHome().findAllByProvider(provider);
 		} catch (FinderException e) {
@@ -1661,7 +1654,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
-	public Collection getAllCourseTypes(boolean valid) {
+	public Collection<CourseType> getAllCourseTypes(boolean valid) {
 		try {
 			return getCourseTypeHome().findAll(valid);
 		} catch (FinderException e) {
@@ -1670,7 +1663,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList();
 	}
 
-	public Collection getAllCourseTypes(Integer schoolTypePK, boolean valid) {
+	public Collection<CourseType> getAllCourseTypes(Integer schoolTypePK, boolean valid) {
 		try {			
 			return getCourseTypeHome().findAllBySchoolType(schoolTypePK, valid);
 		} catch (Exception e) {
@@ -1680,7 +1673,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	
-	public Collection getAllSchoolTypes() {
+	public Collection<CourseProviderType> getAllSchoolTypes() {
 		try {
 			Collection schoolTypes = getSchoolBusiness()
 					.findAllSchoolTypesInCategory(
@@ -1690,7 +1683,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			Object typePK = getIWApplicationContext().getApplicationSettings()
 					.getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
 			if (typePK != null) {
-				SchoolType type = getSchoolBusiness().getSchoolType(
+				CourseProviderType type = getSchoolBusiness().getSchoolType(
 						new Integer(typePK.toString()));
 				schoolTypes.remove(type);
 			}
@@ -1701,70 +1694,77 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	public Collection getAllSchoolTypes(String category) {
-		try {
-			Collection schoolTypes = getSchoolBusiness()
-					.findAllSchoolTypesInCategory(category);
+	public Collection<? extends CourseProviderType> getAllSchoolTypes(String category) {
+		Collection<? extends CourseProviderType> schoolTypes = getSchoolBusiness()
+				.findAllSchoolTypesInCategory(category);
+		if (ListUtil.isEmpty(schoolTypes)) {
+			return Collections.emptyList();
+		}
 
-			Object typePK = getIWApplicationContext().getApplicationSettings()
-					.getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
-			if (typePK != null) {
-				SchoolType type = getSchoolBusiness().getSchoolType(
-						new Integer(typePK.toString()));
-				schoolTypes.remove(type);
+		String typePK = getIWApplicationContext().getApplicationSettings()
+				.getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
+		if (typePK != null) {
+			CourseProviderType type = null;
+			for (CourseProviderType schoolType : schoolTypes) {
+				if (typePK.equals(schoolType.getPrimaryKey().toString())) {
+					type = schoolType;
+				}
 			}
 
-			return schoolTypes;
-		} catch (RemoteException re) {
-			throw new IBORuntimeException(re);
+			schoolTypes.remove(type);
 		}
+
+		return schoolTypes;
 	}
 
 	
 	public Collection getSchoolAreas() {
 		try {
-			return getSchoolBusiness().getSchoolAreaHome().findAllSchoolAreas(
+			return getCourseProviderAreaHome().findAllSchoolAreas(
 					getSchoolBusiness().getCategoryAfterSchoolCare());
 		} catch (RemoteException e) {
 			e.printStackTrace();
-		} catch (FinderException e) {
-			e.printStackTrace();
 		}
+
 		return new ArrayList();
 	}
 
-	public Collection getSchoolTypes(School provider) {
-		try {
-			Collection types = new ArrayList();
-
+	private CourseProviderAreaHome courseProviderAreaHome = null;
+	
+	protected CourseProviderAreaHome getCourseProviderAreaHome() {
+		if (courseProviderAreaHome == null) {
 			try {
-				Collection schoolTypes = provider.getSchoolTypes();
+				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup
+						.getHome(CourseProviderArea.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderAreaHome.class + " cause of: ", e);
+			}
+		}
 
-				String typePK = getIWApplicationContext()
-						.getApplicationSettings().getProperty(
-								CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
-				if (typePK != null) {
-					SchoolType type = getSchoolBusiness().getSchoolType(
-							new Integer(typePK));
-					schoolTypes.remove(type);
-				}
+		return this.courseProviderAreaHome;
+	}
+	
+	public Collection<? extends CourseProviderType> getSchoolTypes(CourseProvider provider) {
+		Collection<? extends CourseProviderType> schoolTypes = provider.getCourseProviderAreas();
+		if (ListUtil.isEmpty(schoolTypes)) {
+			return Collections.emptyList();
+		}
 
-				Iterator iterator = schoolTypes.iterator();
-				while (iterator.hasNext()) {
-					SchoolType type = (SchoolType) iterator.next();
-					/*if (type.getCategory().equals(
-							getSchoolBusiness().getCategoryAfterSchoolCare())) {*/
-						types.add(type);
-					//}
+		String typePK = getIWApplicationContext().getApplicationSettings().getProperty(
+						CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
+		if (typePK != null) {
+			CourseProviderType type = null;
+			for (CourseProviderType schoolType : schoolTypes) {
+				if (schoolType.equals(schoolType.getPrimaryKey().toString())) {
+					type = schoolType;
 				}
-			} catch (IDORelationshipException e) {
-				e.printStackTrace();
 			}
 
-			return types;
-		} catch (RemoteException re) {
-			throw new IBORuntimeException(re);
+			schoolTypes.remove(type);
 		}
+
+		return schoolTypes;
 	}
 
 	public Collection getAllCoursePrices() {
@@ -1799,54 +1799,53 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return course.getMax();
 	}
 
-	public Collection getProviders() {
-		try {
-			return getSchoolBusiness()
-					.findAllSchoolsByType(getAllSchoolTypes());
-		} catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		}
+	public Collection<? extends CourseProvider> getProviders() {
+		return getSchoolBusiness()
+				.findAllSchoolsByType(getAllSchoolTypes());
+
 	}
 
-	public Collection getProviders(String category) {
-		try {
-			return getSchoolBusiness()
-					.findAllSchoolsByType(getAllSchoolTypes(category));
-		} catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		}
+	public Collection<? extends CourseProvider> getProviders(String category) {
+		return getSchoolBusiness()
+				.findAllSchoolsByType(getAllSchoolTypes(category));
 	}
 	
-	public Collection getProviders(SchoolArea area, SchoolType type) {
-		try {
-			return getSchoolBusiness().findAllSchoolsByAreaAndType(
-					((Integer) area.getPrimaryKey()).intValue(),
-					((Integer) type.getPrimaryKey()).intValue());
-		} catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		}
+	public Collection<? extends CourseProvider> getProviders(
+			CourseProviderArea area,
+			CourseProviderType type) {
+		return getSchoolBusiness().findAllSchoolsByAreaAndType(area, type);
 	}
 
-	public Collection getProvidersForUser(User user) {
-		try {
-			SchoolUser schoolUser = getSchoolUserBusiness().getSchoolUserHome()
+	public Collection<CourseProvider> getProvidersForUser(User user) {
+			CourseProviderUser schoolUser = getCourseProviderUserHome()
 					.findForUser(user);
-			return schoolUser.getSchools();
-		} catch (IDORelationshipException ire) {
-			ire.printStackTrace();
-			return new ArrayList();
-		} catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		} catch (FinderException fe) {
-			fe.printStackTrace();
-			return new ArrayList();
-		}
+			if (schoolUser == null) {
+				return Collections.emptyList();
+			}
+
+			return schoolUser.getCourseProviders();
 	}
 
-	public Map getApplicationMap(User user, Collection schools) {
+	private CourseProviderUserHome courseProviderUserHome = null;
+	
+	protected CourseProviderUserHome getCourseProviderUserHome() {
+		if (this.courseProviderUserHome == null) {
+			try {
+				this.courseProviderUserHome = (CourseProviderUserHome) IDOLookup.getHome(CourseProviderUser.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get home for " + CourseProviderUser.class + 
+						" cause of: " , e);
+			}
+		}
+
+		return this.courseProviderUserHome;
+	}
+
+	public Map getApplicationMap(User user, Collection<CourseProvider> schools) {
 		Map map = new LinkedHashMap();
 		try {
-			Collection choices = getCourseChoiceHome()
+			Collection<CourseChoice> choices = getCourseChoiceHome()
 					.findAllByUserAndProviders(user, schools);
 			Iterator iterator = choices.iterator();
 			while (iterator.hasNext()) {
@@ -2060,7 +2059,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return false;
 	}
 
-	public boolean hasAvailableCourses(User user, SchoolType type) {
+	public boolean hasAvailableCourses(User user, CourseProviderType type) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
 			IWTimestamp stampNow = new IWTimestamp();
@@ -2086,7 +2085,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	public boolean hasAvailableCourses(User user, School school) {
+	public boolean hasAvailableCourses(User user, CourseProvider school) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
 			IWTimestamp stampNow = new IWTimestamp();
@@ -2099,7 +2098,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	public boolean hasAvailableCourses(User user, School school, CourseType type) {
+	public boolean hasAvailableCourses(User user, CourseProvider school, CourseType type) {
 		try {
 			IWTimestamp stamp = new IWTimestamp(user.getDateOfBirth());
 			IWTimestamp stampNow = new IWTimestamp();
@@ -2180,7 +2179,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		if (choice != null) {
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
-			School provider = course.getProvider();
+			CourseProvider provider = course.getProvider();
 			Object[] arguments = {
 					applicant.getName(),
 					PersonalIDFormatter.format(applicant.getPersonalID(),
@@ -2252,7 +2251,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		User applicant = choice.getUser();
 		Course course = choice.getCourse();
-		School provider = course.getProvider();
+		CourseProvider provider = course.getProvider();
 		Object[] arguments = {
 				applicant.getName(),
 				PersonalIDFormatter.format(applicant.getPersonalID(),
@@ -2403,7 +2402,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
-			School provider = course.getProvider();
+			CourseProvider provider = course.getProvider();
 			IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 			IWTimestamp applicationDate = new IWTimestamp(application
 					.getCreated());
@@ -2582,7 +2581,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
-			School provider = course.getProvider();
+			CourseProvider provider = course.getProvider();
 			IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 			Object[] arguments = {
 					applicant.getName(),
@@ -2638,7 +2637,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		try {
 			CourseApplication application = choice.getApplication();
 			Course course = choice.getCourse();
-			School school = choice.getCourse().getProvider();
+			CourseProvider school = choice.getCourse().getProvider();
 			User child = choice.getUser();
 
 			Object[] arguments = {
@@ -2648,12 +2647,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					course.getName()
 			};
 
-			Collection users = getSchoolBusiness().getAllSchoolUsers(school);
+			Collection<? extends CourseProviderUser> users = getSchoolBusiness().getAllSchoolUsers(school);
 			if (users != null) {
 				CommuneMessageBusiness messageBiz = getMessageBusiness();
-				Iterator it = users.iterator();
+				Iterator<? extends CourseProviderUser> it = users.iterator();
 				while (it.hasNext()) {
-					SchoolUser providerUser = (SchoolUser) it.next();
+					CourseProviderUser providerUser = it.next();
 					User user = providerUser.getUser();
 					messageBiz.createUserMessage(application, user, sender,
 							MessageFormat.format(subject, arguments),
@@ -2666,7 +2665,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	public int getNumberOfCourses(School provider, SchoolType schoolType,
+	public int getNumberOfCourses(CourseProvider provider, CourseProviderType schoolType,
 			CourseType courseType, Date fromDate, Date toDate) {
 		try {
 			return getCourseHome()
@@ -2678,7 +2677,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	public int getNumberOfChoices(School provider, SchoolType schoolType,
+	public int getNumberOfChoices(CourseProvider provider, CourseProviderType schoolType,
 			Gender gender, Date fromDate, Date toDate) {
 		try {
 			return getCourseChoiceHome()
@@ -2700,7 +2699,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	public Collection getCourses(School provider, SchoolType schoolType,
+	public Collection<Course> getCourses(CourseProvider provider, CourseProviderType schoolType,
 			Date fromDate, Date toDate) {
 		try {
 			return getCourseHome().findAllByProviderAndSchoolTypeAndCourseType(
@@ -2834,23 +2833,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	private SchoolBusiness getSchoolBusiness() {
+	private CourseProviderBusiness getSchoolBusiness() {
 		try {
-			return (SchoolBusiness) IBOLookup.getServiceInstance(
-					getIWApplicationContext(), SchoolBusiness.class);
+			return (CourseProviderBusiness) IBOLookup.getServiceInstance(
+					getIWApplicationContext(), CourseProviderBusiness.class);
 		} catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
 		}
 	}
 
-	private SchoolUserBusiness getSchoolUserBusiness() {
-		try {
-			return (SchoolUserBusiness) IBOLookup.getServiceInstance(
-					getIWApplicationContext(), SchoolUserBusiness.class);
-		} catch (IBOLookupException ile) {
-			throw new IBORuntimeException(ile);
-		}
-	}
+//	private SchoolUserBusiness getSchoolUserBusiness() {
+//		try {
+//			return (SchoolUserBusiness) IBOLookup.getServiceInstance(
+//					getIWApplicationContext(), SchoolUserBusiness.class);
+//		} catch (IBOLookupException ile) {
+//			throw new IBORuntimeException(ile);
+//		}
+//	}
 
 	private CommuneMessageBusiness getMessageBusiness() {
 		try {
@@ -2861,14 +2860,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
-	private AccountingKeyBusiness getAccountingBusiness() {
-		try {
-			return (AccountingKeyBusiness) IBOLookup.getServiceInstance(
-					getIWApplicationContext(), AccountingKeyBusiness.class);
-		} catch (IBOLookupException e) {
-			throw new IBORuntimeException(e);
-		}
-	}
+//	FIXME
+//	private AccountingKeyBusiness getAccountingBusiness() {
+//		try {
+//			return (AccountingKeyBusiness) IBOLookup.getServiceInstance(
+//					getIWApplicationContext(), AccountingKeyBusiness.class);
+//		} catch (IBOLookupException e) {
+//			throw new IBORuntimeException(e);
+//		}
+//	}
 
 	private CourseCertificateHome getCertificateHome() {
 		try {

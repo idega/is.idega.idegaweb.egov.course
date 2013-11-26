@@ -9,10 +9,9 @@
  */
 package is.idega.idegaweb.egov.course.data;
 
-import com.idega.block.school.data.SchoolType;
-import com.idega.block.school.data.SchoolTypeBMPBean;
 
-public class CourseCategoryBMPBean extends SchoolTypeBMPBean implements CourseCategory, SchoolType {
+
+public class CourseCategoryBMPBean extends CourseProviderTypeBMPBean implements CourseCategory, CourseProviderType {
 
 	public static final String ALLOWS_ALL_CHILDREN = "allows_all_children";
 	public static final String HAS_CARE = "has_care";

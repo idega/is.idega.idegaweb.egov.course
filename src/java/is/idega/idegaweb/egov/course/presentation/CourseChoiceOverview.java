@@ -14,6 +14,7 @@ import is.idega.block.family.data.Relative;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -24,7 +25,6 @@ import java.util.List;
 import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
-import com.idega.block.school.data.School;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
@@ -166,7 +166,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		Course course = choice.getCourse();
 		CourseType type = course.getCourseType();
 		is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
-		School provider = course.getProvider();
+		CourseProvider provider = course.getProvider();
 
 		// User user = iwc.getCurrentUser();
 		User applicant = choice.getUser();
@@ -661,7 +661,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		Course course = choice.getCourse();
 		CourseType type = course.getCourseType();
 		is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
-		School provider = course.getProvider();
+		CourseProvider provider = course.getProvider();
 
 		User applicant = choice.getUser();
 		form.add(getPersonInfo(iwc, applicant, true));

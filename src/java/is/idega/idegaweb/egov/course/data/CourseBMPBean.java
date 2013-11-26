@@ -11,8 +11,6 @@ import javax.ejb.FinderException;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
@@ -88,7 +86,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
-		addManyToOneRelationship(COLUMN_PROVIDER, School.class);
+		addManyToOneRelationship(COLUMN_PROVIDER, CourseProvider.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
 
 		Map<String, ? extends RentableItem> entities = null;
@@ -123,8 +121,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	public School getProvider() {
-		return (School) getColumnValue(COLUMN_PROVIDER);
+	public CourseProvider getProvider() {
+		return (CourseProvider) getColumnValue(COLUMN_PROVIDER);
 	}
 
 	@Override
@@ -245,7 +243,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	public void setProvider(School provider) {
+	public void setProvider(CourseProvider provider) {
 		setColumn(COLUMN_PROVIDER, provider);
 	}
 
@@ -329,7 +327,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return ejbFindAll(null, null, null, -1, null, null);
 	}
 
-	public Collection<Integer> ejbFindAllByProvider(School provider) throws FinderException, IDORelationshipException {
+	public Collection<Integer> ejbFindAllByProvider(CourseProvider provider) throws FinderException, IDORelationshipException {
 		return ejbFindAll(provider.getPrimaryKey(), null, null, -1, null, null);
 	}
 
@@ -414,7 +412,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Collection<Integer> ejbFindAllByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate,
+	public Collection<Integer> ejbFindAllByProviderAndSchoolTypeAndCourseType(
+			CourseProvider provider, 
+			CourseProviderType type, 
+			CourseType courseType, 
+			Date fromDate,
 			Date toDate) throws FinderException {
 
 		Table table = new Table(this);
@@ -536,7 +538,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoGetNumberOfRecords(query);
 	}
 
-	public int ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate)
+	public int ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(
+			CourseProvider provider,
+			CourseProviderType type, CourseType courseType, Date fromDate, Date toDate)
 		throws IDOException {
 
 		Table table = new Table(this);

@@ -6,8 +6,6 @@ import java.util.Collection;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolArea;
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOCompositePrimaryKeyException;
 import com.idega.data.IDORelationshipException;
@@ -52,8 +50,8 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		addAttribute(COLUMN_PRE_CARE_PRICE, "Pre care price", Integer.class);
 		addAttribute(COLUMN_POST_CARE_PRICE, "Post care price", Integer.class);
 
-		addOneToOneRelationship(COLUMN_SCHOOL_TYPE, SchoolType.class);
-		addManyToOneRelationship(COLUMN_SCHOOL_AREA, SchoolArea.class);
+		addOneToOneRelationship(COLUMN_SCHOOL_TYPE, CourseProviderType.class);
+		addManyToOneRelationship(COLUMN_SCHOOL_AREA, CourseProviderArea.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
 	}
@@ -64,8 +62,8 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return getStringColumnValue(COLUMN_NAME);
 	}
 
-	public SchoolArea getSchoolArea() {
-		return (SchoolArea) getColumnValue(COLUMN_SCHOOL_AREA);
+	public CourseProviderArea getSchoolArea() {
+		return (CourseProviderArea) getColumnValue(COLUMN_SCHOOL_AREA);
 	}
 
 	public CourseType getCourseType() {
@@ -102,7 +100,7 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		setColumn(COLUMN_NAME, name);
 	}
 
-	public void setSchoolArea(SchoolArea area) {
+	public void setSchoolArea(CourseProviderArea area) {
 		setColumn(COLUMN_SCHOOL_AREA, area);
 	}
 
@@ -147,11 +145,11 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return ejbFindAll(null, null, fromDate, toDate);
 	}
 
-	public Collection ejbFindAll(SchoolArea area, CourseType cType) throws FinderException, IDORelationshipException {
+	public Collection ejbFindAll(CourseProviderArea area, CourseType cType) throws FinderException, IDORelationshipException {
 		return ejbFindAll(area, cType, null, null);
 	}
 
-	public Collection ejbFindAll(SchoolArea area, CourseType cType, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
+	public Collection ejbFindAll(CourseProviderArea area, CourseType cType, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 
@@ -188,14 +186,14 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return this.idoFindPKsByQuery(query);
 	}
 
-	public SchoolType getSchoolType() {
+	public CourseProviderType getSchoolType() {
 		Object type = getColumnValue(COLUMN_SCHOOL_TYPE);
-		if (type instanceof SchoolType)
-			return (SchoolType) type;
+		if (type instanceof CourseProviderType)
+			return (CourseProviderType) type;
 		return null;
 	}
 
-	public void setSchoolType(SchoolType schoolType) {
+	public void setSchoolType(CourseProviderType schoolType) {
 		setColumn(COLUMN_SCHOOL_TYPE, schoolType);
 	}
 }

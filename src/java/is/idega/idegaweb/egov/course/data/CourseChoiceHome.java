@@ -1,17 +1,17 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.data.IDOException;
-import com.idega.block.school.data.School;
-import java.util.Collection;
-import javax.ejb.CreateException;
-import com.idega.data.IDOHome;
-import com.idega.block.school.data.SchoolType;
-import com.idega.util.IWTimestamp;
-import javax.ejb.FinderException;
 import java.sql.Date;
-import com.idega.user.data.User;
+import java.util.Collection;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+
+import com.idega.data.IDOException;
+import com.idega.data.IDOHome;
 import com.idega.user.data.Gender;
+import com.idega.user.data.User;
+import com.idega.util.IWTimestamp;
 
 public interface CourseChoiceHome extends IDOHome {
 	public CourseChoice create() throws CreateException;
@@ -37,7 +37,7 @@ public interface CourseChoiceHome extends IDOHome {
 
 	public Collection findAllByUser(User user) throws FinderException;
 
-	public Collection findAllByUserAndProviders(User user, Collection providers)
+	public Collection<CourseChoice> findAllByUserAndProviders(User user, Collection<CourseProvider> providers)
 			throws FinderException;
 
 	public CourseChoice findByUserAndCourse(User user, Course course)
@@ -49,8 +49,8 @@ public interface CourseChoiceHome extends IDOHome {
 	public int getCountByUserAndProviders(User user, Collection providers)
 			throws IDOException;
 
-	public int getCountByProviderAndSchoolTypeAndGender(School provider,
-			SchoolType type, Gender gender, Date fromDate, Date toDate)
+	public int getCountByProviderAndSchoolTypeAndGender(CourseProvider provider,
+			CourseProviderType type, Gender gender, Date fromDate, Date toDate)
 			throws IDOException;
 
 	public int getCountByCourseAndGender(Course course, Gender gender)

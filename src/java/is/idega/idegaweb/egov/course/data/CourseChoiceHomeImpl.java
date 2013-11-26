@@ -1,18 +1,18 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.data.IDOException;
-import com.idega.block.school.data.School;
-import javax.ejb.CreateException;
-import com.idega.user.data.User;
 import java.sql.Date;
-import com.idega.user.data.Gender;
 import java.util.Collection;
+
+import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import com.idega.util.IWTimestamp;
-import com.idega.block.school.data.SchoolType;
-import com.idega.data.IDOFactory;
+
 import com.idega.data.IDOEntity;
+import com.idega.data.IDOException;
+import com.idega.data.IDOFactory;
+import com.idega.user.data.Gender;
+import com.idega.user.data.User;
+import com.idega.util.IWTimestamp;
 
 public class CourseChoiceHomeImpl extends IDOFactory implements
 		CourseChoiceHome {
@@ -130,8 +130,8 @@ public class CourseChoiceHomeImpl extends IDOFactory implements
 		return theReturn;
 	}
 
-	public int getCountByProviderAndSchoolTypeAndGender(School provider,
-			SchoolType type, Gender gender, Date fromDate, Date toDate)
+	public int getCountByProviderAndSchoolTypeAndGender(CourseProvider provider,
+			CourseProviderType type, Gender gender, Date fromDate, Date toDate)
 			throws IDOException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		int theReturn = ((CourseChoiceBMPBean) entity)

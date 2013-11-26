@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -12,7 +13,6 @@ import java.util.Iterator;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -157,7 +157,7 @@ public class CourseTypeEditor extends CourseBlock {
 		if (type != null) {
 			inputName.setContent(type.getName());
 			inputLocalization.setContent(type.getLocalizationKey());
-			inputDesc.setContent(type.getDatasource());
+			inputDesc.setContent(type.getDescription());
 			CourseCategory category = type.getCourseCategory();
 			if (category != null) {
 				inputSchoolTypes.setSelectedElement(category.getPrimaryKey()
@@ -269,7 +269,7 @@ public class CourseTypeEditor extends CourseBlock {
 				Iterator it = schoolTypes.iterator();
 				courseTypes = new ArrayList();
 				while (it.hasNext()) {
-					SchoolType type = (SchoolType) it.next();
+					CourseProviderType type = (CourseProviderType) it.next();
 					courseTypes.addAll(getCourseBusiness(iwc).getAllCourseTypes((Integer) type.getPrimaryKey(), false));
 				}
 			} else {

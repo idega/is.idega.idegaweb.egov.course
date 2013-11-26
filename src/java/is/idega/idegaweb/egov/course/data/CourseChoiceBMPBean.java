@@ -13,8 +13,6 @@ import java.util.Collection;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOException;
 import com.idega.data.IDORelationshipException;
@@ -405,7 +403,10 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return idoGetNumberOfRecords(query);
 	}
 
-	public int ejbHomeGetCountByProviderAndSchoolTypeAndGender(School provider, SchoolType type, Gender gender, Date fromDate, Date toDate) throws IDOException {
+	public int ejbHomeGetCountByProviderAndSchoolTypeAndGender(
+			CourseProvider provider, 
+			CourseProviderType type, 
+			Gender gender, Date fromDate, Date toDate) throws IDOException {
 		Table table = new Table(this);
 		Table course = new Table(Course.class);
 		Table courseType = new Table(CourseType.class);

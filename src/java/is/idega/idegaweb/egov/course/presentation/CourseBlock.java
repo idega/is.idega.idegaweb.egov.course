@@ -14,6 +14,7 @@ import is.idega.block.family.data.Relative;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.business.CourseSession;
 
 import java.rmi.RemoteException;
@@ -24,7 +25,6 @@ import java.util.Map;
 
 import javax.faces.component.UIComponent;
 
-import com.idega.block.school.business.SchoolBusiness;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -196,9 +196,9 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		}
 	}
 
-	protected SchoolBusiness getSchoolBusiness(IWApplicationContext iwac) {
+	protected CourseProviderBusiness getSchoolBusiness(IWApplicationContext iwac) {
 		try {
-			return (SchoolBusiness) IBOLookup.getServiceInstance(iwac, SchoolBusiness.class);
+			return (CourseProviderBusiness) IBOLookup.getServiceInstance(iwac, CourseProviderBusiness.class);
 		}
 		catch (RemoteException e) {
 			throw new IBORuntimeException(e.getMessage());

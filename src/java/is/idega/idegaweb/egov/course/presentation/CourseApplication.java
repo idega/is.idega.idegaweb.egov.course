@@ -16,6 +16,8 @@ import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 
@@ -34,8 +36,6 @@ import java.util.SortedSet;
 import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -205,7 +205,7 @@ public class CourseApplication extends ApplicationForm {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.user_not_applicable", "The user you selected is not applicable for this application"));
 						canContinue = false;
 					}
-					else if (!iUseSessionUser && !getCourseBusiness(iwc).hasAvailableCourses(applicant, (SchoolType) null)) {
+					else if (!iUseSessionUser && !getCourseBusiness(iwc).hasAvailableCourses(applicant, (CourseProviderType) null)) {
 						setError(PARAMETER_CHILD_PERSONAL_ID, iwrb.getLocalizedString("application_error.no_courses_available", "There are no courses available for the user you have selected."));
 						canContinue = false;
 					}
@@ -921,7 +921,7 @@ public class CourseApplication extends ApplicationForm {
 			}
 
 			Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
-			schoolTypePK = (Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey();
+			schoolTypePK = (Integer) ((CourseProviderType) schoolTypes.iterator().next()).getPrimaryKey();
 			DropdownMenu catMenu = new DropdownMenu(schoolTypes, PARAMETER_CATEGORY);
 			catMenu.addMenuElementFirst("", iwrb.getLocalizedString("select_school_type", "Select school type"));
 			catMenu.setId(PARAMETER_CATEGORY);
@@ -972,7 +972,7 @@ public class CourseApplication extends ApplicationForm {
 		
 		iter = providers.iterator();
 		while (iter.hasNext()) {
-			School provider = (School) iter.next();
+			CourseProvider provider = (CourseProvider) iter.next();
 			if (getCourseBusiness(iwc).hasAvailableCourses(applicant, provider, type)) {
 				filtered.add(provider);
 			}
@@ -1258,7 +1258,7 @@ public class CourseApplication extends ApplicationForm {
 			Course course = holder.getCourse();
 			CoursePrice price = course.getPrice();
 			CourseType type = course.getCourseType();
-			School provider = course.getProvider();
+			CourseProvider provider = course.getProvider();
 			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course, false);
 
 			DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);

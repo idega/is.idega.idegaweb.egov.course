@@ -8,6 +8,7 @@
 package is.idega.idegaweb.egov.course.business;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -15,9 +16,6 @@ import java.util.Collection;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.business.SchoolBusiness;
-import com.idega.block.school.business.SchoolUserBusiness;
-import com.idega.block.school.data.School;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -32,8 +30,9 @@ import com.idega.user.data.User;
  */
 public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 
+	private static final long serialVersionUID = -5612636090287766679L;
 	private Object iUserPK;
-	private School iProvider;
+	private CourseProvider iProvider;
 	private Boolean iSchoolProvider;
 	private boolean allProvidersSelected;
 
@@ -50,7 +49,7 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		return iSchoolProvider.booleanValue();
 	}
 
-	public School getProvider() throws RemoteException {
+	public CourseProvider getProvider() throws RemoteException {
 		if (getUserContext().isLoggedOn()) {
 			User user = getUserContext().getCurrentUser();
 			Object userID = user.getPrimaryKey();
@@ -73,10 +72,10 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		}
 	}
 
-	private School getSchoolIDFromUser(User user) throws RemoteException {
+	private CourseProvider getSchoolIDFromUser(User user) throws RemoteException {
 		if (user != null) {
 			try {
-				School school = null;
+				CourseProvider school = null;
 				try {
 					school = getSchoolUserBusiness().getFirstManagingChildCareForUser(user);
 				} catch(Exception e) {
@@ -95,26 +94,20 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		return this.iProvider;
 	}
 
-	public void setProvider(School provider) {
+	public void setProvider(CourseProvider provider) {
 		this.iProvider = provider;
 	}
 
 	public void setProviderPK(Object providerPK) {
 		if (providerPK != null) {
-			try {
-				setProvider(getSchoolBusiness().getSchool(providerPK));
-			}
-			catch (RemoteException re) {
-				throw new IBORuntimeException(re);
-			}
-		}
-		else {
+			setProvider(getSchoolBusiness().getSchool(providerPK));
+		} else {
 			setProvider(null);
 		}
 	}
 
-	public Collection getSchoolsForUser() throws RemoteException {
-		Collection schools = new ArrayList();
+	public Collection<CourseProvider> getSchoolsForUser() throws RemoteException {
+		Collection<CourseProvider> schools = new ArrayList<CourseProvider>();
 		if (isSchoolProvider()) {
 			schools.add(getProvider());
 		}
@@ -147,18 +140,18 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		}
 	}
 
-	private SchoolBusiness getSchoolBusiness() {
+	private CourseProviderBusiness getSchoolBusiness() {
 		try {
-			return (SchoolBusiness) IBOLookup.getServiceInstance(getIWApplicationContext(), SchoolBusiness.class);
+			return (CourseProviderBusiness) IBOLookup.getServiceInstance(getIWApplicationContext(), CourseProviderBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
 		}
 	}
 
-	private SchoolUserBusiness getSchoolUserBusiness() {
+	private CourseProviderUserBusiness getSchoolUserBusiness() {
 		try {
-			return (SchoolUserBusiness) IBOLookup.getServiceInstance(this.getIWApplicationContext(), SchoolUserBusiness.class);
+			return (CourseProviderUserBusiness) IBOLookup.getServiceInstance(this.getIWApplicationContext(), CourseProviderUserBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);

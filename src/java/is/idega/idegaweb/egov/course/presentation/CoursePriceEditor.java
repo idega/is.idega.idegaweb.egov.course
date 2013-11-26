@@ -3,6 +3,8 @@ package is.idega.idegaweb.egov.course.presentation;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -14,8 +16,6 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolArea;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -221,7 +221,7 @@ public class CoursePriceEditor extends CourseBlock {
 			CoursePrice cPrice = (CoursePrice) iter.next();
 			CourseType type = cPrice.getCourseType();
 			CourseCategory courseCategory = type.getCourseCategory();
-			SchoolArea area = cPrice.getSchoolArea();
+			CourseProviderArea area = cPrice.getSchoolArea();
 			row = group.createRow();
 
 			try {
@@ -438,7 +438,7 @@ public class CoursePriceEditor extends CourseBlock {
 		if (price != null) {
 			CourseType type = price.getCourseType();
 			CourseCategory category = type.getCourseCategory();
-			SchoolArea area = price.getSchoolArea();
+			CourseProviderArea area = price.getSchoolArea();
 
 			inputName.setContent(price.getName());
 			inputLength.setContent(Integer.toString(price.getNumberOfDays()));
@@ -462,7 +462,7 @@ public class CoursePriceEditor extends CourseBlock {
 
 		}
 		else {
-			cargoTypes = getCourseBusiness(iwc).getCourseTypes((Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey(), true);
+			cargoTypes = getCourseBusiness(iwc).getCourseTypes((Integer) ((CourseProviderType) schoolTypes.iterator().next()).getPrimaryKey(), true);
 			courseTypeID.addMenuElements(cargoTypes);
 		}
 

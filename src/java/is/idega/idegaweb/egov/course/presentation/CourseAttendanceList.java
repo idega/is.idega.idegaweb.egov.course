@@ -12,6 +12,7 @@ import is.idega.idegaweb.egov.course.business.CourseAttendanceWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -22,7 +23,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.idega.block.school.data.School;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -106,7 +106,7 @@ public class CourseAttendanceList extends CourseBlock {
 
 			Collection providersList = getBusiness().getProviders();
 			if (providersList.size() == 1) {
-				School school = (School) providersList.iterator().next();
+				CourseProvider school = (CourseProvider) providersList.iterator().next();
 				getSession().setProvider(school);
 				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
 			}

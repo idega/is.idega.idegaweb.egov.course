@@ -8,6 +8,9 @@
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
@@ -18,9 +21,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolArea;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -70,7 +70,7 @@ public class CourseStatistics extends CourseBlock {
 			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_statistics", "Course statistics"));
 			section.add(heading);
 
-			SchoolType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
+			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
 			Collection courseTypes = getBusiness().getCourseTypes(new Integer(schoolTypePK.toString()), false);
 			Collection areas = getBusiness().getSchoolAreas();
 
@@ -81,7 +81,7 @@ public class CourseStatistics extends CourseBlock {
 
 			Iterator iter = areas.iterator();
 			while (iter.hasNext()) {
-				SchoolArea area = (SchoolArea) iter.next();
+				CourseProviderArea area = (CourseProviderArea) iter.next();
 
 				Collection providers = getBusiness().getProviders(area, type);
 				if (userProviders != null) {
@@ -163,7 +163,7 @@ public class CourseStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, SchoolType type, Collection providers, Collection courseTypes, Layer section, String header) throws RemoteException {
+	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection providers, Collection courseTypes, Layer section, String header) throws RemoteException {
 		Heading2 heading2 = new Heading2(header);
 		section.add(heading2);
 
@@ -185,7 +185,7 @@ public class CourseStatistics extends CourseBlock {
 		Map providerTotals = new HashMap();
 		Iterator iterator = providers.iterator();
 		while (iterator.hasNext()) {
-			School provider = (School) iterator.next();
+			CourseProvider provider = (CourseProvider) iterator.next();
 
 			cell = row.createHeaderCell();
 			cell.setStyleClass(provider.getPrimaryKey().toString());
@@ -217,7 +217,7 @@ public class CourseStatistics extends CourseBlock {
 			int sum = 0;
 			iterator = providers.iterator();
 			while (iterator.hasNext()) {
-				School provider = (School) iterator.next();
+				CourseProvider provider = (CourseProvider) iterator.next();
 				if (!providerTotals.containsKey(provider)) {
 					providerTotals.put(provider, new Integer(0));
 				}
@@ -256,7 +256,7 @@ public class CourseStatistics extends CourseBlock {
 
 		iterator = providers.iterator();
 		while (iterator.hasNext()) {
-			School provider = (School) iterator.next();
+			CourseProvider provider = (CourseProvider) iterator.next();
 			int providerSum = ((Integer) providerTotals.get(provider)).intValue();
 
 			cell = row.createCell();

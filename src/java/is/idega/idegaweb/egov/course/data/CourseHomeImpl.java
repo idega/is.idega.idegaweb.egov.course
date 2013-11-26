@@ -7,8 +7,6 @@ import java.util.Collection;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOException;
 import com.idega.data.IDOFactory;
@@ -40,7 +38,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	}
 
 	@Override
-	public Collection findAllByProvider(School provider) throws FinderException, IDORelationshipException {
+	public Collection findAllByProvider(CourseProvider provider) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseBMPBean) entity).ejbFindAllByProvider(provider);
 		this.idoCheckInPooledEntity(entity);
@@ -80,7 +78,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	}
 
 	@Override
-	public Collection findAllByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws FinderException {
+	public Collection findAllByProviderAndSchoolTypeAndCourseType(CourseProvider provider, CourseProviderType type, CourseType courseType, Date fromDate, Date toDate) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		Collection ids = ((CourseBMPBean) entity).ejbFindAllByProviderAndSchoolTypeAndCourseType(provider, type, courseType, fromDate, toDate);
 		this.idoCheckInPooledEntity(entity);
@@ -120,7 +118,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	}
 
 	@Override
-	public int getCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException {
+	public int getCountByProviderAndSchoolTypeAndCourseType(CourseProvider provider, CourseProviderType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
 		int theReturn = ((CourseBMPBean) entity).ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(provider, type, courseType, fromDate, toDate);
 		this.idoCheckInPooledEntity(entity);

@@ -13,6 +13,8 @@ import is.idega.idegaweb.egov.course.business.CourseWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -23,8 +25,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -50,7 +50,7 @@ public class CourseList extends CourseBlock {
 
 	protected static final String PARAMETER_SORTING = "prm_sorting";
 
-	private SchoolType type = null;
+	private CourseProviderType type = null;
 	private boolean showTypes = true;
 
 	@Override
@@ -112,7 +112,7 @@ public class CourseList extends CourseBlock {
 
 			Collection providersList = getBusiness().getProviders();
 			if (providersList.size() == 1) {
-				School school = (School) providersList.iterator().next();
+				CourseProvider school = (CourseProvider) providersList.iterator().next();
 				getSession().setProvider(school);
 				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
 			}
@@ -138,7 +138,7 @@ public class CourseList extends CourseBlock {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = (SchoolType) schoolTypes.iterator().next();
+				type = (CourseProviderType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);
@@ -147,7 +147,7 @@ public class CourseList extends CourseBlock {
 			Collection schoolTypes = getBusiness().getAllSchoolTypes();
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = (SchoolType) schoolTypes.iterator().next();
+				type = (CourseProviderType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);
@@ -434,7 +434,7 @@ public class CourseList extends CourseBlock {
 			}
 
 			if (isSchoolSuperAdministrator(iwc)) {
-				School provider = course.getProvider();
+				CourseProvider provider = course.getProvider();
 
 				cell = row.createCell();
 				cell.setStyleClass("provider");

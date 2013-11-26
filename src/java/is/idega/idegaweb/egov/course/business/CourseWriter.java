@@ -10,6 +10,7 @@ package is.idega.idegaweb.egov.course.business;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
@@ -31,8 +32,6 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import com.idega.block.school.business.SchoolBusiness;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.core.file.util.MimeTypeUtil;
 import com.idega.idegaweb.IWApplicationContext;
@@ -71,7 +70,7 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 			this.iwrb = iwc.getIWMainApplication().getBundle(CourseConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(this.locale);
 
 			if (getCourseSession(iwc).getProvider() != null && iwc.isParameterSet(CourseBlock.PARAMETER_SCHOOL_TYPE_PK)) {
-				SchoolType type = getSchoolBusiness(iwc).getSchoolType(iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK));
+				CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK));
 				schoolTypeName = type.getSchoolTypeName();
 
 				Date fromDate = iwc.isParameterSet(CourseBlock.PARAMETER_FROM_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_FROM_DATE)).getDate() : null;
@@ -214,7 +213,7 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 		return (CourseSession) IBOLookup.getSessionInstance(iwc, CourseSession.class);
 	}
 
-	private SchoolBusiness getSchoolBusiness(IWApplicationContext iwc) throws RemoteException {
-		return (SchoolBusiness) IBOLookup.getServiceInstance(iwc, SchoolBusiness.class);
+	private CourseProviderBusiness getSchoolBusiness(IWApplicationContext iwc) throws RemoteException {
+		return (CourseProviderBusiness) IBOLookup.getServiceInstance(iwc, CourseProviderBusiness.class);
 	}
 }

@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -24,7 +25,6 @@ import java.util.Map;
 import javax.ejb.FinderException;
 import javax.faces.component.UIComponent;
 
-import com.idega.block.school.data.School;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -275,7 +275,7 @@ public class CourseParticipantOverview extends CourseBlock {
 				}
 
 				Course course = choice.getCourse();
-				School provider = course.getProvider();
+				CourseProvider provider = course.getProvider();
 				CourseType type = course.getCourseType();
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());

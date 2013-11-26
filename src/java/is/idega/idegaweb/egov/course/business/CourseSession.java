@@ -1,10 +1,12 @@
 package is.idega.idegaweb.egov.course.business;
 
 
-import com.idega.block.school.data.School;
-import java.util.Collection;
-import com.idega.business.IBOSession;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+
 import java.rmi.RemoteException;
+import java.util.Collection;
+
+import com.idega.business.IBOSession;
 
 public interface CourseSession extends IBOSession {
 	/**
@@ -15,12 +17,12 @@ public interface CourseSession extends IBOSession {
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#getProvider
 	 */
-	public School getProvider() throws RemoteException, RemoteException;
+	public CourseProvider getProvider() throws RemoteException, RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#setProvider
 	 */
-	public void setProvider(School provider) throws RemoteException;
+	public void setProvider(CourseProvider provider) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#setProviderPK
@@ -30,7 +32,7 @@ public interface CourseSession extends IBOSession {
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#getSchoolsForUser
 	 */
-	public Collection getSchoolsForUser() throws RemoteException,
+	public Collection<CourseProvider> getSchoolsForUser() throws RemoteException,
 			RemoteException;
 
 	/**

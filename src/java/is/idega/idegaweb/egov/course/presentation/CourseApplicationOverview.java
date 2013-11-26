@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 
@@ -24,7 +25,6 @@ import java.util.SortedSet;
 import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
-import com.idega.block.school.data.School;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
 import com.idega.presentation.IWContext;
@@ -288,7 +288,7 @@ public class CourseApplicationOverview extends CourseBlock {
 				ApplicationHolder appHolder = (ApplicationHolder) iter.next();
 
 				Course course = appHolder.getCourse();
-				School provider = course.getProvider();
+				CourseProvider provider = course.getProvider();
 				CourseType type = course.getCourseType();
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());

@@ -9,6 +9,9 @@ package is.idega.idegaweb.egov.course.presentation.statistics;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
@@ -21,9 +24,6 @@ import java.util.Map;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolArea;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
 import com.idega.idegaweb.IWApplicationContext;
@@ -83,8 +83,8 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM))).getDate() : null;
 				Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO))).getDate() : null;
 
-				SchoolType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
-				SchoolArea area = getSchoolBusiness(iwc).getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
+				CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
+				CourseProviderArea area = getSchoolBusiness(iwc).getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
 				Collection providers = getBusiness().getProviders(area, type);
 
 				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
@@ -94,7 +94,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 				Iterator iter = providers.iterator();
 				while (iter.hasNext()) {
-					School provider = (School) iter.next();
+					CourseProvider provider = (CourseProvider) iter.next();
 
 					Collection courses = getBusiness().getCourses(provider, type, fromDate, toDate);
 
@@ -187,7 +187,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, SchoolType type, Collection courses, Layer section, String header, Date fromDate, Date toDate) throws RemoteException {
+	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection courses, Layer section, String header, Date fromDate, Date toDate) throws RemoteException {
 		Gender male = null;
 		Gender female = null;
 		try {

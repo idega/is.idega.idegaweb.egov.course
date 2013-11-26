@@ -6,7 +6,6 @@ import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 import java.sql.Timestamp;
 import java.util.Collection;
 
-import com.idega.block.school.data.School;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDORemoveRelationshipException;
@@ -31,7 +30,7 @@ public interface Course extends IDOEntity {
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getProvider
 	 */
-	public School getProvider();
+	public CourseProvider getProvider();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCourseType
@@ -141,7 +140,7 @@ public interface Course extends IDOEntity {
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setProvider
 	 */
-	public void setProvider(School provider);
+	public void setProvider(CourseProvider provider);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseType

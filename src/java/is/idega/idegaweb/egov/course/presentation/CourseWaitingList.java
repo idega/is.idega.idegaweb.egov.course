@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -20,7 +21,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.location.data.Address;
@@ -53,7 +53,7 @@ public class CourseWaitingList extends CourseBlock {
 	private static final int ACTION_VIEW = 1;
 	private static final int ACTION_ACCEPT = 2;
 	
-	private SchoolType type = null;
+	private CourseProviderType type = null;
 
 	@Override
 	public void present(IWContext iwc) {
@@ -181,10 +181,10 @@ public class CourseWaitingList extends CourseBlock {
 
 		boolean showTypes = true;
 		if (getSession().getProvider() != null) {
-			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			Collection<CourseProviderType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = (SchoolType) schoolTypes.iterator().next();
+				type = (CourseProviderType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);

@@ -16,6 +16,8 @@ import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
@@ -31,8 +33,6 @@ import java.util.Map;
 import java.util.SortedSet;
 
 import com.ibm.icu.text.NumberFormat;
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
@@ -72,7 +72,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
 
-	protected SchoolType type = null;
+	protected CourseProviderType type = null;
 	
 	protected ICPage changeEmailResponsePage = null;
 
@@ -200,7 +200,7 @@ public class CourseParticipantsList extends CourseBlock {
 			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = (SchoolType) schoolTypes.iterator().next();
+				type = (CourseProviderType) schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);
@@ -515,7 +515,7 @@ public class CourseParticipantsList extends CourseBlock {
 		String courseId = course == null ? null : course.getPrimaryKey().toString();
 		String schoolId = null;
 		if (course != null) {
-			School school = course.getProvider();
+			CourseProvider school = course.getProvider();
 			schoolId = school == null ? null : school.getPrimaryKey().toString();
 		}
 		String schoolTypeId = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);

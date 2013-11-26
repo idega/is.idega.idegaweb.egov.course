@@ -6,6 +6,8 @@ import is.idega.idegaweb.egov.course.business.CourseSession;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -22,8 +24,6 @@ import javax.ejb.FinderException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.block.web2.business.JQuery;
 import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
@@ -93,7 +93,7 @@ public class CourseEditor extends CourseBlock {
 	protected static final int ACTION_SAVE = 4;
 	protected static final int ACTION_DELETE = 5;
 
-	private SchoolType type = null;
+	private CourseProviderType type = null;
 
 	private boolean showTypes = true,
 					showCourseCategory = true,
@@ -242,9 +242,9 @@ public class CourseEditor extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			Collection<School> providersList = getBusiness().getProviders();
+			Collection<? extends CourseProvider> providersList = getBusiness().getProviders();
 			if (providersList.size() == 1) {
-				School school = providersList.iterator().next();
+				CourseProvider school = providersList.iterator().next();
 				if (getSession() != null)
 					getSession().setProvider(school);
 				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
@@ -267,7 +267,7 @@ public class CourseEditor extends CourseBlock {
 		schoolType.keepStatusOnAction(true);
 
 		if (getSession() != null && getProvider() != null) {
-			Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getProvider());
+			Collection<CourseProviderType> schoolTypes = getBusiness().getSchoolTypes(getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
 				type = schoolTypes.iterator().next();
@@ -275,7 +275,7 @@ public class CourseEditor extends CourseBlock {
 			}
 			schoolType.addMenuElements(schoolTypes);
 		} else {
-			Collection<SchoolType> schoolTypes = getBusiness().getAllSchoolTypes();
+			Collection<CourseProviderType> schoolTypes = getBusiness().getAllSchoolTypes();
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
 				type = schoolTypes.iterator().next();
@@ -637,9 +637,9 @@ public class CourseEditor extends CourseBlock {
 		if (useFixedPrice == null) {
 			try {
 				if (getSession() != null && getProvider() != null) {
-					Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getProvider());
+					Collection<CourseProviderType> schoolTypes = getBusiness().getSchoolTypes(getProvider());
 					if (schoolTypes.size() == 1) {
-						SchoolType type = schoolTypes.iterator().next();
+						CourseProviderType type = schoolTypes.iterator().next();
 						CourseCategory c = getBusiness().getCourseCategory(type.getPrimaryKey());
 						useFixedPrice = c.useFixedPricing();
 						return useFixedPrice;
@@ -680,7 +680,7 @@ public class CourseEditor extends CourseBlock {
 		return user;
 	}
 
-	private School getProvider() {
+	private CourseProvider getProvider() {
 		try {
 			CourseSession session = getSession();
 			if (session == null)
@@ -816,13 +816,13 @@ public class CourseEditor extends CourseBlock {
 		Object schoolTypePK = null;
 
 		Collection cargoTypes = null;
-		School provider = getProvider();
+		CourseProvider provider = getProvider();
 		Collection schoolTypes = provider == null ? null : getCourseBusiness().getSchoolTypes(provider);
 		if (schoolTypes != null) {
 			if (schoolTypeID != null && schoolTypes.size() > 1) {
 				schoolTypeID.addMenuElements(schoolTypes);
 			} else if (schoolTypes.size() == 1) {
-				SchoolType type = (SchoolType) schoolTypes.iterator().next();
+				CourseProviderType type = (CourseProviderType) schoolTypes.iterator().next();
 				showTypes = false;
 				form.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
 				schoolTypePK = type.getPrimaryKey();
@@ -845,7 +845,7 @@ public class CourseEditor extends CourseBlock {
 				useFixedPrices = category == null ? false : category.useFixedPricing();
 			}
 
-			School providerFromCourse = course.getProvider();
+			CourseProvider providerFromCourse = course.getProvider();
 			CoursePrice coursePrice = course.getPrice();
 
 			if (course.getCourseNumber() > 0) {
@@ -891,7 +891,7 @@ public class CourseEditor extends CourseBlock {
 						postCarePrice.setContent(coursePrice.getPostCarePrice() > 0 ? Integer.toString(coursePrice.getPostCarePrice()) : "0");
 
 						try {
-							Collection prices = getCourseBusiness().getCoursePriceHome().findAll(providerFromCourse.getSchoolArea(), type);
+							Collection prices = getCourseBusiness().getCoursePriceHome().findAll(providerFromCourse.getCourseProviderArea(), type);
 							priceDrop.addMenuElements(prices);
 							priceDrop.setSelectedElement(course.getPrice().getPrimaryKey().toString());
 						} catch (IDORelationshipException e) {
@@ -916,7 +916,7 @@ public class CourseEditor extends CourseBlock {
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
 		} else {
 			if (isShowCourseType() && schoolTypes != null && schoolTypes.iterator().hasNext()) {
-				cargoTypes = getCourseBusiness().getCourseTypes((Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey(), true);
+				cargoTypes = getCourseBusiness().getCourseTypes((Integer) ((CourseProviderType) schoolTypes.iterator().next()).getPrimaryKey(), true);
 				courseTypeID.addMenuElements(cargoTypes);
 			}
 

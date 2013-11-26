@@ -8,6 +8,9 @@
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 import java.rmi.RemoteException;
@@ -19,9 +22,6 @@ import java.util.Map;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolArea;
-import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
 import com.idega.idegaweb.IWApplicationContext;
@@ -75,7 +75,7 @@ public class CourseParticipantsStatistics extends CourseBlock {
 			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_participants_statistics", "Course participants statistics"));
 			section.add(heading);
 
-			SchoolType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
+			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
 			Collection areas = getBusiness().getSchoolAreas();
 
 			Collection userProviders = null;
@@ -85,7 +85,7 @@ public class CourseParticipantsStatistics extends CourseBlock {
 
 			Iterator iter = areas.iterator();
 			while (iter.hasNext()) {
-				SchoolArea area = (SchoolArea) iter.next();
+				CourseProviderArea area = (CourseProviderArea) iter.next();
 
 				Collection providers = getBusiness().getProviders(area, type);
 				if (userProviders != null) {
@@ -169,7 +169,7 @@ public class CourseParticipantsStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, SchoolType type, Collection providers, Layer section, String header) throws RemoteException {
+	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection providers, Layer section, String header) throws RemoteException {
 		Gender male = null;
 		Gender female = null;
 		try {
@@ -225,7 +225,7 @@ public class CourseParticipantsStatistics extends CourseBlock {
 		int total = 0;
 		Iterator iter = providers.iterator();
 		while (iter.hasNext()) {
-			School provider = (School) iter.next();
+			CourseProvider provider = (CourseProvider) iter.next();
 
 			row = group.createRow();
 			cell = row.createCell();

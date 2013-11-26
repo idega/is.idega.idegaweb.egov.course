@@ -7,8 +7,6 @@ import java.util.Collection;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.School;
-import com.idega.block.school.data.SchoolType;
 import com.idega.data.IDOException;
 import com.idega.data.IDOHome;
 import com.idega.data.IDORelationshipException;
@@ -19,19 +17,19 @@ public interface CourseHome extends IDOHome {
 
 	public Course findByPrimaryKey(Object pk) throws FinderException;
 
-	public Collection findAll() throws FinderException, IDORelationshipException;
+	public Collection<Course> findAll() throws FinderException, IDORelationshipException;
 
-	public Collection findAllByProvider(School provider) throws FinderException, IDORelationshipException;
+	public Collection<Course> findAllByProvider(CourseProvider provider) throws FinderException, IDORelationshipException;
 
-	public Collection findAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException;
+	public Collection<Course> findAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException;
 
-	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException;
+	public Collection<Course> findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException;
 
-	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException;
+	public Collection<Course> findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException;
 
-	public Collection findAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException;
+	public Collection<Course> findAll(Collection<CourseProvider> providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException;
 
-	public Collection findAllByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws FinderException;
+	public Collection<Course> findAllByProviderAndSchoolTypeAndCourseType(CourseProvider provider, CourseProviderType type, CourseType courseType, Date fromDate, Date toDate) throws FinderException;
 
 	public int getCountBySchoolTypeAndBirthYear(Object schoolTypePK, int birthYear, Date fromDate) throws IDOException;
 
@@ -41,13 +39,13 @@ public interface CourseHome extends IDOHome {
 
 	public int getCountBySchoolAndBirthYear(Object schoolPK, int birthYear, Date fromDate) throws IDOException;
 
-	public int getCountByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException;
+	public int getCountByProviderAndSchoolTypeAndCourseType(CourseProvider provider, CourseProviderType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException;
 
 	public int getHighestCourseNumber() throws IDOException;
 
-	public Collection findAllWithNoCourseNumber() throws FinderException;
+	public Collection<Course> findAllWithNoCourseNumber() throws FinderException;
 
-	public Collection findAllByTypes(Collection<String> typesIds) throws FinderException;
+	public Collection<Course> findAllByTypes(Collection<String> typesIds) throws FinderException;
 
 	public Collection<Course> findAllByUser(String user) throws FinderException;
 }

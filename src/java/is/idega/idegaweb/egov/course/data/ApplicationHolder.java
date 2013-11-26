@@ -2,7 +2,6 @@ package is.idega.idegaweb.egov.course.data;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 
-import com.idega.block.school.data.School;
 import com.idega.user.data.User;
 
 public class ApplicationHolder {
@@ -36,7 +35,7 @@ public class ApplicationHolder {
 		return course;
 	}
 
-	public School getProvider() {
+	public CourseProvider getProvider() {
 		return getCourse().getProvider();
 	}
 
