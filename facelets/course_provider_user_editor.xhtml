@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<link 
+		rel="stylesheet"
+		type="text/css"
+		href="#{iwResourceResolver['com.idega.core']['style/iw_core.css']}"/>
+	<link
+		rel="stylesheet"
+		type="text/css"
+		href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
+	<script 
+		type="text/javascript" 
+		src="http://code.jquery.com/jquery-latest.min.js"/>
+	<script
+		type="text/javascript"
+		src="//code.jquery.com/ui/1.10.3/jquery-ui.js"/>
+	<script 
+		type="text/javascript"
+		src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"/>
+	<script 
+		type="text/javascript" 
+		src="#{iwResourceResolver['com.idega.core']['iw_core.js']}"/>
+	<script 
+		type="text/javascript"
+		src="#{iwResourceResolver['is.idega.idegaweb.egov.course']['javascript/courseProviderUserEditorHelper.js']}"/>
+	<script type="text/javascript">
+		CourseProviderUserEditorHelper.FIELD_IS_REQUIRED = "#{localizedStrings['is.idega.idegaweb.egov.course']['field_is_required']}";
+		CourseProviderUserEditorHelper.SAVING = "#{localizedStrings['is.idega.idegaweb.egov.course']['saving']}";
+		CourseProviderUserEditorHelper.LOADING = "#{localizedStrings['is.idega.idegaweb.egov.course']['loading']}";
+	</script>
+	<h:panelGroup
+		rendered="#{courseProviderUserBean.submitted}">
+		<h:outputText
+			styleClass="savedText"
+			value="#{localizedStrings['is.idega.idegaweb.egov.course']['saved']}"/>
+	</h:panelGroup>
+	<h:form
+		rendered="#{not courseProviderUserBean.submitted}"
+		id="typeForm">
+		<h:panelGrid
+			columns="2"
+			styleClass="editorTable">
+			<h:panelGroup
+				layout="block">
+				<h:outputLabel
+					for="type"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['type']}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:selectOneMenu
+					id="type"
+					value="#{courseProviderUserBean.courseProviderUserTypeId}"
+					valueChangeListener="#{courseProviderUserBean.selectedTypeChange}"
+					onchange="showLoadingMessage(CourseProviderUserEditorHelper.LOADING); submit();">
+					<f:selectItem
+						itemLabel="#{localizedStrings['is.idega.idegaweb.egov.course']['select_user_type']}"
+						itemValue="-1"/>
+					<f:selectItems
+						value="#{courseProviderUserBean.courseProviderUserTypes}"/>
+				</h:selectOneMenu>
+			</h:panelGroup>
+			<h:panelGroup
+				rendered="#{not courseProviderUserBean.superAdminSelected}"
+				layout="block">
+				<h:outputLabel
+					for="area"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['area']}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				rendered="#{not courseProviderUserBean.superAdminSelected}"
+				layout="block">
+				<h:selectManyCheckbox
+					id="area"
+					value="#{courseProviderUserBean.courseProviderIds}"
+					layout="pageDirection">
+					<f:selectItems
+						value="#{courseProviderUserBean.courseProviders}"/>
+				</h:selectManyCheckbox>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:outputLabel
+					for="email"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['email']}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:inputText
+					id="email"
+					value="#{courseProviderUserBean.eMail}"
+					autocomplete="off"
+					onkeyup="CourseProviderUserEditorHelper.loadUserMails(this.value)"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:outputLabel
+					for="name"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['name']}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:inputText
+					id="name"
+					value="#{courseProviderUserBean.name}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:outputLabel
+					for="phone"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['phone']}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:inputText
+					id="phone"
+					value="#{courseProviderUserBean.phone}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:commandButton
+					id="saveButton"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['save']}"
+					action="#{courseProviderUserBean.submit}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:inputHidden
+					value="#{courseProviderUserBean.id}"/>
+				<h:inputHidden
+					id="idegaUserId"
+					value="#{courseProviderUserBean.idegaUserId}"/>
+			</h:panelGroup>
+		</h:panelGrid>
+	</h:form>
+</div>

@@ -1,0 +1,18 @@
+div.areasContainer {
+	display: none;
+	width: -moz-fit-content;
+    width: -webkit-fit-content;
+    width: fit-content;
+	border: 1px solid #CCCCCC;
+	border-radius: 0.5cm;
+	padding-left: 0.5cm;
+	padding-right: 0.5cm;
+	margin-bottom: 12pt;
+}
+
+div.tableContainer {
+	width: -moz-fit-content;
+    width: -webkit-fit-content;
+    width: fit-content;
+	margin-bottom: 12pt;
+}
