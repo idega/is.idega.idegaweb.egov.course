@@ -33,3 +33,8 @@ table.table td {
 tr.tableRow:HOVER {
 	background-color: #EFEFEF;	
 }
+
+a.homepageLink, a.windowLink {
+	text-decoration: none;
+	float: left;
+}

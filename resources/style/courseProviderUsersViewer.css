@@ -10,6 +10,10 @@ div.areasContainer {
 	margin-bottom: 12pt;
 }
 
+table.areaName {
+	padding-bottom: 12pt;
+}
+
 div.tableContainer {
 	width: -moz-fit-content;
     width: -webkit-fit-content;
