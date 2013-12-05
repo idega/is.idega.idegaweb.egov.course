@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.sql.Date;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -10,12 +11,21 @@ import javax.ejb.FinderException;
 import com.idega.data.IDOException;
 import com.idega.data.IDOHome;
 import com.idega.data.IDORelationshipException;
+import com.idega.user.data.Group;
+import com.idega.user.data.User;
 
 public interface CourseHome extends IDOHome {
 
 	public Course create() throws CreateException;
 
-	public Course findByPrimaryKey(Object pk) throws FinderException;
+	/**
+	 * 
+	 * @param pk is {@link Course#getPrimaryKey()} to search by, 
+	 * not <code>null</code>;
+	 * @return {@link Course} found or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Course findByPrimaryKey(Object pk);
 
 	public Collection<Course> findAll() throws FinderException, IDORelationshipException;
 
@@ -29,7 +39,25 @@ public interface CourseHome extends IDOHome {
 
 	public Collection<Course> findAll(Collection<CourseProvider> providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException;
 
-	public Collection<Course> findAllByProviderAndSchoolTypeAndCourseType(CourseProvider provider, CourseProviderType type, CourseType courseType, Date fromDate, Date toDate) throws FinderException;
+	/**
+	 * 
+	 * <p>Finds all entities by following criteria:</p>
+	 * @param provider to filter by, skipped if <code>null</code>;
+	 * @param type to filter by, skipped if <code>null</code>;
+	 * @param courseType to filter by, skipped if <code>null</code>;
+	 * @param fromDate is floor for course start date, 
+	 * skipped if <code>null</code>;
+	 * @param toDate is ceiling for course start date, 
+	 * skipped if <code>null</code>;
+	 * @return found entities or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Course> findAllByProviderAndSchoolTypeAndCourseType(
+			CourseProvider provider, 
+			CourseProviderType type, 
+			CourseType courseType, 
+			Date fromDate, 
+			Date toDate);
 
 	public int getCountBySchoolTypeAndBirthYear(Object schoolTypePK, int birthYear, Date fromDate) throws IDOException;
 
@@ -48,4 +76,136 @@ public interface CourseHome extends IDOHome {
 	public Collection<Course> findAllByTypes(Collection<String> typesIds) throws FinderException;
 
 	public Collection<Course> findAllByUser(String user) throws FinderException;
+
+	/**
+	 * 
+	 * <p>All {@link Course}s by following criteria:</p>
+	 * @param courseProviders to filter by, skipped if <code>null</code>;
+	 * @param couserProviderTypes to filter by, skipped if <code>null</code>;
+	 * @param courseTypes to filter by, skipped if <code>null</code>;
+	 * @param birthDateFrom is floor of age of course attender, 
+	 * skipped if <code>null</code>;
+	 * @param birthDateTo is ceiling of age of course attender, 
+	 * skipped if <code>null</code>;
+	 * @param fromDate is floor for course start date, 
+	 * skipped if <code>null</code>;
+	 * @param toDate is ceiling for course start date, 
+	 * skipped if <code>null</code>;
+	 * @param isPrivate tells if {@link Course}s can be viewed by all, 
+	 * skipped if <code>null</code>;
+	 * @param groupsWithAccess is {@link Group}, which can view private 
+	 * {@link Course}s, skipped if <code>null</code>;
+	 * @return entities or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<Course> findAll(
+			Collection<? extends CourseProvider> courseProviders,
+			Collection<? extends CourseProviderType> couserProviderTypes,
+			Collection<? extends CourseType> courseTypes, Date birthDateFrom,
+			Date birthDateTo, Date fromDate, Date toDate, Boolean isPrivate,
+			Collection<Group> groupsWithAccess);
+
+	/**
+	 * 
+	 * <p>Removes entity.</p>
+	 * @param primaryKey is {@link Course#getPrimaryKey()}, not null;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	void remove(String primaryKey);
+
+	/**
+	 * 
+	 * <p>Creates, updates {@link Course}</p>
+	 * @param course to update, new one created if <code>null</code>;
+	 * @param courseNumber
+	 * @param name is {@link Course#getName()}, skipped if <code>null</code>;
+	 * @param handler is {@link Course#getUser()}, skipped if <code>null</code>;
+	 * @param courseType to assign, skipped if <code>null</code>;
+	 * @param provider to assign, skipped if <code>null</code>;
+	 * @param coursePrice to assign, skipped if <code>null</code>;
+	 * @param startDate when {@link Course} should be available for attending, 
+	 * skipped if <code>null</code>;
+	 * @param endDate when course ends, skipped if <code>null</code>;
+	 * @param accountingKey
+	 * @param birthYearFrom is floor of age for attendants, 
+	 * skipped if <code>null</code>;
+	 * @param birthYearTo is ceiling of age for attendants, 
+	 * skipped if <code>null</code>;
+	 * @param maxPer is maximum number of attendants, 
+	 * skipped if <code>null</code>;
+	 * @param price same as coursePrice, but without type, 
+	 * skipped if <code>null</code>;
+	 * @param cost
+	 * @param openForRegistration
+	 * @param registrationEnd
+	 * @param hasPreCare
+	 * @param hasPostCare
+	 * @param isPrivate tells if all {@link User}s can take or manage this 
+	 * course or only certain groups, skipped if <code>null</code>;
+	 * @param groupsWithAccess tells which {@link Group} {@link User}s can
+	 * attend/manage course, skipped if <code>null</code>. Works only with
+	 * isPrivate property;
+	 * @return created/updated entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Course update(Course course, int courseNumber, String name, User handler,
+			CourseType courseType, CourseProvider provider,
+			CoursePrice coursePrice, java.util.Date startDate,
+			java.util.Date endDate, String accountingKey,
+			Integer birthYearFrom, Integer birthYearTo, Integer maxPer,
+			Float price, Float cost, Boolean openForRegistration,
+			java.util.Date registrationEnd, Boolean hasPreCare,
+			Boolean hasPostCare, Boolean isPrivate,
+			Collection<Group> groupsWithAccess);
+
+	/**
+	 * 
+	 * <p>Creates, updates {@link Course}</p>
+	 * @param primaryKey is {@link Course#getPrimaryKey()}, new {@link Course}
+	 * will be created if <code>null</code>;
+	 * @param courseNumber
+	 * @param name is {@link Course#getName()}, skipped if <code>null</code>;
+	 * @param handlerPersonalId is {@link User#getPersonalID()} of handler of
+	 * this {@link Course}, skipped if null;
+	 * @param courseTypePrimaryKey is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param providerPrimaryKey is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param coursePricePrimaryKey is {@link CoursePrice#getPrimaryKey()},
+	 * skipped if <code>null</code>;
+	 * @param startDate when {@link Course} should be available for attending, 
+	 * skipped if <code>null</code>;
+	 * @param endDate when course ends, skipped if <code>null</code>;
+	 * @param accountingKey
+	 * @param birthYearFrom is floor of age for attendants, 
+	 * skipped if <code>null</code>;
+	 * @param birthYearTo is ceiling of age for attendants, 
+	 * skipped if <code>null</code>;
+	 * @param maxPer is maximum number of attendants, 
+	 * skipped if <code>null</code>;
+	 * @param price same as coursePrice, but without type, 
+	 * skipped if <code>null</code>;
+	 * @param cost
+	 * @param openForRegistration
+	 * @param registrationEnd
+	 * @param hasPreCare
+	 * @param hasPostCare
+	 * @param isPrivate tells if all {@link User}s can take or manage this 
+	 * course or only certain groups, skipped if <code>null</code>;
+	 * @param groupsWithAccess is {@link Collection} of {@link Group#getPrimaryKey()}.
+	 * Tells which {@link Group} {@link User}s can
+	 * attend/manage course, skipped if <code>null</code>. Works only with
+	 * isPrivate property;
+	 * @return created/updated entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Course update(String primaryKey, int courseNumber, String name,
+			String handlerPersonalId, String courseTypePrimaryKey,
+			String providerPrimaryKey, String coursePricePrimaryKey,
+			java.util.Date startDate, java.util.Date endDate, String accountingKey,
+			Integer birthYearFrom, Integer birthYearTo, Integer maxPer,
+			Float price, Float cost, Boolean openForRegistration,
+			java.util.Date registrationEnd, Boolean hasPreCare,
+			Boolean hasPostCare, Boolean isPrivate,
+			Collection<String> groupsWithAccess);
 }

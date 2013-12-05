@@ -112,16 +112,28 @@ public class CourseProviderUserUpdatedEvent extends ApplicationEvent {
 	private Set<String> appededCourseProvidersIds = null;
 
 	private Set<String> removedCourseProvidersIds = null;
+
+	private Boolean superAdmin = false;
 	
 	public CourseProviderUserUpdatedEvent(
 			String relatedUserId,
 			Collection<String> appededCourseProvidersIds,
-			Collection<String> removedCourseProvidersIds) {
+			Collection<String> removedCourseProvidersIds, 
+			Boolean isSuperAdmin) {
 
 		super(relatedUserId);
 		this.relatedUserId = relatedUserId;
 		appendAddedCourseProviderIds(appededCourseProvidersIds);
 		appendRemovedCourseProviderIds(removedCourseProvidersIds);
+		this.superAdmin = isSuperAdmin;
+	}
+
+	public Boolean isSuperAdmin() {
+		return superAdmin;
+	}
+
+	public void setSuperAdmin(boolean superAdmin) {
+		this.superAdmin = superAdmin;
 	}
 
 	public String getRelatedUserId() {

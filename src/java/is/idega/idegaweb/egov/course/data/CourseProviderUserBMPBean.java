@@ -275,7 +275,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
 					String.valueOf(this.getUserId()),
 					addedSchoolsIds,
-					null));
+					null, null));
 		}
 	}
 
@@ -292,7 +292,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			cpuue = new CourseProviderUserUpdatedEvent(
 					String.valueOf(this.getUserId()),
 					null,
-					providerIds);
+					providerIds, null);
 		}
 
 		String primarykey = this.getPrimaryKey().toString();
@@ -321,7 +321,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 				ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
 						String.valueOf(this.getUserId()), 
 						null, 
-						Arrays.asList(school.getPrimaryKey().toString())));
+						Arrays.asList(school.getPrimaryKey().toString()), null));
 				getLogger().info(school.getClass().getName() + 
 						" by id: '" + school.getPrimaryKey() + 
 						"' is removed from " + this.getClass().getName() + 
@@ -347,7 +347,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			cpuue = new CourseProviderUserUpdatedEvent(
 					String.valueOf(this.getUserId()),
 					null,
-					providerIds);
+					providerIds, null);
 		}
 		
 		try {
@@ -396,7 +396,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
 					String.valueOf(this.getUserId()), 
 					Arrays.asList(String.valueOf(schoolId)), 
-					null));
+					null, null));
 			getLogger().info(
 					"Added new relation of " + CourseProvider.class.getName() + 
 					" by id: '" + schoolId + 

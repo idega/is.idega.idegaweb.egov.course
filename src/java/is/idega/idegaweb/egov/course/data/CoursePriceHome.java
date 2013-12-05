@@ -14,7 +14,13 @@ public interface CoursePriceHome extends IDOHome {
 
 	public CoursePrice create() throws CreateException;
 
-	public CoursePrice findByPrimaryKey(Object pk) throws FinderException;
+	/**
+	 * 
+	 * @param pk is {@link CoursePrice#getPrimaryKey()}, not <code>null</code>;
+	 * @return entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public CoursePrice findByPrimaryKey(Object pk);
 
 	public Collection<CoursePrice> findAll() throws FinderException, IDORelationshipException;
 

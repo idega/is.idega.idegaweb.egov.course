@@ -21,8 +21,25 @@ public class CoursePriceHomeImpl extends IDOFactory implements CoursePriceHome {
 		return (CoursePrice) super.createIDO();
 	}
 
-	public CoursePrice findByPrimaryKey(Object pk) throws FinderException {
-		return (CoursePrice) super.findByPrimaryKeyIDO(pk);
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CoursePriceHome#findByPrimaryKey(java.lang.Object)
+	 */
+	@Override
+	public CoursePrice findByPrimaryKey(Object pk) {
+		if (pk == null) {
+			return null;
+		}
+
+		try {
+			return (CoursePrice) super.findByPrimaryKeyIDO(pk);
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).warning(
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
+					" by id: '" + pk + "'");
+		}
+
+		return null;
 	}
 
 	public Collection findAll() throws FinderException, IDORelationshipException {

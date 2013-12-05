@@ -9,6 +9,7 @@ import java.util.Collection;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.user.data.Group;
 
 public interface Course extends IDOEntity {
 
@@ -227,4 +228,35 @@ public interface Course extends IDOEntity {
 	public Collection<CoursePrice> getAllPrices();
 	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException;
 	public void removeAllPrices() throws IDORemoveRelationshipException;
+
+	/**
+	 * 
+	 * @return groups, who can view this {@link Course} when it is private;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<Group> getGroupsWithAccess();
+
+	/**
+	 * 
+	 * @param groups which can view this course, when course is private;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	void setGroupsWithAccess(Collection<Group> groups);
+
+	/**
+	 * 
+	 * <p>Removes all related {@link Group}s to this {@link Course}</p>
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	void removeGroupsWithAccess();
+
+	/**
+	 * 
+	 * @return <code>true</code>, when {@link Course} can be seen to concrete 
+	 * set of {@link Group}s, <code>false</code> otherwise;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	boolean isPrivate();
+
+	void setPrivate(boolean isPrivate);
 }

@@ -90,6 +90,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
+import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.repository.data.ImplementorRepository;
@@ -628,8 +629,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			type.remove();
 
 			return true;
-		} catch (javax.ejb.FinderException fe) {
-			fe.printStackTrace();
 		} catch (RemoveException re) {
 			re.printStackTrace();
 		}
@@ -678,8 +677,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					new Integer(pk.toString()));
 			course.remove();
 			return true;
-		} catch (javax.ejb.FinderException fe) {
-			fe.printStackTrace();
 		} catch (RemoveException re) {
 			re.printStackTrace();
 		}
@@ -719,81 +716,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			String user, Object courseTypePK, Object providerPK,
 			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
 			String accountingKey, int birthYearFrom, int birthYearTo,
-			int maxPer, float price, float cost, boolean openForRegistration, IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare)
+			int maxPer, float price, float cost, boolean openForRegistration, 
+			IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare)
 			throws FinderException, CreateException {
-		Course course = null;
-		if (pk != null) {
-			course = getCourseHome().findByPrimaryKey(
-					new Integer(pk.toString()));
-		} else {
-			course = getCourseHome().create();
-		}
-
-		if (courseNumber > 0) {
-			course.setCourseNumber(courseNumber);
-		} else {
-			course.setCourseNumber(getNextCourseNumber());
-		}
-		course.setName(name);
-
-		if (courseTypePK != null) {
-			CourseType type = getCourseType(courseTypePK);
-			course.setCourseType(type);
-		}
-
-		if (providerPK != null) {
-			CourseProvider provider = getSchoolBusiness().getSchool(providerPK);
-			course.setProvider(provider);
-		}
-		course.setUser(user);
-
-		if (coursePricePK != null) {
-			course
-					.setPrice(getCoursePrice(new Integer(coursePricePK
-							.toString())));
-		}
-
-		if (startDate != null) {
-			course.setStartDate(startDate.getTimestamp());
-		}
-
-		if (endDate != null) {
-			course.setEndDate(endDate.getTimestamp());
-		}
-		
-		if (registrationEnd != null) {
-			course.setRegistrationEnd(registrationEnd.getTimestamp());
-		}
-
-		if (accountingKey != null) {
-			course.setAccountingKey(accountingKey);
-		}
-
-		if (birthYearFrom > 0) {
-			course.setBirthyearFrom(birthYearFrom);
-		}
-
-		if (birthYearTo > 0) {
-			course.setBirthyearTo(birthYearTo);
-		}
-
-		if (maxPer >= 0) {
-			course.setMax(maxPer);
-		}
-
-		if (price >= 0 && coursePricePK == null) {
-			course.setCoursePrice(price);
-		}
-		if (cost >= 0 && coursePricePK == null) {
-			course.setCourseCost(cost);
-		}
-		course.setOpenForRegistration(openForRegistration);
-		course.setHasPostCare(hasPostCare);
-		course.setHasPreCare(hasPreCare);
-
-		course.store();
-
-		return course;
+		return getCourseHome().update(
+				pk != null ? pk.toString() : null, 
+				courseNumber, name, user, 
+				courseTypePK != null ? courseTypePK.toString() : null, 
+				providerPK != null ? providerPK.toString() : null, 
+				coursePricePK != null ? coursePricePK.toString() : null, 
+				startDate != null ? startDate.getDate() : null, 
+				endDate != null ? endDate.getDate() : null, 
+				accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, 
+				openForRegistration, 
+				registrationEnd != null ? registrationEnd.getDate() : null, 
+				hasPreCare, hasPostCare, null, null);
 	}
 
 	public void storeCourse(Object pk, int courseNumber, String name,
@@ -843,16 +780,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	public boolean deleteCoursePrice(Object pk) throws RemoteException {
-		CoursePrice price = null;
-		try {
-			price = getCoursePriceHome().findByPrimaryKey(
-					new Integer(pk.toString()));
-			price.setValid(false);
-			price.store();
+		CoursePrice price = getCoursePriceHome().findByPrimaryKey(pk);
+		if (price == null) {
+			return false;
+		}
 
+		price.setValid(false);
+		try {
+			price.store();
+			getLogger().info(CoursePrice.class.getSimpleName() + 
+					" by id: '" + pk + "' removed.");
 			return true;
-		} catch (javax.ejb.FinderException fe) {
-			fe.printStackTrace();
+		} catch (IDOStoreException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to remove " + CoursePrice.class.getSimpleName() + 
+					" by id: '" + pk + "' cause of: ", e);
 		}
 
 		return false;
@@ -1118,25 +1060,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	public CoursePriceDWR getPriceDWR(int pricePK) {
-		try {
-			CoursePrice price = getCoursePriceHome().findByPrimaryKey(
-					new Integer(pricePK));
-
-			CoursePriceDWR dwr = new CoursePriceDWR();
-			dwr.setName(price.getName());
-			dwr.setPk(price.getPrimaryKey().toString());
-			dwr.setPrice(Integer.toString(price.getPrice()));
-			dwr.setPreCarePrice(price.getPreCarePrice() > 0 ? Integer
-					.toString(price.getPreCarePrice()) : "0");
-			dwr.setPostCarePrice(price.getPostCarePrice() > 0 ? Integer
-					.toString(price.getPostCarePrice()) : "0");
-
-			return dwr;
-		} catch (FinderException e) {
-			e.printStackTrace();
+		CoursePrice price = getCoursePriceHome().findByPrimaryKey(pricePK);
+		if (price == null) {
+			return null;
 		}
 
-		return null;
+		CoursePriceDWR dwr = new CoursePriceDWR();
+		dwr.setName(price.getName());
+		dwr.setPk(price.getPrimaryKey().toString());
+		dwr.setPrice(Integer.toString(price.getPrice()));
+		dwr.setPreCarePrice(price.getPreCarePrice() > 0 ? Integer
+				.toString(price.getPreCarePrice()) : "0");
+		dwr.setPostCarePrice(price.getPostCarePrice() > 0 ? Integer
+				.toString(price.getPostCarePrice()) : "0");
+
+		return dwr;
 	}
 
 	public UserDWR getUserDWR(String personalID, int childPK, int minimumAge,
@@ -1546,14 +1484,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	public CoursePrice getCoursePrice(Object pk) {
-		if (pk != null) {
-			try {
-				return getCoursePriceHome().findByPrimaryKey(
-						new Integer(pk.toString()));
-			} catch (javax.ejb.FinderException fe) {
-			}
-		}
-		return null;
+		return getCoursePriceHome().findByPrimaryKey(pk);
 	}
 
 	public Collection getCoursePrices(Date fromDate, Date toDate) {
@@ -1578,11 +1509,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	public Course getCourse(Object pk) {
 		if (pk != null) {
-			try {
-				return getCourseHome().findByPrimaryKey(
-						new Integer(pk.toString()));
-			} catch (javax.ejb.FinderException fe) {
-			}
+			return getCourseHome().findByPrimaryKey(
+					new Integer(pk.toString()));
+
 		}
 		return null;
 	}
@@ -1597,16 +1526,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	public CourseType getCourseType(Object pk) {
-		if (pk != null) {
-			try {
-				return getCourseTypeHome().findByPrimaryKey(
-						new Integer(pk.toString()));
-			} catch (FinderException fe) {
-				log(fe);
-			}
-		}
-
-		return null;
+		return getCourseTypeHome().findByPrimaryKey(pk);
 	}
 
 	public CourseCategory getCourseCategory(Object pk) {
@@ -2701,13 +2621,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	public Collection<Course> getCourses(CourseProvider provider, CourseProviderType schoolType,
 			Date fromDate, Date toDate) {
-		try {
-			return getCourseHome().findAllByProviderAndSchoolTypeAndCourseType(
-					provider, schoolType, null, fromDate, toDate);
-		} catch (FinderException e) {
-			e.printStackTrace();
-			return new ArrayList();
-		}
+		return getCourseHome().findAllByProviderAndSchoolTypeAndCourseType(
+				provider, schoolType, null, fromDate, toDate);
 	}
 
 	public Date getEndDate(CoursePrice price, Date startDate) {

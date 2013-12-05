@@ -1,12 +1,14 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.data.IDORelationshipException;
 import java.util.Collection;
+
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
+
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDORelationshipException;
 
 public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 
@@ -21,8 +23,25 @@ public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 		return (CourseType) super.createIDO();
 	}
 
-	public CourseType findByPrimaryKey(Object pk) throws FinderException {
-		return (CourseType) super.findByPrimaryKeyIDO(pk);
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseTypeHome#findByPrimaryKey(java.lang.Object)
+	 */
+	@Override
+	public CourseType findByPrimaryKey(Object pk) {
+		if (pk == null) {
+			return null;
+		}
+
+		try {
+			return (CourseType) findByPrimaryKeyIDO(pk);
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).warning(
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() +
+					" by id: '" + pk + "'");
+		}
+
+		return null;
 	}
 
 	public Collection findAll(boolean valid) throws FinderException {

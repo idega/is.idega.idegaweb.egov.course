@@ -83,6 +83,8 @@
 package is.idega.idegaweb.egov.course.data;
 
 
+import is.idega.idegaweb.egov.course.event.CourseProviderUserUpdatedEvent;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -103,6 +105,7 @@ import com.idega.user.data.User;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 /**
  * <p>Implementation for {@link CourseProviderUserHome}</p>
@@ -288,9 +291,18 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			return null;
 		}
 
+		/* Updating existing course providers */
 		if (!ListUtil.isEmpty(courseProviders)) {
 			user.removeSchools();
 			user.addSchools(courseProviders);
+		}
+
+		/* Publishing event of changing role for administrator */
+		if (userType != null) {
+			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
+					String.valueOf(user.getUserId()), 
+					null, null, 
+					userType.isSuperAdmin()));
 		}
 
 		java.util.logging.Logger.getLogger(getClass().getName()).info(
@@ -415,6 +427,12 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 
 			try {
 				user.store();
+				ELUtil.getInstance().publishEvent(
+						new CourseProviderUserUpdatedEvent(
+								String.valueOf(user.getUserId()), 
+								null, 
+								null, 
+								false));
 				java.util.logging.Logger.getLogger(getClass().getName()).info(
 						"Type is removed from " + user.getClass().getName() + 
 						" by id: '" + user.getPrimaryKey() + "'");

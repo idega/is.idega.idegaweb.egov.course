@@ -1,17 +1,26 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.data.IDORelationshipException;
 import java.util.Collection;
+
 import javax.ejb.CreateException;
-import com.idega.data.IDOHome;
 import javax.ejb.FinderException;
+
+import com.idega.data.IDOHome;
+import com.idega.data.IDORelationshipException;
 
 public interface CourseTypeHome extends IDOHome {
 
 	public CourseType create() throws CreateException;
 
-	public CourseType findByPrimaryKey(Object pk) throws FinderException;
+	/**
+	 * 
+	 * @param pk is {@link CourseType#getPrimaryKey()} to search by, 
+	 * not <code>null</code>;
+	 * @return found entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public CourseType findByPrimaryKey(Object pk);
 
 	public Collection<CourseType> findAll(boolean valid) throws FinderException;
 

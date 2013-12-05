@@ -82,6 +82,8 @@
  */
 package is.idega.idegaweb.egov.course.data;
 
+import is.idega.idegaweb.egov.course.event.CourseProviderUserUpdatedEvent;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -96,6 +98,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOStoreException;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 /**
  * <p>Implementation for {@link CourseProviderUserTypeHome}</p>
@@ -205,12 +208,18 @@ public class CourseProviderUserTypeHomeImpl extends IDOFactory implements
 			courseProviderUserType.setName(name);
 		}
 
-		if (superAdmin != null) {
+		boolean isRoleChanged = false;
+		if (superAdmin != null && !superAdmin.equals(courseProviderUserType.isSuperAdmin())) {
 			courseProviderUserType.setSuperAdmin(superAdmin);
+			isRoleChanged = true;
 		}
 
 		try {
 			courseProviderUserType.store();
+			if (isRoleChanged) {
+				notify(courseProviderUserType);
+			}
+
 			return courseProviderUserType;
 		} catch (IDOStoreException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
@@ -218,8 +227,30 @@ public class CourseProviderUserTypeHomeImpl extends IDOFactory implements
 					"Failed to store " + getEntityInterfaceClass().getName() + 
 					" cause of: ", e);
 		}
-
+		
 		return null;
+	}
+
+	/**
+	 * 
+	 * <p>Notifying interested parties about changes on 
+	 * {@link CourseProviderUserType#isSuperAdmin()}</p>
+	 * @param courseProviderUserType to notify about, not <code>null</code>;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected void notify(CourseProviderUserType courseProviderUserType) {
+		if (courseProviderUserType != null) {
+			Collection<? extends CourseProviderUser> users = getCourseProviderUserHome()
+					.findByType(Arrays.asList(courseProviderUserType));
+			for (CourseProviderUser user: users) {
+				ELUtil.getInstance().publishEvent(
+						new CourseProviderUserUpdatedEvent(
+								String.valueOf(user.getUserId()), 
+								null, 
+								null, 
+								courseProviderUserType.isSuperAdmin()));
+			}
+		}
 	}
 
 	/* (non-Javadoc)
