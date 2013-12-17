@@ -101,6 +101,7 @@ import com.idega.user.data.Group;
  *
  * @version 1.0.0 Oct 23, 2013
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+ * @param <T>
  */
 public interface CourseProviderHome extends IDOHome {
 
@@ -164,6 +165,7 @@ public interface CourseProviderHome extends IDOHome {
 	 * not <code>null</code>;
 	 * @return entity by primary key or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 * @param <CP>
 	 */
 	public CourseProvider find(String primaryKey);
 
@@ -176,6 +178,17 @@ public interface CourseProviderHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<? extends CourseProvider> find(Collection<String> primaryKeys);
+
+	/**
+	 * 
+	 * @param primaryKeys is {@link Collection} of {@link CourseProvider#getPrimaryKey()},
+	 * not <code>null</code>;
+	 * @return entities by primary keys or {@link Collections#emptyList()} on
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<? extends CourseProvider> findByPrimaryKeys(
+			Collection<Object> primaryKeys);
 
 	/**
 	 * 

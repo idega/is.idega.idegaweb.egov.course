@@ -85,6 +85,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import is.idega.idegaweb.egov.course.event.CourseProviderUpdatedEvent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -111,16 +112,16 @@ import com.idega.util.expression.ELUtil;
  *
  * @version 1.0.0 Oct 23, 2013
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+ * @param <T>
  */
-public class CourseProviderHomeImpl extends IDOFactory implements
-		CourseProviderHome {
+public class CourseProviderHomeImpl extends IDOFactory 
+		implements CourseProviderHome {
 
 	private static final long serialVersionUID = -2095902709213742089L;
 
 	/* (non-Javadoc)
 	 * @see com.idega.data.IDOFactory#getEntityInterfaceClass()
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Class<? extends CourseProvider> getEntityInterfaceClass() {
 		return CourseProvider.class;
@@ -211,6 +212,20 @@ public class CourseProviderHomeImpl extends IDOFactory implements
 		}
 
 		return Collections.emptyList();
+	}
+
+	@Override
+	public Collection<? extends CourseProvider> findByPrimaryKeys(Collection<Object> primaryKeys) {
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
+		}
+
+		ArrayList<String> keys = new ArrayList<String>();
+		for (Object primaryKey: primaryKeys) {
+			keys.add(primaryKey.toString());
+		}
+
+		return find(keys);
 	}
 
 	/*
@@ -381,16 +396,6 @@ public class CourseProviderHomeImpl extends IDOFactory implements
 			courseProvider = find(primaryKey);
 		}
 
-		/*
-		 * Trying to make this entity unique by name and postal code
-		 */
-		if (courseProvider == null) {
-			Collection<? extends CourseProvider> courseProviders = find(name, zipCode);
-			if (!ListUtil.isEmpty(courseProviders)) {
-				courseProvider = courseProviders.iterator().next();
-			}
-		}
-
 		if (courseProvider == null) {
 			try {
 				courseProvider = super.createIDO();
@@ -455,7 +460,19 @@ public class CourseProviderHomeImpl extends IDOFactory implements
 			courseProvider.setHasPostCare(hasPostCare);
 		}
 
-		courseProvider.store();
+		try {
+			courseProvider.store();
+			java.util.logging.Logger.getLogger(getClass().getName()).info(
+					CourseProvider.class.getName() + 
+					" by id: " + courseProvider.getPrimaryKey().toString() + 
+					" stored!");
+		} catch (Exception e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING, 
+					"Failed to create " + CourseProvider.class.getName() + 
+					" cause of: ", e);
+			return null;
+		}
 
 		if (notify) {
 			ELUtil.getInstance().publishEvent(new CourseProviderUpdatedEvent(
