@@ -1743,7 +1743,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				return Collections.emptyList();
 			}
 
-			return schoolUser.getCourseProviders();
+			Collection<? extends CourseProvider> courseProviders = schoolUser.getCourseProviders();
+			if (ListUtil.isEmpty(courseProviders)) {
+				return Collections.emptyList();
+			}
+
+			return new ArrayList<CourseProvider>(courseProviders);
 	}
 
 	private CourseProviderUserHome courseProviderUserHome = null;

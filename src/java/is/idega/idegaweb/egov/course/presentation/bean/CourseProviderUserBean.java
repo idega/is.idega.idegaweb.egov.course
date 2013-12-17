@@ -184,7 +184,7 @@ public class CourseProviderUserBean {
 			return courseProviderIds;
 		}
 
-		Collection<CourseProvider> selectedProviders = getCourseProviderUser()
+		Collection<? extends CourseProvider> selectedProviders = getCourseProviderUser()
 				.getCourseProviders();
 		if (ListUtil.isEmpty(selectedProviders)) {
 			return null;
@@ -224,11 +224,13 @@ public class CourseProviderUserBean {
 	}
 
 	public String getCourseProviderUserTypeId() {
-		if (getCourseProviderUser() == null) {
-			return courseProviderUserTypeId;
+		if (StringUtil.isEmpty(this.courseProviderUserTypeId)
+				&& getCourseProviderUser() != null) {
+			this.courseProviderUserTypeId = String.valueOf(
+					getCourseProviderUser().getUserType());
 		}
 
-		return String.valueOf(getCourseProviderUser().getUserType());
+		return this.courseProviderUserTypeId;
 	}
 
 	public void setCourseProviderUserTypeId(String courseProviderTypeId) {
@@ -253,16 +255,13 @@ public class CourseProviderUserBean {
 		Object value = event.getNewValue();
 		if (value != null) {
 			setCourseProviderUserTypeId(value.toString());
-		}
-
-		setCourseProviderUserTypeId(value.toString());
-
-		CourseProviderUserType userType = getCourseProviderUserTypeHome().find(
-				getCourseProviderUserTypeId());
-		if (userType != null && userType.isSuperAdmin()) {
-			setSuperAdminSelected(Boolean.TRUE);
-		} else {
-			setSuperAdminSelected(Boolean.FALSE);
+			CourseProviderUserType userType = getCourseProviderUserTypeHome().find(
+					this.courseProviderUserTypeId);
+			if (userType != null && userType.isSuperAdmin()) {
+				setSuperAdminSelected(Boolean.TRUE);
+			} else {
+				setSuperAdminSelected(Boolean.FALSE);
+			}
 		}
 	}
 	

@@ -188,7 +188,7 @@ public class CourseProviderUsersAreaGroup {
 		return users;
 	}
 
-	public void addAll(Collection<CourseProviderUserBean> users) {
+	public void addAll(Collection<? extends CourseProviderUserBean> users) {
 		if (!ListUtil.isEmpty(users)) {
 			for (CourseProviderUserBean user: users) {
 				add(user);
