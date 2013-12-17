@@ -243,9 +243,13 @@ public class CourseProviderUsersViewerBean {
 	}
 
 	public void remove(String courseProviderUserId, String courseProviderId) {
-		getCourseProviderUserHome().remove(
-				courseProviderUserId, 
-				courseProviderId);
+		if (!StringUtil.isEmpty(courseProviderId) && !StringUtil.isEmpty(courseProviderUserId)) {
+			getCourseProviderUserHome().remove(
+					courseProviderUserId,
+					courseProviderId);
+		} else if (!StringUtil.isEmpty(courseProviderUserId)) {
+			getCourseProviderUserHome().remove(courseProviderUserId);
+		}
 	}
 
 	public Map<String, UserDWR> getAutocompleteMails(String email) {
