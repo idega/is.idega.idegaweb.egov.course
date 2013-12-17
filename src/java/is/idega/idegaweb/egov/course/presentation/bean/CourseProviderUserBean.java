@@ -141,7 +141,7 @@ public class CourseProviderUserBean {
 	
 	private String phone = null;
 
-	private boolean superAdminSelected = Boolean.FALSE;
+	private Boolean superAdminSelected = null;
 	
 	private CourseProviderUser courseProviderUser = null;
 
@@ -324,14 +324,12 @@ public class CourseProviderUserBean {
 	}
 
 	public boolean isSuperAdminSelected() {
-		if (getCourseProviderUser() == null) {
-			return superAdminSelected;
-		}
-		
-		CourseProviderUserType type = getCourseProviderUserTypeHome().find(
-				String.valueOf(getCourseProviderUser().getUserType()));
-		if (type != null) {
-			return type.isSuperAdmin();
+		if (this.superAdminSelected == null && getCourseProviderUser() != null) {
+			CourseProviderUserType type = getCourseProviderUserTypeHome().find(
+					String.valueOf(getCourseProviderUser().getUserType()));
+			if (type != null) {
+				this.superAdminSelected = type.isSuperAdmin();
+			}
 		}
 
 		return superAdminSelected;
@@ -398,7 +396,7 @@ public class CourseProviderUserBean {
 				this.id, this.idegaUserId, this.name, 
 				this.phone, this.eMail, 
 				this.courseProviderUserTypeId, 
-				Arrays.asList(this.courseProviderIds)) != null) {
+				this.courseProviderIds != null ? Arrays.asList(this.courseProviderIds) : null) != null) {
 			CoreUtil.getIWContext().setMultipartParameter(
 					SUBMITTED, 
 					Boolean.TRUE.toString());	
