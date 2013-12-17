@@ -619,7 +619,7 @@ public class CourseProviderBMPBean extends GenericEntity implements
 		} catch (FinderException e) {
 			getLogger().log(Level.WARNING,
 					"Failed to get primary keys for " + 
-							CourseProvider.class.getName());
+							this.getClass().getName());
 		}
 
 		// some databases doesn't understand UPPER
@@ -632,7 +632,7 @@ public class CourseProviderBMPBean extends GenericEntity implements
 			getLogger().log(
 					Level.WARNING, 
 					"Failed to get primary keys for " + 
-					CourseProvider.class.getName(), e);
+					this.getClass().getName(), e);
 		}
 
 		return java.util.Collections.emptyList();
