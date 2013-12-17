@@ -153,7 +153,7 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * skipped if <code>null</code>;
 	 * @param courseProviderUserTypeId is {@link CourseProviderUserType#getPrimaryKey()},
 	 * skipped if <code>null</code>;
-	 * @param courseProviderId id {@link CourseProvider#getPrimaryKey()}, 
+	 * @param courseProviderIds id {@link CourseProvider#getPrimaryKey()}, 
 	 * skipped if <code>null</code>;
 	 * @return created/updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -207,6 +207,15 @@ public interface CourseProviderUserHome extends IDOHome {
 
 	/**
 	 * 
+	 * <p>Removes entity with all relations</p>
+	 * @param courseProviderUserId is {@link CourseProviderUser#getPrimaryKey()},
+	 * not <code>null</code>;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public void remove(String courseProviderUserId);
+
+	/**
+	 * 
 	 * <p>Removes relation between these two entities.</p>
 	 * @param user to remove relation from, not <code>null</code>;
 	 * @param provider is {@link CourseProvider} to 
@@ -222,4 +231,12 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public void removeType(CourseProviderUser user);
+
+	/**
+	 * @param users to search for, not <code>null</code>;
+	 * @return entities found by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<? extends CourseProviderUser> findByUsers(Collection<User> users);
 }

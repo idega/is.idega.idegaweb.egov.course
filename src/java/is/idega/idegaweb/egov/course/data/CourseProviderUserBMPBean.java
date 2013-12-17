@@ -231,7 +231,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUser#getSchools()
 	 */
 	@Override
-	public Collection<CourseProvider> getCourseProviders() {
+	public Collection<? extends CourseProvider> getCourseProviders() {
 		try {
 			return idoGetRelatedEntities(CourseProvider.class);
 		} catch (IDORelationshipException e) {
@@ -294,6 +294,8 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 					null,
 					providerIds, null);
 		}
+
+		removeSchools();
 
 		String primarykey = this.getPrimaryKey().toString();
 		try {
@@ -370,7 +372,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public int getSchoolId() {
-		Collection<CourseProvider> providers = getCourseProviders();
+		Collection<? extends CourseProvider> providers = getCourseProviders();
 		if (ListUtil.isEmpty(providers)) {
 			return -1;
 		}

@@ -105,7 +105,7 @@ public interface CourseProviderUser extends IDOEntity {
 
 	public int getUserId();
 
-	public Collection<CourseProvider> getCourseProviders();
+	public Collection<? extends CourseProvider> getCourseProviders();
 
 	public void setUserType(Integer userType);
 
@@ -128,4 +128,6 @@ public interface CourseProviderUser extends IDOEntity {
 	public void removeSchool(CourseProvider school);
 
 	public void removeSchools();
+
+	public void remove();
 }

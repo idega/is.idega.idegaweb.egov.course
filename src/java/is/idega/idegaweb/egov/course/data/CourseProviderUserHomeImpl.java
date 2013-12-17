@@ -130,11 +130,38 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			return null;
 		}
 
+		Collection<? extends CourseProviderUser> entities = findByUsers(
+				Arrays.asList(user)
+				);
+		if (ListUtil.isEmpty(entities)) {
+			return null;
+		}
+
+		return entities.iterator().next();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#findByUsers(java.util.Collection)
+	 */
+	@Override
+	public Collection<? extends CourseProviderUser> findByUsers(Collection<User> users) {
+		if (ListUtil.isEmpty(users)) {
+			return Collections.emptyList();
+		}
+
 		CourseProviderUserBMPBean entity = (CourseProviderUserBMPBean) idoCheckOutPooledEntity();
-		Collection<Object> ids = entity.ejbFindPrimaryKeys(null, Arrays.asList(user), null);
-		Collection<CourseProviderUser> entities = null;
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> ids = entity.ejbFindPrimaryKeys(null, users, null);
+		if (ListUtil.isEmpty(ids)) {
+			return Collections.emptyList();
+		}
+
 		try {
-			entities = getEntityCollectionForPrimaryKeys(ids);
+			return getEntityCollectionForPrimaryKeys(ids);
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
@@ -142,11 +169,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 					"'s by id's: '" + ids + "'");
 		}
 
-		if (ListUtil.isEmpty(entities)) {
-			return null;
-		}
-		
-		return entities.iterator().next();
+		return Collections.emptyList();
 	}
 
 	/* (non-Javadoc)
@@ -386,6 +409,20 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 		}
 
 		return Collections.emptyList();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#remove(java.lang.String)
+	 */
+	@Override
+	public void remove(String courseProviderUserId) {
+		if (!StringUtil.isEmpty(courseProviderUserId)) {
+			CourseProviderUser user = find(courseProviderUserId);
+			if (user != null) {
+				user.remove();
+			}
+		}
 	}
 
 	/*
