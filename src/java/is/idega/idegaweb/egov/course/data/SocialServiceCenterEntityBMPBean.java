@@ -146,6 +146,8 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		addAttribute(COLUMN_ORGANIZATION_NUMBER, "Organisation number", String.class, 20);
 		addAttribute(COLUMN_CREATION_DATE, "Date created", Date.class);
 		addAttribute(TERMINATION_DATE, "Termination date", Date.class);
+		addAttribute(COLUMN_WEB_PAGE, "Web page", String.class, 500);
+		addAttribute(COLUMN_PROVIDER_STRING_ID, "Extra provider id", String.class, 40);
 
 		/* Group of service center managers */
 		addOneToOneRelationship(COLUMN_MANAGING_GROUP, Group.class);
@@ -627,9 +629,17 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	 */
 	@Override
 	public String getSchoolPhone() {
-		Phone phone = null;
+		Phone phone = getPhone();
+		if (phone != null) {
+			return phone.getNumber();
+		}
+
+		return null;
+	}
+
+	public Phone getPhone() {
 		try {
-			phone = getGroupBusiness().getGroupPhone(
+			return getGroupBusiness().getGroupPhone(
 					getManagingGroup(), 
 					PhoneType.HOME_PHONE_ID);
 		} catch (RemoteException e) {
@@ -638,9 +648,9 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 					"Failed to get social service center group, cause of: ", e);
 		}
 
-		return phone.getNumber();
+		return null;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderBMPBean#setSchoolPhone(java.lang.String)

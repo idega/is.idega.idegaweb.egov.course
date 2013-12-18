@@ -499,7 +499,7 @@ public class CourseProviderBean {
 
 		return this.courseProviderHome;
 	}
-	
+
 	private CommuneHome communeHome = null;
 
 	protected CommuneHome getCommuneHome() {

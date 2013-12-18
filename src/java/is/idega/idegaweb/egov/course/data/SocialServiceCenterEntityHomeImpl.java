@@ -136,7 +136,14 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 	public Collection<? extends SocialServiceCenterEntity> update(
 			SocialServiceCenterEntity socialServiceCenter, 
 			Group group,
-			Collection<PostalCode> postalCodes) {
+			Collection<PostalCode> postalCodes,
+			String providerId, 
+			String organizationNumber, 
+			String address, 
+			String phone, 
+			String webPageAddress, 
+			String communeId, 
+			String courseProviderAreaId) {
 		Collection<? extends SocialServiceCenterEntity> entities = null;
 		if (socialServiceCenter != null) {
 			entities = Arrays.asList(socialServiceCenter);
@@ -156,8 +163,6 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 
 		for (SocialServiceCenterEntity entity : entities) {
 			entity.setManagingGroup(group);
-			entity.setServicedAreas(postalCodes);
-			entity.setHandlers(getHandlers(group));
 
 			try {
 				entity.store();
@@ -172,6 +177,18 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 						" by id: " + entity.getPrimaryKey().toString() + 
 						" cause of: ", e);
 			}
+
+			entity.setServicedAreas(postalCodes);
+			entity.setHandlers(getHandlers(group));
+
+			/* FIXME this is done due to lack of time. It should be optimized
+			 * for one update per entity or one update per entities
+			 * only.
+			 */
+			update(entity.getPrimaryKey().toString(), null, providerId, 
+					communeId, phone, webPageAddress, null, organizationNumber, 
+					null, null, address, courseProviderAreaId, null, null, 
+					true);
 		}
 
 		return entities;
@@ -184,11 +201,18 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 	@Override
 	public ArrayList<SocialServiceCenterEntity> update(
 			String groupId,
-			String groupName, 
-			String groupDescription, 
+			String groupName,
+			String groupDescription,
 			String groupCity,
-			String[] postalCodes, 
-			String[] roleNames) {
+			String[] postalCodes,
+			String[] roleNames, 
+			String providerId, 
+			String organizationNumber, 
+			String address, 
+			String phone, 
+			String webPageAddress, 
+			String communeId, 
+			String courseProviderAreaId) {
 		ArrayList<SocialServiceCenterEntity> updatedEntities = new ArrayList<SocialServiceCenterEntity>();
 
 		/* Getting postal codes */
@@ -203,7 +227,9 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 		/* Updating */
 		Collection<? extends SocialServiceCenterEntity> entities = null;
 		for (Group group : groups) {
-			entities = update(null, group, codes);
+			entities = update(null, group, codes, providerId, 
+					organizationNumber, address, phone, webPageAddress, 
+					communeId, courseProviderAreaId);
 			if (!ListUtil.isEmpty(entities)) {
 				updatedEntities.addAll(entities);
 			}

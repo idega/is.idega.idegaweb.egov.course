@@ -87,6 +87,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.idega.core.contact.data.Phone;
+import com.idega.core.location.data.Address;
+import com.idega.core.location.data.Commune;
 import com.idega.core.location.data.PostalCode;
 import com.idega.user.data.Group;
 import com.idega.user.data.User;
@@ -117,6 +120,17 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 	 * not <code>null</code
 	 * @param roleNames BPM process roles to be accessed by this service centers,
 	 * skipped if <code>null</code>;
+	 * @param providerId TODO
+	 * @param organizationNumber TODO
+	 * @param address is {@link Address#getStreetAddress()}, 
+	 * skipped if <code>null</code>
+	 * @param phone is {@link Phone#getNumber()}, skipped if <code>null</code>;
+	 * @param webPageAddress for example: "http://www.google.com", 
+	 * skipped if null;
+	 * @param communeId is {@link Commune#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseProviderAreaId {@link CourseProviderArea#getPrimaryKey()},
+	 * skipped if <code>null</code>;
 	 * @return updated/created entities or {@link Collections#emptyList()}
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -127,7 +141,14 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 			String groupDescription, 
 			String groupCity, 
 			String[] postalCodes, 
-			String[] roleNames);
+			String[] roleNames, 
+			String providerId, 
+			String organizationNumber, 
+			String address, 
+			String phone, 
+			String webPageAddress, 
+			String communeId, 
+			String courseProviderAreaId);
 
 	/**
 	 * 
@@ -184,28 +205,29 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 	List<SocialServiceCenterEntity> findByPostalCodeEntity(Collection<PostalCode> postalCodes);
 
 	/**
-	 * 
-	 * <p>TODO</p>
-	 * @param serviceCenter
-	 * @return
+	 * <p>Note: users are taken from 
+	 * {@link SocialServiceCenterEntity#getManagingGroup()}.</p>
+	 * @param serviceCenter to get {@link User}s for, not <code>null</code>;
+	 * @return {@link User}s of {@link SocialServiceCenterEntity} or 
+	 * {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<User> getHandlers(SocialServiceCenterEntity serviceCenter);
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param group
-	 * @return
+	 * @param group is {@link SocialServiceCenterEntity#getManagingGroup()} to
+	 * take {@link User}s from, not <code>null</code>;
+	 * @return {@link User}s or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<User> getHandlers(Group group);
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param handlers
-	 * @return
+	 * @param handlers to search {@link SocialServiceCenterEntity}s by, 
+	 * not <code>null</code>;
+	 * @return entities or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<SocialServiceCenterEntity> findByHandlerEntities(
@@ -213,9 +235,10 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param users
-	 * @return
+	 * @param users are handlers of {@link SocialServiceCenterEntity}, not 
+	 * <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()} on 
+	 * failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<SocialServiceCenterEntity> findByHandlers(Collection<User> users);
@@ -228,6 +251,17 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 	 * @param group of center, skipped if <code>null</code> and 
 	 * {@link SocialServiceCenterEntity} not <code>null</code>;
 	 * @param postalCodes
+	 * @param providerId TODO
+	 * @param organizationNumber TODO
+	 * @param address is {@link Address#getStreetAddress()}, 
+	 * skipped if <code>null</code>
+	 * @param phone is {@link Phone#getNumber()}, skipped if <code>null</code>;
+	 * @param webPageAddress for example: "http://www.google.com", 
+	 * skipped if null;
+	 * @param communeId is {@link Commune#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseProviderAreaId {@link CourseProviderArea#getPrimaryKey()},
+	 * skipped if <code>null</code>;
 	 * @return created/updated entities or {@link Collections#emptyList()}
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -235,5 +269,12 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 	Collection<? extends SocialServiceCenterEntity> update(
 			SocialServiceCenterEntity socialServiceCenter, 
 			Group group,
-			Collection<PostalCode> postalCodes);
+			Collection<PostalCode> postalCodes,
+			String providerId, 
+			String organizationNumber, 
+			String address, 
+			String phone, 
+			String webPageAddress, 
+			String communeId, 
+			String courseProviderAreaId);
 }
