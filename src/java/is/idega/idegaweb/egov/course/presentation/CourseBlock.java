@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Aug 10, 2005
- * 
+ *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation;
@@ -59,7 +59,7 @@ import com.idega.util.text.Name;
 
 /**
  * Last modified: $Date$ by $Author$
- * 
+ *
  * @author <a href="mailto:laddi@idega.com">laddi</a>
  * @version $Revision$
  */
@@ -93,8 +93,9 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	private ICPage iBackPage;
 
 	private boolean iHasErrors = false;
-	private Map iErrors;
+	private Map<String, String> iErrors;
 
+	@Override
 	public boolean actionPerformed(IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_PROVIDER_PK)) {
 			try {
@@ -162,7 +163,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	private CourseBusiness getBusiness(IWApplicationContext iwac) {
 		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwac, CourseBusiness.class);
+			return IBOLookup.getServiceInstance(iwac, CourseBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -171,7 +172,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	protected CourseSession getSession(IWUserContext iwuc) {
 		try {
-			return (CourseSession) IBOLookup.getSessionInstance(iwuc, CourseSession.class);
+			return IBOLookup.getSessionInstance(iwuc, CourseSession.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -180,7 +181,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	protected FamilyLogic getFamilyLogic(IWApplicationContext iwac) {
 		try {
-			return (FamilyLogic) IBOLookup.getServiceInstance(iwac, FamilyLogic.class);
+			return IBOLookup.getServiceInstance(iwac, FamilyLogic.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -189,7 +190,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	protected CitizenBusiness getUserBusiness(IWApplicationContext iwac) {
 		try {
-			return (CitizenBusiness) IBOLookup.getServiceInstance(iwac, CitizenBusiness.class);
+			return IBOLookup.getServiceInstance(iwac, CitizenBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -198,7 +199,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	protected CourseProviderBusiness getSchoolBusiness(IWApplicationContext iwac) {
 		try {
-			return (CourseProviderBusiness) IBOLookup.getServiceInstance(iwac, CourseProviderBusiness.class);
+			return IBOLookup.getServiceInstance(iwac, CourseProviderBusiness.class);
 		}
 		catch (RemoteException e) {
 			throw new IBORuntimeException(e.getMessage());
@@ -394,7 +395,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		section.add(formItem);
 	}
 
-	protected Layer getCustodians(IWContext iwc, IWResourceBundle iwrb, User owner, Child child, Collection custodians) throws RemoteException {
+	protected Layer getCustodians(IWContext iwc, IWResourceBundle iwrb, User owner, Child child, Collection<Custodian> custodians) throws RemoteException {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -475,9 +476,8 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		 * Label(); label.add(iwrb.getLocalizedString("marital_status", "Marital status")); maritalStatus.add(label); layer.add(maritalStatus);
 		 */
 
-		Iterator iter = custodians.iterator();
-		while (iter.hasNext()) {
-			Custodian custodian = (Custodian) iter.next();
+		for (Iterator<Custodian> iter = custodians.iterator(); iter.hasNext();) {
+			Custodian custodian = iter.next();
 			boolean hasRelation = isSchoolAdministrator(iwc) || getFamilyLogic(iwc).isRelatedTo(custodian, owner) || owner.getPrimaryKey().equals(custodian.getPrimaryKey());
 
 			Address userAddress = getUserBusiness(iwc).getUsersMainAddress(custodian);
@@ -584,7 +584,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		return layer;
 	}
 
-	protected Layer getRelatives(IWContext iwc, IWResourceBundle iwrb, Collection custodians) {
+	protected Layer getRelatives(IWContext iwc, IWResourceBundle iwrb, Collection<Relative> custodians) {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -636,9 +636,8 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		email.add(label);
 		layer.add(email);
 
-		Iterator iter = custodians.iterator();
-		while (iter.hasNext()) {
-			Relative relative = (Relative) iter.next();
+		for (Iterator<Relative> iter = custodians.iterator(); iter.hasNext();) {
+			Relative relative = iter.next();
 
 			Layer span = new Layer(Layer.SPAN);
 			span.add(new Text(iwrb.getLocalizedString("relation." + relative.getRelation(), "")));
@@ -781,7 +780,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	protected void setError(String parameter, String error) {
 		if (this.iErrors == null) {
-			this.iErrors = new HashMap();
+			this.iErrors = new HashMap<String, String>();
 		}
 
 		this.iHasErrors = true;
@@ -801,7 +800,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	/**
 	 * Adds the errors encountered
-	 * 
+	 *
 	 * @param iwc
 	 * @param errors
 	 */
@@ -820,9 +819,8 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 			Lists list = new Lists();
 			layer.add(list);
 
-			Iterator iter = this.iErrors.values().iterator();
-			while (iter.hasNext()) {
-				String element = (String) iter.next();
+			for (Iterator<String> iter = this.iErrors.values().iterator(); iter.hasNext();) {
+				String element = iter.next();
 				ListItem item = new ListItem();
 				item.add(new Text(element));
 
