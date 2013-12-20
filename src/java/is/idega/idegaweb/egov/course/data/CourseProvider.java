@@ -152,7 +152,7 @@ public interface CourseProvider extends IDOEntity {
 
 	public void setSchoolAreaId(int id);
 
-	public <T extends CourseProviderType> Collection<T> getCourseProviderAreas();
+	public <T extends CourseProviderType> Collection<T> getCourseProviderTypes();
 
 	public boolean hasPreCare();
 

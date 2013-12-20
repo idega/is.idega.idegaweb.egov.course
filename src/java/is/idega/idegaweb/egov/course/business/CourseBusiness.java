@@ -813,7 +813,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAllChoicesByCourseAndDate
 	 */
-	public Collection getAllChoicesByCourseAndDate(Object coursePK,
+	public Collection<CourseChoice> getAllChoicesByCourseAndDate(Object coursePK,
 			IWTimestamp fromDate, IWTimestamp toDate) throws RemoteException;
 
 	/**
@@ -821,4 +821,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 */
 	public Collection<Course> getCoursesByTypes(Collection<String> typesIds)
 			throws RemoteException, RemoteException;
+
+	public <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user);
 }

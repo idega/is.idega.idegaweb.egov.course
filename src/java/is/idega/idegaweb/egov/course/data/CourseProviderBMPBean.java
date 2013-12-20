@@ -423,7 +423,7 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 * @see is.idega.idegaweb.egov.course.data.CourseProvider#getSchoolTypes()
 	 */
 	@Override
-	public Collection<CourseProviderType> getCourseProviderAreas() {
+	public Collection<CourseProviderType> getCourseProviderTypes() {
 		try {
 			return idoGetRelatedEntities(CourseProviderType.class);
 		} catch (IDORelationshipException e) {

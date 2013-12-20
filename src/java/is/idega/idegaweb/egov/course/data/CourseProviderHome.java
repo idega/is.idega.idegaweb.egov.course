@@ -261,4 +261,5 @@ public interface CourseProviderHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public void remove(String primaryKey);
+
 }

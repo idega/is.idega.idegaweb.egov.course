@@ -95,7 +95,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
-		
+
 		/* TODO What exactly I should do with this, I mean here should be schools */
 		addManyToOneRelationship(COLUMN_PROVIDER, CourseProvider.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
@@ -248,16 +248,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		try {
 			return idoGetRelatedEntities(Group.class);
 		} catch (IDORelationshipException e) {
-			getLogger().log(Level.WARNING, 
+			getLogger().log(Level.WARNING,
 					"Failed to get related " + Group.class.getName() + "'s " +
-					"for " + this.getClass().getName() + 
-					" by id: '" + getPrimaryKey() + 
+					"for " + this.getClass().getName() +
+					" by id: '" + getPrimaryKey() +
 					"' cause of: ", e);
 		}
 
 		return Collections.emptyList();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.Course#isPrivate()
@@ -266,7 +266,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public boolean isPrivate() {
 		return getBooleanColumnValue(COLUMN_VISIBILITY, false);
 	}
-	
+
 	// Setters
 
 	/*
@@ -289,10 +289,10 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public void removeGroupsWithAccess() {
 		try {
 			idoRemoveFrom(Group.class);
-			getLogger().info("All groups related to " + Course.class.getSimpleName() + 
+			getLogger().info("All groups related to " + Course.class.getSimpleName() +
 					" by id: '" + getPrimaryKey() + "'");
 		} catch (IDORemoveRelationshipException e) {
-			getLogger().log(Level.WARNING, 
+			getLogger().log(Level.WARNING,
 					"Failed to remove " + Course.class.getSimpleName() +
 					" by id: '" + getPrimaryKey() + "' cause of: ", e);
 		}
@@ -426,22 +426,22 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	/**
-	 * 
+	 *
 	 * <p>Constructs SQL query</p>
 	 * @param courseProviders to filter by, skipped if <code>null</code>;
 	 * @param couserProviderTypes to filter by, skipped if <code>null</code>;
 	 * @param courseTypes to filter by, skipped if <code>null</code>;
-	 * @param birthDateFrom is floor of age of course attender, 
+	 * @param birthDateFrom is floor of age of course attender,
 	 * skipped if <code>null</code>;
-	 * @param birthDateTo is ceiling of age of course attender, 
+	 * @param birthDateTo is ceiling of age of course attender,
 	 * skipped if <code>null</code>;
-	 * @param fromDate is floor for course start date, 
+	 * @param fromDate is floor for course start date,
 	 * skipped if <code>null</code>;
-	 * @param toDate is ceiling for course start date, 
+	 * @param toDate is ceiling for course start date,
 	 * skipped if <code>null</code>;
-	 * @param isPrivate tells if {@link Course}s can be viewed by all, 
+	 * @param isPrivate tells if {@link Course}s can be viewed by all,
 	 * skipped if <code>null</code>;
-	 * @param groupsWithAccess is {@link Group}, which can view private 
+	 * @param groupsWithAccess is {@link Group}, which can view private
 	 * {@link Course}s, skipped if <code>null</code>;
 	 * @return query by criteria;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -452,11 +452,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			Collection<? extends CourseType> courseTypes,
 			Date birthDateFrom,
 			Date birthDateTo,
-			Date fromDate, 
+			Date fromDate,
 			Date toDate,
 			Boolean isPrivate,
 			Collection<Group> groupsWithAccess) {
-		
+
 		/* This table */
 		IDOQuery query = idoQuery();
 		query.appendSelectAllFrom(this);
@@ -559,22 +559,22 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	/**
-	 * 
+	 *
 	 * <p>Finds all primary keys by following criteria:</p>
 	 * @param courseProviders to filter by, skipped if <code>null</code>;
 	 * @param couserProviderTypes to filter by, skipped if <code>null</code>;
 	 * @param courseTypes to filter by, skipped if <code>null</code>;
-	 * @param birthDateFrom is floor of age of course attender, 
+	 * @param birthDateFrom is floor of age of course attender,
 	 * skipped if <code>null</code>;
-	 * @param birthDateTo is ceiling of age of course attender, 
+	 * @param birthDateTo is ceiling of age of course attender,
 	 * skipped if <code>null</code>;
-	 * @param fromDate is floor for course start date, 
+	 * @param fromDate is floor for course start date,
 	 * skipped if <code>null</code>;
-	 * @param toDate is ceiling for course start date, 
+	 * @param toDate is ceiling for course start date,
 	 * skipped if <code>null</code>;
-	 * @param isPrivate tells if {@link Course}s can be viewed by all, 
+	 * @param isPrivate tells if {@link Course}s can be viewed by all,
 	 * skipped if <code>null</code>;
-	 * @param groupsWithAccess is {@link Group}, which can view private 
+	 * @param groupsWithAccess is {@link Group}, which can view private
 	 * {@link Course}s, skipped if <code>null</code>;
 	 * @return primary keys found data source or {@link Collections#emptyList()}
 	 * on failure;
@@ -586,24 +586,24 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			Collection<? extends CourseType> courseTypes,
 			Date birthDateFrom,
 			Date birthDateTo,
-			Date fromDate, 
+			Date fromDate,
 			Date toDate,
 			Boolean isPrivate,
 			Collection<Group> groupsWithAccess) {
-		IDOQuery query = getQuery(courseProviders, couserProviderTypes, 
-				courseTypes, birthDateFrom, birthDateTo, fromDate, toDate, 
+		IDOQuery query = getQuery(courseProviders, couserProviderTypes,
+				courseTypes, birthDateFrom, birthDateTo, fromDate, toDate,
 				isPrivate, groupsWithAccess);
 		try {
 			return idoFindPKsByQuery(query);
 		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get primary keys for " + this.getClass().getName() + 
+			getLogger().log(Level.WARNING,
+					"Failed to get primary keys for " + this.getClass().getName() +
 					" by query: '" + query.toString() + "' cause of: ", e);
 		}
 
 		return Collections.emptyList();
 	}
-	
+
 	// TODO can be merged
 	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate)
 		throws FinderException, IDORelationshipException {
@@ -640,11 +640,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		if (toDate != null) {
 			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.LESSEQUAL, toDate));
 		}
-		
+
 
 		return this.idoFindPKsByQuery(query);
 	}
-	
+
 
 	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException,
 		IDORelationshipException {
@@ -680,7 +680,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param keys to convert, not <code>null</code>;
 	 * @return converted {@link Integer}s, where it was possible to convert;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -703,32 +703,32 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	/**
-	 * 
+	 *
 	 * <p>Finds all primary keys by following criteria:</p>
 	 * @param provider to filter by, skipped if <code>null</code>;
 	 * @param type to filter by, skipped if <code>null</code>;
 	 * @param courseType to filter by, skipped if <code>null</code>;
-	 * @param fromDate is floor for course start date, 
+	 * @param fromDate is floor for course start date,
 	 * skipped if <code>null</code>;
-	 * @param toDate is ceiling for course start date, 
+	 * @param toDate is ceiling for course start date,
 	 * skipped if <code>null</code>;
 	 * @return primary keys found data source or {@link Collections#emptyList()}
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<Integer> ejbFindAll(
-			CourseProvider provider, 
-			CourseProviderType type, 
-			CourseType courseType, 
+			CourseProvider provider,
+			CourseProviderType type,
+			CourseType courseType,
 			Date fromDate,
 			Date toDate) {
 
 		return convertPrimaryKeys(ejbFindAll(
-				provider != null ? Arrays.asList(provider) : null,  
-				type != null ? Arrays.asList(type) : null, 
-				courseType != null ? Arrays.asList(courseType) : null, 
-				null, null, 
-				fromDate, toDate, 
+				provider != null ? Arrays.asList(provider) : null,
+				type != null ? Arrays.asList(type) : null,
+				courseType != null ? Arrays.asList(courseType) : null,
+				null, null,
+				fromDate, toDate,
 				null, null));
 	}
 
@@ -817,38 +817,38 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	/**
-	 * 
+	 *
 	 * <p>Finds number of all primary keys by following criteria:</p>
 	 * @param provider to filter by, skipped if <code>null</code>;
 	 * @param type to filter by, skipped if <code>null</code>;
 	 * @param courseType to filter by, skipped if <code>null</code>;
-	 * @param fromDate is floor for course start date, 
+	 * @param fromDate is floor for course start date,
 	 * skipped if <code>null</code>;
-	 * @param toDate is ceiling for course start date, 
+	 * @param toDate is ceiling for course start date,
 	 * skipped if <code>null</code>;
-	 * @return number primary keys found data source or 
+	 * @return number primary keys found data source or
 	 * {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public int ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(
 			CourseProvider provider,
-			CourseProviderType type, 
-			CourseType courseType, 
-			Date fromDate, Date toDate) {
-
+			CourseProviderType type,
+			CourseType courseType,
+			Date fromDate, Date toDate
+	) {
 		IDOQuery query = getQuery(
-				provider != null ? Arrays.asList(provider) : null,  
-				type != null ? Arrays.asList(type) : null, 
-				courseType != null ? Arrays.asList(courseType) : null, 
-				null, null, 
-				fromDate, toDate, 
+				provider != null ? Arrays.asList(provider) : null,
+				type != null ? Arrays.asList(type) : null,
+				courseType != null ? Arrays.asList(courseType) : null,
+				null, null,
+				fromDate, toDate,
 				null, null);
 
 		try {
 			return this.idoGetNumberOfRecords(query);
 		} catch (IDOException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get number of " + this.getClass().getSimpleName() + 
+			getLogger().log(Level.WARNING,
+					"Failed to get number of " + this.getClass().getSimpleName() +
 					" by query: '" + query.toString() + "' cause of: ", e);
 		}
 

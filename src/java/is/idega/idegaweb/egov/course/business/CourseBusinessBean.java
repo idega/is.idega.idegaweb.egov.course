@@ -35,6 +35,8 @@ import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
+import is.idega.idegaweb.egov.course.data.SocialServiceCenterEntity;
+import is.idega.idegaweb.egov.course.data.SocialServiceCenterEntityHome;
 import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 import is.idega.idegaweb.egov.message.business.MessageValue;
@@ -45,6 +47,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -1714,7 +1717,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public <T extends CourseProviderType> Collection<T> getSchoolTypes(CourseProvider provider) {
-		Collection<T> schoolTypes = provider.getCourseProviderAreas();
+		Collection<T> schoolTypes = provider.getCourseProviderTypes();
 		if (ListUtil.isEmpty(schoolTypes)) {
 			return Collections.emptyList();
 		}
@@ -2651,12 +2654,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public int getNumberOfCourses(CourseProvider provider, CourseProviderType schoolType,
-			CourseType courseType, Date fromDate, Date toDate) {
+	public int getNumberOfCourses(CourseProvider provider, CourseProviderType schoolType, CourseType courseType, Date fromDate, Date toDate) {
 		try {
-			return getCourseHome()
-					.getCountByProviderAndSchoolTypeAndCourseType(provider,
-							schoolType, courseType, fromDate, toDate);
+			return getCourseHome().getCountByProviderAndSchoolTypeAndCourseType(provider, schoolType, courseType, fromDate, toDate);
 		} catch (IDOException e) {
 			e.printStackTrace();
 			return 0;
@@ -3382,8 +3382,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection<Course> getCoursesByTypes(Collection<String> typesIds)
-			throws RemoteException {
+	public Collection<Course> getCoursesByTypes(Collection<String> typesIds) throws RemoteException {
 		if (ListUtil.isEmpty(typesIds)) {
 			return null;
 		}
@@ -3394,6 +3393,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			e.printStackTrace();
 		}
 
+		return null;
+	}
+
+	@Override
+	public Collection<SocialServiceCenterEntity> getHandledCourseProviders(User user) {
+		if (user == null) {
+			return null;
+		}
+
+		try {
+			SocialServiceCenterEntityHome sscHome = (SocialServiceCenterEntityHome) IDOLookup.getHome(SocialServiceCenterEntity.class);
+			return sscHome.findByHandlers(Arrays.asList(user));
+		} catch (Exception e) {
+
+		}
 		return null;
 	}
 }
