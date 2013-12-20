@@ -93,14 +93,10 @@ import java.util.logging.Level;
 import javax.ejb.FinderException;
 
 import com.idega.core.location.data.Commune;
-import com.idega.core.location.data.CommuneHome;
-import com.idega.core.location.data.PostalCode;
 import com.idega.data.GenericEntity;
-import com.idega.data.IDOLookup;
 import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
 import com.idega.util.ListUtil;
-import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
 /**
@@ -117,20 +113,12 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	private static final long serialVersionUID = -2826496048886070573L;
 
 	public static final String TABLE_NAME = "cou_course_provider";
-	public final static String COLUMN_NAME = "SCHOOL_NAME";
-	public final static String COLUMN_INFO = "school_info";
-	public final static String COLUMN_ADDRESS = "school_address";
-	public final static String COLUMN_ZIPCODE = "zip_code";
-	public final static String COLUMN_ZIPAREA = "zip_area";
-	public final static String COLUMN_PHONE = "phone";
 	public final static String COLUMN_WEB_PAGE = "web_page";
-	public final static String COLUMN_COMMUNE = "commune";
 	public final static String COLUMN_ORGANIZATION_NUMBER = "organization_number";
 	public final static String COLUMN_SCHOOL_AREA = "sch_school_area_id";
 	public final static String TERMINATION_DATE = "termination_date";
 	public final static String COLUMN_PROVIDER_STRING_ID = "provider_string_id";
-	public final static String COLUMN_HAS_PRE_CARE = "has_pre_care";
-	public final static String COLUMN_HAS_POST_CARE = "has_post_care";
+	
 
 	/* (non-Javadoc)
 	 * @see com.idega.data.GenericEntity#initializeAttributes()
@@ -138,45 +126,21 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
-		addManyToOneRelationship(COLUMN_SCHOOL_AREA, CourseProviderArea.class);
-		addAttribute(COLUMN_NAME, "Schoolname", true, true, String.class);
-		addAttribute(COLUMN_INFO, "Info", true, true, String.class, 4000);
-		addAttribute(COLUMN_ADDRESS, "Address", true, true, String.class, 100);
-		addAttribute(COLUMN_ZIPAREA, "Ziparea", true, true, String.class, 100);
-		addAttribute(COLUMN_ZIPCODE, "Zipcode", true, true, String.class, 20);
-		addAttribute(COLUMN_PHONE, "phone", true, true, String.class, 60);
-		addAttribute(COLUMN_WEB_PAGE, "web_page", true, true, String.class, 500);
-		addManyToManyRelationShip(CourseProviderType.class);
-		addManyToOneRelationship(COLUMN_COMMUNE, Commune.class);
-		addAttribute(COLUMN_ORGANIZATION_NUMBER, "organisationsnummer", true, true, String.class, 20);
-		addAttribute(TERMINATION_DATE, "termination date", true, true, Date.class);
-		addAttribute(COLUMN_PROVIDER_STRING_ID, "Extra provider id", true, true, String.class, 40);
-		addAttribute(COLUMN_HAS_PRE_CARE, "Has pre care", Boolean.class);
-		addAttribute(COLUMN_HAS_POST_CARE, "Has post care", Boolean.class);
 	}
 
+	@Override
+	public void setPrimaryKey(Object pk) {
+		super.setPrimaryKey(pk);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProvider#getCommunePK()
 	 */
 	@Override
 	public Object getCommunePK() {
-		Object communeId = getColumnValue(COLUMN_COMMUNE);
-		if (communeId == null) {
-			try {
-				CommuneHome cHome = (CommuneHome) IDOLookup.getHome(Commune.class);
-				Commune comm = cHome.findDefaultCommune();
-				if (comm != null) {
-					setCommunePK(comm.getPrimaryKey());
-					store();
-					return comm.getPrimaryKey();
-				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return communeId;
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -203,7 +167,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public Commune getCommune() {
-		return (Commune) getColumnValue(COLUMN_COMMUNE);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -212,7 +177,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public int getCommuneId() {
-		return this.getIntColumnValue(COLUMN_COMMUNE);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -221,7 +187,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setCommunePK(Object pk) {
-		this.setColumn(COLUMN_COMMUNE, pk);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 	
 	/*
@@ -230,7 +197,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public String getSchoolInfo() {
-		return this.getStringColumnValue(COLUMN_INFO);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -239,7 +207,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setSchoolInfo(String info) {
-		this.setColumn(COLUMN_INFO, info);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -266,7 +235,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public String getSchoolZipArea() {
-		return this.getStringColumnValue(COLUMN_ZIPAREA);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -275,7 +245,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setSchoolZipArea(String ziparea) {
-		this.setColumn(COLUMN_ZIPAREA, ziparea);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -284,7 +255,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public String getSchoolZipCode() {
-		return this.getStringColumnValue(COLUMN_ZIPCODE);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -293,7 +265,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setSchoolZipCode(String zipcode) {
-		this.setColumn(COLUMN_ZIPCODE, zipcode);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -302,7 +275,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public String getSchoolAddress() {
-		return this.getStringColumnValue(COLUMN_ADDRESS);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -311,7 +285,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setSchoolAddress(String address) {
-		this.setColumn(COLUMN_ADDRESS, address);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 	
 	/*
@@ -337,7 +312,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public String getSchoolName() {
-		return this.getStringColumnValue(COLUMN_NAME);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -346,7 +322,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setSchoolName(String name) {
-		this.setColumn(COLUMN_NAME, name);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/* (non-Javadoc)
@@ -407,7 +384,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public String getSchoolPhone() {
-		return this.getStringColumnValue(COLUMN_PHONE);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -416,7 +394,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setSchoolPhone(String phone) {
-		this.setColumn(COLUMN_PHONE, phone);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/* (non-Javadoc)
@@ -441,7 +420,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setHasPreCare(boolean hasPreCare) {
-		setColumn(COLUMN_HAS_PRE_CARE, hasPreCare);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 	
 	/* (non-Javadoc)
@@ -449,7 +429,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public boolean hasPreCare() {
-		return getBooleanColumnValue(COLUMN_HAS_PRE_CARE, false);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -458,7 +439,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setHasPostCare(boolean hasPostCare) {
-		setColumn(COLUMN_HAS_POST_CARE, hasPostCare);
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 	
 	/* (non-Javadoc)
@@ -466,7 +448,8 @@ public class CourseProviderBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public boolean hasPostCare() {
-		return getBooleanColumnValue(COLUMN_HAS_POST_CARE, false);
+		throw new UnsupportedOperationException(
+				"Method implemented in one of subclasses!");
 	}
 
 	/*
@@ -520,35 +503,6 @@ public class CourseProviderBMPBean extends GenericEntity implements
 
 	protected Date getCurrentDate() {
 		return new Date(System.currentTimeMillis());
-	}
-
-	/**
-	 * 
-	 * @param name is {@link CourseProvider#getName()}, not <code>null</code>;
-	 * @param postalCode is {@link PostalCode#getPostalCode()}, not <code>null</code>;
-	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}s, 
-	 * filtered by criteria or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public Collection<Object> ejbFindByNameAndPostalCode(String name, String postalCode) {
-		if (StringUtil.isEmpty(name) || StringUtil.isEmpty(postalCode)) {
-			return Collections.emptyList();
-		}
-
-		IDOQuery sql = idoQuery();
-		sql.appendSelectAllFrom(this);
-		sql.appendWhereEqualsQuoted(COLUMN_NAME, name);
-		sql.appendAndEqualsQuoted(COLUMN_ZIPCODE, postalCode);
-		try {
-			return idoFindPKsByQuery(sql);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get primary keys for: '" + this.getClass().getName() + 
-					"' by name: '" + name + "' and postal code: '" + postalCode + 
-					"' cause of: ", e);
-		}
-
-		return Collections.emptyList();
 	}
 
 	/**
@@ -611,28 +565,13 @@ public class CourseProviderBMPBean extends GenericEntity implements
 
 	public Collection<Object> ejbFindAll() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT * FROM ").append(getEntityName()).append(" ");
-		sb.append("ORDER BY UPPER (").append(COLUMN_NAME).append(") ");
-
+		sb.append("SELECT * FROM ").append(getEntityName());
 		try {
 			return super.idoFindPKsBySQL(sb.toString());
 		} catch (FinderException e) {
 			getLogger().log(Level.WARNING,
 					"Failed to get primary keys for " + 
 							this.getClass().getName());
-		}
-
-		// some databases doesn't understand UPPER
-		sb = new StringBuilder();
-		sb.append("SELECT * FROM ").append(getEntityName()).append(" ");
-		sb.append("ORDER BY ").append(COLUMN_NAME);
-		try {
-			return super.idoFindPKsBySQL(sb.toString());
-		} catch (FinderException e) {
-			getLogger().log(
-					Level.WARNING, 
-					"Failed to get primary keys for " + 
-					this.getClass().getName(), e);
 		}
 
 		return java.util.Collections.emptyList();
