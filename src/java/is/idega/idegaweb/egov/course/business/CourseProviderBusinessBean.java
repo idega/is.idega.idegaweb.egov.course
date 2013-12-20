@@ -94,14 +94,17 @@ import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.logging.Level;
 
 import com.idega.business.IBOServiceBean;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
@@ -127,7 +130,15 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 			return null;
 		}
 
-		return getCourseProviderHome().find(primaryKey.toString());
+		CourseProvider provider = null;
+		for (CourseProviderHome home : getCourseProviderHomes()) {
+			provider = home.find(primaryKey.toString());
+			if (provider != null) {
+				return provider;
+			}
+		}
+
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -140,7 +151,16 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 			return Collections.emptyList();
 		}
 
-		return getCourseProviderHome().findByType(typeIds);
+		ArrayList<CourseProvider> courseProviders = new ArrayList<CourseProvider>();
+		Collection<? extends CourseProvider> providers = null;
+		for (CourseProviderHome home : getCourseProviderHomes()) {
+			providers = home.findByType(typeIds);
+			if (!ListUtil.isEmpty(providers)) {
+				courseProviders.addAll(providers);
+			}
+		}
+
+		return courseProviders;
 	}
 
 	/* (non-Javadoc)
@@ -165,9 +185,16 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 			return Collections.emptyList();
 		}
 
-		return getCourseProviderHome().find(
-				Arrays.asList(area), 
-				Arrays.asList(type));
+		ArrayList<CourseProvider> courseProviders = new ArrayList<CourseProvider>();
+		Collection<? extends CourseProvider> providers = null;
+		for (CourseProviderHome home : getCourseProviderHomes()) {
+			providers = home.find(Arrays.asList(area), Arrays.asList(type));
+			if (!ListUtil.isEmpty(providers)) {
+				courseProviders.addAll(providers);
+			}
+		}
+
+		return courseProviders;
 	}
 
 	/* (non-Javadoc)
@@ -243,7 +270,7 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		return getCourseProviderUserHome().findBySchool(school);
 	}
 
-	private CourseProviderHome courseProviderHome = null;
+	private ArrayList<CourseProviderHome> courseProviderHomes = null;
 
 	private CourseProviderUserHome courseProviderUserHome = null;
 
@@ -311,17 +338,31 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		return this.courseProviderUserHome;
 	}
 
-	protected CourseProviderHome getCourseProviderHome() {
-		if (this.courseProviderHome == null) {
+	protected ArrayList<CourseProviderHome> getCourseProviderHomes() {
+		if (ListUtil.isEmpty(this.courseProviderHomes)) {
+			this.courseProviderHomes = new ArrayList<CourseProviderHome>(); 
+		}
+
+		Set<Class<? extends CourseProvider>> subtypes = CoreUtil.getSubTypesOf(CourseProvider.class, true);
+		if (ListUtil.isEmpty(subtypes)) {
+			return this.courseProviderHomes;
+		}
+
+		CourseProviderHome courseProviderHome = null;
+		for (Class<? extends CourseProvider> subtype : subtypes) {
 			try {
-				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
+				courseProviderHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
 			} catch (IDOLookupException e) {
 				getLogger().log(Level.WARNING, 
-						"Failed to get " + CourseProviderHome.class.getName() + 
+						"Failed to get " + subtype.getSimpleName() + 
 						" cause of: ", e);
+			}
+
+			if (courseProviderHome == null) {
+				this.courseProviderHomes.add(courseProviderHome);
 			}
 		}
 
-		return this.courseProviderHome;
+		return this.courseProviderHomes;
 	}
 }
