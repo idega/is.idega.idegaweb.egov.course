@@ -33,6 +33,8 @@ public interface Course extends IDOEntity {
 	 */
 	public CourseProvider getProvider();
 
+	public String getProviderId();
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCourseType
 	 */

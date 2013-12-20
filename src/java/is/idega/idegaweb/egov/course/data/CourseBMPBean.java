@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.course.data;
 
+import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
 import java.sql.Date;
@@ -11,11 +12,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
@@ -35,6 +39,7 @@ import com.idega.data.query.Table;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.Group;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 
 public class CourseBMPBean extends GenericEntity implements Course {
@@ -139,7 +144,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	@Override
 	public CourseProvider getProvider() {
-		return (CourseProvider) getColumnValue(COLUMN_PROVIDER);
+		return getCourseProviderBusiness().getSchool(getProviderId());
+	}
+
+	@Override
+	public String getProviderId() {
+		return getStringColumnValue(COLUMN_PROVIDER);
 	}
 
 	@Override
@@ -554,6 +564,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.appendOrderBy(COLUMN_START_DATE)
 		.append(CoreConstants.COMMA)
 		.append(CoreConstants.SPACE)
+		.append(IDOQuery.ENTITY_TO_SELECT)
+		.append(CoreConstants.DOT)
 		.append(COLUMN_NAME);
 		return query;
 	}
@@ -895,7 +907,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
 		try {
 			return super.idoGetRelatedEntities(itemType);
@@ -956,7 +967,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Collection<CoursePrice> getAllPrices() {
 		try {
 			return super.idoGetRelatedEntities(CoursePrice.class);
@@ -983,5 +993,20 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		}
 
 		store();
+	}
+
+	private CourseProviderBusiness courseProviderBusiness = null;
+
+	protected CourseProviderBusiness getCourseProviderBusiness() {
+		if (this.courseProviderBusiness == null) {
+			try {
+				this.courseProviderBusiness = IBOLookup.getServiceInstance(
+						CoreUtil.getIWContext(), CourseProviderBusiness.class);
+			} catch (IBOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
+			}
+		}
+
+		return this.courseProviderBusiness;
 	}
 }
