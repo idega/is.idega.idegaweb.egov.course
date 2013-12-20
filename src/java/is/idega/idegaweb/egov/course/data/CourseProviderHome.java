@@ -222,8 +222,7 @@ public interface CourseProviderHome extends IDOHome {
 	 * @return entities by criteria or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<? extends CourseProvider> findByType(
-			Collection<? extends CourseProviderType> types);
+	public <P extends CourseProvider> Collection<P> findByType(Collection<? extends CourseProviderType> types);
 
 	/**
 	 *

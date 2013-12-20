@@ -120,8 +120,7 @@ public interface CourseProviderBusiness extends IBOService {
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<? extends CourseProvider> findAllSchoolsByType(
-			Collection<? extends CourseProviderType> types);
+	public <P extends CourseProvider> Collection<P> findAllSchoolsByType(Collection<? extends CourseProviderType> types);
 
 	/**
 	 * <p>FIXME Optimize number of queries, but don't crack possibility
@@ -143,8 +142,7 @@ public interface CourseProviderBusiness extends IBOService {
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public <P extends CourseProvider> Collection<P> findAllSchoolsByAreaAndType(
-			CourseProviderArea area, CourseProviderType type);
+	public <P extends CourseProvider> Collection<P> findAllSchoolsByAreaAndType(CourseProviderArea area, CourseProviderType type);
 
 	/**
 	 *

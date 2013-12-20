@@ -498,7 +498,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProviders
 	 */
-	public Collection<? extends CourseProvider> getProviders() throws RemoteException;
+	public <P extends CourseProvider> Collection<P> getProviders() throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProviders

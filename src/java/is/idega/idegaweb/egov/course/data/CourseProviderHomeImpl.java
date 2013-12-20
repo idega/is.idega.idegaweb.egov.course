@@ -233,7 +233,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#findByType(java.util.Collection)
 	 */
 	@Override
-	public Collection<? extends CourseProvider> findByType(Collection<? extends CourseProviderType> types) {
+	public <P extends CourseProvider> Collection<P> findByType(Collection<? extends CourseProviderType> types) {
 		if (ListUtil.isEmpty(types)) {
 			return Collections.emptyList();
 		}

@@ -134,8 +134,7 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#findAllSchoolsByType(java.util.Collection)
 	 */
 	@Override
-	public Collection<? extends CourseProvider> findAllSchoolsByType(
-			Collection<? extends CourseProviderType> typeIds) {
+	public <P extends CourseProvider> Collection<P> findAllSchoolsByType(Collection<? extends CourseProviderType> typeIds) {
 		if (ListUtil.isEmpty(typeIds)) {
 			return Collections.emptyList();
 		}

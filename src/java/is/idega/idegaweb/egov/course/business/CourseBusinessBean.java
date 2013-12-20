@@ -94,6 +94,7 @@ import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
 import com.idega.data.IDOStoreException;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.repository.data.ImplementorRepository;
@@ -1771,7 +1772,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection<? extends CourseProvider> getProviders() {
+	public <P extends CourseProvider> Collection<P> getProviders() {
 		return getSchoolBusiness().findAllSchoolsByType(getAllSchoolTypes());
 	}
 
@@ -3400,6 +3401,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public Collection<SocialServiceCenterEntity> getHandledCourseProviders(User user) {
 		if (user == null) {
 			return null;
+		}
+
+		try {
+			if (IWMainApplication.getDefaultIWMainApplication().getAccessController().getAdministratorUser().getId().equals(user.getId())) {
+				SocialServiceCenterEntityHome sscHome = (SocialServiceCenterEntityHome) IDOLookup.getHome(SocialServiceCenterEntity.class);
+				return sscHome.find();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		try {
