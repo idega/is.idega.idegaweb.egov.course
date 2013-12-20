@@ -161,6 +161,16 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 
 	/**
 	 * 
+	 * @param groupIds is {@link Group#getPrimaryKey()}, not <code>null</code>;
+	 * @return entity, connected to center or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<? extends SocialServiceCenterEntity> findByGroupIds(
+			Collection<String> groupIds);
+	
+	/**
+	 * 
 	 * <p>Removes {@link SocialServiceCenterEntity} connected to 
 	 * given {@link Group}.</p>
 	 * @param groupId is {@link Group#getPrimaryKey()}, not <code>null</code>;

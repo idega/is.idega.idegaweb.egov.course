@@ -248,12 +248,22 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 			return Collections.emptyList();
 		}
 
+		return findByGroupIds(Arrays.asList(groupId));
+	}
+
+	
+	@Override
+	public Collection<? extends SocialServiceCenterEntity> findByGroupIds(Collection<String> groupIds) {
+		if (ListUtil.isEmpty(groupIds)) {
+			return Collections.emptyList();
+		}
+
 		SocialServiceCenterEntityBMPBean entity = (SocialServiceCenterEntityBMPBean) this.idoCheckOutPooledEntity();
 		if (entity == null) {
 			return Collections.emptyList();
 		}
 
-		Collection<Object> primaryKeys = entity.ejbFindByManagingGroupId(groupId);
+		Collection<Object> primaryKeys = entity.ejbFindByManagingGroupIds(groupIds);
 		if (ListUtil.isEmpty(primaryKeys)) {
 			return Collections.emptyList();
 		}
