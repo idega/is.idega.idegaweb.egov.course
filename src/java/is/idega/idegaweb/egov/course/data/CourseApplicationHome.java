@@ -1,12 +1,14 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import java.util.Collection;
-import com.idega.block.process.data.CaseStatus;
-import javax.ejb.CreateException;
-import com.idega.data.IDOHome;
-import javax.ejb.FinderException;
 import java.sql.Date;
+import java.util.Collection;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+
+import com.idega.block.process.data.CaseStatus;
+import com.idega.data.IDOHome;
 
 public interface CourseApplicationHome extends IDOHome {
 
@@ -14,7 +16,7 @@ public interface CourseApplicationHome extends IDOHome {
 
 	public CourseApplication findByPrimaryKey(Object pk) throws FinderException;
 
-	public Collection findAll(CaseStatus caseStatus, Date fromDate, Date toDate) throws FinderException;
+	public Collection<CourseApplication> findAll(CaseStatus caseStatus, Date fromDate, Date toDate) throws FinderException;
 
-	public Collection findAll() throws FinderException;
+	public Collection<CourseApplication> findAll() throws FinderException;
 }

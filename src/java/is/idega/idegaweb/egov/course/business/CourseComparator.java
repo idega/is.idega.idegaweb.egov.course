@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Apr 18, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.business;
@@ -15,7 +15,7 @@ import java.util.Locale;
 
 import com.idega.util.IWTimestamp;
 
-public class CourseComparator implements Comparator {
+public class CourseComparator implements Comparator<Course> {
 
 	public static final int NAME_SORT = 1;
 	public static final int REVERSE_NAME_SORT = 8;
@@ -36,9 +36,8 @@ public class CourseComparator implements Comparator {
 		this.compareBy = compareBy;
 	}
 
-	public int compare(Object arg0, Object arg1) {
-		Course course1 = (Course) arg0;
-		Course course2 = (Course) arg1;
+	@Override
+	public int compare(Course course1, Course course2) {
 		collator = Collator.getInstance(locale);
 
 		int returner = 0;
@@ -50,7 +49,7 @@ public class CourseComparator implements Comparator {
 			case REVERSE_ID_SORT:
 				returner = -idSort(course1, course2);
 				break;
-				
+
 			case NAME_SORT:
 				returner = nameSort(course1, course2);
 				break;

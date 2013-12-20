@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Apr 20, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
@@ -17,6 +17,7 @@ import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,18 +40,94 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
+import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 
 public class CourseStatistics extends CourseBlock {
 
 	private static final String PARAMETER_FROM = "prm_from";
 	private static final String PARAMETER_TO = "prm_to";
 
-	private Object schoolTypePK;
+//	private Object schoolTypePK;
+	private String courseProviderTypePK;
 
+	private Collection<CourseProvider> courseProviders = null;
+
+	private Collection<CourseProviderArea> getAreas() throws RemoteException {
+		if (courseProviders == null) {
+			return getBusiness().getSchoolAreas();
+		}
+
+		Map<String, CourseProviderArea> areas = new HashMap<String, CourseProviderArea>();
+		for (CourseProvider provider: courseProviders) {
+			CourseProviderArea area = provider.getCourseProviderArea();
+			areas.put(area.getPrimaryKey().toString(), area);
+		}
+		return areas.values();
+	}
+
+	private Collection<CourseType> getCourseTypes() throws RemoteException {
+		if (courseProviders == null && isValidCourseProviderTypePK()) {
+			return getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
+		}
+
+		if (courseProviders == null) {
+			return Collections.emptyList();
+		}
+
+		Map<String, CourseType> allTypes = new HashMap<String, CourseType>();
+		for (CourseProvider provider: courseProviders) {
+			Collection<CourseProviderType> providerTypes = provider.getCourseProviderTypes();
+			if (ListUtil.isEmpty(providerTypes)) {
+				continue;
+			}
+
+			for (CourseProviderType courseProviderType: providerTypes) {
+				Collection<CourseType> types = getBusiness().getCourseTypes(new Integer(courseProviderType.getPrimaryKey().toString()), false);
+				if (!ListUtil.isEmpty(types)) {
+					for (CourseType type: types) {
+						allTypes.put(type.getPrimaryKey().toString(), type);
+					}
+				}
+			}
+		}
+		return allTypes.values();
+	}
+
+	private CourseProviderType getProviderType(IWContext iwc) throws RemoteException {
+		if (courseProviders == null && isValidCourseProviderTypePK()) {
+			return getSchoolBusiness(iwc).getSchoolType(new Integer(courseProviderTypePK));
+		}
+
+		if (courseProviders == null) {
+			return null;
+		}
+
+		for (CourseProvider provider: courseProviders) {
+			Collection<CourseProviderType> providerTypes = provider.getCourseProviderTypes();
+			if (ListUtil.isEmpty(providerTypes)) {
+				continue;
+			}
+
+			return providerTypes.iterator().next();
+		}
+
+		return null;
+	}
+
+	private boolean isValidCourseProviderTypePK() {
+		return !StringUtil.isEmpty(courseProviderTypePK) && !"-1".equals(courseProviderTypePK) && StringHandler.isNumeric(courseProviderTypePK);
+	}
+
+	@Override
 	public void present(IWContext iwc) {
 		try {
-			if (schoolTypePK == null) {
-				add("No school type set");
+			if (!isValidCourseProviderTypePK() && iwc.isLoggedOn()) {
+				courseProviders = getHandledCourseProviders(iwc.getCurrentUser());
+			}
+			if (!isValidCourseProviderTypePK() && courseProviders == null) {
+				add("Course provider type is not set and no course providers are available for the current user");
 				return;
 			}
 
@@ -70,24 +147,30 @@ public class CourseStatistics extends CourseBlock {
 			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_statistics", "Course statistics"));
 			section.add(heading);
 
-			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(schoolTypePK.toString()), false);
-			Collection areas = getBusiness().getSchoolAreas();
+//			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(courseProviderTypePK));
+			CourseProviderType type = getProviderType(iwc);
+//			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
+			Collection<CourseType> courseTypes = getCourseTypes();
+//			Collection<CourseProviderArea> areas = getBusiness().getSchoolAreas();
+			Collection<CourseProviderArea> areas = getAreas();
 
-			Collection userProviders = null;
-			if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+			Collection<CourseProvider> userProviders = null;
+			if (courseProviders == null) {
+				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+					userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+				}
+			} else {
+				userProviders = courseProviders;
 			}
 
-			Iterator iter = areas.iterator();
-			while (iter.hasNext()) {
-				CourseProviderArea area = (CourseProviderArea) iter.next();
+			for (Iterator<CourseProviderArea> iter = areas.iterator(); iter.hasNext();) {
+				CourseProviderArea area = iter.next();
 
-				Collection providers = getBusiness().getProviders(area, type);
+				Collection<CourseProvider> providers = getBusiness().getProviders(area, type);
 				if (userProviders != null) {
 					providers.retainAll(userProviders);
 				}
-				
+
 				addResults(iwc, iwrb, type, providers, courseTypes, section, area.getName());
 
 				Layer clearLayer = new Layer(Layer.DIV);
@@ -163,7 +246,15 @@ public class CourseStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection providers, Collection courseTypes, Layer section, String header) throws RemoteException {
+	private void addResults(
+			IWContext iwc,
+			IWResourceBundle iwrb,
+			CourseProviderType type,
+			Collection<CourseProvider> providers,
+			Collection<CourseType> courseTypes,
+			Layer section,
+			String header
+	) throws RemoteException {
 		Heading2 heading2 = new Heading2(header);
 		section.add(heading2);
 
@@ -182,10 +273,9 @@ public class CourseStatistics extends CourseBlock {
 		cell.setStyleClass("type");
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("type", "Type")));
 
-		Map providerTotals = new HashMap();
-		Iterator iterator = providers.iterator();
-		while (iterator.hasNext()) {
-			CourseProvider provider = (CourseProvider) iterator.next();
+		Map<CourseProvider, Integer> providerTotals = new HashMap<CourseProvider, Integer>();
+		for (Iterator<CourseProvider> iterator = providers.iterator(); iterator.hasNext();) {
+			CourseProvider provider = iterator.next();
 
 			cell = row.createHeaderCell();
 			cell.setStyleClass(provider.getPrimaryKey().toString());
@@ -204,9 +294,8 @@ public class CourseStatistics extends CourseBlock {
 		int iRow = 1;
 
 		int total = 0;
-		Iterator iter = courseTypes.iterator();
-		while (iter.hasNext()) {
-			CourseType courseType = (CourseType) iter.next();
+		for (Iterator<CourseType> iter = courseTypes.iterator(); iter.hasNext();) {
+			CourseType courseType = iter.next();
 
 			row = group.createRow();
 			cell = row.createCell();
@@ -215,15 +304,14 @@ public class CourseStatistics extends CourseBlock {
 			cell.add(new Text(courseType.getName()));
 
 			int sum = 0;
-			iterator = providers.iterator();
-			while (iterator.hasNext()) {
-				CourseProvider provider = (CourseProvider) iterator.next();
+			for (Iterator<CourseProvider> prIter = providers.iterator(); prIter.hasNext();) {
+				CourseProvider provider = prIter.next();
 				if (!providerTotals.containsKey(provider)) {
 					providerTotals.put(provider, new Integer(0));
 				}
 				int providerSum = getBusiness().getNumberOfCourses(provider, type, courseType, fromDate, toDate);
 				sum += providerSum;
-				providerTotals.put(provider, new Integer(((Integer) providerTotals.get(provider)).intValue() + providerSum));
+				providerTotals.put(provider, new Integer(providerTotals.get(provider).intValue() + providerSum));
 
 				cell = row.createCell();
 				cell.setStyleClass(courseType.getPrimaryKey().toString());
@@ -254,10 +342,9 @@ public class CourseStatistics extends CourseBlock {
 		cell.setStyleClass("totals");
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("total", "Total")));
 
-		iterator = providers.iterator();
-		while (iterator.hasNext()) {
-			CourseProvider provider = (CourseProvider) iterator.next();
-			int providerSum = ((Integer) providerTotals.get(provider)).intValue();
+		for (Iterator<CourseProvider> prIter = providers.iterator(); prIter.hasNext();) {
+			CourseProvider provider = prIter.next();
+			int providerSum = providerTotals.get(provider).intValue();
 
 			cell = row.createCell();
 			cell.add(new Text(String.valueOf(providerSum)));
@@ -269,7 +356,17 @@ public class CourseStatistics extends CourseBlock {
 		cell.add(new Text(String.valueOf(total)));
 	}
 
-	public void setSchoolTypePK(String schoolTypePK) {
-		this.schoolTypePK = schoolTypePK;
+	public void setCourseProviderTypePK(String courseProviderTypePK) {
+		this.courseProviderTypePK = courseProviderTypePK;
+	}
+
+	@Deprecated
+	/**
+	 * Use method setCourseProviderTypePK
+	 *
+	 * @param courseProviderTypePK
+	 */
+	public void setSchoolTypePK(String courseProviderTypePK) {
+		setCourseProviderTypePK(courseProviderTypePK);
 	}
 }

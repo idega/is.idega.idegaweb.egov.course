@@ -20,22 +20,22 @@ public interface CourseChoiceHome extends IDOHome {
 
 	public CourseChoice findByUniqueID(String uniqueID) throws FinderException;
 
-	public Collection findAllByApplication(CourseApplication application)
+	public Collection<CourseChoice> findAllByApplication(CourseApplication application)
 			throws FinderException;
 
-	public Collection findAllByApplication(CourseApplication application,
+	public Collection<CourseChoice> findAllByApplication(CourseApplication application,
 			Boolean waitingList) throws FinderException;
 
 	public CourseChoice findFirstChoiceByApplication(
 			CourseApplication application) throws FinderException;
 
-	public Collection findAllByCourse(Course course, Boolean waitingList)
+	public Collection<CourseChoice> findAllByCourse(Course course, Boolean waitingList)
 			throws FinderException;
 
 	public int getCountByCourse(Course course) throws IDOException;
 	public int getCountByCourse(Course course, boolean countOffers) throws IDOException;
 
-	public Collection findAllByUser(User user) throws FinderException;
+	public Collection<CourseChoice> findAllByUser(User user) throws FinderException;
 
 	public Collection<CourseChoice> findAllByUserAndProviders(User user, Collection<CourseProvider> providers)
 			throws FinderException;
@@ -43,10 +43,10 @@ public interface CourseChoiceHome extends IDOHome {
 	public CourseChoice findByUserAndCourse(User user, Course course)
 			throws FinderException;
 
-	public Collection findAllByCourseAndDate(Course course,
+	public Collection<CourseChoice> findAllByCourseAndDate(Course course,
 			IWTimestamp fromDate, IWTimestamp toDate) throws FinderException;
 
-	public int getCountByUserAndProviders(User user, Collection providers)
+	public int getCountByUserAndProviders(User user, Collection<?> providers)
 			throws IDOException;
 
 	public int getCountByProviderAndSchoolTypeAndGender(CourseProvider provider,
