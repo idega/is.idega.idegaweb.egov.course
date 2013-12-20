@@ -17,6 +17,7 @@ import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,6 +40,9 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
+import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 
 public class CourseStatistics extends CourseBlock {
 
@@ -48,11 +52,82 @@ public class CourseStatistics extends CourseBlock {
 //	private Object schoolTypePK;
 	private String courseProviderTypePK;
 
+	private Collection<CourseProvider> courseProviders = null;
+
+	private Collection<CourseProviderArea> getAreas() throws RemoteException {
+		if (courseProviders == null) {
+			return getBusiness().getSchoolAreas();
+		}
+
+		Map<String, CourseProviderArea> areas = new HashMap<String, CourseProviderArea>();
+		for (CourseProvider provider: courseProviders) {
+			CourseProviderArea area = provider.getCourseProviderArea();
+			areas.put(area.getPrimaryKey().toString(), area);
+		}
+		return areas.values();
+	}
+
+	private Collection<CourseType> getCourseTypes() throws RemoteException {
+		if (courseProviders == null && isValidCourseProviderTypePK()) {
+			return getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
+		}
+
+		if (courseProviders == null) {
+			return Collections.emptyList();
+		}
+
+		Map<String, CourseType> allTypes = new HashMap<String, CourseType>();
+		for (CourseProvider provider: courseProviders) {
+			Collection<CourseProviderType> providerTypes = provider.getCourseProviderTypes();
+			if (ListUtil.isEmpty(providerTypes)) {
+				continue;
+			}
+
+			for (CourseProviderType courseProviderType: providerTypes) {
+				Collection<CourseType> types = getBusiness().getCourseTypes(new Integer(courseProviderType.getPrimaryKey().toString()), false);
+				if (!ListUtil.isEmpty(types)) {
+					for (CourseType type: types) {
+						allTypes.put(type.getPrimaryKey().toString(), type);
+					}
+				}
+			}
+		}
+		return allTypes.values();
+	}
+
+	private CourseProviderType getProviderType(IWContext iwc) throws RemoteException {
+		if (courseProviders == null && isValidCourseProviderTypePK()) {
+			return getSchoolBusiness(iwc).getSchoolType(new Integer(courseProviderTypePK));
+		}
+
+		if (courseProviders == null) {
+			return null;
+		}
+
+		for (CourseProvider provider: courseProviders) {
+			Collection<CourseProviderType> providerTypes = provider.getCourseProviderTypes();
+			if (ListUtil.isEmpty(providerTypes)) {
+				continue;
+			}
+
+			return providerTypes.iterator().next();
+		}
+
+		return null;
+	}
+
+	private boolean isValidCourseProviderTypePK() {
+		return !StringUtil.isEmpty(courseProviderTypePK) && !"-1".equals(courseProviderTypePK) && StringHandler.isNumeric(courseProviderTypePK);
+	}
+
 	@Override
 	public void present(IWContext iwc) {
 		try {
-			if (courseProviderTypePK == null) {
-				add("Course provider type is not set");
+			if (!isValidCourseProviderTypePK() && iwc.isLoggedOn()) {
+				courseProviders = getHandledCourseProviders(iwc.getCurrentUser());
+			}
+			if (!isValidCourseProviderTypePK() && courseProviders == null) {
+				add("Course provider type is not set and no course providers are available for the current user");
 				return;
 			}
 
@@ -72,13 +147,20 @@ public class CourseStatistics extends CourseBlock {
 			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_statistics", "Course statistics"));
 			section.add(heading);
 
-			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(courseProviderTypePK));
-			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
-			Collection<CourseProviderArea> areas = getBusiness().getSchoolAreas();
+//			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(courseProviderTypePK));
+			CourseProviderType type = getProviderType(iwc);
+//			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
+			Collection<CourseType> courseTypes = getCourseTypes();
+//			Collection<CourseProviderArea> areas = getBusiness().getSchoolAreas();
+			Collection<CourseProviderArea> areas = getAreas();
 
 			Collection<CourseProvider> userProviders = null;
-			if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+			if (courseProviders == null) {
+				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+					userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+				}
+			} else {
+				userProviders = courseProviders;
 			}
 
 			for (Iterator<CourseProviderArea> iter = areas.iterator(); iter.hasNext();) {
@@ -164,7 +246,15 @@ public class CourseStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection<CourseProvider> providers, Collection<CourseType> courseTypes, Layer section, String header) throws RemoteException {
+	private void addResults(
+			IWContext iwc,
+			IWResourceBundle iwrb,
+			CourseProviderType type,
+			Collection<CourseProvider> providers,
+			Collection<CourseType> courseTypes,
+			Layer section,
+			String header
+	) throws RemoteException {
 		Heading2 heading2 = new Heading2(header);
 		section.add(heading2);
 

@@ -16,6 +16,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.business.CourseSession;
+import is.idega.idegaweb.egov.course.data.CourseProvider;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
@@ -846,4 +847,9 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	public void setBackPage(ICPage responsePage) {
 		this.iBackPage = responsePage;
 	}
+
+	protected <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user) {
+		return getBusiness().getHandledCourseProviders(user);
+	}
+
 }
