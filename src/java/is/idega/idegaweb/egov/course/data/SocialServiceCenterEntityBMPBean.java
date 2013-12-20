@@ -703,6 +703,14 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		try {
 			setCreationDate(getCurrentDate());
 			super.store();
+			CourseProviderHome home = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
+			try {
+				home.findByPrimaryKeyIDO(this.getPrimaryKey());	
+			} catch (FinderException e) {
+				CourseProvider entity = home.createIDO();
+				entity.setPrimaryKey(this.getPrimaryKey());
+				entity.store();
+			}
 		} catch (Exception e) {
 			getLogger().log(Level.WARNING, 
 					"Failed to store " + getInterfaceClass() + 
@@ -749,9 +757,28 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	public void remove() {
 		removeHandlers();
 		removeServicedAreas();
+		CourseProvider provider = null;
+		try {
+			CourseProviderHome providerHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
+			provider = providerHome.findByPrimaryKeyIDO(this.getPrimaryKey());
+			provider.remove();
+		} catch (Exception e) {}
+
 		super.remove();
 	};
 
+//	@Override
+//	public Object ejbCreate() throws CreateException {
+//			this._group = this.getGroupHome().create();
+//			this._group.setGroupType(this.getGroupTypeKey());
+//			this._group.setName(this.getName() + "");
+//			this._group.store();
+//			this.setPrimaryKey(this._group.getPrimaryKey());
+//			this.setUniqueId(this._group.getUniqueId());
+//
+//			return super.ejbCreate();
+//	}
+	
 	/**
 	 * 
 	 * @param groupId is {@link Group#getPrimaryKey()}, not <code>null</code>;
