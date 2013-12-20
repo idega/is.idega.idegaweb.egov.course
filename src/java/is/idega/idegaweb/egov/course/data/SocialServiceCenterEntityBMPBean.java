@@ -759,14 +759,14 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Object> ejbFindByManagingGroupId(String groupId) {
-		if (StringUtil.isEmpty(groupId)) {
-			return null;
+	public Collection<Object> ejbFindByManagingGroupIds(Collection<String> groupIds) {
+		if (ListUtil.isEmpty(groupIds)) {
+			return Collections.emptyList();
 		}
 
 		IDOQuery sql = idoQuery();
 		sql.appendSelectAllFrom(this);
-		sql.appendWhereEquals(COLUMN_MANAGING_GROUP, groupId);
+		sql.appendWhere(COLUMN_MANAGING_GROUP).appendInForStringCollectionWithSingleQuotes(groupIds);
 
 		try {
 			return idoFindPKsByQuery(sql);
