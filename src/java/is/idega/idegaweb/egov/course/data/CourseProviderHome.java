@@ -192,15 +192,6 @@ public interface CourseProviderHome extends IDOHome {
 
 	/**
 	 * 
-	 * @param name is {@link CourseProvider#getName()}, not <code>null</code>;
-	 * @param postalCode is {@link PostalCode#getPostalCode()}, not <code>null</code>;
-	 * @return entities by criteria or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public Collection<? extends CourseProvider> find(String name, String postalCode);
-
-	/**
-	 * 
 	 * <p>Creates or updates entity in data source.</p>
 	 * @param provider to update, if <code>null</code> new one will be created;
 	 * @param group

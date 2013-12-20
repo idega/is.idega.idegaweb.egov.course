@@ -167,4 +167,6 @@ public interface CourseProvider extends IDOEntity {
 	public void setTerminationDate(Date date);
 
 	public void remove();
+
+	public void setPrimaryKey(Object primaryKey);
 }

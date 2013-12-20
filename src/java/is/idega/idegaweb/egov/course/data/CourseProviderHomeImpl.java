@@ -89,6 +89,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -144,7 +145,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, "Failed to get primary keys of " + 
-					CourseProvider.class.getName());
+					getEntityInterfaceClass().getClass().getSimpleName());
 		}
 
 		return java.util.Collections.emptyList();
@@ -161,39 +162,16 @@ public class CourseProviderHomeImpl extends IDOFactory
 		}
 		
 		try {
-			return (CourseProvider) findByPrimaryKeyIDO(primaryKey);
+			CourseProvider provider = (CourseProvider) findSubTypeByPrimaryKeyIDO(primaryKey);
+			return provider;
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to get " + getEntityBeanClass().getClass().getName() + 
+					"Failed to get " + getEntityInterfaceClass().getClass().getSimpleName() + 
 					" by primary key: " + primaryKey);
 		}
 
 		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#find(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public Collection<? extends CourseProvider> find(String name, String postalCode) {
-		CourseProviderBMPBean entity = (CourseProviderBMPBean) this.idoCheckOutPooledEntity();
-		if (entity == null) {
-			return java.util.Collections.emptyList();
-		}
-
-		Collection<Object> primaryKeys = entity.ejbFindByNameAndPostalCode(name, postalCode);
-		try {
-			return getEntityCollectionForPrimaryKeys(primaryKeys);
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getName() + 
-					"'s by id's: '" + primaryKeys + "' cause of: ", e);
-		}
-
-		return Collections.emptyList();
 	}
 	
 	/*
@@ -202,16 +180,25 @@ public class CourseProviderHomeImpl extends IDOFactory
 	 */
 	@Override
 	public Collection<? extends CourseProvider> find(Collection<String> primaryKeys) {
-		try {
-			return getEntityCollectionForPrimaryKeys(primaryKeys);
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getName() + 
-					"'s by id's: '" + primaryKeys + "' cause of: ", e);
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
 		}
 
-		return Collections.emptyList();
+		ArrayList<CourseProvider> providers = new ArrayList<CourseProvider>(primaryKeys.size());
+		for (String key : primaryKeys) {
+			providers.add(find(key));
+		}
+
+//		try {
+//			return getEntityCollectionForPrimaryKeys(primaryKeys);
+//		} catch (FinderException e) {
+//			java.util.logging.Logger.getLogger(getClass().getName()).log(
+//					Level.WARNING, 
+//					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
+//					"'s by id's: '" + primaryKeys);
+//		}
+
+		return providers;
 	}
 
 	@Override
@@ -247,9 +234,9 @@ public class CourseProviderHomeImpl extends IDOFactory
 		try {
 			return getEntityCollectionForPrimaryKeys(primaryKeys);
 		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
+			Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getName() + 
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
 					"'s by id's: '" + primaryKeys + "' cause of: ", e);
 		}
 
@@ -278,7 +265,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getName() + 
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
 					"'s by id's: '" + primaryKeys + "' cause of: ", e);
 		}
 
