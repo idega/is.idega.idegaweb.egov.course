@@ -332,7 +332,11 @@ public class CourseProviderUserBean {
 			}
 		}
 
-		return superAdminSelected;
+		if (this.superAdminSelected != null) {
+			return this.superAdminSelected;
+		} else {
+			return Boolean.FALSE;
+		}
 	}
 
 	public void setSuperAdminSelected(boolean superAdminSelected) {
