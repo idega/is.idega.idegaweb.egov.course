@@ -287,6 +287,14 @@ public class CourseList extends CourseBlock {
 		return link;
 	}
 
+	@Override
+	protected boolean isSchoolUser() {
+		try {
+			return super.isSchoolUser();
+		} catch (Exception e) {}
+		return false;
+	}
+
 	protected Table2 getCourses(IWContext iwc) throws RemoteException {
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 
