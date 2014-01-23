@@ -128,4 +128,8 @@ public interface SocialServiceCenterEntity extends CourseProvider {
 	void addHandler(SocialServiceCenterHandlerEntity entity);
 
 	void addHandlerEntities(Collection<SocialServiceCenterHandlerEntity> handlers);
+
+	void setCourseProviderTypes(String[] typeIds);
+	
+	void setCourseProviderTypes(Collection<? extends CourseProviderType> types);
 }

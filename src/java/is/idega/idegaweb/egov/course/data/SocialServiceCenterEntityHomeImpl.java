@@ -143,7 +143,8 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 			String phone,
 			String webPageAddress,
 			String communeId,
-			String courseProviderAreaId) {
+			String courseProviderAreaId, 
+			String[] courseProviderTypes) {
 		Collection<? extends SocialServiceCenterEntity> entities = null;
 		if (socialServiceCenter != null) {
 			entities = Arrays.asList(socialServiceCenter);
@@ -180,6 +181,7 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 
 			entity.setServicedAreas(postalCodes);
 			entity.setHandlers(getHandlers(group));
+			entity.setCourseProviderTypes(courseProviderTypes);
 
 			/* FIXME this is done due to lack of time. It should be optimized
 			 * for one update per entity or one update per entities
@@ -212,7 +214,8 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 			String phone,
 			String webPageAddress,
 			String communeId,
-			String courseProviderAreaId) {
+			String courseProviderAreaId, 
+			String[] courseProviderTypes) {
 		ArrayList<SocialServiceCenterEntity> updatedEntities = new ArrayList<SocialServiceCenterEntity>();
 
 		/* Getting postal codes */
@@ -229,7 +232,7 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 		for (Group group : groups) {
 			entities = update(null, group, codes, providerId,
 					organizationNumber, address, phone, webPageAddress,
-					communeId, courseProviderAreaId);
+					communeId, courseProviderAreaId, courseProviderTypes);
 			if (!ListUtil.isEmpty(entities)) {
 				updatedEntities.addAll(entities);
 			}

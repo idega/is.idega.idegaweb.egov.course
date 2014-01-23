@@ -84,6 +84,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.rmi.RemoteException;
 import java.sql.Date;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -111,6 +112,7 @@ import com.idega.data.IDORemoveRelationshipException;
 import com.idega.user.business.GroupBusiness;
 import com.idega.user.data.Group;
 import com.idega.user.data.User;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -160,6 +162,9 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 
 		/* Relation for handlers of group */
 		addManyToManyRelationShip(SocialServiceCenterHandlerEntity.class);
+
+		/* Using default course provider type */
+		addManyToManyRelationShip(CourseProviderType.class);
 	}
 
 	@Override
@@ -343,6 +348,79 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		}
 	}
 
+	/**
+	 * 
+	 * <p>Appends a {@link CourseProviderType}s to many-to-many relationship
+	 * with this entity.</p>
+	 * @param types to append, not <code>null</code>;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public boolean addCourseProviderTypes(Collection<? extends CourseProviderType> types) {
+		return idoAddTo(types);
+	}
+	
+	/**
+	 * 
+	 * <p>Appends a {@link CourseProviderType} to many-to-many relationship
+	 * with this entity.</p>
+	 * @param type to append, not <code>null</code>;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public boolean addCourseProviderType(CourseProviderType type) {
+		if (type != null) {
+			return addCourseProviderTypes(Arrays.asList(type));
+		}
+
+		return Boolean.FALSE;
+	}
+
+	public void removeCourseProviderType(CourseProviderType type) {
+		if (type != null) {
+			idoRemoveRelationTo(type);
+		}
+	}
+
+	public void removeCourseProviderTypes() {
+		idoRemoveRelationsTo(CourseProviderType.class);
+	}
+
+	@Override
+	public void setCourseProviderTypes(String[] typeIds) {
+		if (!ArrayUtil.isEmpty(typeIds)) {
+			Collection<? extends CourseProviderType> types = getCourseProviderTypeHome()
+					.find(Arrays.asList(typeIds));
+			if (!ListUtil.isEmpty(types)) {
+				setCourseProviderTypes(types);
+			}
+		}
+	}
+
+	@Override
+	public void setCourseProviderTypes(Collection<? extends CourseProviderType> types) {
+		if (!ListUtil.isEmpty(types)) {
+			removeCourseProviderTypes();
+			addCourseProviderTypes(types);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderBMPBean#getCourseProviderTypes()
+	 */
+	@Override
+	public Collection<CourseProviderType> getCourseProviderTypes() {
+		try {
+			return idoGetRelatedEntities(CourseProviderType.class);
+		} catch (IDORelationshipException e) {
+			getLogger().log(Level.WARNING, "Failed to get " + 
+					CourseProviderType.class.getSimpleName() + "'s for " + 
+					getClass().getSimpleName() + " by primary key: '" + 
+					getPrimaryKey() + "' cause of: ", e);
+		}
+
+		return Collections.emptyList();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.SocialServiceCenterEntity#getServicedAreas()
@@ -445,7 +523,12 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	 */
 	@Override
 	public Commune getCommune() {
-		return getAddress().getCommune();
+		Address address = getAddress();
+		if (address != null) {
+			return getAddress().getCommune();
+		}
+
+		return null;
 	}
 
 	/*
@@ -454,7 +537,12 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	 */
 	@Override
 	public int getCommuneId() {
-		return getAddress().getCommuneID();
+		Address address = getAddress();
+		if (address != null) {
+			return getAddress().getCommuneID();
+		}
+
+		return -1;
 	}
 
 	/*
@@ -963,5 +1051,20 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		}
 
 		return this.socialServiceCenterHandlerEntityHome;
+	}
+
+	private CourseProviderTypeHome courseProviderTypeHome = null;
+
+	protected CourseProviderTypeHome getCourseProviderTypeHome() {
+		if (this.courseProviderTypeHome == null) {
+			try {
+				this.courseProviderTypeHome = (CourseProviderTypeHome) IDOLookup.getHome(CourseProviderType.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to get " + CourseProviderTypeHome.class.getSimpleName() + " cause of: ", e);
+			}
+		}
+
+		return this.courseProviderTypeHome;
 	}
 }

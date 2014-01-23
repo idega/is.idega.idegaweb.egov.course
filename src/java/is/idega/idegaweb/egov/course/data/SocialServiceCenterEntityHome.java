@@ -131,6 +131,7 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 	 * skipped if <code>null</code>;
 	 * @param courseProviderAreaId {@link CourseProviderArea#getPrimaryKey()},
 	 * skipped if <code>null</code>;
+	 * @param courseProviderTypes TODO
 	 * @return updated/created entities or {@link Collections#emptyList()}
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -148,7 +149,7 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 			String phone, 
 			String webPageAddress, 
 			String communeId, 
-			String courseProviderAreaId);
+			String courseProviderAreaId, String[] courseProviderTypes);
 
 	/**
 	 * 
@@ -272,6 +273,8 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 	 * skipped if <code>null</code>;
 	 * @param courseProviderAreaId {@link CourseProviderArea#getPrimaryKey()},
 	 * skipped if <code>null</code>;
+	 * @param courseProviderTypes is {@link Collection} of 
+	 * {@link CourseProviderType#getPrimaryKey()}, skipped if <code>null</code>;
 	 * @return created/updated entities or {@link Collections#emptyList()}
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -286,5 +289,5 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 			String phone, 
 			String webPageAddress, 
 			String communeId, 
-			String courseProviderAreaId);
+			String courseProviderAreaId, String[] courseProviderTypes);
 }
