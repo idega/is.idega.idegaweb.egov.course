@@ -55,14 +55,16 @@ public class CourseStatistics extends CourseBlock {
 	private Collection<CourseProvider> courseProviders = null;
 
 	private Collection<CourseProviderArea> getAreas() throws RemoteException {
-		if (courseProviders == null) {
+		if (ListUtil.isEmpty(courseProviders)) {
 			return getBusiness().getSchoolAreas();
 		}
 
 		Map<String, CourseProviderArea> areas = new HashMap<String, CourseProviderArea>();
 		for (CourseProvider provider: courseProviders) {
 			CourseProviderArea area = provider.getCourseProviderArea();
-			areas.put(area.getPrimaryKey().toString(), area);
+			if (area != null) {
+				areas.put(area.getPrimaryKey().toString(), area);
+			}
 		}
 		return areas.values();
 	}
