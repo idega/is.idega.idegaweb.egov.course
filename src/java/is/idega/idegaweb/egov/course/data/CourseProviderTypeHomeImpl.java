@@ -87,10 +87,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
 
+import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDOStoreException;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
@@ -185,5 +187,86 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 		}
 
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#findAll()
+	 */
+	@Override
+	public <T extends CourseProviderType> Collection<T> findAll() {
+		CourseProviderTypeBMPBean entity = (CourseProviderTypeBMPBean) idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> ids = entity.ejbFindAllSchoolTypes();
+		if (ListUtil.isEmpty(ids)) {
+			return Collections.emptyList();
+		}
+
+		try {
+			return getEntityCollectionForPrimaryKeys(ids);
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING,
+					"Failed to find " + getEntityBeanClass().getName() +
+					"'s by primary keys: '" + ids + "'");
+		}
+
+		return Collections.emptyList();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#update(is.idega.idegaweb.egov.course.data.CourseProviderType)
+	 */
+	@Override
+	public CourseProviderType update(CourseProviderType type) {
+		if (type == null) {
+			return null;
+		}
+
+		try {
+			type.store();
+			java.util.logging.Logger.getLogger(getClass().getName()).info(
+					CourseProviderType.class.getSimpleName() + " by id: '" + 
+							type.getPrimaryKey() + "' successfully updated!");
+			return type;
+		} catch (IDOStoreException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to update " + CourseProviderType.class.getSimpleName() + 
+					" by id: '" + type.getPrimaryKey() + "' cause of: ", e);
+		}
+
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#update(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public CourseProviderType update(String id, String name) {
+		CourseProviderType type = null;
+		if (!StringUtil.isEmpty(id)) {
+			type = find(id);
+		} else {
+			try {
+				type = createIDO();
+				java.util.logging.Logger.getLogger(getClass().getName()).info(
+						CourseProviderType.class.getSimpleName() + " successfully created!");
+			} catch (CreateException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to create " + CourseProviderType.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		if (!StringUtil.isEmpty(name)) {
+			type.setSchoolTypeName(name);
+		}
+
+		return update(type);
 	}
 }

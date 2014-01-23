@@ -98,6 +98,28 @@ import com.idega.data.IDOHome;
 public interface CourseProviderTypeHome extends IDOHome {
 
 	/**
+	 * 
+	 * <p>Updates existing {@link CourseProviderType}</p>
+	 * @param type to update, not <code>null</code>;
+	 * @return updated type or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public CourseProviderType update(CourseProviderType type);
+
+	/**
+	 * 
+	 * <p>Updates or creates {@link CourseProviderType}</p>
+	 * @param id is {@link CourseProviderType#getPrimaryKey()}, 
+	 * not <code>null</code> when update is needed, <code>null</code>
+	 * on new entity creation;
+	 * @param name is {@link CourseProvider#getName()}, 
+	 * skipped if <code>null</code>;
+	 * @return updated entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public CourseProviderType update(String id, String name);
+
+	/**
 	 *
 	 * @param primaryKey is {@link CourseProviderType#getPrimaryKey()},
 	 * not <code>null</code>;
@@ -123,4 +145,12 @@ public interface CourseProviderTypeHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public <T extends CourseProviderType> Collection<T> findByCategories(Collection<? extends CourseProviderCategory> categories);
+
+	/**
+	 * 
+	 * @return all entities in data source or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public <T extends CourseProviderType> Collection<T> findAll();
 }
