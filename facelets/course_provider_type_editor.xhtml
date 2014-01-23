@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+	<link 
+		rel="stylesheet"
+		type="text/css"
+		href="#{iwResourceResolver['com.idega.core']['style/iw_core.css']}"/>
+	<script
+		type="text/javascript"
+		src="http://code.jquery.com/jquery-1.9.0.js"/>
+	<script 
+		type="text/javascript"
+		src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"/>
+	<script 
+		type="text/javascript" 
+		src="#{iwResourceResolver['com.idega.core']['iw_core.js']}"/>
+	<script 
+		type="text/javascript"
+		src="#{iwResourceResolver['is.idega.idegaweb.egov.course']['javascript/courseProviderTypeEditorHelper.js']}"/>
+	<script type="text/javascript">
+		CourseProviderTypeEditorHelper.FIELD_IS_REQUIRED = "#{localizedStrings['is.idega.idegaweb.egov.course']['field_is_required']}";
+		CourseProviderTypeEditorHelper.SAVING = "#{localizedStrings['is.idega.idegaweb.egov.course']['saving']}";
+	</script>
+	<h:outputText
+		rendered="#{courseProviderTypeBean.saved}"
+		styleClass="savedText"
+		value="#{localizedStrings['is.idega.idegaweb.egov.course']['saved']}"/>
+	<h:form
+		rendered="#{not courseProviderTypeBean.saved}"
+		id="editorForm">
+		<h:panelGrid
+			columns="2"
+			styleClass="editorTable">
+			<h:panelGroup>
+				<h:outputLabel
+					for="name"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['name']}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:inputText
+					id="name"
+					value="#{courseProviderTypeBean.name}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:commandButton
+					id="saveButton"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['save']}"
+					action="#{courseProviderTypeBean.save}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:inputHidden
+					id="prm_saved"
+					value="#{courseProviderTypeBean.primaryKey}"/>
+			</h:panelGroup>
+		</h:panelGrid>
+	</h:form>
+</div>
