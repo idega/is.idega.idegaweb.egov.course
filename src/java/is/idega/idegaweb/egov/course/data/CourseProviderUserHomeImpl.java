@@ -432,7 +432,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 	@Override
 	public void remove(String courseProviderUserId, String courseProviderId) {
 		remove(find(courseProviderUserId), 
-				getCourseProviderHome().find(courseProviderId));
+				getCourseProviderHome().findByPrimaryKeyRecursively(courseProviderId));
 	}
 
 	/*
