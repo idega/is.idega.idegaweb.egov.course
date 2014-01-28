@@ -381,7 +381,7 @@ public class CourseProviderBean {
 			String courseProviderId = CoreUtil.getIWContext()
 					.getParameter(COURSE_PROVIDER_ID);
 			if (!StringUtil.isEmpty(courseProviderId)) {
-				this.courseProvider = getCourseProviderHome().find(
+				this.courseProvider = getCourseProviderHome().findByPrimaryKeyRecursively(
 						courseProviderId
 						);
 			}

@@ -432,7 +432,7 @@ public class CoursePriceEditor extends CourseBlock {
 		schoolTypeID.setOnChange("changeValues();");
 
 		Collection cargoTypes = null;
-		Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
+		Collection schoolTypes = getCourseBusiness(iwc).getAllAfterschoolCareSchoolTypes();
 		schoolTypeID.addMenuElements(schoolTypes);
 
 		if (price != null) {

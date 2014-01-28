@@ -275,7 +275,7 @@ public class CourseEditor extends CourseBlock {
 			}
 			schoolType.addMenuElements(schoolTypes);
 		} else {
-			Collection<CourseProviderType> schoolTypes = getBusiness().getAllSchoolTypes();
+			Collection<CourseProviderType> schoolTypes = getBusiness().getAllAfterschoolCareSchoolTypes();
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
 				type = schoolTypes.iterator().next();

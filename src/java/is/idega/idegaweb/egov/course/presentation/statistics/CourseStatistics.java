@@ -275,7 +275,6 @@ public class CourseStatistics extends CourseBlock {
 		cell.setStyleClass("type");
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("type", "Type")));
 
-		Map<CourseProvider, Integer> providerTotals = new HashMap<CourseProvider, Integer>();
 		for (Iterator<CourseProvider> iterator = providers.iterator(); iterator.hasNext();) {
 			CourseProvider provider = iterator.next();
 
@@ -296,6 +295,7 @@ public class CourseStatistics extends CourseBlock {
 		int iRow = 1;
 
 		int total = 0;
+		Map<CourseProvider, Integer> providerTotals = new HashMap<CourseProvider, Integer>();
 		for (Iterator<CourseType> iter = courseTypes.iterator(); iter.hasNext();) {
 			CourseType courseType = iter.next();
 

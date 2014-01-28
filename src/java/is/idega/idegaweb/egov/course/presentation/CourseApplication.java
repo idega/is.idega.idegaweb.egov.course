@@ -920,7 +920,7 @@ public class CourseApplication extends ApplicationForm {
 				}
 			}
 
-			Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
+			Collection schoolTypes = getCourseBusiness(iwc).getAllAfterschoolCareSchoolTypes();
 			schoolTypePK = (Integer) ((CourseProviderType) schoolTypes.iterator().next()).getPrimaryKey();
 			DropdownMenu catMenu = new DropdownMenu(schoolTypes, PARAMETER_CATEGORY);
 			catMenu.addMenuElementFirst("", iwrb.getLocalizedString("select_school_type", "Select school type"));

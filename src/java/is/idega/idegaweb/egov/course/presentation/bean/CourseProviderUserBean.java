@@ -210,7 +210,7 @@ public class CourseProviderUserBean {
 	}
 
 	public Map<String, String> getCourseProviders() {
-		Collection<? extends CourseProvider> providers = getCourseProviderHome().find();
+		Collection<? extends CourseProvider> providers = getCourseProviderHome().findAllRecursively();
 		if (ListUtil.isEmpty(providers)) {
 			return Collections.emptyMap();
 		}

@@ -173,7 +173,7 @@ public class CourseProviderUsersViewerBean {
 		}
 
 		Collection<? extends CourseProviderUserType> userTypes = getCourseProviderUserTypeHome().find();
-		Collection<? extends CourseProvider> providers = getCourseProviderHome().find();
+		Collection<CourseProvider> providers = getCourseProviderHome().findAllRecursively();
 		ArrayList<CourseProviderUsersAreaGroup> groupedUsers = new ArrayList<CourseProviderUsersAreaGroup>(providers.size());
 
 		/* Multiple providers */

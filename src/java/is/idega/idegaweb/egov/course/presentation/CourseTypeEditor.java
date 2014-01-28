@@ -122,7 +122,7 @@ public class CourseTypeEditor extends CourseBlock {
 			}
 		}
 	}
-
+	
 	public void showEditor(IWContext iwc, Object courseTypePK)
 			throws java.rmi.RemoteException {
 		Form form = new Form();
@@ -143,12 +143,13 @@ public class CourseTypeEditor extends CourseBlock {
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		TextInput inputLocalization = new TextInput(PARAMETER_LOCALIZATION_KEY);
 		TextArea inputDesc = new TextArea(PARAMETER_DESCRIPTION);
-		Collection schoolTypes = null;
+		Collection<? extends CourseProviderType> schoolTypes = null;
 		if (category == null) {
-			schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
+			schoolTypes = getCourseBusiness(iwc).getAllAfterschoolCareSchoolTypes();
 		} else {
 			schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes(category);			
 		}
+
 		DropdownMenu inputSchoolTypes = new DropdownMenu(schoolTypes,
 				PARAMETER_SCHOOL_TYPE_PK);
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
