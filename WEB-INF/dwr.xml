@@ -71,6 +71,18 @@
 		<include 
 			method="remove" />
 	</create>
+	<create
+		creator="jsf" 
+		javascript="CourseProviderTypesViewerBean">
+		<param 
+			name="managedBeanName" 
+			value="courseProviderTypesViewerBean" />
+		<param 
+			name="class" 
+			value="is.idega.idegaweb.egov.course.presentation.bean.CourseProviderTypesViewerBean" />
+		<include 
+			method="remove" />
+	</create>
   </allow>
   <signatures>
   	<![CDATA[

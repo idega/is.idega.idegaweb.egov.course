@@ -82,6 +82,8 @@
  */
 package is.idega.idegaweb.egov.course.presentation.bean;
 
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseProviderTypeHome;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderTypeEditor;
@@ -91,7 +93,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
+
+import javax.ejb.EJBException;
+import javax.ejb.RemoveException;
 
 import com.idega.builder.business.BuilderLogic;
 import com.idega.data.IDOLookup;
@@ -111,6 +118,16 @@ import com.idega.util.ListUtil;
  */
 public class CourseProviderTypesViewerBean {
 
+	public Map<String, String> getCategories() {
+		TreeMap<String, String> categoriesMap = new TreeMap<String, String>();
+		Collection<CourseProviderCategory> categories = getCourseProviderCategoryHome().findAll();
+		for (CourseProviderCategory category: categories) {
+			categoriesMap.put(category.getCategory(), category.getPrimaryKey().toString());
+		}
+
+		return categoriesMap;
+	}
+	
 	public List<CourseProviderTypeBean> getTypes() {
 		Collection<CourseProviderType> types = getCourseProviderTypeHome().findAll();
 		if (!ListUtil.isEmpty(types)) {
@@ -123,6 +140,18 @@ public class CourseProviderTypesViewerBean {
 		}
 
 		return Collections.emptyList();
+	}
+
+	/**
+	 * 
+	 * @param primaryKey is {@link CourseProviderType#getPrimaryKey()}, 
+	 * not {@link NullPointerException};
+	 * @throws EJBException is newer thrown, interface requires this...
+	 * @throws RemoveException is newer thrown, interface requires this...
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public void remove(String primaryKey) throws EJBException, RemoveException {
+		getCourseProviderTypeHome().remove(primaryKey);
 	}
 
 	public String getEditorLink() {
@@ -158,5 +187,24 @@ public class CourseProviderTypesViewerBean {
 		}
 
 		return this.courseProviderTypeHome;
+	}
+
+	private CourseProviderCategoryHome courseProviderCategoryHome = null;
+
+	protected CourseProviderCategoryHome getCourseProviderCategoryHome() {
+		if (this.courseProviderCategoryHome == null) {
+			try {
+				this.courseProviderCategoryHome = (CourseProviderCategoryHome) IDOLookup
+						.getHome(CourseProviderCategory.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING,
+						"Failed to get "
+								+ CourseProviderCategoryHome.class
+										.getSimpleName() + " cause of: ", e);
+			}
+		}
+
+		return this.courseProviderCategoryHome;
 	}
 }

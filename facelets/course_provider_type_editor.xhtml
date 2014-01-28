@@ -47,6 +47,19 @@
 					value="#{courseProviderTypeBean.name}"/>
 			</h:panelGroup>
 			<h:panelGroup>
+				<h:outputLabel
+					for="category"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['category']}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:selectOneRadio
+					id="category"
+					value="#{courseProviderTypeBean.categoryKey}">
+					<f:selectItems
+						value="#{courseProviderTypesViewerBean.categories}"/>
+				</h:selectOneRadio>
+			</h:panelGroup>
+			<h:panelGroup>
 				<h:commandButton
 					id="saveButton"
 					value="#{localizedStrings['is.idega.idegaweb.egov.course']['save']}"

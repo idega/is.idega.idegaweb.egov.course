@@ -23,7 +23,7 @@ table.table th {
 }
 
 table.table td {
-	border-bottom: 1px solid #CCCCCC;
+	border-top: 1px solid #CCCCCC;
     font-size: 0.85em;
     overflow: hidden;
     padding: 5px 8px;

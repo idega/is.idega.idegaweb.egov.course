@@ -82,6 +82,7 @@
  */
 package is.idega.idegaweb.egov.course.presentation.bean;
 
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseProviderTypeHome;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderTypeEditor;
@@ -116,6 +117,8 @@ public class CourseProviderTypeBean {
 	private String primaryKey = null;
 
 	private String name = null;
+
+	private String categoryKey = null;
 
 	private boolean saved = Boolean.FALSE;
 
@@ -164,6 +167,21 @@ public class CourseProviderTypeBean {
 		this.name = name;
 	}
 
+	public String getCategoryKey() {
+		if (getType() != null) {
+			CourseProviderCategory category = getType().getCategory();
+			if (category != null) {
+				return category.getPrimaryKey().toString();
+			}
+		}
+
+		return categoryKey;
+	}
+
+	public void setCategoryKey(String categoryKey) {
+		this.categoryKey = categoryKey;
+	}
+
 	public boolean isSaved() {
 		String parameter = CoreUtil.getIWContext().getParameter(PARAMETER_SAVED);
 		if (Boolean.TRUE.toString().equals(parameter)) {
@@ -178,7 +196,8 @@ public class CourseProviderTypeBean {
 	}
 
 	public void save() {
-		CourseProviderType entity = getCourseProviderTypeHome().update(getPrimaryKey(), getName());
+		CourseProviderType entity = getCourseProviderTypeHome().update(
+				getPrimaryKey(), getName(), null, getCategoryKey());
 		if (entity != null) {
 			setSaved(Boolean.TRUE);
 		}

@@ -39,6 +39,7 @@
 		id="editorTable"
 		value="#{courseProviderTypesViewerBean.types}"
 		var="type"
+		styleClass="table"
 		rowClasses="tableRow">
 		<h:column>
 			<h:inputHidden
@@ -77,6 +78,24 @@
 						value="#{iwResourceResolver['is.idega.idegaweb.egov.course']['style/images/edit.png']}"
 						alt="#{localizedStrings['is.idega.idegaweb.egov.course']['edit']}"/>
 				</h:outputLink>
+			</h:panelGroup>
+		</h:column>
+		<h:column>
+			<f:facet 
+				name="header">
+				<h:panelGroup
+					layout="block"
+					styleClass="header">
+					<h:outputText
+						value="#{localizedStrings['is.idega.idegaweb.egov.course']['delete']}"/>
+				</h:panelGroup>
+			</f:facet>
+			<h:panelGroup
+				layout="block">
+				<h:graphicImage
+					url="#{IWURIResource.res['/idegaweb/bundles/is.idega.idegaweb.egov.course.bundle/resources/style/images/delete.png']}"
+					onclick="CourseProviderTypesViewerHelper.remove(this.parentNode.parentNode)"
+					alt="#{localizedStrings['is.idega.idegaweb.egov.course']['delete']}"/>
 			</h:panelGroup>
 		</h:column>
 	</h:dataTable>
