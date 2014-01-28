@@ -89,7 +89,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -145,7 +144,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, "Failed to get primary keys of " +
-					getEntityInterfaceClass().getClass().getSimpleName());
+					getEntityInterfaceClass().getSimpleName());
 		}
 
 		return java.util.Collections.emptyList();
@@ -153,16 +152,35 @@ public class CourseProviderHomeImpl extends IDOFactory
 
 	/*
 	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#find(java.lang.String)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#findAllRecursively()
 	 */
 	@Override
-	public CourseProvider find(String primaryKey) {
+	public <P extends CourseProvider> Collection<P> findAllRecursively() {
+		IDOEntity entity = this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return java.util.Collections.emptyList();
+		}
+
+		Collection<Object> ids = ((CourseProviderBMPBean) entity).ejbFindAll();
+		if (ListUtil.isEmpty(ids)) {
+			return java.util.Collections.emptyList();
+		}
+
+		return findSubTypesByPrimaryKeysIDO(ids);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#findById(java.lang.String)
+	 */
+	@Override
+	public <T extends IDOEntity> T findByPrimaryKey(String primaryKey) {
 		if (StringUtil.isEmpty(primaryKey)) {
 			return null;
 		}
 
 		try {
-			CourseProvider provider = (CourseProvider) findSubTypeByPrimaryKeyIDO(primaryKey);
+			T provider = findByPrimaryKeyIDO(primaryKey);
 			return provider;
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
@@ -173,20 +191,36 @@ public class CourseProviderHomeImpl extends IDOFactory
 
 		return null;
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#find(java.lang.String)
+	 */
+	@Override
+	public <T extends CourseProvider> T findByPrimaryKeyRecursively(String primaryKey) {
+		if (StringUtil.isEmpty(primaryKey)) {
+			return null;
+		}
+
+		return findSubTypeByPrimaryKeyIDO(primaryKey);
+	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#find(java.util.Collection)
 	 */
 	@Override
-	public Collection<? extends CourseProvider> find(Collection<String> primaryKeys) {
+	public <T extends CourseProvider> Collection<T> find(Collection<String> primaryKeys) {
 		if (ListUtil.isEmpty(primaryKeys)) {
 		return Collections.emptyList();
 	}
 
-		ArrayList<CourseProvider> providers = new ArrayList<CourseProvider>(primaryKeys.size());
+		ArrayList<T> providers = new ArrayList<T>(primaryKeys.size());
 		for (String key : primaryKeys) {
-			providers.add(find(key));
+			T entity = findByPrimaryKeyRecursively(key);
+			if (entity != null) {
+				providers.add(entity);
+			}	
 		}
 
 //		try {
@@ -380,7 +414,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 
 		CourseProvider courseProvider = null;
 		if (!StringUtil.isEmpty(primaryKey)) {
-			courseProvider = find(primaryKey);
+			courseProvider = findByPrimaryKeyRecursively(primaryKey);
 		}
 
 		if (courseProvider == null) {
@@ -495,7 +529,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 	 */
 	@Override
 	public void remove(String primaryKey) {
-		remove(find(primaryKey));
+		remove(findByPrimaryKeyRecursively(primaryKey));
 	}
 
 	private CourseProviderUserHome courseProviderUserHome = null;

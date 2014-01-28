@@ -91,6 +91,7 @@ import com.idega.core.contact.data.Phone;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.Commune;
 import com.idega.core.location.data.PostalCode;
+import com.idega.data.IDOEntity;
 import com.idega.data.IDOHome;
 import com.idega.user.data.Group;
 
@@ -160,14 +161,33 @@ public interface CourseProviderHome extends IDOHome {
 	public <P extends CourseProvider> Collection<P> find();
 
 	/**
+	 * 
+	 * <p>Tries searching in subclasses.</p>
+	 * @return all {@link CourseProvider}s from data source or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public <P extends CourseProvider> Collection<P> findAllRecursively();
+
+	/**
+	 * 
+	 * @param primaryKey is {@link CourseProvider#getPrimaryKey()},
+	 * not <code>null</code>;
+	 * @return entity by primary key or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<T extends IDOEntity> T findByPrimaryKey(String primaryKey);
+	
+	/**
 	 *
+	 * <p>Performs deep search in types and extending subtypes</p>
 	 * @param primaryKey is {@link CourseProvider#getPrimaryKey()},
 	 * not <code>null</code>;
 	 * @return entity by primary key or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 * @param <CP>
 	 */
-	public CourseProvider find(String primaryKey);
+	<T extends CourseProvider> T findByPrimaryKeyRecursively(String primaryKey);
 
 	/**
 	 *
@@ -177,7 +197,7 @@ public interface CourseProviderHome extends IDOHome {
 	 * failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<? extends CourseProvider> find(Collection<String> primaryKeys);
+	public <T extends CourseProvider> Collection<T> find(Collection<String> primaryKeys);
 
 	/**
 	 *
