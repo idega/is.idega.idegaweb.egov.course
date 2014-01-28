@@ -483,7 +483,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		/* Filtering by course types */
 		if (!ListUtil.isEmpty(courseTypes)) {
-			query.append(courseTypes);
+			query.appendJoinOn(courseTypes);
 		}
 
 		/* Filtering by groups, which has access */

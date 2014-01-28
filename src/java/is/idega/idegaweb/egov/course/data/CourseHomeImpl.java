@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -432,7 +433,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		return update(
 				findByPrimaryKey(primaryKey), courseNumber, name, handler,
 				getCourseTypeHome().findByPrimaryKey(courseTypePrimaryKey), 
-				getCourseProvider().find(providerPrimaryKey),
+				getCourseProvider().findByPrimaryKeyRecursively(providerPrimaryKey),
 				getCoursePriceHome().findByPrimaryKey(coursePricePrimaryKey),
 				startDate, endDate, accountingKey, birthYearFrom, birthYearTo, 
 				maxPer, price, cost, openForRegistration, registrationEnd, 
@@ -440,6 +441,35 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				getGroupHome().findGroups(groupsWithAccessPrimaryKeys));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#update(is.idega.idegaweb.egov.course.data.Course, java.lang.String, java.lang.String, is.idega.idegaweb.egov.course.data.CourseProvider, java.util.Date, java.util.Date, java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer, java.util.Date, java.util.ArrayList)
+	 */
+	@Override
+	public Course update(Course course, String name,
+			String courseHandlerPersonalId, CourseProvider center,
+			java.util.Date startDate, java.util.Date endDate,
+			String accountingKey, Integer birthYearFrom, Integer birthYearTo,
+			Integer maximumParticipantsNumber,
+			java.util.Date registrationEndDate, ArrayList<Group> accessGroups) {
+		
+		User handler = null;
+		if (!StringUtil.isEmpty(courseHandlerPersonalId)) {
+			try {
+				handler = getUserHome().findByPersonalID(courseHandlerPersonalId);
+			} catch (FinderException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).warning(
+						"Failed to get " + User.class.getSimpleName() + 
+						" by personal id: '" + courseHandlerPersonalId + "'");
+			}
+		}
+
+		return update(course, -1, name, handler, null, center, null,
+				startDate, endDate, accountingKey, birthYearFrom, birthYearTo, 
+				maximumParticipantsNumber, null, null, null, registrationEndDate, 
+				null, null, true, accessGroups);
+	}
+	
 	private GroupHome groupHome = null;
 
 	protected GroupHome getGroupHome() {

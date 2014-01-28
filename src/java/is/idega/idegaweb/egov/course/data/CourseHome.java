@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.data;
 
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -208,4 +209,35 @@ public interface CourseHome extends IDOHome {
 			java.util.Date registrationEnd, Boolean hasPreCare,
 			Boolean hasPostCare, Boolean isPrivate,
 			Collection<String> groupsWithAccess);
+
+	/**
+	 * 
+	 * <p>Creates, updates {@link Course}</p>
+	 * @param course to update, new one created if <code>null</code>;
+	 * @param name is {@link Course#getName()}, skipped if <code>null</code>;
+	 * @param courseHandlerPersonalId is {@link User#getPersonalID()} of handler of
+	 * this {@link Course}, skipped if null;
+	 * @param center to assign, skipped if <code>null</code>;
+	 * when {@link Course} should be available for attending, 
+	 * skipped if <code>null</code>;
+	 * @param endDate when course ends, skipped if <code>null</code>;
+	 * @param accountingKey
+	 * @param birthYearFrom is floor of age for attendants, 
+	 * skipped if <code>null</code>;
+	 * @param birthYearTo is ceiling of age for attendants, 
+	 * skipped if <code>null</code>;
+	 * @param maximumParticipantsNumber is maximum number of attendants, 
+	 * skipped if <code>null</code>;
+	 * @param registrationEndDate
+	 * @param accessGroups
+	 * @return tells which {@link Group} {@link User}s can
+	 * attend/manage course, skipped if <code>null</code>;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Course update(Course course, String name,
+			String courseHandlerPersonalId, CourseProvider center,
+			java.util.Date startDate, java.util.Date endDate,
+			String accountingKey, Integer birthYearFrom, Integer birthYearTo,
+			Integer maximumParticipantsNumber,
+			java.util.Date registrationEndDate, ArrayList<Group> accessGroups);
 }
