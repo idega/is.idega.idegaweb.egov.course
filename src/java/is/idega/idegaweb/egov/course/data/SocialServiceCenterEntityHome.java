@@ -149,7 +149,8 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 			String phone, 
 			String webPageAddress, 
 			String communeId, 
-			String courseProviderAreaId, String[] courseProviderTypes);
+			String courseProviderAreaId, 
+			String[] courseProviderTypes);
 
 	/**
 	 * 

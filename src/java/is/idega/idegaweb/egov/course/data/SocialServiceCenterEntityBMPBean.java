@@ -388,7 +388,7 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	public void setCourseProviderTypes(String[] typeIds) {
 		if (!ArrayUtil.isEmpty(typeIds)) {
 			Collection<? extends CourseProviderType> types = getCourseProviderTypeHome()
-					.find(Arrays.asList(typeIds));
+					.findByPrimaryKeys(Arrays.asList(typeIds));
 			if (!ListUtil.isEmpty(types)) {
 				setCourseProviderTypes(types);
 			}
@@ -845,14 +845,17 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	public void remove() {
 		removeHandlers();
 		removeServicedAreas();
-		CourseProvider provider = null;
-		try {
-			CourseProviderHome providerHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
-			provider = providerHome.findByPrimaryKeyIDO(this.getPrimaryKey());
-			provider.remove();
-		} catch (Exception e) {}
+		removeCourseProviderTypes();
+		Object primaryKey = getPrimaryKey();
+		if (primaryKey != null) {
+			super.remove();
 
-		super.remove();
+			CourseProvider provider = getCourseProviderHome()
+					.findByPrimaryKey(primaryKey.toString());
+			if (provider != null) {
+				provider.remove();
+			}
+		}
 	};
 
 //	@Override
@@ -967,6 +970,24 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		}
 
 		return Collections.emptyList();
+	}
+
+	private CourseProviderHome courseProviderHome = null;
+
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup
+						.getHome(CourseProvider.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderHome;
 	}
 
 	private PostalCodeHome postalCodeHome = null;
