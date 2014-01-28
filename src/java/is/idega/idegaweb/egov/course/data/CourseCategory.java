@@ -1,9 +1,8 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.data.IDOEntity;
 
-public interface CourseCategory extends IDOEntity, CourseProviderType {
+public interface CourseCategory extends CourseProviderType {
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseCategoryBMPBean#allowsAllChildren
