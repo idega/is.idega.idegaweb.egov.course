@@ -30,6 +30,7 @@ import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
+import is.idega.idegaweb.egov.course.data.CourseProviderTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 import is.idega.idegaweb.egov.course.data.CourseType;
@@ -922,17 +923,26 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		courseDiscount.store();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourseTypes(java.lang.Integer, boolean)
+	 */
 	@Override
-	public Collection<CourseType> getCourseTypes(Integer schoolTypePK, boolean valid) {
-		try {
-			Collection<CourseType> coll = getCourseTypeHome().findAllBySchoolType(schoolTypePK, valid);
-			return coll;
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		} catch (FinderException e) {
-			e.printStackTrace();
+	public Collection<CourseType> getCourseTypes(
+			Integer schoolTypePK, 
+			boolean valid) {
+		if (schoolTypePK == null) {
+			return Collections.emptyList();
 		}
-		return null;
+
+		CourseCategory courseCategory = getCourseCategoryHome()
+				.findByPrimaryKey(schoolTypePK.toString());
+		if (courseCategory == null) {
+			return Collections.emptyList();
+		}
+
+		return getCourseTypeHome().findAllByCategory(
+				Arrays.asList(courseCategory), valid);
 	}
 
 	@Override
@@ -1580,16 +1590,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public CourseCategory getCourseCategory(Object pk) {
-		if (pk != null) {
-			try {
-				return getCourseCategoryHome().findByPrimaryKey(
-						new Integer(pk.toString()));
-			} catch (FinderException fe) {
-				log(fe);
-			}
-		}
-
-		return null;
+		return getCourseCategoryHome().findByPrimaryKey(pk.toString());
 	}
 
 	@Override
@@ -1647,28 +1648,22 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList<CourseType>();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getAllSchoolTypes()
+	 */
 	@Override
-	public <T extends CourseProviderType> Collection<T> getAllSchoolTypes() {
-		try {
-			Collection<T> schoolTypes = getSchoolBusiness().findAllSchoolTypesInCategory(
-					getSchoolBusiness().getAfterSchoolCareSchoolCategory()
-			);
-
-			Object typePK = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
-			if (typePK != null) {
-				CourseProviderType type = getSchoolBusiness().getSchoolType(new Integer(typePK.toString()));
-				schoolTypes.remove(type);
-			}
-
-			return schoolTypes;
-		} catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		}
+	public <T extends CourseProviderType> Collection<T> getAllAfterschoolCareSchoolTypes() {
+		return getAllSchoolTypes(getSchoolBusiness().getAfterSchoolCareSchoolCategory());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getAllSchoolTypes(java.lang.String)
+	 */
 	@Override
-	public Collection<? extends CourseProviderType> getAllSchoolTypes(String category) {
-		Collection<? extends CourseProviderType> schoolTypes = getSchoolBusiness()
+	public <T extends CourseProviderType> Collection<T> getAllSchoolTypes(String category) {
+		Collection<T> schoolTypes = getSchoolBusiness()
 				.findAllSchoolTypesInCategory(category);
 		if (ListUtil.isEmpty(schoolTypes)) {
 			return Collections.emptyList();
@@ -1677,14 +1672,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		String typePK = getIWApplicationContext().getApplicationSettings()
 				.getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
 		if (typePK != null) {
-			CourseProviderType type = null;
-			for (CourseProviderType schoolType : schoolTypes) {
-				if (typePK.equals(schoolType.getPrimaryKey().toString())) {
-					type = schoolType;
-				}
+			CourseProviderType type = getSchoolBusiness().getSchoolType(typePK);
+			if (type != null) {
+				schoolTypes.remove(type);
 			}
-
-			schoolTypes.remove(type);
 		}
 
 		return schoolTypes;
@@ -1692,13 +1683,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public Collection<CourseProviderArea> getSchoolAreas() {
-		try {
-			return getCourseProviderAreaHome().findAllSchoolAreas(getSchoolBusiness().getCategoryAfterSchoolCare());
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-
-		return new ArrayList<CourseProviderArea>();
+//		return getCourseProviderAreaHome().findAllSchoolAreas(getSchoolBusiness().getCategoryAfterSchoolCare());
+		return getCourseProviderAreaHome().find();
 	}
 
 	private CourseProviderAreaHome courseProviderAreaHome = null;
@@ -1773,7 +1759,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public <P extends CourseProvider> Collection<P> getProviders() {
-		return getSchoolBusiness().findAllSchoolsByType(getAllSchoolTypes());
+		return getSchoolBusiness().findAllSchoolsByType(getAllAfterschoolCareSchoolTypes());
 	}
 
 	@Override
@@ -3419,5 +3405,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		}
 		return null;
+	}
+
+	private CourseProviderTypeHome courseProviderTypeHome = null;
+
+	protected CourseProviderTypeHome getCourseProviderTypeHome() {
+		if (this.courseProviderTypeHome == null) {
+			try {
+				this.courseProviderTypeHome = (CourseProviderTypeHome) IDOLookup.getHome(CourseProviderType.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderTypeHome.class.getSimpleName(), e);
+			}
+		}
+
+		return this.courseProviderTypeHome;
 	}
 }

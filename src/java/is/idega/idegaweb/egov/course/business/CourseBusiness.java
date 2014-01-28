@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.course.business;
 
 import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
 import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
@@ -20,6 +21,7 @@ import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CoursePriceHome;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
@@ -30,6 +32,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -234,10 +237,14 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseTypes
+	 * 
+	 * @param schoolTypePK is {@link CourseCategory#getPrimaryKey()}, 
+	 * not <code>null</code>;
+	 * @param valid is not disabled;
+	 * @return {@link Collection} of entities or {@link Collections#emptyList()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<CourseType> getCourseTypes(Integer schoolTypePK, boolean valid)
-			throws RemoteException;
+	public Collection<CourseType> getCourseTypes(Integer schoolTypePK, boolean valid);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseTypesDWR
@@ -460,14 +467,30 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAllSchoolTypes
+	 * 
+	 * @return all {@link CourseProviderType}s, 
+	 * where {@link CourseProviderType#getCategory()} is equals to 
+	 * {@link CourseProviderCategory#CATEGORY_AFTER_SCHOOL_CARE}
+	 * and which are not in 
+	 * {@link CourseConstants#PROPERTY_HIDDEN_SCHOOL_TYPE} and 
+	 * or {@link Collections#emptyList()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public <T extends CourseProviderType> Collection<T> getAllSchoolTypes() throws RemoteException;
+	public <T extends CourseProviderType> Collection<T> getAllAfterschoolCareSchoolTypes();
+
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAllSchoolTypes
+	 * 
+	 * @param category is {@link CourseProviderCategory#getCategory()}, 
+	 * not <code>null</code>;
+	 * @return all {@link CourseProviderType}s, 
+	 * where {@link CourseProviderType#getCategory()} is equals to given category 
+	 * and which are not in 
+	 * {@link CourseConstants#PROPERTY_HIDDEN_SCHOOL_TYPE} and 
+	 * or {@link Collections#emptyList()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<? extends CourseProviderType> getAllSchoolTypes(String category) throws RemoteException;
+	public <T extends CourseProviderType> Collection<T> getAllSchoolTypes(String category);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getSchoolAreas
