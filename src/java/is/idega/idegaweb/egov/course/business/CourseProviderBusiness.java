@@ -88,7 +88,6 @@ import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 
-import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -142,7 +141,8 @@ public interface CourseProviderBusiness extends IBOService {
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public <P extends CourseProvider> Collection<P> findAllSchoolsByAreaAndType(CourseProviderArea area, CourseProviderType type);
+	public <P extends CourseProvider> Collection<P> findAllSchoolsByAreaAndType(
+			CourseProviderArea area, CourseProviderType type);
 
 	/**
 	 *
@@ -172,12 +172,21 @@ public interface CourseProviderBusiness extends IBOService {
 	 */
 	public <T extends CourseProviderType> Collection<T> findAllSchoolTypesInCategory(String category);
 
-	/*
-	 * Course categories
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_AFTER_SCHOOL_CARE} and
+	 * creates an entity in the database, if not exists;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
+	public String getAfterSchoolCareSchoolCategory();
 
-	public String getAfterSchoolCareSchoolCategory() throws RemoteException;
-	public CourseProviderCategory getCategoryAfterSchoolCare() throws RemoteException;
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_AFTER_SCHOOL_CARE} and
+	 * creates an entity in the database, if not exists;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public CourseProviderCategory getCategoryAfterSchoolCare();
 
 	/**
 	 *

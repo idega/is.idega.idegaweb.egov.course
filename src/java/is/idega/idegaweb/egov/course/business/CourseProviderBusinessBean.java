@@ -93,11 +93,11 @@ import is.idega.idegaweb.egov.course.data.CourseProviderTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -132,7 +132,7 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 
 		CourseProvider provider = null;
 		for (CourseProviderHome home : getCourseProviderHomes()) {
-			provider = home.find(primaryKey.toString());
+			provider = home.findByPrimaryKeyRecursively(primaryKey.toString());
 			if (provider != null) {
 				return provider;
 			}
@@ -230,7 +230,7 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		}
 
 		CourseProviderCategory category = getCourseProviderCategoryHome()
-				.findByCategory(categoryName);
+				.findByPrimaryKeyInSubtypes(categoryName);
 		if (category == null) {
 			return Collections.emptyList();
 		}
@@ -242,9 +242,12 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getAfterSchoolCareSchoolCategory()
 	 */
 	@Override
-	public String getAfterSchoolCareSchoolCategory() throws RemoteException {
-//		throw new UnsupportedOperationException();
-//		FIXME this is not supported for this
+	public String getAfterSchoolCareSchoolCategory() {
+		CourseProviderCategory category = getCategoryAfterSchoolCare();
+		if (category != null) {
+			return category.getCategory();
+		}
+
 		return null;
 	}
 
@@ -252,11 +255,9 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getCategoryAfterSchoolCare()
 	 */
 	@Override
-	public CourseProviderCategory getCategoryAfterSchoolCare()
-			throws RemoteException {
-//		throw new UnsupportedOperationException();
-//		FIXME this is not supported for this
-		return null;
+	public CourseProviderCategory getCategoryAfterSchoolCare() {
+		return getCourseProviderCategoryHome().findByPrimaryKeyInSubtypes(
+				CourseProviderCategory.CATEGORY_AFTER_SCHOOL_CARE);
 	}
 
 	/* (non-Javadoc)
@@ -268,7 +269,7 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		return getCourseProviderUserHome().findBySchool(school);
 	}
 
-	private ArrayList<CourseProviderHome> courseProviderHomes = null;
+	private HashSet<CourseProviderHome> courseProviderHomes = null;
 
 	private CourseProviderUserHome courseProviderUserHome = null;
 
@@ -323,6 +324,7 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 
 	protected CourseProviderUserHome getCourseProviderUserHome() {
 		if (this.courseProviderUserHome == null) {
+			
 			try {
 				this.courseProviderUserHome = (CourseProviderUserHome) IDOLookup.getHome(CourseProviderUser.class);
 			} catch (IDOLookupException e) {
@@ -336,9 +338,9 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		return this.courseProviderUserHome;
 	}
 
-	protected ArrayList<CourseProviderHome> getCourseProviderHomes() {
+	protected HashSet<CourseProviderHome> getCourseProviderHomes() {
 		if (ListUtil.isEmpty(this.courseProviderHomes)) {
-			this.courseProviderHomes = new ArrayList<CourseProviderHome>(); 
+			this.courseProviderHomes = new HashSet<CourseProviderHome>();
 		}
 
 		Set<Class<? extends CourseProvider>> subtypes = CoreUtil.getSubTypesOf(CourseProvider.class, true);
@@ -349,14 +351,14 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		CourseProviderHome courseProviderHome = null;
 		for (Class<? extends CourseProvider> subtype : subtypes) {
 			try {
-				courseProviderHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
+				courseProviderHome = (CourseProviderHome) IDOLookup.getHome(subtype);
 			} catch (IDOLookupException e) {
 				getLogger().log(Level.WARNING,
 						"Failed to get " + subtype.getSimpleName() + 
 						" cause of: ", e);
 			}
 
-			if (courseProviderHome == null) {
+			if (courseProviderHome != null) {
 				this.courseProviderHomes.add(courseProviderHome);
 			}
 		}
