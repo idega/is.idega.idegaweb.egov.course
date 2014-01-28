@@ -83,6 +83,9 @@
 package is.idega.idegaweb.egov.course.data;
 
 
+import java.util.Collection;
+import java.util.Collections;
+
 import com.idega.data.IDOHome;
 
 /**
@@ -102,7 +105,7 @@ public interface CourseProviderCategoryHome extends IDOHome {
 	 * @return entity by primary key or <code>null</code>;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public CourseProviderCategory find(String primaryKey);
+	CourseProviderCategory find(String primaryKey);
 
 	/**
 	 * 
@@ -111,6 +114,24 @@ public interface CourseProviderCategoryHome extends IDOHome {
 	 * @return entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public CourseProviderCategory findByCategory(String category);
+	CourseProviderCategory findByCategory(String category);
+
+	/**
+	 * 
+	 * <p>Searches for given primary key in all subtypes</p>
+	 * @param primaryKey is {@link CourseProviderCategory#getPrimaryKey()}
+	 * to search for, not <code>null</code>;
+	 * @return entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	CourseProviderCategory findByPrimaryKeyInSubtypes(String primaryKey);
+
+	/**
+	 * 
+	 * @return all entities without sub-entities or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<T extends CourseProviderCategory> Collection<T> findAll();
 
 }

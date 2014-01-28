@@ -83,6 +83,8 @@
 package is.idega.idegaweb.egov.course.data;
 
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
@@ -106,17 +108,11 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 
 	public static final String TABLE_NAME = "cou_course_provider_category";
 	public static final String COLUMN_CATEGORY = "CATEGORY";
-	public static final String COLUMN_LOCALIZED_KEY = "localized_key";
-	public static final String COLUMN_NAME = "CATEGORY_NAME";
-	
-	public static final String CATEGORY_MUSIC_SCHOOL = "MUSIC_SCHOOL";
-	public static final String CATEGORY_AFTER_SCHOOL_CARE = "AFTER_SCHOOL_CARE";
-	public static final String CATEGORY_CHILD_CARE = "CHILD_CARE";
-	public static final String CATEGORY_ELEMENTARY_SCHOOL = "ELEMENTARY_SCHOOL";
-	public static final String CATEGORY_HIGH_SCHOOL = "HIGH_SCHOOL";
-	public static final String CATEGORY_COLLEGE = "COLLEGE";
-	public static final String CATEGORY_UNIVERSITY = "UNIVERSITY";
-	public static final String CATEGORY_ADULT_EDUCATION = "ADULT_EDUCATION";
+
+	@Override
+	public Class getPrimaryKeyClass() {
+		return String.class;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.idega.data.GenericEntity#getEntityName()
@@ -141,27 +137,7 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName(), "Category", String.class, 30);
-		setAsPrimaryKey(COLUMN_CATEGORY, true);
-		addAttribute(COLUMN_NAME, "Name of category", String.class, 255);
-		addAttribute(COLUMN_LOCALIZED_KEY, "Localized key for category", String.class, 255);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderCategory#setLocalizedKey(java.lang.String)
-	 */
-	@Override
-	public void setLocalizedKey(String key) {
-		setColumn(COLUMN_LOCALIZED_KEY, key);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderCategory#getLocalizedKey()
-	 */
-	@Override
-	public String getLocalizedKey() {
-		return getStringColumnValue(COLUMN_LOCALIZED_KEY);
+		setAsPrimaryKey(getIDColumnName(), true);
 	}
 
 	/*
@@ -182,37 +158,25 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 		return getStringColumnValue(COLUMN_CATEGORY);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.idega.data.GenericEntity#setName(java.lang.String)
+	/**
+	 * 
+	 * @return {@link Collection} of {@link CourseProviderCategory#getPrimaryKey()}
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	@Override
-	public void setName(String name) {
-		setColumn(COLUMN_NAME, name);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.idega.data.GenericEntity#getName()
-	 */
-	@Override
-	public String getName() {
-		return getStringColumnValue(COLUMN_NAME);
-	}
-	
-	public String ejbFindByLocalizedKey(String key) {
+	public Collection<Object> ejbFindAllCategories() {
 		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(COLUMN_LOCALIZED_KEY, key);
+		query.appendSelectAllFrom(this);
 
 		try {
-			return (String) idoFindOnePKByQuery(query);
+			return idoFindPKsByQuery(query);
 		} catch (FinderException e) {
 			getLogger().log(Level.WARNING, 
-					"Failed to get primary key by localization key: '" + key + 
-					"' and query:'" + query.toString() + "'", e);
+					"Failed to get " + getClass().getSimpleName() +"s by query: '" + 
+							query.toString() + "'");
 		}
 
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -223,7 +187,7 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Object ejbFindPrimaryKey(String category) {
+	public Object ejbFindByPrimaryKey(String category) {
 		if (StringUtil.isEmpty(category)) {
 			return null;
 		}
@@ -242,139 +206,75 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 		return null;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_AFTER_SCHOOL_CARE};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindAfterSchoolCareCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_AFTER_SCHOOL_CARE);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_AFTER_SCHOOL_CARE + "' and query: '" + 
-							query.toString() + "'");
-		}
-
-		return null;
+		return CATEGORY_AFTER_SCHOOL_CARE;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_CHILD_CARE};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindChildcareCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_CHILD_CARE);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_CHILD_CARE + "' and query: '" + 
-							query.toString() + "'");
-		}
-
-		return null;
+		return CATEGORY_CHILD_CARE;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_ELEMENTARY_SCHOOL};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindElementarySchoolCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_ELEMENTARY_SCHOOL);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_ELEMENTARY_SCHOOL + "' and query: '" + 
-							query.toString() + "'");
-		}
-
-		return null;
+		return CATEGORY_ELEMENTARY_SCHOOL;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_HIGH_SCHOOL};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindHighSchoolCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_HIGH_SCHOOL);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_HIGH_SCHOOL + "' and query: '" + 
-							query.toString() + "'");
-		}
-
-		return null;
+		return CATEGORY_HIGH_SCHOOL;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_COLLEGE};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindCollegeCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_COLLEGE);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_COLLEGE + "' and query: '" + 
-							query.toString() + "'");
-		}
-
-		return null;
+		return CATEGORY_COLLEGE;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_UNIVERSITY};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindUniversityCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_UNIVERSITY);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_UNIVERSITY + "' and query: '" + 
-							query.toString() + "'");
-		}
-
-		return null;
+		return CATEGORY_UNIVERSITY;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_ADULT_EDUCATION};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindAdultEducationCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_ADULT_EDUCATION);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_ADULT_EDUCATION + "' and query: '" + 
-							query.toString() + "'");
-		}
-	
-		return null;
+		return CATEGORY_ADULT_EDUCATION;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderCategory#CATEGORY_MUSIC_SCHOOL};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String ejbFindMusicSchoolCategory() {
-		IDOQuery query = idoQuery();
-		query.appendSelectAllFrom(this).appendWhereEqualsQuoted(
-				COLUMN_CATEGORY, CATEGORY_MUSIC_SCHOOL);
-
-		try {
-			return (String) idoFindOnePKByQuery(query);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course provider category by id: '" + 
-							CATEGORY_MUSIC_SCHOOL + "' and query: '" + 
-							query.toString() + "'");
-		}
-
-		return null;
+		return CATEGORY_MUSIC_SCHOOL;
 	}
 }

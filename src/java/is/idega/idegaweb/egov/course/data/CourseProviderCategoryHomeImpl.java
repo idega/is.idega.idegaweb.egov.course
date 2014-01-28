@@ -83,12 +83,15 @@
 package is.idega.idegaweb.egov.course.data;
 
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
 /**
@@ -118,20 +121,16 @@ public class CourseProviderCategoryHomeImpl extends IDOFactory implements
 	 */
 	@Override
 	public CourseProviderCategory find(String primaryKey) {
-		if (StringUtil.isEmpty(primaryKey)) {
-			return null;
-		}
+		return findByCategory(primaryKey);
+	}
 
-		try {
-			return super.findByPrimaryKeyIDO(primaryKey);
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to find " + CourseProviderCategory.class.getName() + 
-					" by primary key: " + primaryKey, e);
-		}
-
-		return null;
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome#findByPrimaryKeyInSubtypes(java.lang.String)
+	 */
+	@Override
+	public CourseProviderCategory findByPrimaryKeyInSubtypes(String primaryKey) {
+		return findSubTypeByPrimaryKeyIDO(primaryKey);
 	}
 
 	/*
@@ -149,11 +148,52 @@ public class CourseProviderCategoryHomeImpl extends IDOFactory implements
 			return null;
 		}
 
-		Object id = entity.ejbFindPrimaryKey(category);
+		Object id = entity.ejbFindByPrimaryKey(category);
 		if (id == null) {
 			return null;
 		}
 
-		return find(id.toString());
+		try {
+			return findByPrimaryKeyIDO(id);
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).warning(
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
+					" by primary key: '" + category + "'");
+		}
+
+		return null;
+	}
+
+	public CourseProviderCategory findByCategoryInSubtypes(String category) {
+		return findByPrimaryKeyInSubtypes(category);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome#findAll()
+	 */
+	@Override
+	public <T extends CourseProviderCategory> Collection<T> findAll() {
+		CourseProviderCategoryBMPBean entity = (CourseProviderCategoryBMPBean) idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> primaryKeys = entity.ejbFindAllCategories();
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
+		}
+
+		try {
+			return getEntityCollectionForPrimaryKeys(primaryKeys);
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING,
+					"Failed to get "
+							+ getEntityInterfaceClass().getSimpleName()
+							+ " by primary keys: '" + primaryKeys + "'");
+		}
+
+		return Collections.emptyList();
 	}
 }

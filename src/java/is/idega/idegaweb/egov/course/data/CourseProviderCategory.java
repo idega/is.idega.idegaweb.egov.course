@@ -96,15 +96,20 @@ import com.idega.data.IDOEntity;
  */
 public interface CourseProviderCategory extends IDOEntity {
 
-	public String getCategory();
-
-	public void setCategory(String category);
+	public static final String CATEGORY_MUSIC_SCHOOL = "MUSIC_SCHOOL";
+	public static final String CATEGORY_AFTER_SCHOOL_CARE = "AFTER_SCHOOL_CARE";
+	public static final String CATEGORY_CHILD_CARE = "CHILD_CARE";
+	public static final String CATEGORY_ELEMENTARY_SCHOOL = "ELEMENTARY_SCHOOL";
+	public static final String CATEGORY_HIGH_SCHOOL = "HIGH_SCHOOL";
+	public static final String CATEGORY_COLLEGE = "COLLEGE";
+	public static final String CATEGORY_UNIVERSITY = "UNIVERSITY";
+	public static final String CATEGORY_ADULT_EDUCATION = "ADULT_EDUCATION";
 
 	public String getName();
-	
+
 	public void setName(String name);
 
-	public String getLocalizedKey();
+	public String getCategory();
 
-	public void setLocalizedKey(String key);
+	public void setCategory(String category);	
 }
