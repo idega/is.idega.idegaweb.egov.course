@@ -114,10 +114,35 @@ public interface CourseProviderTypeHome extends IDOHome {
 	 * on new entity creation;
 	 * @param name is {@link CourseProvider#getName()}, 
 	 * skipped if <code>null</code>;
+	 * @param localizationKey is {@link String} in Localized.strings file, 
+	 * skipped if <code>null</code>;
+	 * @param category skipped if <code>null</code>;
 	 * @return updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public CourseProviderType update(String id, String name);
+	CourseProviderType update(String id, String name, 
+			String localizationKey, CourseProviderCategory category);
+
+	/**
+	 * 
+	 * <p>Updates or creates {@link CourseProviderType}</p>
+	 * @param id is {@link CourseProviderType#getPrimaryKey()}, 
+	 * not <code>null</code> when update is needed, <code>null</code>
+	 * on new entity creation;
+	 * @param name is {@link CourseProvider#getName()}, 
+	 * skipped if <code>null</code>;
+	 * @param localizationKey is {@link String} in Localized.strings file, 
+	 * skipped if <code>null</code>;
+	 * @param category is {@link CourseProviderCategory#getPrimaryKey()},
+	 * skipped if <code>null</code>;
+	 * @return updated entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	CourseProviderType update(
+			String id, 
+			String name, 
+			String localizationKey,
+			String category);
 
 	/**
 	 *
@@ -135,7 +160,7 @@ public interface CourseProviderTypeHome extends IDOHome {
 	 * failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<? extends CourseProviderType> find(
+	public Collection<? extends CourseProviderType> findByPrimaryKeys(
 			Collection<String> primaryKeys);
 
 	/**

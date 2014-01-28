@@ -92,6 +92,8 @@ import javax.ejb.FinderException;
 
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOStoreException;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -122,7 +124,8 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#findByCategories(java.util.Collection)
 	 */
 	@Override
-	public <T extends CourseProviderType> Collection<T> findByCategories(Collection<? extends CourseProviderCategory> categories) {
+	public <T extends CourseProviderType> Collection<T> findByCategories(
+			Collection<? extends CourseProviderCategory> categories) {
 		if (ListUtil.isEmpty(categories)) {
 			return Collections.emptyList();
 		}
@@ -137,16 +140,7 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 			return Collections.emptyList();
 		}
 
-		try {
-			return getEntityCollectionForPrimaryKeys(ids);
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING,
-					"Failed to find " + getEntityBeanClass().getName() +
-					"'s by primary keys: '" + ids + "'");
-		}
-
-		return Collections.emptyList();
+		return findSubTypesByPrimaryKeysIDO(ids);
 	}
 
 	/*
@@ -154,7 +148,7 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#find(java.util.Collection)
 	 */
 	@Override
-	public Collection<? extends CourseProviderType> find(Collection<String> primaryKeys) {
+	public Collection<? extends CourseProviderType> findByPrimaryKeys(Collection<String> primaryKeys) {
 		try {
 			return getEntityCollectionForPrimaryKeys(primaryKeys);
 		} catch (FinderException e) {
@@ -244,22 +238,43 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public CourseProviderType update(String id, String name,
+			String localizationKey, String category) {
+		return update(
+				id,
+				name,
+				localizationKey,
+				getCourseProviderCategoryHome().findByPrimaryKeyInSubtypes(
+						category));
+	}
+	
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#update(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public CourseProviderType update(String id, String name) {
+	public CourseProviderType update(String id, String name,
+			String localizationKey, CourseProviderCategory category) {
 		CourseProviderType type = null;
 		if (!StringUtil.isEmpty(id)) {
 			type = find(id);
-		} else {
+		} 
+		
+		if (type == null) {
 			try {
 				type = createIDO();
 				java.util.logging.Logger.getLogger(getClass().getName()).info(
-						CourseProviderType.class.getSimpleName() + " successfully created!");
+						CourseProviderType.class.getSimpleName()
+								+ " successfully created!");
 			} catch (CreateException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-						"Failed to create " + CourseProviderType.class.getSimpleName() + 
-						" cause of: ", e);
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING,
+						"Failed to create "
+								+ CourseProviderType.class.getSimpleName()
+								+ " cause of: ", e);
 			}
 		}
 
@@ -267,6 +282,62 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 			type.setSchoolTypeName(name);
 		}
 
+		if (!StringUtil.isEmpty(localizationKey)) {
+			type.setLocalizationKey(localizationKey);
+		}
+
+		if (category != null) {
+			type.setCategory(category);
+		}
+
 		return update(type);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.IDOFactory#remove(java.lang.Object)
+	 */
+	@Override
+	public void remove(Object primaryKey) {
+		if (primaryKey != null) {
+			CourseProviderType entity = find(primaryKey.toString());
+			if (entity != null) {
+				try {
+					entity.remove();
+					java.util.logging.Logger.getLogger(getClass().getName())
+							.log(Level.INFO,
+									getEntityInterfaceClass().getSimpleName()
+											+ " by id: '" + primaryKey
+											+ "' removed!");
+				} catch (Exception e) {
+					java.util.logging.Logger.getLogger(getClass().getName())
+							.log(Level.WARNING,
+									"Failed to remove "
+											+ getEntityInterfaceClass()
+													.getSimpleName()
+											+ " by primary key: " + primaryKey
+											+ " cause of: ", e);
+				}
+			}
+		}
+	}
+
+	private CourseProviderCategoryHome courseProviderCategoryHome = null;
+
+	protected CourseProviderCategoryHome getCourseProviderCategoryHome() {
+		if (this.courseProviderCategoryHome == null) {
+			try {
+				this.courseProviderCategoryHome = (CourseProviderCategoryHome) IDOLookup
+						.getHome(CourseProviderCategory.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING,
+						"Failed to get "
+								+ CourseProviderCategoryHome.class
+										.getSimpleName() + " cause of: ", e);
+			}
+		}
+
+		return this.courseProviderCategoryHome;
 	}
 }

@@ -136,6 +136,15 @@ public class CourseProviderTypeBMPBean extends GenericEntity implements CoursePr
 
 	/*
 	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#getName()
+	 */
+	@Override
+	public String getName() {
+		return getSchoolTypeName();
+	}
+	
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderType#getCategory()
 	 */
 	@Override
@@ -149,25 +158,7 @@ public class CourseProviderTypeBMPBean extends GenericEntity implements CoursePr
 	 */
 	@Override
 	public void setCategory(CourseProviderCategory category){
-		setColumn(COLUMN_SCHOOL_CATEGORY,category);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderType#getSchoolCategory()
-	 */
-	@Override
-	public String getSchoolCategory(){
-		return getStringColumnValue(COLUMN_SCHOOL_CATEGORY);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderType#setSchoolCategory(java.lang.String)
-	 */
-	@Override
-	public void setSchoolCategory(String category){
-		setColumn(COLUMN_SCHOOL_CATEGORY,category);
+		setColumn(COLUMN_SCHOOL_CATEGORY, category);
 	}
 
 	/*
@@ -190,7 +181,7 @@ public class CourseProviderTypeBMPBean extends GenericEntity implements CoursePr
 
 	/*
 	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderType#getLocalizationKey()
+	 * @see is.idega.idegaweb.egov.co`urse.data.CourseProviderType#getLocalizationKey()
 	 */
 	@Override
 	public String getLocalizationKey() {

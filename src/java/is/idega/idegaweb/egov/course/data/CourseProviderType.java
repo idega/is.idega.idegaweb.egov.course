@@ -95,20 +95,16 @@ import com.idega.data.IDOEntity;
 public interface CourseProviderType extends IDOEntity {
 
 	public void setSchoolTypeName(String name);
-	
+
 	public String getSchoolTypeName();
 
 	public void setLocalizationKey(String key);
-	
+
 	public String getLocalizationKey();
-	
+
 	public String getName();
 
 	public CourseProviderCategory getCategory();
 
 	public void setCategory(CourseProviderCategory category);
-	
-	public String getSchoolCategory();
-
-	public void setSchoolCategory(String category);
 }
