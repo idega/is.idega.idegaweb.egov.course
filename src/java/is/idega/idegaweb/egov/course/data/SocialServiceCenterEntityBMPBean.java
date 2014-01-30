@@ -911,6 +911,7 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		}
 
 		IDOQuery sql = idoQuery();
+		sql.useDefaultAlias = Boolean.TRUE;
 		sql.appendSelectAllFrom(this);
 		sql.appendJoinOn(postalCodes);
 
@@ -939,6 +940,7 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		}
 
 		IDOQuery sql = idoQuery();
+		sql.useDefaultAlias = Boolean.TRUE;
 		sql.appendSelectAllFrom(this);
 		sql.appendJoinOn(handlers);
 

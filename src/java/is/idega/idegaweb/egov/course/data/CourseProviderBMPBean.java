@@ -547,6 +547,7 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 			Collection<? extends CourseProviderType> types,
 			Collection<? extends CourseProviderArea> areas) {
 		IDOQuery sql = idoQuery();
+		sql.useDefaultAlias = Boolean.TRUE;
 		sql.appendSelectAllFrom(this);
 		sql.appendJoinOn(types);
 		sql.appendJoinOn(areas);

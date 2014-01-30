@@ -159,6 +159,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		}
 
 		IDOQuery query = idoQuery();
+		query.useDefaultAlias = Boolean.TRUE;
 		query.appendSelectAllFrom(this);
 		query.appendJoinOn(courseCategories);
 

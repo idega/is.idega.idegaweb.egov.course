@@ -575,6 +575,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			Collection<? extends User> user, 
 			int userType) {
 		IDOQuery sql = idoQuery();
+		sql.useDefaultAlias = Boolean.TRUE;
 		sql.appendSelectAllFrom(this)
 		.appendJoinOn(school)
 		.appendJoinOn(user);
@@ -596,6 +597,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			Collection<? extends User> user, 
 			Collection<? extends CourseProviderUserType> userType) {
 		IDOQuery sql = idoQuery();
+		sql.useDefaultAlias = Boolean.TRUE;
 		sql.appendSelectAllFrom(this)
 		.appendJoinOn(school)
 		.appendJoinOn(user)

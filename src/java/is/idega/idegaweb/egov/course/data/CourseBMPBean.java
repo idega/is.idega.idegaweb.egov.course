@@ -469,6 +469,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		/* This table */
 		IDOQuery query = idoQuery();
+		query.useDefaultAlias = Boolean.TRUE;
 		query.appendSelectAllFrom(this);
 
 		/* Filtering by course providers */
