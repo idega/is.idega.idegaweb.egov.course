@@ -220,6 +220,8 @@ public interface CourseHome extends IDOHome {
 	 * @param center to assign, skipped if <code>null</code>;
 	 * when {@link Course} should be available for attending, 
 	 * skipped if <code>null</code>;
+	 * @param courseTypeId is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
 	 * @param endDate when course ends, skipped if <code>null</code>;
 	 * @param accountingKey
 	 * @param birthYearFrom is floor of age for attendants, 
@@ -236,8 +238,8 @@ public interface CourseHome extends IDOHome {
 	 */
 	Course update(Course course, String name,
 			String courseHandlerPersonalId, CourseProvider center,
-			java.util.Date startDate, java.util.Date endDate,
-			String accountingKey, Integer birthYearFrom, Integer birthYearTo,
-			Integer maximumParticipantsNumber,
-			java.util.Date registrationEndDate, ArrayList<Group> accessGroups);
+			String courseTypeId, java.util.Date startDate,
+			java.util.Date endDate, String accountingKey, Integer birthYearFrom,
+			Integer birthYearTo,
+			Integer maximumParticipantsNumber, java.util.Date registrationEndDate, ArrayList<Group> accessGroups);
 }

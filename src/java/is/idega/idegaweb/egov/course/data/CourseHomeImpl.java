@@ -448,10 +448,10 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	@Override
 	public Course update(Course course, String name,
 			String courseHandlerPersonalId, CourseProvider center,
-			java.util.Date startDate, java.util.Date endDate,
-			String accountingKey, Integer birthYearFrom, Integer birthYearTo,
-			Integer maximumParticipantsNumber,
-			java.util.Date registrationEndDate, ArrayList<Group> accessGroups) {
+			String courseTypeId, java.util.Date startDate,
+			java.util.Date endDate, String accountingKey, Integer birthYearFrom,
+			Integer birthYearTo,
+			Integer maximumParticipantsNumber, java.util.Date registrationEndDate, ArrayList<Group> accessGroups) {
 		
 		User handler = null;
 		if (!StringUtil.isEmpty(courseHandlerPersonalId)) {
@@ -464,7 +464,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			}
 		}
 
-		return update(course, -1, name, handler, null, center, null,
+		return update(course, -1, name, handler, 
+				getCourseTypeHome().findByPrimaryKey(courseTypeId), center, null,
 				startDate, endDate, accountingKey, birthYearFrom, birthYearTo, 
 				maximumParticipantsNumber, null, null, null, registrationEndDate, 
 				null, null, true, accessGroups);
