@@ -10,6 +10,7 @@ package is.idega.idegaweb.egov.course.presentation.statistics;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
@@ -21,8 +22,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 import com.idega.business.IBORuntimeException;
+import com.idega.core.accesscontrol.business.AccessController;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -52,21 +57,36 @@ public class CourseStatistics extends CourseBlock {
 //	private Object schoolTypePK;
 	private String courseProviderTypePK;
 
-	private Collection<CourseProvider> courseProviders = null;
+	private CourseProviderAreaHome courseProviderAreaHome = null;
 
-	private Collection<CourseProviderArea> getAreas() throws RemoteException {
-		if (ListUtil.isEmpty(courseProviders)) {
-			return getBusiness().getSchoolAreas();
-		}
-
-		Map<String, CourseProviderArea> areas = new HashMap<String, CourseProviderArea>();
-		for (CourseProvider provider: courseProviders) {
-			CourseProviderArea area = provider.getCourseProviderArea();
-			if (area != null) {
-				areas.put(area.getPrimaryKey().toString(), area);
+	protected CourseProviderAreaHome getCourseProviderAreaHome() {
+		if (this.courseProviderAreaHome == null) {
+			try {
+				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup.getHome(CourseProviderArea.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderAreaHome.class + 
+						" cause of: ", e);
 			}
 		}
-		return areas.values();
+
+		return this.courseProviderAreaHome;
+	}
+	
+	private Collection<CourseProvider> courseProviders = null;
+
+	private Collection<CourseProviderArea> getAreas(IWContext iwc) {
+		Collection<CourseProvider> userProviders = courseProviders;
+		if (ListUtil.isEmpty(userProviders)) {
+			if (!hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)
+					&& (hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc))) {
+				userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+			} else {
+				return getBusiness().getSchoolAreas();
+			}
+		}
+
+		return getCourseProviderAreaHome().findAllByProviders(userProviders);
 	}
 
 	private Collection<CourseType> getCourseTypes() throws RemoteException {
@@ -149,17 +169,16 @@ public class CourseStatistics extends CourseBlock {
 			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_statistics", "Course statistics"));
 			section.add(heading);
 
-//			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(courseProviderTypePK));
 			CourseProviderType type = getProviderType(iwc);
-//			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
 			Collection<CourseType> courseTypes = getCourseTypes();
-//			Collection<CourseProviderArea> areas = getBusiness().getSchoolAreas();
-			Collection<CourseProviderArea> areas = getAreas();
+			Collection<CourseProviderArea> areas = getAreas(iwc);
 
 			Collection<CourseProvider> userProviders = null;
-			if (courseProviders == null) {
-				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-					userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+			if (ListUtil.isEmpty(this.courseProviders)) {
+				if (!hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)
+						&& (hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc))) {
+					userProviders = getBusiness().getProvidersForUser(
+							iwc.getCurrentUser());
 				}
 			} else {
 				userProviders = courseProviders;
@@ -169,7 +188,7 @@ public class CourseStatistics extends CourseBlock {
 				CourseProviderArea area = iter.next();
 
 				Collection<CourseProvider> providers = getBusiness().getProviders(area, type);
-				if (userProviders != null) {
+				if (!ListUtil.isEmpty(userProviders)) {
 					providers.retainAll(userProviders);
 				}
 
@@ -311,6 +330,7 @@ public class CourseStatistics extends CourseBlock {
 				if (!providerTotals.containsKey(provider)) {
 					providerTotals.put(provider, new Integer(0));
 				}
+
 				int providerSum = getBusiness().getNumberOfCourses(provider, type, courseType, fromDate, toDate);
 				sum += providerSum;
 				providerTotals.put(provider, new Integer(providerTotals.get(provider).intValue() + providerSum));
@@ -370,5 +390,24 @@ public class CourseStatistics extends CourseBlock {
 	 */
 	public void setSchoolTypePK(String courseProviderTypePK) {
 		setCourseProviderTypePK(courseProviderTypePK);
+	}
+
+	private AccessController accessController = null;
+
+	protected AccessController getAccessController(IWContext iwc) {
+		if (iwc != null) {
+			this.accessController = iwc.getAccessController();
+		}
+
+		return this.accessController;
+	}
+
+	protected boolean hasRole(String role, IWContext iwc) {
+		AccessController controller = getAccessController(iwc);
+		if (controller == null) {
+			return Boolean.FALSE;
+		}
+
+		return controller.hasRole(iwc.getCurrentUser(), role);
 	}
 }
