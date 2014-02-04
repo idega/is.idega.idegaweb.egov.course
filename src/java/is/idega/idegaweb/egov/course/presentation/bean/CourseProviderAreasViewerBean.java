@@ -84,6 +84,8 @@ package is.idega.idegaweb.egov.course.presentation.bean;
 
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderAreaEditor;
 import is.idega.idegaweb.egov.course.presentation.CourseProvidersViewer;
 
@@ -91,7 +93,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.idega.builder.business.BuilderLogic;
 import com.idega.data.IDOLookup;
@@ -110,6 +115,21 @@ import com.idega.util.ListUtil;
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
 public class CourseProviderAreasViewerBean {
+
+	public Map<String, String> getCategories() {
+		Collection<CourseProviderCategory> categories = getCourseProviderCategoryHome()
+				.findAllInSubtypes();
+		if (ListUtil.isEmpty(categories)) {
+			return Collections.emptyMap();
+		}
+
+		TreeMap<String, String> categoriesMap = new TreeMap<String, String>();
+		for (CourseProviderCategory category: categories) {
+			categoriesMap.put(category.getName(), category.getPrimaryKey().toString());
+		}
+
+		return categoriesMap;
+	}
 
 	public List<CourseProviderAreaBean> getCourseProviders() {
 		Collection<CourseProviderArea> courseProviders = getCourseProviderAreaHome().find();
@@ -147,7 +167,24 @@ public class CourseProviderAreasViewerBean {
 	public void remove(String courseProviderId) {
 		getCourseProviderAreaHome().remove(courseProviderId);
 	}
-	
+
+	private CourseProviderCategoryHome courseProviderCategoryHome = null;
+
+	protected CourseProviderCategoryHome getCourseProviderCategoryHome() {
+		if (this.courseProviderCategoryHome == null) {
+			try {
+				this.courseProviderCategoryHome = (CourseProviderCategoryHome) IDOLookup
+						.getHome(CourseProviderCategory.class);
+			} catch (IDOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get: " + CourseProviderCategoryHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderCategoryHome;
+	}
+
 	private CourseProviderAreaHome courseProviderAreaHome = null;
 
 	protected CourseProviderAreaHome getCourseProviderAreaHome() {

@@ -85,6 +85,22 @@
 					id="accountingId"
 					value="#{courseProviderAreaBean.accountingId}"/>
 			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:outputLabel
+					for="category"
+					value="#{localizedStrings['is.idega.idegaweb.egov.course']['category']}"/>
+			</h:panelGroup>
+			<h:panelGroup
+				layout="block">
+				<h:selectOneRadio
+					id="category"
+					value="#{courseProviderAreaBean.category}"
+					layout="pageDirection">
+					<f:selectItems
+						value="#{courseProviderAreasViewerBean.categories}"/>
+				</h:selectOneRadio>
+			</h:panelGroup>
 			<h:panelGroup>
 				<h:commandButton
 					id="saveButton"

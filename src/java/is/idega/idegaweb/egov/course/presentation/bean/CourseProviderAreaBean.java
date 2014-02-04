@@ -85,6 +85,7 @@ package is.idega.idegaweb.egov.course.presentation.bean;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderAreaEditor;
 
 import java.util.ArrayList;
@@ -120,6 +121,8 @@ public class CourseProviderAreaBean {
 	private String info = null;
 
 	private String accountingId = null;
+
+	private String category = null;
 	
 	private CourseProviderArea courseProviderArea = null;
 
@@ -189,6 +192,23 @@ public class CourseProviderAreaBean {
 		this.accountingId = accountingId;
 	}
 
+	public String getCategory() {
+		if (getCourseProviderArea() == null) {
+			return category;
+		}
+
+		CourseProviderCategory entity = getCourseProviderArea().getCategory();
+		if (entity == null) {
+			 return category;
+		}
+
+		return entity.getCategory();
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
 	public CourseProviderArea getCourseProviderArea() {
 		if (this.courseProviderArea == null) {
 			String courseProviderAreaId = CoreUtil.getIWContext()
@@ -232,7 +252,7 @@ public class CourseProviderAreaBean {
 	public void submit() {
 		// Update
 		if(getCourseProviderAreaHome().update(this.id, this.name, this.info, 
-				this.address, this.accountingId) != null) {
+				this.address, this.accountingId, this.category) != null) {
 			CoreUtil.getIWContext().setMultipartParameter(
 					SUBMITTED, 
 					Boolean.TRUE.toString());	
