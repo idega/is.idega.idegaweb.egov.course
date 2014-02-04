@@ -54,7 +54,8 @@
 			<h:panelGroup>
 				<h:selectOneRadio
 					id="category"
-					value="#{courseProviderTypeBean.categoryKey}">
+					value="#{courseProviderTypeBean.categoryKey}"
+					layout="pageDirection">
 					<f:selectItems
 						value="#{courseProviderTypesViewerBean.categories}"/>
 				</h:selectOneRadio>
