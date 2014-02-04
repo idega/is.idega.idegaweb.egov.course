@@ -495,7 +495,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getSchoolAreas
 	 */
-	public Collection<CourseProviderArea> getSchoolAreas() throws RemoteException;
+	public Collection<CourseProviderArea> getSchoolAreas();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getSchoolTypes
@@ -542,7 +542,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersForUser
 	 */
-	public Collection<CourseProvider> getProvidersForUser(User user) throws RemoteException;
+	public Collection<CourseProvider> getProvidersForUser(User user);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getApplicationMap
@@ -675,11 +675,25 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			String prefix, User owner, User performer, Locale locale) throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getNumberOfCourses
+	 *
+	 * <p>Finds all primary keys by following criteria and counts number of 
+	 * results.</p>
+	 * @param provider to filter by, skipped if <code>null</code>;
+	 * @param type to filter by, skipped if <code>null</code>;
+	 * @param courseType to filter by, skipped if <code>null</code>;
+	 * @param fromDate is floor for course start date,
+	 * skipped if <code>null</code>;
+	 * @param toDate is ceiling for course start date,
+	 * skipped if <code>null</code>;
+	 * @return count of primary keys found data source or 0
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public int getNumberOfCourses(CourseProvider provider, CourseProviderType schoolType,
-			CourseType courseType, Date fromDate, Date toDate)
-			throws RemoteException;
+	public int getNumberOfCourses(
+			CourseProvider provider, 
+			CourseProviderType schoolType,
+			CourseType courseType, 
+			Date fromDate, Date toDate);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getNumberOfChoices

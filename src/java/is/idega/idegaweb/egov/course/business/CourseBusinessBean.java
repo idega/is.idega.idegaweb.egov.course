@@ -1683,8 +1683,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public Collection<CourseProviderArea> getSchoolAreas() {
-//		return getCourseProviderAreaHome().findAllSchoolAreas(getSchoolBusiness().getCategoryAfterSchoolCare());
-		return getCourseProviderAreaHome().find();
+		return getCourseProviderAreaHome().findAllSchoolAreas(getSchoolBusiness().getCategoryAfterSchoolCare());
 	}
 
 	private CourseProviderAreaHome courseProviderAreaHome = null;
@@ -1774,20 +1773,32 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return getSchoolBusiness().findAllSchoolsByAreaAndType(area, type);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getProvidersForUser(com.idega.user.data.User)
+	 */
 	@Override
 	public Collection<CourseProvider> getProvidersForUser(User user) {
-			CourseProviderUser schoolUser = getCourseProviderUserHome()
-					.findForUser(user);
-			if (schoolUser == null) {
-				return Collections.emptyList();
-			}
+		if (user == null) {
+			Collections.emptyList();
+		}
 
-			Collection<? extends CourseProvider> courseProviders = schoolUser.getCourseProviders();
-			if (ListUtil.isEmpty(courseProviders)) {
-				return Collections.emptyList();
-			}
+		Collection<? extends CourseProviderUser> schoolUsers = getCourseProviderUserHome()
+				.findByUsersInSubTypes(Arrays.asList(user));
+		if (ListUtil.isEmpty(schoolUsers)) {
+			return Collections.emptyList();
+		}
 
-			return new ArrayList<CourseProvider>(courseProviders);
+		Collection<CourseProvider> courseProviders = new ArrayList<CourseProvider>();
+		for (CourseProviderUser schoolUser: schoolUsers) {
+			Collection<? extends CourseProvider> providers = schoolUser
+					.getCourseProviders();
+			if (!ListUtil.isEmpty(providers)) {
+				courseProviders.addAll(providers);
+			}
+		}
+
+		return courseProviders;
 	}
 
 	private CourseProviderUserHome courseProviderUserHome = null;
@@ -2640,13 +2651,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getNumberOfCourses(is.idega.idegaweb.egov.course.data.CourseProvider, is.idega.idegaweb.egov.course.data.CourseProviderType, is.idega.idegaweb.egov.course.data.CourseType, java.sql.Date, java.sql.Date)
+	 */
 	@Override
-	public int getNumberOfCourses(CourseProvider provider, CourseProviderType schoolType, CourseType courseType, Date fromDate, Date toDate) {
-		try {
-			return getCourseHome().getCountByProviderAndSchoolTypeAndCourseType(provider, schoolType, courseType, fromDate, toDate);
-		} catch (IDOException e) {
-			e.printStackTrace();
+	public int getNumberOfCourses(
+			CourseProvider provider, 
+			CourseProviderType schoolType, 
+			CourseType courseType, 
+			Date fromDate, 
+			Date toDate) {
+		int numberOfCourses = getCourseHome().getCountByProviderAndSchoolTypeAndCourseType(
+				provider, schoolType, courseType, fromDate, toDate);
+		if (numberOfCourses < 0) {
 			return 0;
+		} else {
+			return numberOfCourses;
 		}
 	}
 
