@@ -88,9 +88,13 @@ import java.util.Collections;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
 
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
+import com.idega.data.IDOStoreException;
 import com.idega.util.StringUtil;
 
 /**
@@ -158,6 +162,40 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 		return getStringColumnValue(COLUMN_CATEGORY);
 	}
 
+	/**
+	 * 
+	 * <p>Check if it is one of extending entities.</p>
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean isSubclass() {
+		return !getClass().equals(CourseProviderCategoryBMPBean.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#store()
+	 */
+	@Override
+	public void store() throws IDOStoreException {
+		super.store();
+		if (isSubclass()) {
+			getCourseProviderCategoryHome().update(getPrimaryKey().toString());
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#remove()
+	 */
+	@Override
+	public void remove() throws RemoveException {
+		super.remove();
+		if (isSubclass()) {
+			getCourseProviderCategoryHome().remove(getPrimaryKey().toString());
+		}
+	}
+	
 	/**
 	 * 
 	 * @return {@link Collection} of {@link CourseProviderCategory#getPrimaryKey()}
@@ -276,5 +314,24 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 	 */
 	public String ejbFindMusicSchoolCategory() {
 		return CATEGORY_MUSIC_SCHOOL;
+	}
+
+	private CourseProviderCategoryHome courseProviderCategoryHome = null;
+
+	protected CourseProviderCategoryHome getCourseProviderCategoryHome() {
+		if (this.courseProviderCategoryHome == null) {
+			try {
+				this.courseProviderCategoryHome = (CourseProviderCategoryHome) IDOLookup
+						.getHome(CourseProviderCategory.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(
+						Level.WARNING,
+						"Faule to get "
+								+ CourseProviderCategoryHome.class
+										.getSimpleName() + " cause of: ", e);
+			}
+		}
+
+		return this.courseProviderCategoryHome;
 	}
 }

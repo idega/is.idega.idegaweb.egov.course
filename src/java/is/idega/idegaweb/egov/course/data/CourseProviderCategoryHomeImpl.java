@@ -87,10 +87,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
 
+import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDOStoreException;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
@@ -115,6 +117,58 @@ public class CourseProviderCategoryHomeImpl extends IDOFactory implements
 		return CourseProviderCategory.class;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome#update(is.idega.idegaweb.egov.course.data.CourseProviderCategory)
+	 */
+	@Override
+	public CourseProviderCategory update(CourseProviderCategory category) {
+		if (category == null) {
+			return null;
+		}
+
+		try {
+			category.store();
+			java.util.logging.Logger.getLogger(getClass().getName()).info(
+					getEntityInterfaceClass().getSimpleName() + 
+					" by primary key: '" + category + "' successfully updated!");
+			return category;
+		} catch (IDOStoreException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING,
+					"Failed to update " + getEntityInterfaceClass().getSimpleName() + 
+					" by primary key: '" + category + "' cause of: ", e);
+		}
+
+		return null;
+	}
+
+	@Override
+	public CourseProviderCategory update(String category) {
+		if (StringUtil.isEmpty(category)) {
+			return null;
+		}
+
+		CourseProviderCategory entity = find(category);
+		if (entity == null) {
+			try {
+				entity = createIDO();
+				java.util.logging.Logger.getLogger(getClass().getName()).info(
+						getEntityInterfaceClass().getSimpleName() 
+						+ " by id: '" + category + "' stored!" );
+			} catch (CreateException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING,
+						"Failed to create "
+								+ getEntityInterfaceClass().getSimpleName()
+								+ " cause of: ", e);
+				return null;
+			}
+		}
+
+		return entity;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome#find(java.lang.String)
@@ -195,5 +249,24 @@ public class CourseProviderCategoryHomeImpl extends IDOFactory implements
 		}
 
 		return Collections.emptyList();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome#findAllInSubtypes()
+	 */
+	@Override
+	public <T extends CourseProviderCategory> Collection<T> findAllInSubtypes() {
+		CourseProviderCategoryBMPBean entity = (CourseProviderCategoryBMPBean) idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> primaryKeys = entity.ejbFindAllCategories();
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
+		}
+
+		return findSubTypesByPrimaryKeysIDO(primaryKeys);
 	}
 }

@@ -100,6 +100,25 @@ public interface CourseProviderCategoryHome extends IDOHome {
 
 	/**
 	 * 
+	 * <p>Creates or updates existing entity.</p>
+	 * @param category to create/update, not <code>null</code>;
+	 * @return entity on success, <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	CourseProviderCategory update(CourseProviderCategory category);
+
+	/**
+	 * 
+	 * <p>Creates or updates existing entity.</p>
+	 * @param category is {@link CourseProviderCategoryBMPBean#getPrimaryKey()},
+	 * not <code>null</code>;
+	 * @return entity on success, <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	CourseProviderCategory update(String category);
+
+	/**
+	 * 
 	 * @param primaryKey is {@link CourseProviderCategory#getPrimaryKey()}, 
 	 * not <code>null</code>;
 	 * @return entity by primary key or <code>null</code>;
@@ -133,5 +152,13 @@ public interface CourseProviderCategoryHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	<T extends CourseProviderCategory> Collection<T> findAll();
+
+	/**
+	 * 
+	 * @return all entities with sub-entities or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<T extends CourseProviderCategory> Collection<T> findAllInSubtypes();
 
 }
