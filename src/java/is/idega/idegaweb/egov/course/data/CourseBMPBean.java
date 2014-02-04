@@ -858,7 +858,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				null, null);
 
 		try {
-			return this.idoGetNumberOfRecords(query);
+			return idoGetNumberOfRecords(query);
 		} catch (IDOException e) {
 			getLogger().log(Level.WARNING,
 					"Failed to get number of " + this.getClass().getSimpleName() +

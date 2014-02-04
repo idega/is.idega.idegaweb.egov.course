@@ -248,7 +248,7 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 	@Override
 	public void addHandler(User handler) {
 		if (handler != null) {
-			CourseProviderUser centerHandler = getSocialServiceCenterHandlerEntityHome().update(null, handler, null, null);
+			CourseProviderUser centerHandler = getSocialServiceCenterHandlerEntityHome().update(null, handler, null, null, null);
 			if (centerHandler instanceof SocialServiceCenterHandlerEntity) {
 				addHandler((SocialServiceCenterHandlerEntity) centerHandler);
 			}
