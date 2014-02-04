@@ -68,7 +68,24 @@ public interface CourseHome extends IDOHome {
 
 	public int getCountBySchoolAndBirthYear(Object schoolPK, int birthYear, Date fromDate) throws IDOException;
 
-	public int getCountByProviderAndSchoolTypeAndCourseType(CourseProvider provider, CourseProviderType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException;
+	/**
+	 *
+	 * <p>Finds all primary keys by following criteria and counts number of 
+	 * results.</p>
+	 * @param provider to filter by, skipped if <code>null</code>;
+	 * @param type to filter by, skipped if <code>null</code>;
+	 * @param courseType to filter by, skipped if <code>null</code>;
+	 * @param fromDate is floor for course start date,
+	 * skipped if <code>null</code>;
+	 * @param toDate is ceiling for course start date,
+	 * skipped if <code>null</code>;
+	 * @return count of primary keys found data source or 0
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public int getCountByProviderAndSchoolTypeAndCourseType(
+			CourseProvider provider, CourseProviderType type, 
+			CourseType courseType, Date fromDate, Date toDate);
 
 	public int getHighestCourseNumber() throws IDOException;
 

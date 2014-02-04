@@ -196,11 +196,24 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		return theReturn;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#getCountByProviderAndSchoolTypeAndCourseType(is.idega.idegaweb.egov.course.data.CourseProvider, is.idega.idegaweb.egov.course.data.CourseProviderType, is.idega.idegaweb.egov.course.data.CourseType, java.sql.Date, java.sql.Date)
+	 */
 	@Override
-	public int getCountByProviderAndSchoolTypeAndCourseType(CourseProvider provider, CourseProviderType type, CourseType courseType, Date fromDate, Date toDate) throws IDOException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		int theReturn = ((CourseBMPBean) entity).ejbHomeGetCountByProviderAndSchoolTypeAndCourseType(provider, type, courseType, fromDate, toDate);
-		return theReturn;
+	public int getCountByProviderAndSchoolTypeAndCourseType(
+			CourseProvider provider, 
+			CourseProviderType type, 
+			CourseType courseType, 
+			Date fromDate, 
+			Date toDate) {
+		Collection<Course> courses = findAllByProviderAndSchoolTypeAndCourseType(
+				provider, type, courseType, fromDate, toDate);
+		if (ListUtil.isEmpty(courses)) {
+			return 0;
+		}
+
+		return courses.size();
 	}
 
 	@Override
