@@ -85,6 +85,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.logging.Level;
 
 import javax.ejb.EJBLocalObject;
@@ -339,7 +340,10 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 		query.appendJoinOn(providers);
 
 		try {
-			return idoFindPKsByQuery(query);
+			Collection<Object> primaryKeys = idoFindPKsByQuery(query);
+			if (!ListUtil.isEmpty(primaryKeys)) {
+				return new HashSet<Object>(primaryKeys);
+			}
 		} catch (FinderException e) {
 			getLogger().log(Level.WARNING, 
 					"Failed to get primary keys for " + getInterfaceClass().getSimpleName() + 
