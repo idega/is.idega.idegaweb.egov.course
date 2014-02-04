@@ -130,6 +130,7 @@ public interface CourseProviderAreaHome extends IDOHome {
 	 * skipped if <code>null</code>;
 	 * @param accountingId is {@link CourseProviderArea#getAccountingKey()},
 	 * skipped if <code>null</code>;
+	 * @param categoryId TODO
 	 * @return created/updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -138,7 +139,7 @@ public interface CourseProviderAreaHome extends IDOHome {
 			String name,
 			String info, 
 			String address,
-			String accountingId);
+			String accountingId, String categoryId);
 
 	/**
 	 * 
@@ -158,4 +159,15 @@ public interface CourseProviderAreaHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public void remove(String areaId);
+
+	/**
+	 * 
+	 * <p>Checks in sub-types</p>
+	 * @param providers to search by, not <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<T extends CourseProviderArea> Collection<T> findAllByProviders(
+			Collection<? extends CourseProvider> providers);
 }

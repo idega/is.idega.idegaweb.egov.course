@@ -92,6 +92,7 @@ import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
+import com.idega.util.ListUtil;
 
 /**
  * <p>{@link EJBLocalObject} implementation for {@link CourseProviderArea}</p>
@@ -251,29 +252,48 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 					"' cause of: ", e);
 		}
 	}
-	
-	public Collection<Object> ejbFindAllSchoolAreas(CourseProviderCategory category) {
-		return ejbFindAllSchoolAreas(category, false);
+
+	/**
+	 * 
+	 * @param category to search by, skipped if <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Object> ejbFindAll(CourseProviderCategory category) {
+		return ejbFindAll(category, false);
 	}
 
-	public Collection<Object> ejbFindAllSchoolAreas(
-			CourseProviderCategory category, boolean useNullValue) {
+	/**
+	 * 
+	 * @param category to search by, skipped if <code>null</code>;
+	 * @param useNullValue show only where 
+	 * {@link CourseProviderArea#getCategory()} is <code>null</code>, skipped
+	 * if <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Object> ejbFindAll(
+			CourseProviderCategory category, 
+			boolean useNullValue) {
+
 		IDOQuery sql = idoQuery();
-		sql.appendSelectAllFrom(getEntityName());
+		sql.appendSelectAllFrom(this);
+
 		if (category != null) {
 			sql.appendWhereEquals(COLUMN_SCHOOL_CATEGORY, category);
 		} else if (useNullValue) {
 			sql.appendWhereIsNull(COLUMN_SCHOOL_CATEGORY);
 		}
+
 		sql.appendOrderBy(COLUMN_NAME);
 
 		try {
-			return super.idoFindPKsBySQL(sql.toString());
+			return idoFindPKsByQuery(sql);
 		} catch (FinderException e) {
 			getLogger().log(
 					Level.WARNING, 
-					"Failed to get primary keys for " + CourseProviderArea.class.getName() + 
-					" by " + CourseProviderCategory.class.getName() + " = " + category.getName());
+					"Failed to get primary keys for " + getClass().getSimpleName() + 
+					" by query: '" + sql.toString() + "'");
 		}
 
 		return Collections.emptyList();
@@ -299,6 +319,34 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 		}
 
 		return null;
+	}
+
+	/**
+	 * 
+	 * @param providers to search by, not <code>null</code>;
+	 * @return {@link Collection} of {@link CourseProviderArea#getPrimaryKey()}
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Object> ejbFindByProviders(Collection<? extends CourseProvider> providers) {
+		if (ListUtil.isEmpty(providers)) {
+			return Collections.emptyList();
+		}
+
+		IDOQuery query = idoQuery();
+		query.useDefaultAlias = Boolean.TRUE;
+		query.appendSelectAllFrom(this);
+		query.appendJoinOn(providers);
+
+		try {
+			return idoFindPKsByQuery(query);
+		} catch (FinderException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get primary keys for " + getInterfaceClass().getSimpleName() + 
+					" by query: '" + query.toString() + "'");
+		}
+
+		return Collections.emptyList();
 	}
 
 	public Collection<Object> ejbFind() {

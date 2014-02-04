@@ -86,7 +86,9 @@ package is.idega.idegaweb.egov.course.data;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -96,6 +98,7 @@ import com.idega.data.IDOFactory;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOStoreException;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
 /**
@@ -118,7 +121,7 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 	public Collection<CourseProviderArea> findAllSchoolAreas(
 			CourseProviderCategory category) {
 		CourseProviderAreaBMPBean entity = (CourseProviderAreaBMPBean) idoCheckOutPooledEntity();
-		Collection<?> ids = entity.ejbFindAllSchoolAreas(category);
+		Collection<?> ids = entity.ejbFindAll(category);
 		idoCheckInPooledEntity(entity);
 		try {
 			return this.getEntityCollectionForPrimaryKeys(ids);
@@ -186,11 +189,52 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderAreaHome#findAllByProviders(java.util.Collection)
+	 */
+	@Override
+	public <T extends CourseProviderArea> Collection<T> findAllByProviders(
+			Collection<? extends CourseProvider> providers) {
+		if (ListUtil.isEmpty(providers)) {
+			return Collections.emptyList();
+		}
+
+		CourseProviderAreaBMPBean entity = (CourseProviderAreaBMPBean) idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> primaryKeys = entity.ejbFindByProviders(providers);
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
+		}
+
+		/* Priority for subtypes */
+		List<T> results = findSubTypesByPrimaryKeysIDO(primaryKeys);
+		if (!ListUtil.isEmpty(results)) {
+			return results;
+		}
+
+		/* Taking this type of entities then */
+		try {
+			return getEntityCollectionForPrimaryKeys(primaryKeys);
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING,
+					"Failed to get "
+							+ getEntityInterfaceClass().getSimpleName()
+							+ " by primary keys: '" + primaryKeys + "'");
+		}
+
+		return Collections.emptyList();
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderAreaHome#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public CourseProviderArea update(String id, String name, String info,
-			String address, String accountingId) {
+			String address, String accountingId, String categoryId) {
 		CourseProviderArea courseProviderArea = null;
 		if (!StringUtil.isEmpty(id)) {
 			courseProviderArea = find(id);
@@ -222,6 +266,11 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 
 		if (!StringUtil.isEmpty(accountingId)) {
 			courseProviderArea.setAccountingKey(accountingId);
+		}
+
+		if (!StringUtil.isEmpty(categoryId)) {
+			courseProviderArea.setCategory(getCourseProviderCategoryHome()
+					.findByPrimaryKeyInSubtypes(categoryId));
 		}
 
 		try {
@@ -283,6 +332,23 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 	@Override
 	public void remove(String areaId) {
 		remove(find(areaId));
+	}
+
+	private CourseProviderCategoryHome courseProviderCategoryHome = null;
+
+	protected CourseProviderCategoryHome getCourseProviderCategoryHome() {
+		if (this.courseProviderCategoryHome == null) {
+			try {
+				this.courseProviderCategoryHome = (CourseProviderCategoryHome) IDOLookup
+						.getHome(CourseProviderCategory.class);
+			} catch (IDOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get: " + CourseProviderCategoryHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderCategoryHome;
 	}
 
 	private CourseProviderHome courseProviderHome = null;
