@@ -85,6 +85,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import is.idega.idegaweb.egov.course.event.CourseProviderUserUpdatedEvent;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -98,9 +99,11 @@ import javax.ejb.RemoveException;
 
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
-import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.data.IDOStoreException;
 import com.idega.user.data.User;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -121,6 +124,79 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	public static final String TABLE_NAME = "cou_course_provider_users";
 	public static final String COLUMN_NAME_USER_ID = "IC_USER_ID";
 	public static final String COLUMN_NAME_USER_TYPE = "USER_TYPE";
+
+	private CourseProviderUserHome courseProviderUserHome = null;
+
+	protected CourseProviderUserHome getCourseProviderUserHome() {
+		if (this.courseProviderUserHome == null) {
+			try {
+				this.courseProviderUserHome = (CourseProviderUserHome) IDOLookup
+						.getHome(CourseProviderUser.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING,
+						"Failed to get "
+								+ CourseProviderUserHome.class.getSimpleName()
+								+ " cause of: ", e);
+			}
+		}
+
+		return this.courseProviderUserHome;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUser#setPrimaryKey(java.lang.String)
+	 */
+	@Override
+	public void setPrimaryKey(String pk) {
+		super.setPrimaryKey(pk);
+	}
+	
+	/**
+	 * 
+	 * <p>Check if it is one of extending entities.</p>
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean isSubclass() {
+		return !getClass().equals(CourseProviderUserBMPBean.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#store()
+	 */
+	@Override
+	public void store() throws IDOStoreException {
+		super.store();
+
+		/* if it is one of extending entities, will update that one too */
+		if (isSubclass()) {			
+			getCourseProviderUserHome().update(
+					getPrimaryKey().toString(), 
+					String.valueOf(getUserId()), 
+					null, 
+					null, 
+					null,
+					String.valueOf(getUserType()), 
+					null, 
+					true);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#delete()
+	 */
+	@Override
+	public void delete() throws SQLException {
+		super.delete();
+		/* if it is one of extending entities, will update that one too */
+		if (isSubclass()) {
+			getCourseProviderUserHome().remove(getPrimaryKey().toString());
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUser#getUser()
@@ -232,14 +308,8 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public Collection<? extends CourseProvider> getCourseProviders() {
-		try {
-			return idoGetRelatedEntities(CourseProvider.class);
-		} catch (IDORelationshipException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get course providers cause of:", e);
-		}
-
-		return null;
+		throw new UnsupportedOperationException(
+				"This feature should be implemented in subclasses only!");
 	}
 
 	/*
@@ -287,12 +357,15 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	public void remove() {
 		CourseProviderUserUpdatedEvent cpuue = null;
 
-		List<String> providerIds = getIDOUtil().getPrimaryKeys(this.getCourseProviders());
-		if (!ListUtil.isEmpty(providerIds)) {
-			cpuue = new CourseProviderUserUpdatedEvent(
-					String.valueOf(this.getUserId()),
-					null,
-					providerIds, null);
+		/* Removing providers, if it is a subclass */
+		if (isSubclass()) {
+			List<String> providerIds = getIDOUtil().getPrimaryKeys(getCourseProviders());
+			if (!ListUtil.isEmpty(providerIds)) {
+				cpuue = new CourseProviderUserUpdatedEvent(
+						String.valueOf(this.getUserId()),
+						null,
+						providerIds, null);
+			}
 		}
 
 		removeSchools();
@@ -342,27 +415,29 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void removeSchools() {
-		CourseProviderUserUpdatedEvent cpuue = null;
+		if (isSubclass()) {
+			CourseProviderUserUpdatedEvent cpuue = null;
 
-		List<String> providerIds = getIDOUtil().getPrimaryKeys(this.getCourseProviders());
-		if (!ListUtil.isEmpty(providerIds)) {
-			cpuue = new CourseProviderUserUpdatedEvent(
-					String.valueOf(this.getUserId()),
-					null,
-					providerIds, null);
-		}
-		
-		try {
-			idoRemoveFrom(CourseProvider.class);
-			ELUtil.getInstance().publishEvent(cpuue);
-			getLogger().info(
-					"All relations of " + CourseProvider.class.getName() + 
-					" is removed from " + this.getClass().getName() + 
-					" by id: '" + this.getPrimaryKey().toString() + "'");
-		} catch (IDORemoveRelationshipException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to remove all " + CourseProvider.class.getName() + 
-					"'s cause of: " , e);
+			List<String> providerIds = getIDOUtil().getPrimaryKeys(this.getCourseProviders());
+			if (!ListUtil.isEmpty(providerIds)) {
+				cpuue = new CourseProviderUserUpdatedEvent(
+						String.valueOf(this.getUserId()),
+						null,
+						providerIds, null);
+			}
+			
+			try {
+				idoRemoveFrom(CourseProvider.class);
+				ELUtil.getInstance().publishEvent(cpuue);
+				getLogger().info(
+						"All relations of " + CourseProvider.class.getName() + 
+						" is removed from " + this.getClass().getName() + 
+						" by id: '" + this.getPrimaryKey().toString() + "'");
+			} catch (IDORemoveRelationshipException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to remove all " + CourseProvider.class.getName() + 
+						"'s cause of: " , e);
+			}
 		}
 	}
 

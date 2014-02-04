@@ -155,6 +155,8 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * skipped if <code>null</code>;
 	 * @param courseProviderIds id {@link CourseProvider#getPrimaryKey()}, 
 	 * skipped if <code>null</code>;
+	 * @param forceId if it is necessary that created entity could have 
+	 * this primary key;
 	 * @return created/updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -165,7 +167,7 @@ public interface CourseProviderUserHome extends IDOHome {
 			String phone,
 			String eMail, 
 			String courseProviderUserTypeId, 
-			Collection<String> courseProviderIds);
+			Collection<String> courseProviderIds, boolean forceId);
 	/**
 	 * 
 	 * <p>Creates/updates {@link CourseProviderUser} in data source.</p>
@@ -176,6 +178,7 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * then nothing happens;
 	 * @param userType skipped if <code>null</code>;
 	 * @param courseProviders skipped, if <code>null</code>;
+	 * @param forcedId TODO
 	 * @return created/updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -183,7 +186,7 @@ public interface CourseProviderUserHome extends IDOHome {
 			CourseProviderUser user,
 			User idegaUser,
 			CourseProviderUserType userType,
-			Collection<? extends CourseProvider> courseProviders);
+			Collection<? extends CourseProvider> courseProviders, String forcedId);
 
 	/**
 	 * 
@@ -239,4 +242,15 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Collection<? extends CourseProviderUser> findByUsers(Collection<User> users);
+
+	/**
+	 * 
+	 * <p>Searches in all existing subclasses first!</p>
+	 * @param users to search for, not <code>null</code>;
+	 * @return entities found by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<? extends CourseProviderUser> findByUsersInSubTypes(
+			Collection<User> users);
 }

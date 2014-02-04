@@ -400,7 +400,7 @@ public class CourseProviderUserBean {
 				this.id, this.idegaUserId, this.name, 
 				this.phone, this.eMail, 
 				this.courseProviderUserTypeId, 
-				this.courseProviderIds != null ? Arrays.asList(this.courseProviderIds) : null) != null) {
+				this.courseProviderIds != null ? Arrays.asList(this.courseProviderIds) : null, false) != null) {
 			CoreUtil.getIWContext().setMultipartParameter(
 					SUBMITTED, 
 					Boolean.TRUE.toString());	

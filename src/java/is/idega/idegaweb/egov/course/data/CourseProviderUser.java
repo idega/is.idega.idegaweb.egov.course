@@ -130,4 +130,6 @@ public interface CourseProviderUser extends IDOEntity {
 	public void removeSchools();
 
 	public void remove();
+
+	void setPrimaryKey(String pk);
 }

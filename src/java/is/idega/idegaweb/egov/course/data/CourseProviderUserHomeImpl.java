@@ -142,6 +142,29 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#findByUsersInSubTypes(java.util.Collection)
+	 */
+	@Override
+	public Collection<? extends CourseProviderUser> findByUsersInSubTypes(Collection<User> users) {
+		if (ListUtil.isEmpty(users)) {
+			return Collections.emptyList();
+		}
+
+		CourseProviderUserBMPBean entity = (CourseProviderUserBMPBean) idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> ids = entity.ejbFindPrimaryKeys(null, users, null);
+		if (ListUtil.isEmpty(ids)) {
+			return Collections.emptyList();
+		}
+
+		return findSubTypesByPrimaryKeysIDO(ids);
+	}
+	
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#findByUsers(java.util.Collection)
 	 */
 	@Override
@@ -281,12 +304,16 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			CourseProviderUser user, 
 			User idegaUser,
 			CourseProviderUserType userType,
-			Collection<? extends CourseProvider> courseProviders) {
+			Collection<? extends CourseProvider> courseProviders, 
+			String forcedId) {
 		
 		/* Creating new one if not exist */
 		if (user == null && idegaUser != null) {
 			try {
-				user = createEntity();
+				user = createIDO();
+				if (!StringUtil.isEmpty(forcedId)) {
+					user.setPrimaryKey(forcedId);
+				}
 			} catch (CreateException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
 						Level.WARNING, 
@@ -350,7 +377,8 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			String phone, 
 			String eMail,
 			String courseProviderUserTypeId, 
-			Collection<String> courseProviderIds) {
+			Collection<String> courseProviderIds, 
+			boolean forceId) {
 
 		/* Searching for existing one by primary key */
 		User user = null;
@@ -379,7 +407,8 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 				courseProviderUser, 
 				user,
 				getCourseProviderUserTypeHome().find(courseProviderUserTypeId), 
-				getCourseProviderHome().find(courseProviderIds));
+				getCourseProviderHome().find(courseProviderIds), 
+				forceId ? id : null);
 	}
 
 	/*
