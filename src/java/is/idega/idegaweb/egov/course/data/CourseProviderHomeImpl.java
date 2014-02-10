@@ -89,6 +89,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -530,6 +531,38 @@ public class CourseProviderHomeImpl extends IDOFactory
 	@Override
 	public void remove(String primaryKey) {
 		remove(findByPrimaryKeyRecursively(primaryKey));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#findAllBySchoolGroup(com.idega.user.data.Group)
+	 */
+	@Override
+	public <T extends CourseProvider> Collection<T> findAllBySchoolGroup(
+			Group schoolGroup) {
+		if (schoolGroup == null) {
+			return Collections.emptyList();
+		}
+
+		CourseProviderBMPBean entity = (CourseProviderBMPBean) this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> ids = entity.ejbFindAllBySchoolGroup(schoolGroup);
+		if (ListUtil.isEmpty(ids)) {
+			return Collections.emptyList();
+		}
+
+		try {
+			return this.getEntityCollectionForPrimaryKeys(ids);
+		} catch (FinderException e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
+					" by id's: '" + ids + "'");
+		}
+
+		return Collections.emptyList();
 	}
 
 	private CourseProviderUserHome courseProviderUserHome = null;

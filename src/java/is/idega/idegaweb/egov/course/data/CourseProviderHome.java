@@ -191,6 +191,7 @@ public interface CourseProviderHome extends IDOHome {
 
 	/**
 	 *
+	 * <p>Searches in sub-types also</p>
 	 * @param primaryKeys is {@link Collection} of {@link CourseProvider#getPrimaryKey()},
 	 * not <code>null</code>;
 	 * @return entities by primary keys or {@link Collections#emptyList()} on
@@ -272,4 +273,16 @@ public interface CourseProviderHome extends IDOHome {
 	 */
 	public void remove(String primaryKey);
 
+	/**
+	 * 
+	 * @param schoolGroup to search by, not <code>null</code>;
+	 * @return schools which are controlled by given group or empty list on 
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 * @deprecated this method does not belong to {@link CourseProvider} logic.
+	 * It belongs to school logic. It is a quick hack after dependency inversion
+	 * and it should not be used in here.
+	 */
+	public <T extends CourseProvider> Collection<T> findAllBySchoolGroup(
+			Group schoolGroup);
 }

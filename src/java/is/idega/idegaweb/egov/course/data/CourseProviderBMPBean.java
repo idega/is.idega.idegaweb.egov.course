@@ -96,6 +96,7 @@ import com.idega.core.location.data.Commune;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
+import com.idega.user.data.Group;
 import com.idega.util.ListUtil;
 import com.idega.util.expression.ELUtil;
 
@@ -562,18 +563,61 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 		return Collections.emptyList();
 	}
 
-	public Collection<Object> ejbFindAll() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT * FROM ").append(getEntityName());
-		try {
-			return super.idoFindPKsBySQL(sb.toString());
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING,
-					"Failed to get primary keys for " +
-							this.getClass().getName());
+	/**
+	 * 
+	 * @param schoolGroup is {@link Group} of school administrators to 
+	 * search by, not <code>null</code>;
+	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}s
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 * @deprecated this method does not belong to {@link CourseProvider} logic.
+	 * It belongs to school logic. It is a quick hack after dependency inversion
+	 * and it should not be used in here.
+	 */
+	public Collection<Object> ejbFindAllBySchoolGroup(Group schoolGroup) {
+		if (schoolGroup == null) {
+			return Collections.emptyList();
 		}
 
-		return java.util.Collections.emptyList();
+		String id = schoolGroup.getPrimaryKey().toString();
+		StringBuffer sql = new StringBuffer("SELECT s.* ");
+		sql.append("FROM sch_school s ");
+		sql.append("WHERE s.headmaster_group_id IN ( ");
+		sql.append("SELECT r.ic_group_id FROM ic_group_relation r ");
+		sql.append("WHERE r.ic_group_id IN (SELECT headmaster_group_id FROM sch_school ) ");
+		sql.append("AND r.related_ic_group_id = ").append(id).append(" ) ");
+		sql.append("AND (termination_date IS NULL OR termination_date > '" + getCurrentDate() + "') ");
+		sql.append("ORDER BY s.SCHOOL_NAME");
+
+		try {
+			return idoFindPKsBySQL(sql.toString());
+		} catch (FinderException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get primary keys for " + getInterfaceClass().getSimpleName() + 
+					" by query: '" + sql + "'");
+		}
+
+		return Collections.emptyList();
+	}	
+
+	/**
+	 * 
+	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Object> ejbFindAll() {
+		IDOQuery query = idoQuery();
+		query.appendSelectAllFrom(this);
+		
+		try {
+			return super.idoFindPKsByQuery(query);
+		} catch (FinderException e) {
+			getLogger().log(Level.WARNING,
+					"Failed to get primary keys by query: '" + query + "'");
+		}
+
+		return Collections.emptyList();
 	}
 
 	/*
