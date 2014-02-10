@@ -8,6 +8,7 @@
 package is.idega.idegaweb.egov.course.business;
 
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.text.Collator;
 import java.util.Comparator;
@@ -99,7 +100,27 @@ public class CourseComparator implements Comparator<Course> {
 	}
 
 	private int typeSort(Course course1, Course course2) {
-		return collator.compare(course1.getCourseType().getName(), course2.getCourseType().getName());
+		CourseType sourceCourseType = null;
+		if (course1 != null) {
+			sourceCourseType = course1.getCourseType();
+		}
+
+		CourseType destinationCourseType = null;
+		if (course2 != null) {
+			destinationCourseType = course2.getCourseType();
+		}
+		
+		if (sourceCourseType == null) {
+			return -1;
+		}
+
+		if (destinationCourseType == null) {
+			return 1;
+		}
+
+		return collator.compare(
+				sourceCourseType.getName(), 
+				destinationCourseType.getName());
 	}
 
 	private int yearSort(Course course1, Course course2) {
