@@ -199,7 +199,7 @@ public class CourseAttendanceList extends CourseBlock {
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_SCHOOL_TYPE) && iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
-			List courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), fromDate, toDate));
+			List courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey().toString(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), fromDate, toDate));
 			if (showAllCourses) {
 				Collections.reverse(courses);
 			}

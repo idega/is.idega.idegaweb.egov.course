@@ -12,6 +12,7 @@ import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
 import com.idega.data.IDORelationshipException;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 
 public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 
@@ -32,7 +33,7 @@ public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 	 */
 	@Override
 	public CourseType findByPrimaryKey(Object pk) {
-		if (pk == null) {
+		if (pk == null || StringUtil.isEmpty(pk.toString())) {
 			return null;
 		}
 

@@ -413,11 +413,12 @@ public class CourseEditor extends CourseBlock {
 		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
 		List<Course> courses = new ArrayList<Course>();
 		if (getSession() != null && getProvider() != null || showAllCourses) {
-			try {
-				courses = new ArrayList<Course>(getCourseBusiness().getCourses(-1, getProvider() != null ? getProvider().getPrimaryKey() : null, iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey() : null), iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
-			} catch (RemoteException rex) {
-				throw new IBORuntimeException(rex);
-			}
+			courses = new ArrayList<Course>(
+					getCourseBusiness().getCourses(
+							-1, 
+							getProvider() != null ? getProvider().getPrimaryKey().toString() : null, 
+							iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) ? iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK) : (type != null ? type.getPrimaryKey().toString() : null), 
+							iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
 		}
 		if (showAllCourses) {
 			Collections.reverse(courses);

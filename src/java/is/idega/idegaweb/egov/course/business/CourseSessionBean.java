@@ -14,8 +14,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.ejb.FinderException;
-
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -72,25 +70,20 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		}
 	}
 
-	private CourseProvider getSchoolIDFromUser(User user) throws RemoteException {
+	private CourseProvider getSchoolIDFromUser(User user) {
 		if (user != null) {
-			try {
-				CourseProvider school = null;
-				try {
-					school = getSchoolUserBusiness().getFirstManagingChildCareForUser(user);
-				} catch(Exception e) {
-				}
-				if (school == null) {
-					school = getSchoolUserBusiness().getFirstManagingSchoolForUser(user);
-				}
-				if (school != null) {
-					this.iProvider = school;
-				}
+			CourseProvider school = getSchoolUserBusiness()
+					.getFirstManagingChildCareForUser(user);
+			if (school == null) {
+				school = getSchoolUserBusiness()
+						.getFirstManagingSchoolForUser(user);
 			}
-			catch (FinderException fe) {
-				// No school found for user
+
+			if (school != null) {
+				this.iProvider = school;
 			}
 		}
+
 		return this.iProvider;
 	}
 

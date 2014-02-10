@@ -241,7 +241,12 @@ public class CourseWaitingList extends CourseBlock {
 
 		if ((getSession().getProvider() != null && typePK != null) || showAllCourses) {
 			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-			Collection courses = getBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate);
+			Collection<Course> courses = getBusiness().getCourses(
+					-1, 
+					getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : null,
+					typePK.toString(), 
+					iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, 
+					fromDate, toDate);
 
 			Iterator iter = courses.iterator();
 			while (iter.hasNext()) {

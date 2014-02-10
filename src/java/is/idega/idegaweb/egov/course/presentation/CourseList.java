@@ -43,7 +43,9 @@ import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.PresentationUtil;
 
 public class CourseList extends CourseBlock {
@@ -397,12 +399,28 @@ public class CourseList extends CourseBlock {
 
 		List<Course> courses = new ArrayList<Course>();
 		if (true/* iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) */) {
+			Collection<Course> foundCourses = null;
 			if (isSchoolUser() || getSession().getProvider() != null) {
-				courses = new ArrayList<Course>(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), schoolTypePK, courseTypePK, fromDate, toDate));
+				foundCourses = getBusiness().getCourses(
+						-1, 
+						getSession().getProvider().getPrimaryKey().toString(), 
+						schoolTypePK != null ? schoolTypePK.toString() : null, 
+						courseTypePK != null ? courseTypePK.toString() : null, 
+						fromDate, 
+						toDate);
+			} else {
+				foundCourses = getBusiness().getCourses(
+						getBusiness().getProvidersForUser(iwc.getCurrentUser()), 
+						schoolTypePK != null ? schoolTypePK.toString() : null, 
+						courseTypePK != null ? courseTypePK.toString() : null, 
+						fromDate, 
+						toDate);
 			}
-			else {
-				courses = new ArrayList<Course>(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK, fromDate, toDate));
+
+			if (!ListUtil.isEmpty(foundCourses)) {
+				courses.addAll(foundCourses);
 			}
+
 			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : (useBirthYears ? CourseComparator.DATE_SORT : CourseComparator.ID_SORT)));
 		}
 
@@ -413,7 +431,11 @@ public class CourseList extends CourseBlock {
 
 			Course course = iter.next();
 			CourseType type = course.getCourseType();
-			CourseCategory courseCategory = type.getCourseCategory();
+			CourseCategory courseCategory = null;
+			if (type != null) {
+				courseCategory = type.getCourseCategory();
+			}
+
 			CoursePrice price = course.getPrice();
 			IWTimestamp dateFrom = new IWTimestamp(course.getStartDate());
 			IWTimestamp dateTo = course.getEndDate() != null ? new IWTimestamp(course.getEndDate()) : new IWTimestamp(getBusiness().getEndDate(price, dateFrom.getDate()));
@@ -421,7 +443,7 @@ public class CourseList extends CourseBlock {
 			cell = row.createCell();
 			cell.setStyleClass("firstColumn");
 			cell.setStyleClass("number");
-			if (type.getAbbreviation() != null) {
+			if (type != null && type.getAbbreviation() != null) {
 				cell.add(new Text(type.getAbbreviation()));
 			}
 			cell.add(new Text(String.valueOf(showID ? course.getCourseNumber() : course.getPrimaryKey())));
@@ -433,7 +455,13 @@ public class CourseList extends CourseBlock {
 				link.setPage(getResponsePage());
 				link.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
 				link.addParameter(PARAMETER_COURSE_TYPE_PK, type.getPrimaryKey().toString());
-				link.addParameter(PARAMETER_SCHOOL_TYPE_PK, courseCategory.getPrimaryKey().toString());
+
+				if (courseCategory != null) {
+					link.addParameter(
+							PARAMETER_SCHOOL_TYPE_PK, 
+							courseCategory.getPrimaryKey().toString());
+				}
+
 				cell.add(link);
 			}
 			else {
@@ -450,7 +478,7 @@ public class CourseList extends CourseBlock {
 
 			cell = row.createCell();
 			cell.setStyleClass("type");
-			cell.add(new Text(type.getName()));
+			cell.add(new Text(type != null ? type.getName() : CoreConstants.MINUS));
 
 			if (useBirthYears) {
 				cell = row.createCell();

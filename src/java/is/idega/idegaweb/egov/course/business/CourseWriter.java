@@ -76,7 +76,7 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				Date fromDate = iwc.isParameterSet(CourseBlock.PARAMETER_FROM_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_FROM_DATE)).getDate() : null;
 				Date toDate = iwc.isParameterSet(CourseBlock.PARAMETER_TO_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_TO_DATE)).getDate() : null;
 
-				Collection courses = business.getCourses(-1, getCourseSession(iwc).getProvider().getPrimaryKey(), iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK), fromDate, toDate);
+				Collection courses = business.getCourses(-1, getCourseSession(iwc).getProvider().getPrimaryKey().toString(), iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK), fromDate, toDate);
 
 				this.buffer = writeXLS(iwc, courses);
 				setAsDownload(iwc, "students.xls", this.buffer.length());

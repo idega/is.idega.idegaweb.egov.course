@@ -257,15 +257,20 @@ public class CourseParticipantsList extends CourseBlock {
 
 		if ((getSession().getProvider() != null && typePK != null) || showAllCourses) {
 			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-			List courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
+			List<Course> courses = new ArrayList<Course>(getBusiness().getCourses(
+					-1, 
+					getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : null, 
+							typePK.toString(), 
+							iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, 
+							fromDate, toDate));
 
 			if (showAllCourses) {
 				Collections.reverse(courses);
 			}
 			
-			Iterator iter = courses.iterator();
+			Iterator<Course> iter = courses.iterator();
 			while (iter.hasNext()) {
-				Course element = (Course) iter.next();
+				Course element = iter.next();
 				String name = "";
 				if (showIDInName) {
 					CourseType type = element.getCourseType();
