@@ -93,6 +93,8 @@ import java.util.Collections;
 
 import com.idega.business.IBOService;
 import com.idega.data.IDOHome;
+import com.idega.user.data.Group;
+import com.idega.user.data.User;
 
 /**
  * <p>It eats all {@link Exception}s and {@link IDOHome} searching</p>
@@ -104,6 +106,14 @@ import com.idega.data.IDOHome;
  */
 public interface CourseProviderBusiness extends IBOService {
 
+	public static final String PARAMETER_ROOT_ADULT_EDUCATION_ADMINISTRATORS_GROUP = "adult_education_administrators_group_id";
+
+	public static final String PARAMETER_ROOT_HIGH_SCHOOL_ADMINISTRATORS_GROUP = "high_school_administrators_group_id";
+
+	public static final String PARAMETER_ROOT_SCHOOL_ADMINISTRATORS_GROUP = "school_administrators_group_id";
+
+	public static final String ROOT_SCHOOL_ADMINISTRATORS_GROUP = "provider_administrators_group_id";
+	
 	/**
 	 *
 	 * @param primaryKey is {@link CourseProvider#getPrimaryKey()}, not <code>null</code>;
@@ -195,4 +205,44 @@ public interface CourseProviderBusiness extends IBOService {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<? extends CourseProviderUser> getAllSchoolUsers(CourseProvider school);
+
+	/**
+	 * 
+	 * <p>Creates (if not available) the default {@link Group} 
+	 * of {@link User}s who are school administrators.</p>
+	 * @return {@link Group} of school administrators or <code>null</code>
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Group getRootSchoolAdministratorGroup();
+
+	/**
+	 * 
+	 * <p>Creates (if not available) the default {@link Group} of 
+	 * {@link User}s who are high school administrators.</p>
+	 * @return {@link Group} of high school administrators or 
+	 * <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Group getRootHighSchoolAdministratorGroup();
+
+	/**
+	 * 
+	 * <p>Creates (if not available) the default {@link Group} for {@link User}s
+	 * who are adult education administrators</p>
+	 * @return {@link Group} of adult education administrators or <code>null</code>
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Group getRootAdultEducationAdministratorGroup();
+
+	/**
+	 * 
+	 * <p>Creates (if not available) the default {@link Group} 
+	 * of {@link User}s who are administrators of child care 
+	 * {@link CourseProvider}s</p>
+	 * @return entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Group getRootProviderAdministratorGroup();
 }

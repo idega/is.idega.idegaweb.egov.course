@@ -98,12 +98,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.ejb.FinderException;
+
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.business.IBOServiceBean;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.user.business.GroupBusiness;
+import com.idega.user.data.Group;
+import com.idega.user.data.GroupHome;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -269,6 +277,142 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		return getCourseProviderUserHome().findBySchool(school);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getRootSchoolAdministratorGroup()
+	 */
+	@Override
+	public Group getRootSchoolAdministratorGroup() {
+		String groupId = getIWApplicationContext().getSystemProperties()
+				.getProperty(PARAMETER_ROOT_SCHOOL_ADMINISTRATORS_GROUP);
+		if (!StringUtil.isEmpty(groupId)) {
+			try {
+				return getGroupHome().findByPrimaryKey(groupId);
+			} catch (FinderException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + Group.class.getSimpleName() + 
+						" by id: " + groupId);
+			}
+		} 
+
+		List<Group> groups = getGroupBusiness().update(null, 
+				"School Administrators", 
+				"The Commune Root School Administrators Group.", null, null);
+		if (ListUtil.isEmpty(groups)) {
+			return null;
+		}
+
+		Group rootGroup = groups.iterator().next();
+		getLogger().info("Commune Root school administrators group stored!");
+		getIWApplicationContext().getSystemProperties().setProperty(
+				PARAMETER_ROOT_SCHOOL_ADMINISTRATORS_GROUP, 
+				rootGroup.getPrimaryKey().toString());
+		return rootGroup;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getRootHighSchoolAdministratorGroup()
+	 */
+	@Override
+	public Group getRootHighSchoolAdministratorGroup() {
+		String groupId = getIWApplicationContext().getSystemProperties()
+				.getProperty(PARAMETER_ROOT_HIGH_SCHOOL_ADMINISTRATORS_GROUP);
+		if (!StringUtil.isEmpty(groupId)) {
+			try {
+				return getGroupHome().findByPrimaryKey(groupId);
+			} catch (FinderException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + Group.class.getSimpleName() + 
+						" by primary key: " + groupId);
+			}
+		}
+
+		List<Group> rootGroups = getGroupBusiness().update(null, 
+				"High School Administrators", 
+				"The Commune Root High School Administrators Group.", 
+				null, null);
+		if (ListUtil.isEmpty(rootGroups)) {
+			return null;
+		}
+
+		Group group = rootGroups.iterator().next();
+		getLogger().info("Commune Root high school administrators group is stored!");
+		getIWApplicationContext().getSystemProperties().setProperty(
+				PARAMETER_ROOT_HIGH_SCHOOL_ADMINISTRATORS_GROUP, 
+				group.getPrimaryKey().toString());
+		return group;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getRootAdultEducationAdministratorGroup()
+	 */
+	@Override
+	public Group getRootAdultEducationAdministratorGroup() {
+		String groupId = getIWApplicationContext().getSystemProperties()
+				.getProperty(PARAMETER_ROOT_ADULT_EDUCATION_ADMINISTRATORS_GROUP);
+		if (groupId != null) {
+			try {
+				return getGroupHome().findByPrimaryKey(groupId);
+			} catch (FinderException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + Group.class.getSimpleName() + 
+						" by id: " + groupId);
+			}
+		}
+
+		List<Group> groups = getGroupBusiness().update(null, 
+				"Adult Education Administrators", 
+				"The Commune Root Adult Educaiton Administrators Group.", 
+				null, null);
+		if (ListUtil.isEmpty(groups)) {
+			return null;			
+		}
+
+		Group group = groups.iterator().next();
+		getLogger().info("Commune Root Adult Education administrators group");
+		getIWApplicationContext().getSystemProperties().setProperty(
+				PARAMETER_ROOT_ADULT_EDUCATION_ADMINISTRATORS_GROUP, 
+				group.getPrimaryKey().toString());
+		return group;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getRootProviderAdministratorGroup()
+	 */
+	@Override
+	public Group getRootProviderAdministratorGroup() {
+		String groupId = getIWApplicationContext().getSystemProperties()
+				.getProperty(ROOT_SCHOOL_ADMINISTRATORS_GROUP);
+		if (!StringUtil.isEmpty(groupId)) {
+			try {
+				return getGroupHome().findByPrimaryKey(groupId);
+			} catch (FinderException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + GroupHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		List<Group> rootGroups = getGroupBusiness().update(null, 
+				"Provider Administrators", 
+				"The Commune Root Provider Administrators Group.", 
+				null, null);
+		if (ListUtil.isEmpty(rootGroups)) {
+			return null;
+		}
+
+		Group rootGroup = rootGroups.iterator().next();
+		getLogger().info("Commune Root school administrators group stored!");
+		getIWApplicationContext().getSystemProperties().setProperty(
+				ROOT_SCHOOL_ADMINISTRATORS_GROUP, 
+				rootGroup.getPrimaryKey().toString());
+
+		return rootGroup;
+	}
+
 	private HashSet<CourseProviderHome> courseProviderHomes = null;
 
 	private CourseProviderUserHome courseProviderUserHome = null;
@@ -278,6 +422,39 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 	private CourseProviderTypeHome courseProviderTypeHome = null;
 
 	private CourseProviderAreaHome courseProviderAreaHome = null;
+
+	private GroupHome groupHome = null;
+
+	private GroupBusiness groupBusiness = null;
+
+	protected GroupBusiness getGroupBusiness() {
+		if (this.groupBusiness == null) {
+			try {
+				this.groupBusiness = IBOLookup.getServiceInstance(
+						CoreUtil.getIWContext(), GroupBusiness.class);
+			} catch (IBOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + GroupBusiness.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.groupBusiness;
+	}
+	
+	protected GroupHome getGroupHome() {
+		if (this.groupHome == null) {
+			try {
+				this.groupHome = (GroupHome) IDOLookup.getHome(Group.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + GroupHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.groupHome;
+	}
 
 	protected CourseProviderAreaHome getCourseProviderAreaHome() {
 		if (this.courseProviderAreaHome == null) {
