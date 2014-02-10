@@ -19,9 +19,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.rmi.RemoteException;
 import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,8 +48,10 @@ import com.idega.io.MemoryFileBuffer;
 import com.idega.io.MemoryInputStream;
 import com.idega.io.MemoryOutputStream;
 import com.idega.presentation.IWContext;
+import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 
 public class CourseWriter extends DownloadWriter implements MediaWritable {
 
@@ -62,6 +69,36 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 	public CourseWriter() {
 	}
 
+	/**
+	 * 
+	 * @param unparsedDate date to parse, not <code>null</code>;
+	 * @return parsed {@link Date};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected Date getParsedDate(String unparsedDate) {
+		if (StringUtil.isEmpty(unparsedDate)) {
+			return null;
+		}
+
+		if (CoreUtil.getCurrentLocale().equals(Locale.ENGLISH)) {
+			DateFormat dateFormat = new SimpleDateFormat("mm/dd/yy");
+			
+			java.util.Date date = null;
+			try {
+				date = dateFormat.parse(unparsedDate);
+			} catch (ParseException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to parse " + unparsedDate);
+			}
+
+			if (date != null) {
+				return new Date(date.getTime());
+			}
+		}
+
+		return new IWTimestamp(unparsedDate).getDate();
+	}
+
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
 		try {
@@ -73,14 +110,21 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK));
 				schoolTypeName = type.getSchoolTypeName();
 
-				Date fromDate = iwc.isParameterSet(CourseBlock.PARAMETER_FROM_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_FROM_DATE)).getDate() : null;
-				Date toDate = iwc.isParameterSet(CourseBlock.PARAMETER_TO_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_TO_DATE)).getDate() : null;
+				Date fromDate = getParsedDate(
+						iwc.getParameter(CourseBlock.PARAMETER_FROM_DATE));
+				Date toDate = getParsedDate(
+						iwc.getParameter(CourseBlock.PARAMETER_TO_DATE));
 
-				Collection courses = business.getCourses(-1, getCourseSession(iwc).getProvider().getPrimaryKey().toString(), iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK), fromDate, toDate);
+				Collection<Course> courses = business.getCourses(
+						-1, 
+						getCourseSession(iwc).getProvider().getPrimaryKey().toString(), 
+						iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), 
+						iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK), 
+						fromDate, 
+						toDate);
 
 				this.buffer = writeXLS(iwc, courses);
 				setAsDownload(iwc, "students.xls", this.buffer.length());
-
 			}
 		}
 		catch (Exception e) {
@@ -187,7 +231,9 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				CoursePrice price = course.getPrice();
 				IWTimestamp dateFrom = new IWTimestamp(course.getStartDate());
 				IWTimestamp dateTo = new IWTimestamp(course.getStartDate());
-				dateTo.addDays(price.getNumberOfDays());
+				if (price != null) {
+					dateTo.addDays(price.getNumberOfDays());
+				}
 
 				row.createCell(iCell++).setCellValue(type.getName());
 				row.createCell(iCell++).setCellValue(course.getName());
