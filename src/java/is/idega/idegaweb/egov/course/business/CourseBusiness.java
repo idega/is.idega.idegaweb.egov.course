@@ -330,37 +330,108 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 * 
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param fromDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @param toDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @return entities or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getCourses(int birthYear, Object schoolTypePK,
-			Object courseTypePK, Date fromDate, Date toDate)
-			throws RemoteException;
+	public Collection<Course> getCourses(
+			int birthYear, 
+			String schoolTypePK,
+			String courseTypePK, 
+			Date fromDate, 
+			Date toDate);
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 * 
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @return entities or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getCourses(int birthYear, Object schoolTypePK,
-			Object courseTypePK) throws RemoteException;
+	public Collection<Course> getCourses(
+			int birthYear, 
+			String schoolTypePK,
+			String courseTypePK);
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 * 
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param fromDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @param toDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getCourses(int birthYear, Object providerPK,
-			Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate)
-			throws RemoteException;
+	public Collection<Course> getCourses(
+			int birthYear, 
+			String providerPK,
+			String schoolTypePK, 
+			String courseTypePK, 
+			Date fromDate, Date toDate);
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 * 
+	 * @param providers to search by, skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param fromDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @param toDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getCourses(Collection<CourseProvider> providers, Object schoolTypePK,
-			Object courseTypePK, Date fromDate, Date toDate)
-			throws RemoteException;
+	public Collection<Course> getCourses(
+			Collection<CourseProvider> providers, 
+			String schoolTypePK,
+			String courseTypePK, 
+			Date fromDate, 
+			Date toDate);
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 * 
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @return entities or {@link Collections#emptyList()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getCourses(int birthYear, Object providerPK,
-			Object schoolTypePK, Object courseTypePK) throws RemoteException;
+	public Collection<Course> getCourses(
+			int birthYear, 
+			String providerPK,
+			String schoolTypePK, 
+			String courseTypePK);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
@@ -859,5 +930,12 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public Collection<Course> getCoursesByTypes(Collection<String> typesIds)
 			throws RemoteException, RemoteException;
 
+	/**
+	 * 
+	 * <p>TODO</p>
+	 * @param user
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user);
 }

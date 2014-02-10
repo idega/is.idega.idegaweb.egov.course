@@ -1021,9 +1021,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			toDate = new IWTimestamp(31, 12, year).getDate();
 		}
 
-		Collection<Course> coll = getCourses(-1, new Integer(providerPK),
-				schoolTypePK > 0 ? new Integer(schoolTypePK) : null,
-				courseTypePK > 0 ? new Integer(courseTypePK) : null, fromDate,
+		Collection<Course> coll = getCourses(
+				-1, 
+				String.valueOf(providerPK),
+				String.valueOf(schoolTypePK),
+				String.valueOf(courseTypePK), 
+				fromDate,
 				toDate);
 		Map<Object, String> map = new LinkedHashMap<Object, String>();
 		if (coll != null) {
@@ -1231,21 +1234,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			IWTimestamp birth = applicant != null ? new IWTimestamp(applicant
 					.getDateOfBirth()) : null;
 
-			Integer iP = null;
-			if (providerPK > -1) {
-				iP = new Integer(providerPK);
-			}
-			Integer iST = null;
-			if (schoolTypePK > -1) {
-				iST = new Integer(schoolTypePK);
-			}
-			Integer iCT = null;
-			if (courseTypePK > -1) {
-				iCT = new Integer(courseTypePK);
-			} else {
-				return new ArrayList<CourseDWR>();
-			}
-
 			Locale locale = new Locale(country, country.toUpperCase());
 			IWTimestamp defaultStamp = new IWTimestamp();
 			int backMonths = getIWMainApplication().getSettings().getProperty(
@@ -1264,7 +1252,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			IWTimestamp stamp = new IWTimestamp();
 			Map<Object, CourseDWR> map = new LinkedHashMap<Object, CourseDWR>();
 			Collection<Course> courses = getCourses(
-					birth != null ? birth.getYear() : 0, iP, iST, iCT, null,
+					birth != null ? birth.getYear() : 0, 
+					String.valueOf(providerPK), 
+					String.valueOf(schoolTypePK), 
+					String.valueOf(courseTypePK), 
+					null,
 					null);
 			if (courses != null) {
 				for (Iterator<Course> iter = courses.iterator(); iter.hasNext();) {
@@ -1394,71 +1386,112 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return cDWR;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourses(int, java.lang.String, java.lang.String, java.sql.Date, java.sql.Date)
+	 */
 	@Override
-	public Collection<Course> getCourses(int birthYear, Object schoolTypePK,
-			Object courseTypePK, Date fromDate, Date toDate) {
-		return getCourses(birthYear, null, schoolTypePK, courseTypePK,
+	public Collection<Course> getCourses(
+			int birthYear, 
+			String schoolTypePK,
+			String courseTypePK, 
+			Date fromDate, 
+			Date toDate) {
+		return getCourses(
+				birthYear, 
+				null, 
+				schoolTypePK, 
+				courseTypePK,
 				fromDate, toDate);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourses(int, java.lang.String, java.lang.String)
+	 */
 	@Override
-	public Collection<Course> getCourses(int birthYear, Object schoolTypePK,
-			Object courseTypePK) {
-		return getCourses(birthYear, null, schoolTypePK, courseTypePK);
+	public Collection<Course> getCourses(
+			int birthYear, 
+			String schoolTypePK,
+			String courseTypePK) {
+		return getCourses(
+				birthYear, 
+				null, 
+				schoolTypePK, 
+				courseTypePK);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourses(int, java.lang.String, java.lang.String, java.lang.String, java.sql.Date, java.sql.Date)
+	 */
 	@Override
-	public Collection<Course> getCourses(int birthYear, Object providerPK,
-			Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
-		Collection<Course> courses = new ArrayList<Course>();
-		try {
-			courses = getCourseHome().findAll(providerPK, schoolTypePK,
-					courseTypePK, birthYear, fromDate, toDate);
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		} catch (FinderException e) {
-			e.printStackTrace();
-		}
-		return courses;
+	public Collection<Course> getCourses(int birthYear, String providerPK,
+			String schoolTypePK, String courseTypePK, Date fromDate, Date toDate) {
+		return getCourseHome().findAll(providerPK, schoolTypePK,
+				courseTypePK, birthYear, fromDate, toDate);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourses(java.util.Collection, java.lang.String, java.lang.String, java.sql.Date, java.sql.Date)
+	 */
 	@Override
-	public Collection<Course> getCourses(Collection<CourseProvider> providers, Object schoolTypePK,
-			Object courseTypePK, Date fromDate, Date toDate) {
-		Collection<Course> courses = new ArrayList<Course>();
-		try {
-			courses = getCourseHome().findAll(providers, schoolTypePK,
+	public Collection<Course> getCourses(
+			Collection<CourseProvider> providers, 
+			String schoolTypePK,
+			String courseTypePK, 
+			Date fromDate, 
+			Date toDate) {
+		
+		if (ListUtil.isEmpty(providers)) {
+			return getCourseHome().findAll(null, schoolTypePK,
 					courseTypePK, -1, fromDate, toDate);
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		} catch (FinderException e) {
-			e.printStackTrace();
 		}
-		return courses;
-	}
 
-	@Override
-	public Collection<Course> getCourses(int birthYear, Object providerPK,
-			Object schoolTypePK, Object courseTypePK) {
 		Collection<Course> courses = new ArrayList<Course>();
-		try {
-			courses = getCourseHome().findAll(providerPK, schoolTypePK,
-					courseTypePK, birthYear, null, null);
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		} catch (FinderException e) {
-			e.printStackTrace();
+		for (CourseProvider provider : providers) {
+			Collection<Course> courseByProvider = getCourseHome().findAll(
+					provider.getPrimaryKey().toString(), 
+					schoolTypePK,
+					courseTypePK, 
+					-1, 
+					fromDate, 
+					toDate);
+			if (!ListUtil.isEmpty(courseByProvider)) {
+				courses.addAll(courseByProvider);
+			}
 		}
+
 		return courses;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourses(int, java.lang.String, java.lang.String, java.lang.String)
+	 */
 	@Override
-	public Collection<Course> getCourses(Collection<CourseProvider> providers, Object schoolTypePK,
+	public Collection<Course> getCourses(
+			int birthYear, 
+			String providerPK,
+			String schoolTypePK, 
+			String courseTypePK) {
+			return getCourseHome().findAll(
+					providerPK, 
+					schoolTypePK,
+					courseTypePK, 
+					birthYear, 
+					null, null);
+	}
+
+	@Override
+	public Collection<Course> getCourses(
+			Collection<CourseProvider> providers, 
+			Object schoolTypePK,
 			Object courseTypePK) {
 		Collection<Course> courses = new ArrayList<Course>();
 		try {
-			courses = getCourseHome().findAll(providers, schoolTypePK,
-					courseTypePK, -1, null, null);
+			courses = getCourseHome().findAll(providers, schoolTypePK, courseTypePK);
 		} catch (IDORelationshipException e) {
 			e.printStackTrace();
 		} catch (FinderException e) {
@@ -2706,7 +2739,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public Date getEndDate(CoursePrice price, Date startDate) {
 		Collection<IWTimestamp> holidays = getPublicHolidays();
 		IWTimestamp stamp = new IWTimestamp(startDate);
-		int days = price.getNumberOfDays() - 1;
+		
+		int days = 0;
+		if (price != null) {
+			days = price.getNumberOfDays() - 1;
+		}
+		
 		while (days > 0) {
 			if (stamp.getDayOfWeek() != Calendar.SUNDAY
 					&& stamp.getDayOfWeek() != Calendar.SATURDAY) {
@@ -3365,8 +3403,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					+ " - Done sending reminder messages for courses between "
 					+ fromDate.toSQLDateString() + " and "
 					+ toDate.toSQLDateString() + ": " + count);
-		} catch (IDORelationshipException ire) {
-			log(ire);
 		} catch (FinderException fe) {
 			log(fe);
 		}
