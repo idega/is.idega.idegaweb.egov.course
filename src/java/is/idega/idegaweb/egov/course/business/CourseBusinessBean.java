@@ -946,6 +946,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
+	public Collection<CourseType> getCourseTypes() {
+		try {
+			return getCourseTypeHome().findAll(true);
+		} catch (FinderException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get valid " + CourseType.class.getSimpleName() + 
+					"s cause of: ", e);
+		}
+
+		return Collections.emptyList();
+	}
+
+	@Override
 	public Map<String, String> getCourseTypesDWR(int schoolTypePK, String country) {
 		Collection<CourseType> coll = getCourseTypes(new Integer(schoolTypePK), true);
 		Map<String, String> map = new LinkedHashMap<String, String>();

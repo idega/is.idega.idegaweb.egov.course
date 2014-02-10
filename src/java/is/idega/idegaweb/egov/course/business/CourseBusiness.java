@@ -930,12 +930,14 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public Collection<Course> getCoursesByTypes(Collection<String> typesIds)
 			throws RemoteException, RemoteException;
 
+	public <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user);
+
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
+	 * @return all {@link CourseType}s, which are not 
+	 * {@link CourseType#isDisabled()} or {@link Collections#emptyList()}
+	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user);
+	Collection<CourseType> getCourseTypes();
 }

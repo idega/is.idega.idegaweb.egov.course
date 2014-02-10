@@ -160,14 +160,16 @@ public class CourseList extends CourseBlock {
 		courseType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course_type", "Select course type"));
 		courseType.keepStatusOnAction(true);
 
+		Collection<CourseType> courseTypes = null;
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
-			courseType.addMenuElements(courseTypes);
+			courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
+		} else if (type != null) {
+			courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
+		} else {
+			courseTypes = getBusiness().getCourseTypes();
 		}
-		else if (type != null) {
-			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
-			courseType.addMenuElements(courseTypes);
-		}
+
+		courseType.addMenuElements(courseTypes);
 
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 		int inceptionYear = Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_INCEPTION_YEAR, "-1"));
@@ -483,11 +485,21 @@ public class CourseList extends CourseBlock {
 			if (useBirthYears) {
 				cell = row.createCell();
 				cell.setStyleClass("from");
-				cell.add(new Text(String.valueOf(course.getBirthyearFrom())));
+				int from = course.getBirthyearFrom();
+				if (from > 0) {
+					cell.add(new Text(String.valueOf(from)));
+				} else {
+					cell.add(new Text(CoreConstants.MINUS));
+				}
 
 				cell = row.createCell();
 				cell.setStyleClass("to");
-				cell.add(new Text(String.valueOf(course.getBirthyearTo())));
+				int to = course.getBirthyearTo();
+				if (to > 0) {
+					cell.add(new Text(String.valueOf(to)));
+				} else {
+					cell.add(new Text(CoreConstants.MINUS));
+				}
 			}
 
 			cell = row.createCell();
