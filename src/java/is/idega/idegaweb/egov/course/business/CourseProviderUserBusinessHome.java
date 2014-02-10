@@ -1,5 +1,5 @@
 /**
- * @(#)CourseProviderUserBusiness.java    1.0.0 1:15:19 PM
+ * @(#)CourseProviderUserBusinessHome.java    1.0.0 12:09:52 AM
  *
  * Idega Software hf. Source Code Licence Agreement x
  *
@@ -82,71 +82,19 @@
  */
 package is.idega.idegaweb.egov.course.business;
 
-import is.idega.idegaweb.egov.course.data.CourseProvider;
+import javax.ejb.CreateException;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import com.idega.business.IBOService;
-import com.idega.user.data.User;
+import com.idega.business.IBOHome;
 
 /**
- * <p>TODO</p>
+ * <p>EJB home interface for {@link CourseProviderUserBusiness} 
+ * EJB bean</p>
  * <p>You can report about problems to: 
  * <a href="mailto:martynas@idega.is">Martynas Stakė</a></p>
  *
- * @version 1.0.0 Oct 23, 2013
+ * @version 1.0.0 Feb 9, 2014
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
-public interface CourseProviderUserBusiness extends IBOService {
-	
-	/**
-	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstManagingChildCareForUser(User user);
-
-	/**
-	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstManagingSchoolForUser(User user);
-
-	/**
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	Collection<String> getSchoolsIDs(User user);
-
-	/**
-	 * 
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link Collection} of {@link CourseProvider}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	Collection<CourseProvider> getSchools(User user);
-
-	/**
-	 * 
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link CourseProvider}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstSchool(User user);
+public interface CourseProviderUserBusinessHome extends IBOHome {
+	public CourseProviderUserBusiness create() throws CreateException;
 }

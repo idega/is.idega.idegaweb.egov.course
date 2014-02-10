@@ -1,5 +1,5 @@
 /**
- * @(#)CourseProviderUserBusiness.java    1.0.0 1:15:19 PM
+ * @(#)CourseProviderUserBusinessHomeImpl.java    1.0.0 12:11:26 AM
  *
  * Idega Software hf. Source Code Licence Agreement x
  *
@@ -82,71 +82,37 @@
  */
 package is.idega.idegaweb.egov.course.business;
 
-import is.idega.idegaweb.egov.course.data.CourseProvider;
+import javax.ejb.CreateException;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import com.idega.business.IBOService;
-import com.idega.user.data.User;
+import com.idega.business.IBOHomeImpl;
 
 /**
- * <p>TODO</p>
  * <p>You can report about problems to: 
  * <a href="mailto:martynas@idega.is">Martynas Stakė</a></p>
  *
- * @version 1.0.0 Oct 23, 2013
+ * @version 1.0.0 Feb 9, 2014
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
-public interface CourseProviderUserBusiness extends IBOService {
-	
-	/**
-	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstManagingChildCareForUser(User user);
+public class CourseProviderUserBusinessHomeImpl extends IBOHomeImpl implements
+		CourseProviderUserBusinessHome {
 
-	/**
-	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstManagingSchoolForUser(User user);
+	private static final long serialVersionUID = 5465920197067233409L;
 
-	/**
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	/* (non-Javadoc)
+	 * @see com.idega.business.IBOHomeImpl#getBeanInterfaceClass()
 	 */
-	Collection<String> getSchoolsIDs(User user);
+	@Override
+	protected Class getBeanInterfaceClass() {
+		return CourseProviderUserBusiness.class;
+	}
 
-	/**
-	 * 
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link Collection} of {@link CourseProvider}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderUserBusinessHome#create()
 	 */
-	Collection<CourseProvider> getSchools(User user);
+	@Override
+	public CourseProviderUserBusiness create() throws CreateException {
+		return (CourseProviderUserBusiness) super.createIBO();
+	}
 
-	/**
-	 * 
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link CourseProvider}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstSchool(User user);
 }

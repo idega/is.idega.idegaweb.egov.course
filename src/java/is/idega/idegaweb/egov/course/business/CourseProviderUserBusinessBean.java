@@ -1,5 +1,5 @@
 /**
- * @(#)CourseProviderUserBusiness.java    1.0.0 1:15:19 PM
+ * @(#)CourseProviderUserBusinessBean.java    1.0.0 2:05:16 PM
  *
  * Idega Software hf. Source Code Licence Agreement x
  *
@@ -83,70 +83,178 @@
 package is.idega.idegaweb.egov.course.business;
 
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderUser;
+import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.logging.Level;
 
-import com.idega.business.IBOService;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
+import com.idega.business.IBOServiceBean;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
+import com.idega.user.data.Group;
 import com.idega.user.data.User;
+import com.idega.util.ListUtil;
 
 /**
  * <p>TODO</p>
  * <p>You can report about problems to: 
  * <a href="mailto:martynas@idega.is">Martynas Stakė</a></p>
  *
- * @version 1.0.0 Oct 23, 2013
+ * @version 1.0.0 Feb 8, 2014
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
-public interface CourseProviderUserBusiness extends IBOService {
-	
-	/**
-	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstManagingChildCareForUser(User user);
+public class CourseProviderUserBusinessBean extends IBOServiceBean implements
+		CourseProviderUserBusiness {
 
-	/**
-	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	CourseProvider getFirstManagingSchoolForUser(User user);
+	private static final long serialVersionUID = 9060726100335253631L;
 
-	/**
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	/* (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderUserBusiness#getFirstManagingChildCareForUser(com.idega.user.data.User)
 	 */
-	Collection<String> getSchoolsIDs(User user);
+	@Override
+	public CourseProvider getFirstManagingChildCareForUser(User user) {
+		Group rootGroup = getCourseProviderBusiness().getRootProviderAdministratorGroup();
+		if (user.getPrimaryGroup().equals(rootGroup)) {
+			return getFirstSchool(user);
+		}
 
-	/**
-	 * 
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link Collection} of {@link CourseProvider}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	Collection<CourseProvider> getSchools(User user);
+		Collection<CourseProvider> schools = getCourseProviderHome()
+				.findAllBySchoolGroup(user);
+		if (!ListUtil.isEmpty(schools)) {
+			return schools.iterator().next();
+		}
 
-	/**
-	 * 
-	 * <p>Works correctly with entities in com.idega.block.school module only.</p>
-	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
-	 * @return {@link CourseProvider}
-	 * of {@link User}, who is administrator, manager of the 
-	 * {@link CourseProvider} or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderUserBusiness#getFirstManagingSchoolForUser(com.idega.user.data.User)
 	 */
-	CourseProvider getFirstSchool(User user);
+	@Override
+	public CourseProvider getFirstManagingSchoolForUser(User user) {
+		Group rootGroup = getCourseProviderBusiness().getRootSchoolAdministratorGroup();
+		Group highSchoolRootGroup = getCourseProviderBusiness().getRootHighSchoolAdministratorGroup();
+		Group adultEducationRootGroup = getCourseProviderBusiness().getRootAdultEducationAdministratorGroup();
+		if (user.getPrimaryGroup().equals(rootGroup) || user.getPrimaryGroup().equals(highSchoolRootGroup) || user.getPrimaryGroup().equals(adultEducationRootGroup)) {
+			return getFirstSchool(user);
+		}
+
+		Collection<CourseProvider> schools = getCourseProviderHome()
+				.findAllBySchoolGroup(user);
+		if (!ListUtil.isEmpty(schools)) {
+			schools.iterator().next();
+		}
+
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderUserBusiness#getFirstSchool(com.idega.user.data.User)
+	 */
+	@Override
+	public CourseProvider getFirstSchool(User user) {
+		Collection<String> ids = getSchoolsIDs(user);
+		if (ListUtil.isEmpty(ids)) {
+			return null;
+		}
+
+		return getCourseProviderHome().findByPrimaryKeyRecursively(
+				ids.iterator().next());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderUserBusiness#getSchools(com.idega.user.data.User)
+	 */
+	@Override
+	public Collection<CourseProvider> getSchools(User user) {
+		Collection<String> primaryKeys = getSchoolsIDs(user);
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
+		}
+
+		return getCourseProviderHome().find(primaryKeys);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderUserBusiness#getSchools(com.idega.user.data.User)
+	 */
+	@Override
+	public Collection<String> getSchoolsIDs(User user) {
+		if (user == null) {
+			Collections.emptyList();
+		}
+
+		Collection<? extends CourseProviderUser> schoolUsers = getCourseProviderUserHome()
+				.findByUsersInSubTypes(Arrays.asList(user));
+		if (ListUtil.isEmpty(schoolUsers)) {
+			return Collections.emptyList();
+		}
+
+		Collection<String> courseProviderIDs = new ArrayList<String>();
+		for (CourseProviderUser schoolUser: schoolUsers) {
+			courseProviderIDs.add(String.valueOf(schoolUser.getSchoolId()));
+		}
+
+		return courseProviderIDs;
+	}
+
+	private CourseProviderBusiness courseProviderBusiness = null;
+
+	protected CourseProviderBusiness getCourseProviderBusiness() {
+		if (this.courseProviderBusiness == null) {
+			try {
+				this.courseProviderBusiness = IBOLookup.getServiceInstance(
+						getIWApplicationContext(), CourseProviderBusiness.class);
+			} catch (IBOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderBusiness.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderBusiness;
+	}
+
+	private CourseProviderHome courseProviderHome = null;
+
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup
+						.getHome(CourseProvider.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderHome;
+	}
+
+	private CourseProviderUserHome courseProviderUserHome = null;
+
+	protected CourseProviderUserHome getCourseProviderUserHome() {
+		if (this.courseProviderUserHome == null) {
+			try {
+				this.courseProviderUserHome = (CourseProviderUserHome) IDOLookup.getHome(CourseProviderUser.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING,
+						"Failed to get home for " + CourseProviderUser.class +
+						" cause of: " , e);
+			}
+		}
+
+		return this.courseProviderUserHome;
+	}
 }
