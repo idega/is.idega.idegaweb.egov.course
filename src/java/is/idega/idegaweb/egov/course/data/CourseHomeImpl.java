@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -82,18 +83,58 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAll(java.lang.Object, java.lang.Object, java.lang.Object, int, java.sql.Date, java.sql.Date)
+	 */
 	@Override
-	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, fromDate, toDate);
-		return this.getEntityCollectionForPrimaryKeys(ids);
+	public Collection<Course> findAll(
+			String providerPK, 
+			String schoolTypePK, 
+			String courseTypePK, 
+			int birthYear, 
+			Date fromDate, 
+			Date toDate) {
+		CourseBMPBean entity = (CourseBMPBean) this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Integer> ids = entity.ejbFindAll(providerPK, schoolTypePK, 
+				courseTypePK, birthYear, fromDate, toDate);
+		try {
+			return this.getEntityCollectionForPrimaryKeys(ids);
+		} catch (FinderException e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get " + Course.class.getSimpleName() + 
+					" by ids: '" + ids + "'");
+		}
+
+		return Collections.emptyList();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAll(java.lang.String, java.lang.String, java.lang.String, int)
+	 */
 	@Override
-	public Collection findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear);
-		return this.getEntityCollectionForPrimaryKeys(ids);
+	public Collection<Course> findAll(String providerPK, String schoolTypePK, String courseTypePK, int birthYear) {
+		CourseBMPBean entity = (CourseBMPBean) this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+		
+		Collection<Integer> ids = entity.ejbFindAll(providerPK, schoolTypePK, 
+				courseTypePK, birthYear);
+		try {
+			return getEntityCollectionForPrimaryKeys(ids);
+		} catch (FinderException e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() +
+					" by id's: " + ids);
+		}
+
+		return Collections.emptyList();
 	}
 
 	@Override

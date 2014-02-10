@@ -23,6 +23,7 @@ import com.idega.business.IBOLookupException;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
+import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
@@ -418,7 +419,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	public Collection<Integer> ejbFindAllByProvider(CourseProvider provider) throws FinderException, IDORelationshipException {
-		return ejbFindAll(provider.getPrimaryKey(), null, null, -1, null, null);
+		return ejbFindAll(provider.getPrimaryKey().toString(), null, null, -1, null, null);
 	}
 
 	public Collection<Integer> ejbFindAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException {
@@ -532,8 +533,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			}
 
 			query.append(COLUMN_START_DATE)
-			.appendLessThanOrEqualsSign()
-			.append(getYear(fromDate));
+			.appendGreaterThanOrEqualsSign()
+			.append(fromDate);
 		}
 
 		if (toDate != null && toDate.getTime() > 0) {
@@ -545,8 +546,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			}
 
 			query.append(COLUMN_START_DATE)
-			.appendGreaterThanOrEqualsSign()
-			.append(getYear(toDate));
+			.appendLessThanOrEqualsSign()
+			.append(toDate);
 		}
 
 		/* Filtering public or private ones */
@@ -616,53 +617,121 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return Collections.emptyList();
 	}
+	
+	private CourseProviderHome courseProviderHome = null;
 
-	// TODO can be merged
-	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate)
-		throws FinderException, IDORelationshipException {
+	private CourseProviderTypeHome courseProviderTypeHome = null;
 
-		Table table = new Table(this);
-		Table courseTypeTable = new Table(CourseType.class);
-		Column courseTypeId = new Column(courseTypeTable, "COU_COURSE_TYPE_ID");
-		Column schoolTypeId = new Column(courseTypeTable, "SCH_SCHOOL_TYPE_ID");
-		Column providerId = new Column(table, COLUMN_PROVIDER);
+	private CourseTypeHome courseTypeHome = null;
 
-		SelectQuery query = new SelectQuery(table);
-		query.addColumn(new Column(table, getIDColumnName()));
-		query.addJoin(table, courseTypeTable);
-
-		if (providerPK != null && providerPK.toString().length() > 0) {
-			query.addCriteria(new MatchCriteria(providerId, MatchCriteria.EQUALS, providerPK));
-		}
-		if (schoolTypePK != null && schoolTypePK.toString().length() > 0) {
-			query.addCriteria(new MatchCriteria(schoolTypeId, MatchCriteria.EQUALS, schoolTypePK));
-		}
-		if (courseTypePK != null && courseTypePK.toString().length() > 0) {
-			query.addCriteria(new MatchCriteria(courseTypeId, MatchCriteria.EQUALS, courseTypePK));
+	protected CourseTypeHome getCourseTypeHome() {
+		if (this.courseTypeHome == null) {
+			try {
+				this.courseTypeHome = (CourseTypeHome) IDOLookup.getHome(CourseType.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseTypeHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
 		}
 
-		if (birthYear > 0) {
-			Column bFrom = new Column(table, COLUMN_BIRTHYEAR_FROM);
-			Column yFrom = new Column(table, COLUMN_BIRTHYEAR_TO);
-			query.addCriteria(new MatchCriteria(bFrom, MatchCriteria.LESSEQUAL, birthYear));
-			query.addCriteria(new MatchCriteria(yFrom, MatchCriteria.GREATEREQUAL, birthYear));
-		}
-		if (fromDate != null) {
-			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.GREATEREQUAL, fromDate));
-		}
-		if (toDate != null) {
-			query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_START_DATE), MatchCriteria.LESSEQUAL, toDate));
-		}
-
-
-		return this.idoFindPKsByQuery(query);
+		return this.courseTypeHome;
 	}
 
+	protected CourseProviderTypeHome getCourseProviderTypeHome() {
+		if (this.courseProviderTypeHome == null) {
+			try {
+				this.courseProviderTypeHome = (CourseProviderTypeHome) IDOLookup
+						.getHome(CourseProviderType.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"failed to get " + CourseProviderTypeHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
 
-	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException,
-		IDORelationshipException {
+		return this.courseProviderTypeHome;
+	}
 
-		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(
+						CourseProvider.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderHome;
+	}
+	
+	/**
+	 * 
+	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @param fromDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @param toDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @return {@link Collection} of {@link Course#getPrimaryKey()} or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Integer> ejbFindAll(
+			String providerPK, 
+			String schoolTypePK, 
+			String courseTypePK, 
+			int birthYear, 
+			Date fromDate, 
+			Date toDate) {
+
+		CourseProvider provider = getCourseProviderHome().findByPrimaryKeyRecursively(providerPK);
+		CourseProviderType providerType = getCourseProviderTypeHome().find(schoolTypePK);
+		CourseType courseType = getCourseTypeHome().findByPrimaryKey(courseTypePK);
+		
+		Date birthDate = null;
+		if (birthYear > 0) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.YEAR, birthYear);
+			birthDate = new Date(calendar.getTimeInMillis());
+		}
+
+		return convertPrimaryKeys(ejbFindAll(
+				provider != null ? Arrays.asList(provider) : null, 
+				providerType != null ? Arrays.asList(providerType) : null, 
+				courseType != null ? Arrays.asList(courseType) : null, 
+				birthDate, birthDate, 
+				fromDate, toDate, 
+				null, null));
+	}
+
+	/**
+	 * 
+	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @return {@link Collection} of {@link Course#getPrimaryKey()} or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Integer> ejbFindAll(String providerPK, 
+			String schoolTypePK, String courseTypePK, int birthYear) {
+		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, 
+				birthYear, null, null);
 	}
 
 	// TODO can be merged

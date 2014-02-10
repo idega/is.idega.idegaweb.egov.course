@@ -34,11 +34,55 @@ public interface CourseHome extends IDOHome {
 
 	public Collection<Course> findAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException;
 
-	public Collection<Course> findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate) throws FinderException, IDORelationshipException;
+	/**
+	 * 
+	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @param fromDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @param toDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Course> findAll(
+			String providerPK, 
+			String schoolTypePK, 
+			String courseTypePK, 
+			int birthYear, 
+			Date fromDate, 
+			Date toDate);
 
-	public Collection<Course> findAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException, IDORelationshipException;
+	/**
+	 * 
+	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @return {@link Collection} of {@link Course}s or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Course> findAll(
+			String providerPK, 
+			String schoolTypePK, 
+			String courseTypePK, 
+			int birthYear);
 
-	public Collection<Course> findAll(Collection<CourseProvider> providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException;
+	public Collection<Course> findAll(
+			Collection<CourseProvider> providers, 
+			Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException;
 
 	/**
 	 * 
