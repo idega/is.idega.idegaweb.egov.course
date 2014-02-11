@@ -343,8 +343,11 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 
 		/* Updating existing course providers */
 		if (!ListUtil.isEmpty(courseProviders)) {
-			user.removeSchools();
-			user.addSchools(courseProviders);
+			Collection<? extends CourseProvider> existingCourseProviders = user.getCourseProviders();
+			if (!courseProviders.containsAll(existingCourseProviders)) {
+				user.removeSchools();
+				user.addSchools(courseProviders);
+			}
 		}
 
 		/* Publishing event of changing role for administrator */

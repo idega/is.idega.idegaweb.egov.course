@@ -78,7 +78,7 @@ public class CourseList extends CourseBlock {
 				back.setPageToOpen(getBackPage());
 				buttonLayer.add(back);
 			}
-
+			
 			add(form);
 		}
 		catch (RemoteException re) {
@@ -456,7 +456,9 @@ public class CourseList extends CourseBlock {
 				Link link = new Link(new Text(course.getName()));
 				link.setPage(getResponsePage());
 				link.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
-				link.addParameter(PARAMETER_COURSE_TYPE_PK, type.getPrimaryKey().toString());
+				if (type != null) {
+					link.addParameter(PARAMETER_COURSE_TYPE_PK, type.getPrimaryKey().toString());
+				}
 
 				if (courseCategory != null) {
 					link.addParameter(
