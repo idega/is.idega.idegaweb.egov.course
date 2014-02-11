@@ -29,6 +29,7 @@ import is.idega.idegaweb.egov.course.data.CoursePriceHome;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseProviderTypeHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderUser;
@@ -36,8 +37,6 @@ import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
-import is.idega.idegaweb.egov.course.data.SocialServiceCenterEntity;
-import is.idega.idegaweb.egov.course.data.SocialServiceCenterEntityHome;
 import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 import is.idega.idegaweb.egov.message.business.MessageValue;
@@ -3453,15 +3452,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getHandledCourseProviders(com.idega.user.data.User)
+	 */
 	@Override
-	public Collection<SocialServiceCenterEntity> getHandledCourseProviders(User user) {
+	public Collection<CourseProvider> getHandledCourseProviders(User user) {
 		if (user == null) {
 			return null;
 		}
 
 		try {
 			if (IWMainApplication.getDefaultIWMainApplication().getAccessController().getAdministratorUser().getId().equals(user.getId())) {
-				SocialServiceCenterEntityHome sscHome = (SocialServiceCenterEntityHome) IDOLookup.getHome(SocialServiceCenterEntity.class);
+				CourseProviderHome sscHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
 				return sscHome.find();
 			}
 		} catch (Exception e) {
@@ -3469,7 +3472,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 
 		try {
-			SocialServiceCenterEntityHome sscHome = (SocialServiceCenterEntityHome) IDOLookup.getHome(SocialServiceCenterEntity.class);
+			CourseProviderHome sscHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
 			return sscHome.findByHandlers(Arrays.asList(user));
 		} catch (Exception e) {
 
