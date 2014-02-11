@@ -102,6 +102,7 @@ import com.idega.data.IDOFactory;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.user.data.Group;
+import com.idega.user.data.User;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
@@ -531,6 +532,49 @@ public class CourseProviderHomeImpl extends IDOFactory
 	@Override
 	public void remove(String primaryKey) {
 		remove(findByPrimaryKeyRecursively(primaryKey));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.SocialServiceCenterEntityHome#findByHandlers(java.util.Collection)
+	 */
+	@Override
+	public <T extends CourseProvider> Collection<T> findByHandlers(Collection<User> users) {
+		Collection<? extends CourseProviderUser> userEntities = getCourseProviderUserHome().findByUsers(users);
+		if (ListUtil.isEmpty(userEntities)) {
+			return Collections.emptyList();
+		}
+
+		return findByHandlerEntities(userEntities);
+	};
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.SocialServiceCenterEntityHome#findByHandlers(java.util.Collection)
+	 */
+	@Override
+	public <T extends CourseProvider> Collection<T> findByHandlerEntities(
+			Collection<? extends CourseProviderUser> handlers) {
+		if (ListUtil.isEmpty(handlers)) {
+			return Collections.emptyList();
+		}
+
+		CourseProviderBMPBean entity = (CourseProviderBMPBean) this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<Object> primaryKeys = entity.ejbFindByHandlers(handlers);
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
+		}
+
+		ArrayList<String> ids = new ArrayList<String>(primaryKeys.size());
+		for (Object primaryKey : primaryKeys) {
+			ids.add(primaryKey.toString());
+		}
+		
+		return find(ids);
 	}
 
 	/*

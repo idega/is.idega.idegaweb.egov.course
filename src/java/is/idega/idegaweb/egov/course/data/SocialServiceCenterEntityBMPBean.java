@@ -926,35 +926,6 @@ public class SocialServiceCenterEntityBMPBean extends CourseProviderBMPBean
 		return Collections.emptyList();
 	}
 
-	/**
-	 * 
-	 * @param handlers to search by, not <code>null</code>;
-	 * @return {@link Collection} of {@link SocialServiceCenterEntity#getPrimaryKey()}
-	 * or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public Collection<Object> ejbFindByHandlers(
-			Collection<? extends SocialServiceCenterHandlerEntity> handlers) {
-		if (ListUtil.isEmpty(handlers)) {
-			return Collections.emptyList();
-		}
-
-		IDOQuery sql = idoQuery();
-		sql.useDefaultAlias = Boolean.TRUE;
-		sql.appendSelectAllFrom(this);
-		sql.appendJoinOn(handlers);
-
-		try {
-			return idoFindPKsByQuery(sql);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get primary keys for '" + this.getClass().getName() + 
-					"'' by query: '" + sql.toString() + "'");
-		}
-
-		return Collections.emptyList();
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderBMPBean#ejbFindAll()

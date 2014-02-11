@@ -94,6 +94,7 @@ import com.idega.core.location.data.PostalCode;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOHome;
 import com.idega.user.data.Group;
+import com.idega.user.data.User;
 
 /**
  * <p>Data access object for {@link CourseProvider}</p>
@@ -272,6 +273,26 @@ public interface CourseProviderHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public void remove(String primaryKey);
+
+	/**
+	 * 
+	 * @param handlers to search {@link SocialServiceCenterEntity}s by, 
+	 * not <code>null</code>;
+	 * @return entities or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<T extends CourseProvider> Collection<T> findByHandlerEntities(
+			Collection<? extends CourseProviderUser> handlers);
+
+	/**
+	 * 
+	 * @param users are handlers of {@link SocialServiceCenterEntity}, not 
+	 * <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()} on 
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<T extends CourseProvider> Collection<T> findByHandlers(Collection<User> users);
 
 	/**
 	 * 

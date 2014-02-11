@@ -237,26 +237,6 @@ public interface SocialServiceCenterEntityHome extends CourseProviderHome {
 
 	/**
 	 * 
-	 * @param handlers to search {@link SocialServiceCenterEntity}s by, 
-	 * not <code>null</code>;
-	 * @return entities or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	List<SocialServiceCenterEntity> findByHandlerEntities(
-			Collection<? extends SocialServiceCenterHandlerEntity> handlers);
-
-	/**
-	 * 
-	 * @param users are handlers of {@link SocialServiceCenterEntity}, not 
-	 * <code>null</code>;
-	 * @return entities by criteria or {@link Collections#emptyList()} on 
-	 * failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	List<SocialServiceCenterEntity> findByHandlers(Collection<User> users);
-
-	/**
-	 * 
 	 * <p>Creates/updates existing social service centers.</p>
 	 * @param socialServiceCenter if <code>null</code>, then new entity 
 	 * will be created;

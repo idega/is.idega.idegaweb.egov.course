@@ -429,65 +429,6 @@ public class SocialServiceCenterEntityHomeImpl extends CourseProviderHomeImpl im
 		return new ArrayList<SocialServiceCenterEntity>(postalCodeEntities);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.SocialServiceCenterEntityHome#findByHandlers(java.util.Collection)
-	 */
-	@Override
-	public List<SocialServiceCenterEntity> findByHandlerEntities(
-			Collection<? extends SocialServiceCenterHandlerEntity> handlers) {
-		if (ListUtil.isEmpty(handlers)) {
-			return Collections.emptyList();
-		}
-
-		SocialServiceCenterEntityBMPBean entity = (SocialServiceCenterEntityBMPBean) this.idoCheckOutPooledEntity();
-		if (entity == null) {
-			return Collections.emptyList();
-		}
-
-		Collection<Object> primaryKeys = entity.ejbFindByHandlers(handlers);
-		if (ListUtil.isEmpty(primaryKeys)) {
-			return Collections.emptyList();
-		}
-
-		Collection<SocialServiceCenterEntity> serviceCenterEntities = null;
-		try {
-			serviceCenterEntities = getEntityCollectionForPrimaryKeys(primaryKeys);
-		} catch (FinderException e) {
-			Logger.getLogger(getClass().getName()).log(
-					Level.WARNING,
-					"Failed to get " + SocialServiceCenterEntity.class.getSimpleName() +
-					"'s by id's: '" + primaryKeys + "'");
-		}
-
-		if (ListUtil.isEmpty(serviceCenterEntities)) {
-			return Collections.emptyList();
-		}
-
-		return new ArrayList<SocialServiceCenterEntity>(serviceCenterEntities);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.SocialServiceCenterEntityHome#findByHandlers(java.util.Collection)
-	 */
-	@Override
-	public java.util.List<SocialServiceCenterEntity> findByHandlers(Collection<User> users) {
-		Collection<? extends CourseProviderUser> userEntities = getSocialServiceCenterHandlerEntityHome().findByUsers(users);
-		if (ListUtil.isEmpty(userEntities)) {
-			return Collections.emptyList();
-		}
-
-		ArrayList<SocialServiceCenterHandlerEntity> handlerEntities = new ArrayList<SocialServiceCenterHandlerEntity>(userEntities.size());
-		for (CourseProviderUser userEntity: userEntities) {
-			if (userEntity instanceof SocialServiceCenterHandlerEntity) {
-				handlerEntities.add((SocialServiceCenterHandlerEntity) userEntity);
-			}
-		}
-
-		return findByHandlerEntities(handlerEntities);
-	};
-
 	private SocialServiceCenterHandlerEntityHome socialServiceCenterHandlerEntityHome = null;
 
 	protected SocialServiceCenterHandlerEntityHome getSocialServiceCenterHandlerEntityHome() {
