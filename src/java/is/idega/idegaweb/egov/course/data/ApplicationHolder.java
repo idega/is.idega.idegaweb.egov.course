@@ -40,21 +40,23 @@ public class ApplicationHolder {
 	}
 
 	public int getPrice() {
-		if (course.getCoursePrice() >= 0) {
-			return (int) course.getCoursePrice();
+		if (getCourse().getCoursePrice() >= 0) {
+			return (int) getCourse().getCoursePrice();
 		}
 
-		CoursePrice price = course.getPrice();
-		int totalPrice = price.getPrice();
-		if (getDaycare() == CourseConstants.DAY_CARE_POST) {
-			totalPrice += price.getPostCarePrice();
+		int totalPrice = 0;
+		CoursePrice price = getCourse().getPrice();
+		if (price != null) {
+			totalPrice = price.getPrice();
+			if (getDaycare() == CourseConstants.DAY_CARE_POST) {
+				totalPrice += price.getPostCarePrice();
+			} else if (getDaycare() == CourseConstants.DAY_CARE_PRE) {
+				totalPrice += price.getPreCarePrice();
+			} else if (getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+				totalPrice += (price.getPreCarePrice() + price.getPostCarePrice());
+			}
 		}
-		else if (getDaycare() == CourseConstants.DAY_CARE_PRE) {
-			totalPrice += price.getPreCarePrice();
-		}
-		else if (getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
-			totalPrice += (price.getPreCarePrice() + price.getPostCarePrice());
-		}
+
 		return totalPrice;
 	}
 
