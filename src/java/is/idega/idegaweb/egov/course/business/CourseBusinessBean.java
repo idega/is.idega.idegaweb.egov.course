@@ -1780,14 +1780,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList<CoursePrice>();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#isRegisteredAtProviders(com.idega.user.data.User, java.util.Collection)
+	 */
 	@Override
-	public boolean isRegisteredAtProviders(User user, Collection<CourseProvider> providers) {
-		try {
-			return getCourseChoiceHome().getCountByUserAndProviders(user, providers) > 0;
-		} catch (IDOException ie) {
-			ie.printStackTrace();
-			return false;
-		}
+	public boolean isRegisteredAtProviders(User user, 
+			Collection<CourseProvider> providers) {
+		return getCourseChoiceHome()
+				.getCountByUserAndProviders(user, providers) > 0;
 	}
 
 	@Override

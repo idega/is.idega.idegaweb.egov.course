@@ -46,8 +46,16 @@ public interface CourseChoiceHome extends IDOHome {
 	public Collection<CourseChoice> findAllByCourseAndDate(Course course,
 			IWTimestamp fromDate, IWTimestamp toDate) throws FinderException;
 
-	public int getCountByUserAndProviders(User user, Collection<?> providers)
-			throws IDOException;
+	/**
+	 * 
+	 * @param user to search by, not <code>null</code>;
+	 * @param providers to search by, skipped if <code>null</code>;
+	 * @return number of {@link CourseChoice}s found by criteria
+	 * or -1 on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public int getCountByUserAndProviders(User user, 
+			Collection<CourseProvider> providers);
 
 	public int getCountByProviderAndSchoolTypeAndGender(CourseProvider provider,
 			CourseProviderType type, Gender gender, Date fromDate, Date toDate)

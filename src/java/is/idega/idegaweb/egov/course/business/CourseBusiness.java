@@ -578,12 +578,17 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 */
 	public Collection<CoursePrice> getAllCoursePrices() throws RemoteException;
 
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#isRegisteredAtProviders
-	 */
-	public boolean isRegisteredAtProviders(User user, Collection<CourseProvider> providers)
-			throws RemoteException;
 
+	/**
+	 * 
+	 * @param user to search by, not <code>null</code>;
+	 * @param providers to search by, skipped if <code>null</code>;
+	 * @return <code>true</code> is there are {@link CourseProvider}s
+	 * for this {@link CourseChoice}, <code>false</code> otherwise;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public boolean isRegisteredAtProviders(
+			User user, Collection<CourseProvider> providers);
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getNumberOfFreePlaces
 	 */

@@ -121,13 +121,19 @@ public class CourseChoiceHomeImpl extends IDOFactory implements
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
-	public int getCountByUserAndProviders(User user, Collection providers)
-			throws IDOException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		int theReturn = ((CourseChoiceBMPBean) entity)
-				.ejbHomeGetCountByUserAndProviders(user, providers);
-		this.idoCheckInPooledEntity(entity);
-		return theReturn;
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceHome#getCountByUserAndProviders(com.idega.user.data.User, java.util.Collection)
+	 */
+	@Override
+	public int getCountByUserAndProviders(User user, 
+			Collection<CourseProvider> providers) {
+		CourseChoiceBMPBean entity = (CourseChoiceBMPBean) this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return -1;
+		}
+
+		return entity.ejbHomeGetCountByUserAndProviders(user, providers);
 	}
 
 	public int getCountByProviderAndSchoolTypeAndGender(CourseProvider provider,

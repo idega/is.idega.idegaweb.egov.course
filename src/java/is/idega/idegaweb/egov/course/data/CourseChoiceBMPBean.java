@@ -9,12 +9,17 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOException;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
+import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.query.CountColumn;
 import com.idega.data.query.InCriteria;
@@ -27,6 +32,7 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 
 public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
@@ -388,19 +394,50 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 		return idoFindOnePKByQuery(query);
 	}
-	
-	public int ejbHomeGetCountByUserAndProviders(User user, Collection providers) throws IDOException {
-		Table table = new Table(this);
-		Table course = new Table(Course.class);
 
-		SelectQuery query = new SelectQuery(table);
-		query.addColumn(new CountColumn(table, getIDColumnName()));
-		query.addJoin(table, course);
-		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_USER), MatchCriteria.EQUALS, user));
-		query.addCriteria(new InCriteria(course.getColumn("PROVIDER_ID"), providers));
-		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
+	/**
+	 * 
+	 * @param user to search by, not <code>null</code>;
+	 * @param providers to search by, skipped if <code>null</code>;
+	 * @return number of {@link CourseChoice}s found in data source or 
+	 * -1 on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public int ejbHomeGetCountByUserAndProviders(
+			User user, Collection<CourseProvider> providers) {
+		if (user == null) {
+			return -1;
+		}
 
-		return idoGetNumberOfRecords(query);
+		IDOQuery sql = idoQuery();
+		sql.useDefaultAlias = Boolean.TRUE;
+		sql.appendSelectCountFrom(this);
+		
+		/*
+		 * Users
+		 */
+		sql.appendJoinOn(Arrays.asList(user));
+
+		/*
+		 * Courses
+		 */
+		Collection<Course> courses = getCourseHome().findAll(providers, null, 
+				null, null, null, null, null, null, null);
+		if (ListUtil.isEmpty(courses)) {
+			return -1;
+		}
+
+		sql.appendJoinOn(courses);
+
+		try {
+			return idoGetNumberOfRecords(sql);
+		} catch (IDOException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get primary keys for " + getInterfaceClass() + 
+					" by query: '" + sql + "'");
+		}
+
+		return -1;
 	}
 
 	public int ejbHomeGetCountByProviderAndSchoolTypeAndGender(
@@ -535,5 +572,21 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 
 	public void setBooleanValueForColumn(boolean value, String columnName) {
 		setColumn(columnName, value);
+	}
+
+	private CourseHome courseHome = null;
+
+	protected CourseHome getCourseHome() {
+		if (this.courseHome == null) {
+			try {
+				this.courseHome = (CourseHome) IDOLookup.getHome(Course.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseHome;
 	}
 }
