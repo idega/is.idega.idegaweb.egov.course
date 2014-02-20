@@ -300,9 +300,6 @@ public interface CourseProviderHome extends IDOHome {
 	 * @return schools which are controlled by given group or empty list on 
 	 * failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 * @deprecated this method does not belong to {@link CourseProvider} logic.
-	 * It belongs to school logic. It is a quick hack after dependency inversion
-	 * and it should not be used in here.
 	 */
 	public <T extends CourseProvider> Collection<T> findAllBySchoolGroup(
 			Group schoolGroup);

@@ -26,6 +26,7 @@ import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowD
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -256,14 +257,14 @@ public class CourseParticipantsList extends CourseBlock {
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 		course.setToSubmit();
 
-		if ((getSession().getProvider() != null && typePK != null) || showAllCourses) {
+		CourseProvider provider = getSession().getProvider();
+		if ((provider != null && typePK != null) || showAllCourses) {
 			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 			List<Course> courses = new ArrayList<Course>(getBusiness().getCourses(
-					-1, 
-					getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : null, 
-							typePK.toString(), 
-							iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, 
-							fromDate, toDate));
+					Arrays.asList(provider),
+					String.valueOf(typePK),
+					iwc.getParameter(PARAMETER_COURSE_TYPE_PK), 
+					fromDate, toDate));
 
 			if (showAllCourses) {
 				Collections.reverse(courses);

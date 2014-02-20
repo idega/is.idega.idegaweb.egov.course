@@ -371,8 +371,7 @@ public class CourseList extends CourseBlock {
 			if (schoolTypePK.intValue() < 0) {
 				schoolTypePK = null;
 			}
-		}
-		else if (type != null) {
+		} else if (type != null) {
 			schoolTypePK = new Integer(type.getPrimaryKey().toString());
 		}
 

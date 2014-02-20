@@ -88,8 +88,8 @@ import is.idega.idegaweb.egov.course.event.CourseProviderUpdatedEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -99,6 +99,7 @@ import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDOHome;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.user.data.Group;
@@ -588,25 +589,22 @@ public class CourseProviderHomeImpl extends IDOFactory
 			return Collections.emptyList();
 		}
 
-		CourseProviderBMPBean entity = (CourseProviderBMPBean) this.idoCheckOutPooledEntity();
-		if (entity == null) {
+		Set<? extends IDOHome> subtypes = getHomesForSubtypes();
+		if (ListUtil.isEmpty(subtypes)) {
 			return Collections.emptyList();
 		}
 
-		Collection<Object> ids = entity.ejbFindAllBySchoolGroup(schoolGroup);
-		if (ListUtil.isEmpty(ids)) {
-			return Collections.emptyList();
+		Collection<T> providersOfSubType = null;
+		ArrayList<T> providers = new ArrayList<T>();
+		for (IDOHome home : subtypes) {
+			providersOfSubType = ((CourseProviderHome) home)
+					.findAllBySchoolGroup(schoolGroup);
+			if (!ListUtil.isEmpty(providersOfSubType)) {
+				providers.addAll(providersOfSubType);
+			}
 		}
 
-		try {
-			return this.getEntityCollectionForPrimaryKeys(ids);
-		} catch (FinderException e) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
-					" by id's: '" + ids + "'");
-		}
-
-		return Collections.emptyList();
+		return providers;
 	}
 
 	private CourseProviderUserHome courseProviderUserHome = null;

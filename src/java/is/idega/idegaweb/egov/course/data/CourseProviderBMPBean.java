@@ -570,35 +570,10 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}s
 	 * or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 * @deprecated this method does not belong to {@link CourseProvider} logic.
-	 * It belongs to school logic. It is a quick hack after dependency inversion
-	 * and it should not be used in here.
 	 */
 	public Collection<Object> ejbFindAllBySchoolGroup(Group schoolGroup) {
-		if (schoolGroup == null) {
-			return Collections.emptyList();
-		}
-
-		String id = schoolGroup.getPrimaryKey().toString();
-		StringBuffer sql = new StringBuffer("SELECT s.* ");
-		sql.append("FROM sch_school s ");
-		sql.append("WHERE s.headmaster_group_id IN ( ");
-		sql.append("SELECT r.ic_group_id FROM ic_group_relation r ");
-		sql.append("WHERE r.ic_group_id IN (SELECT headmaster_group_id FROM sch_school ) ");
-		sql.append("AND r.related_ic_group_id = ").append(id).append(" ) ");
-		sql.append("AND (termination_date IS NULL OR termination_date > '" + getCurrentDate() + "') ");
-		sql.append("ORDER BY s.SCHOOL_NAME");
-
-		try {
-			return idoFindPKsBySQL(sql.toString());
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get primary keys for " + getInterfaceClass().getSimpleName() + 
-					" by query: '" + sql + "'");
-		}
-
-		return Collections.emptyList();
-	}	
+		throw new UnsupportedOperationException("Implementation should be in subclasses!");
+	}
 
 	/**
 	 * 

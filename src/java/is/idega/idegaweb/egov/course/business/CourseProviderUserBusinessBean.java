@@ -126,7 +126,7 @@ public class CourseProviderUserBusinessBean extends IBOServiceBean implements
 		}
 
 		Collection<CourseProvider> schools = getCourseProviderHome()
-				.findAllBySchoolGroup(user);
+				.findAllBySchoolGroup(user.getPrimaryGroup());
 		if (!ListUtil.isEmpty(schools)) {
 			return schools.iterator().next();
 		}

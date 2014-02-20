@@ -12,6 +12,7 @@ import is.idega.block.family.data.Custodian;
 import is.idega.block.family.data.Relative;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
@@ -26,13 +27,15 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.ejb.FinderException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -59,9 +62,11 @@ import com.idega.presentation.IWContext;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 
 public class CourseParticipantsWriter extends DownloadWriter implements MediaWritable {
@@ -79,37 +84,49 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 	public CourseParticipantsWriter() {
 	}
 
-	private Collection getChoices(Course course, IWContext iwc, boolean waitingList) {
+	private Collection<CourseChoice> getChoices(Course course, IWContext iwc, 
+			boolean waitingList) {
 		if (iwc.isParameterSet(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)) {
 			User participant = null;
 			try {
-				participant = userBusiness.getUser(Integer.valueOf(iwc.getParameter(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)).intValue());
+				participant = userBusiness.getUser(Integer.valueOf(
+						iwc.getParameter(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)
+						));
 			} catch(Exception e) {
-				e.printStackTrace();
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"failed to get participant, cause of: ", e);
 			}
+
 			if (participant == null) {
-				return new ArrayList();
+				return Collections.emptyList();
 			}
-			
-			CourseChoice choise = null;
+
+			CourseChoice choice = null;
 			try {
-				choise = business.getCourseChoiceHome().findByUserAndCourse(participant, course);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			} catch (FinderException e) {
-				e.printStackTrace();
+				choice = business.getCourseChoiceHome()
+						.findByUserAndCourse(participant, course);
+			} catch (Exception e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get " + CourseChoice.class.getSimpleName() + 
+						" cause of: ", e);
 			}
-			if (choise == null) {
-				return new ArrayList();
+
+			if (choice == null) {
+				return Collections.emptyList();
 			}
-			return Arrays.asList(new CourseChoice[] {choise});
+
+			return Arrays.asList(choice);
 		}
+
 		try {
 			return business.getCourseChoices(course, waitingList);
 		} catch (RemoteException e) {
-			e.printStackTrace();
-			return new ArrayList();
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get " + CourseChoice.class.getSimpleName() + 
+					" cause of: ", e);
 		}
+
+		return Collections.emptyList();
 	}
 	
 	@Override
@@ -126,7 +143,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				
 				boolean waitingList = iwc.isParameterSet(PARAMETER_WAITING_LIST);
 
-				Collection choices = getChoices(course, iwc, waitingList);
+				Collection<CourseChoice> choices = getChoices(course, iwc, waitingList);
 
 				if (iwc.hasRole(CourseConstants.COURSE_ACCOUNTING_ROLE_KEY)) {
 					this.buffer = writeAccountingXLS(iwc, choices);
@@ -162,26 +179,24 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				baos.write(mis.read());
 			}
 			baos.writeTo(out);
+			mis.close();
 		}
 		else {
 			System.err.println("buffer is null");
 		}
 	}
 
-	public MemoryFileBuffer writeXLS(IWContext iwc, Collection choices) throws Exception {
+	public MemoryFileBuffer writeXLS(IWContext iwc, Collection<CourseChoice> choices) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 
 		HSSFWorkbook wb = new HSSFWorkbook();
 		HSSFSheet sheet = wb.createSheet(StringHandler.shortenToLength(this.courseName, 30));
-		sheet.setColumnWidth((short) 0, (short) (30 * 256));
-		sheet.setColumnWidth((short) 1, (short) (14 * 256));
-		sheet.setColumnWidth((short) 2, (short) (30 * 256));
-		sheet.setColumnWidth((short) 3, (short) (14 * 256));
-		sheet.setColumnWidth((short) 4, (short) (14 * 256));
+
 		HSSFFont font = wb.createFont();
 		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 		font.setFontHeightInPoints((short) 12);
+
 		HSSFCellStyle style = wb.createCellStyle();
 		style.setFont(font);
 
@@ -193,7 +208,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 		int cellRow = 0;
 		HSSFRow row = sheet.createRow(cellRow++);
-		HSSFCell cell = row.createCell((short) 0);
+		HSSFCell cell = row.createCell(0);
 		cell.setCellValue(this.courseName);
 		cell.setCellStyle(bigStyle);
 		
@@ -202,18 +217,21 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		boolean showAll = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 		if (showAll) {
 			row = sheet.createRow(cellRow++);
-			cell = row.createCell((short) 0);
+
+			cell = row.createCell(0);
 			cell.setCellValue(this.iwrb.getLocalizedString("participant", "Participant"));
 			cell.setCellStyle(bigStyle);
-			cell = row.createCell((short) 13);
+
+			cell = row.createCell(13);
 			cell.setCellValue(this.iwrb.getLocalizedString("custodians", "Custodians"));
 			cell.setCellStyle(bigStyle);
-			cell = row.createCell((short) 43);
+
+			cell = row.createCell(43);
 			cell.setCellValue(this.iwrb.getLocalizedString("relatives", "Relatives"));
 			cell.setCellStyle(bigStyle);
 		}
 		
-		short iCell = 0;
+		int iCell = 0;
 		row = sheet.createRow(cellRow++);
 		cell = row.createCell(iCell++);
 		cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
@@ -321,86 +339,167 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				cell.setCellStyle(style);
 			}
 		}
-		
-		User user;
-		User owner;
-		Address address;
-		PostalCode postalCode = null;
-		Phone phone;
-		CourseChoice choice;
-		CourseApplication application;
 
-		Iterator iter = choices.iterator();
+		/*
+		 * Auto-size
+		 */
+		HSSFRow headerRow = sheet.getRow(sheet.getLastRowNum());
+		short numberOfHeaderColumns = headerRow.getLastCellNum();
+		for (short columnIndex = 0; columnIndex < numberOfHeaderColumns; columnIndex++) {
+			sheet.autoSizeColumn(columnIndex);
+		}
+		
+		User user = null;
+		User owner = null;
+		Address address = null;
+		PostalCode postalCode = null;
+		Phone phone = null;
+		CourseChoice choice = null;
+		CourseApplication application = null;
+
+		Iterator<CourseChoice> iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = sheet.createRow(cellRow++);
-			choice = (CourseChoice) iter.next();
-			application = choice.getApplication();
+			choice = iter.next();
+			
+			/* 
+			 * User name 
+			 */
 			user = choice.getUser();
-			owner = application.getOwner();
-			Child child = this.userBusiness.getMemberFamilyLogic().getChild(user);
+			HSSFCell userName = row.createCell(0);
+			if (user != null) {
+				userName.setCellValue(user.getName());
+			} else {
+				userName.setCellValue(CoreConstants.MINUS);
+			}
+
+			/* 
+			 * User personal id 
+			 */
+			HSSFCell personalId = row.createCell(1);
+			if (user != null) {
+				personalId.setCellValue(PersonalIDFormatter.format(
+						user.getPersonalID(), this.locale));
+			} else {
+				personalId.setCellValue(CoreConstants.MINUS);
+			}
+
+			/* 
+			 * Address 
+			 */
 			address = this.userBusiness.getUsersMainAddress(user);
+			HSSFCell addressCell = row.createCell(2);
+			if (address != null) {
+				addressCell.setCellValue(address.getStreetAddress());
+			} else {
+				addressCell.setCellValue(CoreConstants.MINUS);
+			}
+
+			/* 
+			 * Postal code 
+			 */
 			if (address != null) {
 				postalCode = address.getPostalCode();
 			}
+
+			HSSFCell postalCodeCell = row.createCell(3);
+			if (postalCode != null) {
+				String postalAddress = postalCode.getPostalCode();
+				if (!StringUtil.isEmpty(postalAddress)) {
+					postalAddress = postalAddress + CoreConstants.SPACE + postalCode.getName();
+				} else {
+					postalAddress = postalCode.getName();
+				}
+
+				if (!StringUtil.isEmpty(postalAddress)) {
+					postalCodeCell.setCellValue(postalAddress);
+				} else {
+					postalCodeCell.setCellValue(CoreConstants.MINUS);
+				}
+			} else {
+				postalCodeCell.setCellValue(CoreConstants.MINUS);
+			}
+
+			/*
+			 * Phone
+			 */
+			HSSFCell phoneCell = row.createCell(4);
 			phone = this.userBusiness.getChildHomePhone(user);
-
-			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
-			row.createCell((short) 0).setCellValue(name.getName(this.locale, true));
-			row.createCell((short) 1).setCellValue(PersonalIDFormatter.format(user.getPersonalID(), this.locale));
-			if (address != null) {
-				row.createCell((short) 2).setCellValue(address.getStreetAddress());
-				if (postalCode != null) {
-					row.createCell((short) 3).setCellValue(postalCode.getPostalAddress());
-				}
-			}
-			if (phone != null) {
-				row.createCell((short) 4).setCellValue(phone.getNumber());
+			if (phone != null && !StringUtil.isEmpty(phone.getNumber())) {
+				phoneCell.setCellValue(phone.getNumber());
+			} else {
+				phoneCell.setCellValue(CoreConstants.MINUS);
 			}
 
+			application = choice.getApplication();
+			owner = application.getOwner();
+			Child child = this.userBusiness.getMemberFamilyLogic().getChild(user);
 			if (showAll) {
-				Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				/*
+				 * Growth deviation
+				 */
+				Boolean hasGrowthDeviation = child.hasGrowthDeviation(
+						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (hasGrowthDeviation == null) {
-					hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
+					hasGrowthDeviation = child.hasGrowthDeviation(
+							CourseConstants.COURSE_PREFIX);
 				}
+
+				HSSFCell growthDeviationCell = row.createCell(5);
 				if (hasGrowthDeviation != null && hasGrowthDeviation.booleanValue()) {
-					row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
-				}
-				else {
-					row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+					growthDeviationCell.setCellValue(
+							this.iwrb.getLocalizedString("yes", "Yes"));
+				} else {
+					growthDeviationCell.setCellValue(
+							this.iwrb.getLocalizedString("no", "No"));
 				}
 	
-				Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				/*
+				 * Allergies
+				 */
+				Boolean hasAllergies = child.hasAllergies(
+						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (hasAllergies == null) {
 					hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
 				}
+				
 				if (hasAllergies != null && hasAllergies.booleanValue()) {
-					row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
-				}
-				else {
-					row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+					row.createCell(6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+				} else {
+					row.createCell(6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
 	
+				/*
+				 * Other information
+				 */
+				HSSFCell otherInfo = row.createCell(7);
 				if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
-					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-				}
-				else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
-					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
+					otherInfo.setCellValue(child.getOtherInformation(
+							CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
+				} else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
+					otherInfo.setCellValue(child.getOtherInformation(
+							CourseConstants.COURSE_PREFIX));
+				} else {
+					otherInfo.setCellValue(CoreConstants.MINUS);
 				}
 	
-				iCell = 8;
-	
-				Collection custodians = new ArrayList();
+				/*
+				 * Relations
+				 */
+				iCell = 8;	
+				Collection<Custodian> custodians = new ArrayList<Custodian>();
 				try {
 					custodians = child.getCustodians();
 				} catch(Exception e) {}
+
 				Custodian extraCustodian = child.getExtraCustodian();
 				if (extraCustodian != null) {
 					custodians.add(extraCustodian);
 				}
 	
-				Iterator iterator = custodians.iterator();
+				Iterator<Custodian> iterator = custodians.iterator();
 				while (iterator.hasNext()) {
-					Custodian element = (Custodian) iterator.next();
+					Custodian element = iterator.next();
 					address = this.userBusiness.getUsersMainAddress(element);
 					Phone work = null;
 					Phone mobile = null;
@@ -436,9 +535,8 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 						email = null;
 					}
 	
-					name = new Name(element.getFirstName(), element.getMiddleName(), element.getLastName());
 					row.createCell(iCell++).setCellValue(relation);
-					row.createCell(iCell++).setCellValue(name.getName(this.locale, true));
+					row.createCell(iCell++).setCellValue(element.getName());
 					row.createCell(iCell++).setCellValue(PersonalIDFormatter.format(element.getPersonalID(), this.locale));
 					if (address != null) {
 						row.createCell(iCell++).setCellValue(address.getStreetAddress());
@@ -580,23 +678,28 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				}
 			}
 		}
+
+		/*
+		 * Auto-sizing columns
+		 */
+		HSSFRow lastRow = sheet.getRow(sheet.getLastRowNum());
+		short numberOfColumns = lastRow.getLastCellNum();
+		for (short columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+			sheet.autoSizeColumn(columnIndex);
+		}
+
 		wb.write(mos);
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
 		return buffer;
 	}
 
-	public MemoryFileBuffer writeAccountingXLS(IWContext iwc, Collection choices) throws Exception {
+	public MemoryFileBuffer writeAccountingXLS(IWContext iwc, 
+			Collection<CourseChoice> choices) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 
 		HSSFWorkbook wb = new HSSFWorkbook();
 		HSSFSheet sheet = wb.createSheet(StringHandler.shortenToLength(this.courseName, 30));
-		sheet.setColumnWidth(0, (short) (30 * 256));
-		sheet.setColumnWidth(1, (short) (14 * 256));
-		sheet.setColumnWidth(2, (short) (30 * 256));
-		sheet.setColumnWidth(3, (short) (14 * 256));
-		sheet.setColumnWidth(4, (short) (14 * 256));
-		sheet.setColumnWidth(4, (short) (10 * 256));
 		HSSFFont font = wb.createFont();
 		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 		font.setFontHeightInPoints((short) 12);
@@ -651,10 +754,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		CourseChoice choice;
 		CourseApplication application;
 
-		Iterator iter = choices.iterator();
+		Iterator<CourseChoice> iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = sheet.createRow(cellRow++);
-			choice = (CourseChoice) iter.next();
+			choice = iter.next();
 			application = choice.getApplication();
 			user = choice.getUser();
 			address = this.userBusiness.getUsersMainAddress(user);
@@ -675,11 +778,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			float userPrice = 0;
 			if (choice.isNoPayment()) {
 				userPrice = 0;
-			}
-			else {
-				Map applicationMap = getCourseBusiness(iwc).getApplicationMap(application, new Boolean(false));
-				SortedSet prices = getCourseBusiness(iwc).calculatePrices(applicationMap);
-				Map discounts = getCourseBusiness(iwc).getDiscounts(prices, applicationMap);
+			} else {
+				Map<User, Collection<ApplicationHolder>> applicationMap = getCourseBusiness(iwc)
+						.getApplicationMap(application, new Boolean(false));
+				SortedSet<PriceHolder> prices = getCourseBusiness(iwc)
+						.calculatePrices(applicationMap);
+				Map<User, PriceHolder> discounts = getCourseBusiness(iwc)
+						.getDiscounts(prices, applicationMap);
 				CoursePrice price = course.getPrice();
 				
 				float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());			
@@ -687,11 +792,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				float carePrice = 0;
 				if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
 					carePrice = price.getPreCarePrice();
-				}
-				else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
+				} else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
 					carePrice = price.getPostCarePrice();
-				}
-				else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+				} else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
 					carePrice = price.getPreCarePrice() + price.getPostCarePrice();
 				}
 				carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
@@ -718,6 +821,16 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				row.createCell(7).setCellValue(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(this.locale, true));
 			}
 		}
+
+		/*
+		 * Auto-sizing columns
+		 */
+		HSSFRow lastRow = sheet.getRow(sheet.getLastRowNum());
+		short numberOfColumns = lastRow.getLastCellNum();
+		for (short columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+			sheet.autoSizeColumn(columnIndex);
+		}
+
 		wb.write(mos);
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
 		return buffer;
