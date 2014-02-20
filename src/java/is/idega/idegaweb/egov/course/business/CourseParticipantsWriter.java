@@ -44,6 +44,7 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.idega.business.IBOLookup;
 import com.idega.core.contact.data.Email;
@@ -214,21 +215,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		
 		row = sheet.createRow(cellRow++);
 
+		HSSFRow secondHeaderRow = null;
 		boolean showAll = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 		if (showAll) {
-			row = sheet.createRow(cellRow++);
-
-			cell = row.createCell(0);
-			cell.setCellValue(this.iwrb.getLocalizedString("participant", "Participant"));
-			cell.setCellStyle(bigStyle);
-
-			cell = row.createCell(13);
-			cell.setCellValue(this.iwrb.getLocalizedString("custodians", "Custodians"));
-			cell.setCellStyle(bigStyle);
-
-			cell = row.createCell(43);
-			cell.setCellValue(this.iwrb.getLocalizedString("relatives", "Relatives"));
-			cell.setCellStyle(bigStyle);
+			secondHeaderRow = sheet.createRow(cellRow++);
 		}
 		
 		int iCell = 0;
@@ -259,7 +249,25 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("child.other_information", "Other information"));
 			cell.setCellStyle(style);
+
+			/*
+			 * Setting a header for previous columns
+			 */
+			cell = secondHeaderRow.createCell(0);
+			cell.setCellValue(this.iwrb.getLocalizedString("participant", "Participant"));
+			cell.setCellStyle(bigStyle);
+
+			CellRangeAddress region = new CellRangeAddress(
+					secondHeaderRow.getRowNum(),
+					secondHeaderRow.getRowNum(), 
+					0, iCell - 1);
+			sheet.addMergedRegion(region);
+
+			int endOfPreviousRegion = iCell;
 	
+			/*
+			 * Custodian headers
+			 */
 			for (int a = 1; a <= 3; a++) {
 				cell = row.createCell(iCell++);
 				cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
@@ -292,8 +300,59 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				cell.setCellValue(this.iwrb.getLocalizedString("marital_status", "Marital status"));
 				cell.setCellStyle(style);
 			}
-		}
-		else {
+
+			/*
+			 * Header for custodians
+			 */
+			cell = secondHeaderRow.createCell(endOfPreviousRegion);
+			cell.setCellValue(this.iwrb.getLocalizedString("custodians", "Custodians"));
+			cell.setCellStyle(bigStyle);
+
+			region = new CellRangeAddress(
+					secondHeaderRow.getRowNum(),
+					secondHeaderRow.getRowNum(), 
+					endOfPreviousRegion, iCell - 1);
+			sheet.addMergedRegion(region);
+
+			endOfPreviousRegion = iCell;
+
+			/*
+			 * Relatives
+			 */
+			for (int a = 1; a <= 2; a++) {
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("work_phone", "Work phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("mobile_phone", "Mobile phone"));
+				cell.setCellStyle(style);
+				cell = row.createCell(iCell++);
+				cell.setCellValue(this.iwrb.getLocalizedString("email", "E-mail"));
+				cell.setCellStyle(style);
+			}
+
+			/*
+			 * Header for relatives
+			 */
+			cell = secondHeaderRow.createCell(endOfPreviousRegion);
+			cell.setCellValue(this.iwrb.getLocalizedString("relatives", "Relatives"));
+			cell.setCellStyle(bigStyle);
+			
+			region = new CellRangeAddress(
+					secondHeaderRow.getRowNum(),
+					secondHeaderRow.getRowNum(), 
+					endOfPreviousRegion, iCell - 1);
+			sheet.addMergedRegion(region);
+		} else {
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("work_phone", "Work phone"));
 			cell.setCellStyle(style);
@@ -315,29 +374,6 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("application.reference_number", "Reference number"));
 			cell.setCellStyle(style);
-		}
-		
-		if (showAll) {
-			for (int a = 1; a <= 2; a++) {
-				cell = row.createCell(iCell++);
-				cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
-				cell.setCellStyle(style);
-				cell = row.createCell(iCell++);
-				cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
-				cell.setCellStyle(style);
-				cell = row.createCell(iCell++);
-				cell.setCellValue(this.iwrb.getLocalizedString("home_phone", "Home phone"));
-				cell.setCellStyle(style);
-				cell = row.createCell(iCell++);
-				cell.setCellValue(this.iwrb.getLocalizedString("work_phone", "Work phone"));
-				cell.setCellStyle(style);
-				cell = row.createCell(iCell++);
-				cell.setCellValue(this.iwrb.getLocalizedString("mobile_phone", "Mobile phone"));
-				cell.setCellStyle(style);
-				cell = row.createCell(iCell++);
-				cell.setCellValue(this.iwrb.getLocalizedString("email", "E-mail"));
-				cell.setCellStyle(style);
-			}
 		}
 
 		/*
@@ -370,7 +406,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			if (user != null) {
 				userName.setCellValue(user.getName());
 			} else {
-				userName.setCellValue(CoreConstants.MINUS);
+				userName.setCellValue(CoreConstants.EMPTY);
 			}
 
 			/* 
@@ -381,7 +417,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				personalId.setCellValue(PersonalIDFormatter.format(
 						user.getPersonalID(), this.locale));
 			} else {
-				personalId.setCellValue(CoreConstants.MINUS);
+				personalId.setCellValue(CoreConstants.EMPTY);
 			}
 
 			/* 
@@ -392,7 +428,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			if (address != null) {
 				addressCell.setCellValue(address.getStreetAddress());
 			} else {
-				addressCell.setCellValue(CoreConstants.MINUS);
+				addressCell.setCellValue(CoreConstants.EMPTY);
 			}
 
 			/* 
@@ -414,10 +450,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				if (!StringUtil.isEmpty(postalAddress)) {
 					postalCodeCell.setCellValue(postalAddress);
 				} else {
-					postalCodeCell.setCellValue(CoreConstants.MINUS);
+					postalCodeCell.setCellValue(CoreConstants.EMPTY);
 				}
 			} else {
-				postalCodeCell.setCellValue(CoreConstants.MINUS);
+				postalCodeCell.setCellValue(CoreConstants.EMPTY);
 			}
 
 			/*
@@ -428,7 +464,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			if (phone != null && !StringUtil.isEmpty(phone.getNumber())) {
 				phoneCell.setCellValue(phone.getNumber());
 			} else {
-				phoneCell.setCellValue(CoreConstants.MINUS);
+				phoneCell.setCellValue(CoreConstants.EMPTY);
 			}
 
 			application = choice.getApplication();
@@ -480,11 +516,11 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					otherInfo.setCellValue(child.getOtherInformation(
 							CourseConstants.COURSE_PREFIX));
 				} else {
-					otherInfo.setCellValue(CoreConstants.MINUS);
+					otherInfo.setCellValue(CoreConstants.EMPTY);
 				}
 	
 				/*
-				 * Relations
+				 * Custodians
 				 */
 				iCell = 8;	
 				Collection<Custodian> custodians = new ArrayList<Custodian>();
@@ -504,110 +540,247 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					Phone work = null;
 					Phone mobile = null;
 					Email email = null;
-					String relation = this.iwrb.getLocalizedString("relation." + child.getRelation(element), "relation." + child.getRelation(element));
-					String maritalStatus = this.iwrb.getLocalizedString("marital_status." + element.getMaritalStatus(), "marital_status." + element.getMaritalStatus());
-	
+					
+					/*
+					 * Custodian type
+					 */
+					String localizedRelation = null;
+					String relation = child.getRelation(element);
+					if (!StringUtil.isEmpty(relation)) {
+						localizedRelation = this.iwrb.getLocalizedString(
+								"relation." + relation, 
+								"relation." + relation);
+					}
+
+					HSSFCell relationTypeCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(localizedRelation)) {
+						relationTypeCell.setCellValue(localizedRelation);
+					} else {
+						relationTypeCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian name
+					 */
+					HSSFCell custodianNameCell = row.createCell(iCell++);
+					String custodianName = element.getName();
+					if (!StringUtil.isEmpty(custodianName)) {
+						custodianNameCell.setCellValue(custodianName);
+					} else {
+						custodianNameCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian personal id
+					 */
+					HSSFCell custodianPersonalIdCell = row.createCell(iCell++);
+					String custodianPersonalId = element.getPersonalID();
+					if (!StringUtil.isEmpty(custodianPersonalId)) {
+						custodianPersonalIdCell.setCellValue(
+								PersonalIDFormatter.format(
+										custodianPersonalId, 
+										this.locale));
+					} else {
+						custodianPersonalIdCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian address
+					 */
+					HSSFCell custodianAddressCell = row.createCell(iCell++);
+					if (address != null && !StringUtil.isEmpty(address.getStreetAddress())) {
+						custodianAddressCell.setCellValue(address.getStreetAddress());
+					} else {
+						custodianAddressCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian postal code
+					 */
+					HSSFCell custodianPostalCode = row.createCell(iCell++);
+					if (postalCode != null) {
+						String postalAddress = postalCode.getPostalCode();
+						if (!StringUtil.isEmpty(postalAddress)) {
+							postalAddress = postalAddress + CoreConstants.SPACE + postalCode.getName();
+						} else {
+							postalAddress = postalCode.getName();
+						}
+
+						if (!StringUtil.isEmpty(postalAddress)) {
+							custodianPostalCode.setCellValue(postalAddress);
+						} else {
+							custodianPostalCode.setCellValue(CoreConstants.EMPTY);
+						}
+					} else {
+						custodianPostalCode.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian home phone
+					 */
 					try {
 						phone = this.userBusiness.getUsersHomePhone(element);
-					}
-					catch (NoPhoneFoundException npfe) {
+					} catch (NoPhoneFoundException npfe) {
 						phone = null;
 					}
-	
+
+					HSSFCell custodianPhoneCell = row.createCell(iCell++);
+					if (phone != null && !StringUtil.isEmpty(phone.getNumber())) {
+						custodianPhoneCell.setCellValue(phone.getNumber());
+					} else {
+						custodianPhoneCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian work phone
+					 */
 					try {
 						work = this.userBusiness.getUsersWorkPhone(element);
-					}
-					catch (NoPhoneFoundException npfe) {
+					} catch (NoPhoneFoundException npfe) {
 						work = null;
 					}
-	
+
+					HSSFCell custodianWorkPhoneCell = row.createCell(iCell++);
+					if (work != null && !StringUtil.isEmpty(work.getNumber())) {
+						custodianWorkPhoneCell.setCellValue(work.getNumber());
+					} else {
+						custodianWorkPhoneCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian mobile phone
+					 */
 					try {
 						mobile = this.userBusiness.getUsersMobilePhone(element);
-					}
-					catch (NoPhoneFoundException npfe) {
+					} catch (NoPhoneFoundException npfe) {
 						mobile = null;
 					}
-	
+
+					HSSFCell custodianMobilePhoneCell = row.createCell(iCell++);
+					if (mobile != null && !StringUtil.isEmpty(mobile.getNumber())) {
+						custodianMobilePhoneCell.setCellValue(mobile.getNumber());
+					} else {
+						custodianMobilePhoneCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Custodian email
+					 */
 					try {
 						email = this.userBusiness.getUsersMainEmail(element);
-					}
-					catch (NoEmailFoundException nefe) {
+					} catch (NoEmailFoundException nefe) {
 						email = null;
 					}
-	
-					row.createCell(iCell++).setCellValue(relation);
-					row.createCell(iCell++).setCellValue(element.getName());
-					row.createCell(iCell++).setCellValue(PersonalIDFormatter.format(element.getPersonalID(), this.locale));
-					if (address != null) {
-						row.createCell(iCell++).setCellValue(address.getStreetAddress());
-						if (postalCode != null) {
-							row.createCell(iCell++).setCellValue(postalCode.getPostalAddress());
-						}
-						else {
-							iCell++;
-						}
+
+					HSSFCell custodianEmailCell = row.createCell(iCell++);
+					if (email != null && !StringUtil.isEmpty(email.getEmailAddress())) {
+						custodianEmailCell.setCellValue(email.getEmailAddress());
+					} else {
+						custodianEmailCell.setCellValue(CoreConstants.EMPTY);
 					}
-					else {
-						iCell++;
-					}
-					if (phone != null) {
-						row.createCell(iCell++).setCellValue(phone.getNumber());
-					}
-					else {
-						iCell++;
-					}
-					if (work != null) {
-						row.createCell(iCell++).setCellValue(work.getNumber());
-					}
-					else {
-						iCell++;
-					}
-					if (mobile != null) {
-						row.createCell(iCell++).setCellValue(mobile.getNumber());
-					}
-					else {
-						iCell++;
-					}
-					if (email != null) {
-						row.createCell(iCell++).setCellValue(email.getEmailAddress());
-					}
-					else {
-						iCell++;
-					}
-					if (maritalStatus != null) {
-						row.createCell(iCell++).setCellValue(maritalStatus);
-					}
-					else {
-						iCell++;
+
+					/*
+					 * Marital status
+					 */					
+					String custodianMaritalStatus = element.getMaritalStatus();
+					HSSFCell custodianMaritalStatusCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(custodianMaritalStatus)) {
+						String localizedMaritalStatus = this.iwrb.getLocalizedString(
+								"marital_status." + custodianMaritalStatus, 
+								"marital_status." + custodianMaritalStatus);
+						custodianMaritalStatusCell.setCellValue(localizedMaritalStatus);
+					} else {
+						custodianMaritalStatusCell.setCellValue(CoreConstants.EMPTY);
 					}
 				}
-	
+
+				/*
+				 * Relatives
+				 */
 				iCell = 38;
 	
-				List relatives = new ArrayList();
-				Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				List<Relative> relatives = new ArrayList<Relative>();
+				Relative mainRelative = child.getMainRelative(
+						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (mainRelative == null) {
 					mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
 				}
+
 				if (mainRelative != null) {
 					relatives.add(mainRelative);
 				}
-				Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+
+				Collection<Relative> otherRelatives = child.getRelatives(
+						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (otherRelatives.isEmpty()) {
 					otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
 				}
+
 				relatives.addAll(otherRelatives);
-				iterator = relatives.iterator();
-				while (iterator.hasNext()) {
-					Relative element = (Relative) iterator.next();
-					String relation = this.iwrb.getLocalizedString("relation." + element.getRelation(), "relation." + element.getRelation());
-	
-					row.createCell(iCell++).setCellValue(relation);
-					row.createCell(iCell++).setCellValue(element.getName());
-					row.createCell(iCell++).setCellValue(element.getHomePhone());
-					row.createCell(iCell++).setCellValue(element.getWorkPhone());
-					row.createCell(iCell++).setCellValue(element.getMobilePhone());
-					row.createCell(iCell++).setCellValue(element.getEmail());
+				for (Relative element : relatives) {
+					
+					/*
+					 * Type of relative
+					 */
+					HSSFCell relativeTypeCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(element.getRelation())) {
+						String localizedRelation = this.iwrb.getLocalizedString(
+								"relation." + element.getRelation(), 
+								"relation." + element.getRelation());
+						relativeTypeCell.setCellValue(localizedRelation);
+					} else {
+						relativeTypeCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Relative name
+					 */
+					HSSFCell relativeNameCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(element.getName())) {
+						relativeNameCell.setCellValue(element.getName());
+					} else {
+						relativeNameCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Relative phone number
+					 */
+					HSSFCell relativeHomePhoneCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(element.getHomePhone())) {
+						relativeHomePhoneCell.setCellValue(element.getHomePhone());
+					} else {
+						relativeHomePhoneCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Relative work phone
+					 */
+					HSSFCell relativeWrokPhoneCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(element.getWorkPhone())) {
+						relativeWrokPhoneCell.setCellValue(element.getWorkPhone());
+					} else {
+						relativeWrokPhoneCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Relative mobile phone
+					 */
+					HSSFCell relativeMobilePhoneCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(element.getMobilePhone())) {
+						relativeMobilePhoneCell.setCellValue(element.getMobilePhone());
+					} else {
+						relativeMobilePhoneCell.setCellValue(CoreConstants.EMPTY);
+					}
+
+					/*
+					 * Relative email
+					 */
+					HSSFCell relativeEmailCell = row.createCell(iCell++);
+					if (!StringUtil.isEmpty(element.getEmail())) {
+						relativeEmailCell.setCellValue(element.getEmail());
+					} else {
+						relativeEmailCell.setCellValue(CoreConstants.EMPTY);
+					}
 				}
 			}
 			else {
