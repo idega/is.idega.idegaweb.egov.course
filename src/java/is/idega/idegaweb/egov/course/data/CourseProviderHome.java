@@ -296,11 +296,11 @@ public interface CourseProviderHome extends IDOHome {
 
 	/**
 	 * 
-	 * @param schoolGroup to search by, not <code>null</code>;
+	 * @param schoolGroups to search by, not <code>null</code>;
 	 * @return schools which are controlled by given group or empty list on 
 	 * failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public <T extends CourseProvider> Collection<T> findAllBySchoolGroup(
-			Group schoolGroup);
+			Collection<Group> schoolGroups);
 }

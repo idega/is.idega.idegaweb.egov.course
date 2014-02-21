@@ -87,6 +87,7 @@ import is.idega.idegaweb.egov.course.data.CourseProviderHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -98,12 +99,12 @@ import com.idega.business.IBOLookupException;
 import com.idega.business.IBOServiceBean;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.user.business.GroupBusiness;
 import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.ListUtil;
 
 /**
- * <p>TODO</p>
  * <p>You can report about problems to: 
  * <a href="mailto:martynas@idega.is">Martynas Stakė</a></p>
  *
@@ -114,6 +115,22 @@ public class CourseProviderUserBusinessBean extends IBOServiceBean implements
 		CourseProviderUserBusiness {
 
 	private static final long serialVersionUID = 9060726100335253631L;
+	
+	private GroupBusiness groupBusiness = null;
+
+	protected GroupBusiness getGroupBusiness() {
+		if (this.groupBusiness == null) {
+			try {
+				this.groupBusiness = IBOLookup.getServiceInstance(
+						getIWApplicationContext(), GroupBusiness.class);
+			} catch (IBOLookupException e) {
+				getLogger().log(Level.WARNING, "Failed to get " + 
+						GroupBusiness.class.getSimpleName() + " cause of: ", e);
+			}
+		}
+
+		return this.groupBusiness;
+	}
 
 	/* (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderUserBusiness#getFirstManagingChildCareForUser(com.idega.user.data.User)
@@ -125,8 +142,16 @@ public class CourseProviderUserBusinessBean extends IBOServiceBean implements
 			return getFirstSchool(user);
 		}
 
-		Collection<CourseProvider> schools = getCourseProviderHome()
-				.findAllBySchoolGroup(user.getPrimaryGroup());
+		Collection<CourseProvider> schools = null;
+		try {
+			schools = getCourseProviderHome()
+					.findAllBySchoolGroup(getGroupBusiness().getParentGroups(user));
+		} catch (RemoteException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get " + Group.class.getSimpleName() + 
+					" for " + User.class.getSimpleName() + " cause of: ", e);
+		}
+
 		if (!ListUtil.isEmpty(schools)) {
 			return schools.iterator().next();
 		}
@@ -146,8 +171,15 @@ public class CourseProviderUserBusinessBean extends IBOServiceBean implements
 			return getFirstSchool(user);
 		}
 
-		Collection<CourseProvider> schools = getCourseProviderHome()
-				.findAllBySchoolGroup(user);
+		Collection<CourseProvider> schools = null;
+		try {
+			schools = getCourseProviderHome()
+					.findAllBySchoolGroup(getGroupBusiness().getParentGroups(user));
+		} catch (RemoteException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get groups for user cause of:", e);
+		}
+
 		if (!ListUtil.isEmpty(schools)) {
 			schools.iterator().next();
 		}

@@ -595,13 +595,13 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 
 	/**
 	 * 
-	 * @param schoolGroup is {@link Group} of school administrators to 
+	 * @param schoolGroups is {@link Group} of school administrators to 
 	 * search by, not <code>null</code>;
 	 * @return {@link Collection} of {@link CourseProvider#getPrimaryKey()}s
 	 * or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Object> ejbFindAllBySchoolGroup(Group schoolGroup) {
+	public Collection<Object> ejbFindAllBySchoolGroup(Collection<Group> schoolGroups) {
 		throw new UnsupportedOperationException("Implementation should be in subclasses!");
 	}
 

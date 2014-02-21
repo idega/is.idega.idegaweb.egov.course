@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import org.hsqldb.lib.StringUtil;
+
 import com.ibm.icu.text.NumberFormat;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
@@ -630,9 +632,13 @@ public class CourseParticipantsList extends CourseBlock {
 				cell = row.createCell();
 				cell.setStyleClass("postalCode");
 				if (postalCode != null) {
-					cell.add(new Text(postalCode.getPostalAddress()));
-				}
-				else {
+					String postalCodeString = postalCode.getPostalCode();
+					if (StringUtil.isEmpty(postalCodeString)) {
+						postalCodeString = CoreConstants.MINUS;
+					}
+
+					cell.add(new Text(postalCodeString));
+				} else {
 					cell.add(new Text(CoreConstants.MINUS));
 				}
 
@@ -641,7 +647,7 @@ public class CourseParticipantsList extends CourseBlock {
 					cell.setStyleClass("lastColumn");
 				}
 				cell.setStyleClass("homePhone");
-				if (phone != null) {
+				if (phone != null && !StringUtil.isEmpty(phone.getNumber())) {
 					cell.add(new Text(phone.getNumber()));
 				}
 				else {

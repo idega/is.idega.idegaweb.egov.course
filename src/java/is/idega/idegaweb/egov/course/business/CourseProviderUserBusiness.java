@@ -91,7 +91,6 @@ import com.idega.business.IBOService;
 import com.idega.user.data.User;
 
 /**
- * <p>TODO</p>
  * <p>You can report about problems to: 
  * <a href="mailto:martynas@idega.is">Martynas Stakė</a></p>
  *
@@ -102,18 +101,18 @@ public interface CourseProviderUserBusiness extends IBOService {
 	
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
+	 * @param user to search for, not <code>null</code>;
+	 * @return one of {@link CourseProvider}s where {@link User}
+	 * attached as manager or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	CourseProvider getFirstManagingChildCareForUser(User user);
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param user
-	 * @return
+	 * @param user to search for, not <code>null</code>;
+	 * @return one of {@link CourseProvider}s where {@link User}
+	 * attached as manager or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	CourseProvider getFirstManagingSchoolForUser(User user);

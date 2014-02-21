@@ -575,8 +575,8 @@ public class CourseProviderHomeImpl extends IDOFactory
 	 */
 	@Override
 	public <T extends CourseProvider> Collection<T> findAllBySchoolGroup(
-			Group schoolGroup) {
-		if (schoolGroup == null) {
+			Collection<Group> schoolGroups) {
+		if (schoolGroups == null) {
 			return Collections.emptyList();
 		}
 
@@ -589,7 +589,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 		ArrayList<T> providers = new ArrayList<T>();
 		for (IDOHome home : subtypes) {
 			providersOfSubType = ((CourseProviderHome) home)
-					.findAllBySchoolGroup(schoolGroup);
+					.findAllBySchoolGroup(schoolGroups);
 			if (!ListUtil.isEmpty(providersOfSubType)) {
 				providers.addAll(providersOfSubType);
 			}
