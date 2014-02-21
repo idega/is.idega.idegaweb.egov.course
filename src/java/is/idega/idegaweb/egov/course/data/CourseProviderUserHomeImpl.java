@@ -363,6 +363,15 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			}
 		}
 
+		/* Publishing event of changing role for administrator */
+		if (userType != null) {
+			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
+									String.valueOf(user.getUserId()), 
+									null, 
+									null,
+									userType.isSuperAdmin()));
+		}
+
 		java.util.logging.Logger.getLogger(getClass().getName()).info(
 				getEntityInterfaceClass().getSimpleName()  + 
 				" by id: '" + user.getPrimaryKey().toString() + 

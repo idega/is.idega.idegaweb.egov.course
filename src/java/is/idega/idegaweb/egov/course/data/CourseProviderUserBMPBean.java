@@ -83,12 +83,16 @@
 package is.idega.idegaweb.egov.course.data;
 
 
+import is.idega.idegaweb.egov.course.event.CourseProviderUserUpdatedEvent;
+
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
@@ -104,6 +108,7 @@ import com.idega.data.IDOStoreException;
 import com.idega.user.data.User;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 /**
  * <p>Implementation for {@link CourseProviderUser} EJB entity.</p>
@@ -363,6 +368,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 		}
 		
 		if (!ListUtil.isEmpty(schools)) {
+			ArrayList<String> addedSchoolsIds = new ArrayList<String>(schools.size());
 			for (Iterator<? extends CourseProvider> iter = schools.iterator(); iter.hasNext();) {
 				CourseProvider entity = iter.next();
 				if (entity == null) {
@@ -371,6 +377,7 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 
 				try {
 					idoAddTo(entity);
+					addedSchoolsIds.add(entity.getPrimaryKey().toString());
 					getLogger().info(
 							"Added new relation of " + entity.getClass().getName() + 
 							" by id: '" + entity.getPrimaryKey().toString() + 
@@ -383,6 +390,10 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 							"' cause of: ", e);
 				}
 			}
+
+			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
+					String.valueOf(this.getUserId()), addedSchoolsIds, 
+					null, null));
 		}
 	}
 
@@ -392,10 +403,23 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void remove() {
+		CourseProviderUserUpdatedEvent cpuue = null;
+
+		/* Removing providers, if it is a subclass */
+		if (isSubclass()) {
+			List<String> providerIds = getIDOUtil().getPrimaryKeys(
+					getCourseProviders());
+			if (!ListUtil.isEmpty(providerIds)) {
+				cpuue = new CourseProviderUserUpdatedEvent(String.valueOf(this
+						.getUserId()), null, providerIds, null);
+			}
+		}
+
 		removeSchools();
 		String primarykey = this.getPrimaryKey().toString();
 		try {
 			super.remove();
+			ELUtil.getInstance().publishEvent(cpuue);
 			getLogger().info(this.getClass().getName() + 
 					" by id: '" + primarykey + 
 					"' was removed!"); 
@@ -420,6 +444,10 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 		if (school != null) {
 			try {
 				idoRemoveFrom(school);
+				ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
+						 String.valueOf(this.getUserId()), 
+						 null, 
+						 Arrays.asList(school.getPrimaryKey().toString()), null));
 				getLogger().info(school.getClass().getName() + 
 						" by id: '" + school.getPrimaryKey() + 
 						"' is removed from " + this.getClass().getName() + 
@@ -439,8 +467,16 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	@Override
 	public void removeSchools() {
 		if (isSubclass()) {
+			CourseProviderUserUpdatedEvent cpuue = null;
+			List<String> providerIds = getIDOUtil().getPrimaryKeys(this.getCourseProviders());
+			if (!ListUtil.isEmpty(providerIds)) {
+			cpuue = new CourseProviderUserUpdatedEvent(
+					String.valueOf(this.getUserId()), null, providerIds, null);
+			}
+
 			try {
 				idoRemoveFrom(CourseProvider.class);
+				ELUtil.getInstance().publishEvent(cpuue);
 				getLogger().info(
 						"All relations of " + CourseProvider.class.getName() + 
 						" is removed from " + this.getClass().getName() + 
@@ -492,6 +528,10 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 
 		try {
 			idoAddTo(CourseProvider.class, schoolId);
+			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
+					 String.valueOf(this.getUserId()), 
+					 Arrays.asList(String.valueOf(schoolId)), 
+					 null, null));
 			getLogger().info(
 					"Added new relation of " + CourseProvider.class.getName() + 
 					" by id: '" + schoolId + 
