@@ -94,8 +94,11 @@ import javax.ejb.FinderException;
 
 import com.idega.core.location.data.Commune;
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
+import com.idega.data.IDOStoreException;
 import com.idega.user.data.Group;
 import com.idega.util.ListUtil;
 import com.idega.util.expression.ELUtil;
@@ -118,6 +121,7 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 	public final static String COLUMN_SCHOOL_AREA = "sch_school_area_id";
 	public final static String TERMINATION_DATE = "termination_date";
 	public final static String COLUMN_PROVIDER_STRING_ID = "provider_string_id";
+	public static final String COLUMN_CREATION_DATE = "CREATION_DATE";
 	
 
 	/* (non-Javadoc)
@@ -126,8 +130,16 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
+		addAttribute(
+				COLUMN_CREATION_DATE, 
+				"Dummy column to avoid failure of entity creation", 
+				Date.class);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#setPrimaryKey(java.lang.Object)
+	 */
 	@Override
 	public void setPrimaryKey(Object pk) {
 		super.setPrimaryKey(pk);
@@ -452,6 +464,10 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 				"Method implemented in one of subclasses!");
 	}
 
+	public void setCreationDate(Date date) {
+		setColumn(COLUMN_CREATION_DATE, date);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.idega.data.GenericEntity#remove()
@@ -481,6 +497,20 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 	@Override
 	public String getEntityName() {
 		return TABLE_NAME;
+	}
+
+	@Override
+	public void store() throws IDOStoreException {
+		if (isSubclass()) {
+			CourseProvider courseProvider = getCourseProviderHome().update(
+					getPrimaryKey() != null ? getPrimaryKey().toString() : null, 
+					null, null, null, null, null, null, null, null, null, 
+					null, null, null, null, false);
+			setPrimaryKey(courseProvider.getPrimaryKey());
+		}
+
+		setCreationDate(getCurrentDate());
+		super.store();
 	}
 
 	public Integer ejbFindByOrganizationNumber(String organizationNumber) {
@@ -631,5 +661,32 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 	@Override
 	public String getName() {
 		return getSchoolName();
+	}
+
+	/**
+	 * 
+	 * <p>Check if it is one of extending entities.</p>
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean isSubclass() {
+		return !getClass().equals(CourseProviderBMPBean.class);
+	}
+
+	private CourseProviderHome courseProviderHome = null;
+
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup
+						.getHome(CourseProvider.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderHome;
 	}
 }

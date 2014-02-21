@@ -217,7 +217,9 @@ public class CourseProviderUserBean {
 
 		TreeMap<String, String> providersMap = new TreeMap<String, String>();
 		for (CourseProvider provider: providers) {
-			providersMap.put(provider.getSchoolName(), provider.getPrimaryKey().toString());
+			providersMap.put(
+					provider.getSchoolName(), 
+					provider.getPrimaryKey().toString());
 		}
 
 		return providersMap;
@@ -348,7 +350,7 @@ public class CourseProviderUserBean {
 			String courseProviderUserId = CoreUtil.getIWContext().getParameter(
 					COURSE_PROVIDER_USER_ID);
 			if (!StringUtil.isEmpty(courseProviderUserId)) {
-				this.courseProviderUser = getCourseProviderUserHome().find(
+				this.courseProviderUser = getCourseProviderUserHome().findByPrimaryKey(
 						courseProviderUserId
 						);
 			}

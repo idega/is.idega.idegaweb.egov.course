@@ -83,15 +83,12 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import is.idega.idegaweb.egov.course.event.CourseProviderUserUpdatedEvent;
-
+import java.sql.Date;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
@@ -107,7 +104,6 @@ import com.idega.data.IDOStoreException;
 import com.idega.user.data.User;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
-import com.idega.util.expression.ELUtil;
 
 /**
  * <p>Implementation for {@link CourseProviderUser} EJB entity.</p>
@@ -121,9 +117,10 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 		CourseProviderUser {
 
 	private static final long serialVersionUID = -6809478800798738414L;
-	public static final String TABLE_NAME = "cou_course_provider_users";
+	public static final String TABLE_NAME = "cou_course_provider_user";
 	public static final String COLUMN_NAME_USER_ID = "IC_USER_ID";
 	public static final String COLUMN_NAME_USER_TYPE = "USER_TYPE";
+	public static final String COLUMN_CREATION_DATE = "CREATION_DATE";
 
 	private CourseProviderUserHome courseProviderUserHome = null;
 
@@ -152,15 +149,9 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	public void setPrimaryKey(String pk) {
 		super.setPrimaryKey(pk);
 	}
-	
-	/**
-	 * 
-	 * <p>Check if it is one of extending entities.</p>
-	 * @return
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	protected boolean isSubclass() {
-		return !getClass().equals(CourseProviderUserBMPBean.class);
+
+	public void setCreationDate(Date date) {
+		setColumn(COLUMN_CREATION_DATE, date);
 	}
 
 	/*
@@ -169,20 +160,23 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void store() throws IDOStoreException {
-		super.store();
-
 		/* if it is one of extending entities, will update that one too */
 		if (isSubclass()) {			
-			getCourseProviderUserHome().update(
-					getPrimaryKey().toString(), 
-					String.valueOf(getUserId()), 
+			CourseProviderUser updatedEntity = getCourseProviderUserHome().update(
+					getPrimaryKey() != null ? getPrimaryKey().toString() : null, 
+					null,
 					null, 
 					null, 
 					null,
-					String.valueOf(getUserType()), 
 					null, 
-					true);
+					null, 
+					false);
+
+			setPrimaryKey(updatedEntity.getPrimaryKey().toString());
 		}
+
+		setCreationDate(new Date(System.currentTimeMillis()));
+		super.store();
 	}
 
 	/*
@@ -203,6 +197,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public User getUser() {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+
 		return (User) getColumnValue(COLUMN_NAME_USER_ID);
 	}
 
@@ -212,6 +211,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setUserId(int userId) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+
 		setColumn(COLUMN_NAME_USER_ID, userId);	
 	}
 
@@ -221,6 +225,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setUser(User user) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+		
 		if (user != null && user.getPrimaryKey() != null) {
 			try {
 				setUserId(Integer.valueOf(user.getPrimaryKey().toString()));
@@ -237,7 +246,12 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public int getUserId() {
-		return getIntColumnValue(COLUMN_NAME_USER_ID);	
+		if (isSubclass()) {
+			return getIntColumnValue(COLUMN_NAME_USER_ID);
+		}
+
+		throw new UnsupportedOperationException(
+				"This method should be called from one of sub-types!");
 	}
 
 	/*
@@ -246,6 +260,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setUserType(Integer userType) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+
 		setColumn(COLUMN_NAME_USER_TYPE, userType);	
 	}
 
@@ -255,6 +274,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setUserType(String userType) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+		
 		if (!StringUtil.isEmpty(userType)) {
 			try {
 				setUserType(Integer.valueOf(userType));
@@ -271,6 +295,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setUserType(CourseProviderUserType userType) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+
 		if (userType != null && userType.getPrimaryKey() != null) {
 			setUserType(userType.getPrimaryKey().toString());
 		}
@@ -282,6 +311,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public Integer getUserType() {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+		
 		return getIntColumnValue(COLUMN_NAME_USER_TYPE);	
 	}
 
@@ -291,6 +325,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setCourseProvider(CourseProvider courseProvider) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+
 		if (courseProvider != null && courseProvider.getPrimaryKey() != null) {
 			try {
 				setSchoolId(Integer.valueOf(courseProvider.getPrimaryKey().toString()));
@@ -318,8 +357,12 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void addSchools(Collection<? extends CourseProvider> schools) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+		
 		if (!ListUtil.isEmpty(schools)) {
-			ArrayList<String> addedSchoolsIds = new ArrayList<String>(schools.size());
 			for (Iterator<? extends CourseProvider> iter = schools.iterator(); iter.hasNext();) {
 				CourseProvider entity = iter.next();
 				if (entity == null) {
@@ -328,7 +371,6 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 
 				try {
 					idoAddTo(entity);
-					addedSchoolsIds.add(entity.getPrimaryKey().toString());
 					getLogger().info(
 							"Added new relation of " + entity.getClass().getName() + 
 							" by id: '" + entity.getPrimaryKey().toString() + 
@@ -341,11 +383,6 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 							"' cause of: ", e);
 				}
 			}
-
-			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
-					String.valueOf(this.getUserId()),
-					addedSchoolsIds,
-					null, null));
 		}
 	}
 
@@ -355,25 +392,10 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void remove() {
-		CourseProviderUserUpdatedEvent cpuue = null;
-
-		/* Removing providers, if it is a subclass */
-		if (isSubclass()) {
-			List<String> providerIds = getIDOUtil().getPrimaryKeys(getCourseProviders());
-			if (!ListUtil.isEmpty(providerIds)) {
-				cpuue = new CourseProviderUserUpdatedEvent(
-						String.valueOf(this.getUserId()),
-						null,
-						providerIds, null);
-			}
-		}
-
 		removeSchools();
-
 		String primarykey = this.getPrimaryKey().toString();
 		try {
 			super.remove();
-			ELUtil.getInstance().publishEvent(cpuue);
 			getLogger().info(this.getClass().getName() + 
 					" by id: '" + primarykey + 
 					"' was removed!"); 
@@ -390,13 +412,14 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void removeSchool(CourseProvider school) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+
 		if (school != null) {
 			try {
 				idoRemoveFrom(school);
-				ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
-						String.valueOf(this.getUserId()), 
-						null, 
-						Arrays.asList(school.getPrimaryKey().toString()), null));
 				getLogger().info(school.getClass().getName() + 
 						" by id: '" + school.getPrimaryKey() + 
 						"' is removed from " + this.getClass().getName() + 
@@ -416,19 +439,8 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	@Override
 	public void removeSchools() {
 		if (isSubclass()) {
-			CourseProviderUserUpdatedEvent cpuue = null;
-
-			List<String> providerIds = getIDOUtil().getPrimaryKeys(this.getCourseProviders());
-			if (!ListUtil.isEmpty(providerIds)) {
-				cpuue = new CourseProviderUserUpdatedEvent(
-						String.valueOf(this.getUserId()),
-						null,
-						providerIds, null);
-			}
-			
 			try {
 				idoRemoveFrom(CourseProvider.class);
-				ELUtil.getInstance().publishEvent(cpuue);
 				getLogger().info(
 						"All relations of " + CourseProvider.class.getName() + 
 						" is removed from " + this.getClass().getName() + 
@@ -447,6 +459,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public int getSchoolId() {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+		
 		Collection<? extends CourseProvider> providers = getCourseProviders();
 		if (ListUtil.isEmpty(providers)) {
 			return -1;
@@ -468,12 +485,13 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void setSchoolId(int schoolId) {
+		if (!isSubclass()) {
+			throw new UnsupportedOperationException(
+					"This method should be called from one of sub-types!");
+		}
+
 		try {
 			idoAddTo(CourseProvider.class, schoolId);
-			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
-					String.valueOf(this.getUserId()), 
-					Arrays.asList(String.valueOf(schoolId)), 
-					null, null));
 			getLogger().info(
 					"Added new relation of " + CourseProvider.class.getName() + 
 					" by id: '" + schoolId + 
@@ -500,9 +518,9 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
-		addAttribute(COLUMN_NAME_USER_ID, "user id", true, true, Integer.class, ONE_TO_MANY, User.class);
-		addManyToOneRelationship(COLUMN_NAME_USER_TYPE, CourseProviderUserType.class);
-		addManyToManyRelationShip(CourseProvider.class);
+		addAttribute(COLUMN_CREATION_DATE, 
+				"Dummy column to get this entity working with id only", 
+				Date.class);
 	}
 
 	/**
@@ -678,5 +696,15 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 		.appendJoinOn(user)
 		.appendJoinOn(userType);
 		return sql;
+	}
+
+	/**
+	 * 
+	 * <p>Check if it is one of extending entities.</p>
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean isSubclass() {
+		return !getClass().equals(CourseProviderUserBMPBean.class);
 	}
 }

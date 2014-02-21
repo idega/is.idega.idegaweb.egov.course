@@ -270,11 +270,24 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#findByPrimaryKeyRecursively(java.lang.String)
+	 */
+	@Override
+	public CourseProviderUser findByPrimaryKeyRecursively(String courseProviderUserId) {
+		if (StringUtil.isEmpty(courseProviderUserId)) {
+			return null;
+		}
+
+		return findSubTypeByPrimaryKeyIDO(courseProviderUserId);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#find(
 	 * java.lang.String)
 	 */
 	@Override
-	public CourseProviderUser find(String courseProviderUserId) {
+	public CourseProviderUser findByPrimaryKey(String courseProviderUserId) {
 		if (StringUtil.isEmpty(courseProviderUserId)) {
 			return null;
 		}
@@ -308,7 +321,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			String forcedId) {
 		
 		/* Creating new one if not exist */
-		if (user == null && idegaUser != null) {
+		if (user == null) {
 			try {
 				user = createIDO();
 				if (!StringUtil.isEmpty(forcedId)) {
@@ -344,22 +357,14 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 		/* Updating existing course providers */
 		if (!ListUtil.isEmpty(courseProviders)) {
 			Collection<? extends CourseProvider> existingCourseProviders = user.getCourseProviders();
-			if (!courseProviders.containsAll(existingCourseProviders)) {
+			if (!courseProviders.equals(existingCourseProviders)) {
 				user.removeSchools();
 				user.addSchools(courseProviders);
 			}
 		}
 
-		/* Publishing event of changing role for administrator */
-		if (userType != null) {
-			ELUtil.getInstance().publishEvent(new CourseProviderUserUpdatedEvent(
-					String.valueOf(user.getUserId()), 
-					null, null, 
-					userType.isSuperAdmin()));
-		}
-
 		java.util.logging.Logger.getLogger(getClass().getName()).info(
-				getEntityInterfaceClass().getName()  + 
+				getEntityInterfaceClass().getSimpleName()  + 
 				" by id: '" + user.getPrimaryKey().toString() + 
 				"' sucessfully updated!"
 				);
@@ -384,26 +389,31 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			boolean forceId) {
 
 		/* Searching for existing one by primary key */
-		User user = null;
 		CourseProviderUser courseProviderUser = null;
 		if (!StringUtil.isEmpty(id)) {
-			courseProviderUser = find(id);
+			courseProviderUser = findByPrimaryKey(id);
+		}
+
+		/* Getting connected user if it is supported */
+		User user = null;
+		if (!CourseProviderUserHomeImpl.class.equals(getClass())) {
+			/* Getting connected user */
 			if (courseProviderUser != null) {
 				user = courseProviderUser.getUser();
 			}
-		}
-		
-		if (StringUtil.isEmpty(idegaUserPrimaryKey)) {
-			idegaUserPrimaryKey = user != null ? user.getPrimaryKey().toString() : null;
-		}
-		
-		/* Updating existing users or creating new one */
-		user = getUserBusiness().update(idegaUserPrimaryKey, name, eMail, phone);
-		if (user == null) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to create " + getEntityInterfaceClass().getName() + 
-					" because failed to create or update " + User.class.getName());
+
+			if (StringUtil.isEmpty(idegaUserPrimaryKey) && user != null) {
+				idegaUserPrimaryKey = user.getPrimaryKey().toString();
+			}
+			
+			/* Updating existing users or creating new one */
+			user = getUserBusiness().update(idegaUserPrimaryKey, name, eMail, phone);
+			if (user == null) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, 
+						"Failed to create " + getEntityInterfaceClass().getName() + 
+						" because failed to create or update " + User.class.getName());
+			}
 		}
 
 		return update(
@@ -450,7 +460,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 	@Override
 	public void remove(String courseProviderUserId) {
 		if (!StringUtil.isEmpty(courseProviderUserId)) {
-			CourseProviderUser user = find(courseProviderUserId);
+			CourseProviderUser user = findByPrimaryKey(courseProviderUserId);
 			if (user != null) {
 				user.remove();
 			}
@@ -463,7 +473,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 	 */
 	@Override
 	public void remove(String courseProviderUserId, String courseProviderId) {
-		remove(find(courseProviderUserId), 
+		remove(findByPrimaryKey(courseProviderUserId), 
 				getCourseProviderHome().findByPrimaryKeyRecursively(courseProviderId));
 	}
 

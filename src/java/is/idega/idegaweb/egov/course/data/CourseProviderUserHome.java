@@ -126,7 +126,17 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * @return entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public CourseProviderUser find(String primaryKey);
+	public CourseProviderUser findByPrimaryKey(String primaryKey);
+
+	/**
+	 * 
+	 * <p>Searches in all existing subclasses first!</p>
+	 * @param courseProviderUserId is {@link CourseProviderUser#getPrimaryKey()}, 
+	 * not <code>null</code>;
+	 * @return entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	CourseProviderUser findByPrimaryKeyRecursively(String courseProviderUserId);
 
 	/**
 	 * 

@@ -226,15 +226,6 @@ public class CourseProviderHomeImpl extends IDOFactory
 			}	
 		}
 
-//		try {
-//			return getEntityCollectionForPrimaryKeys(primaryKeys);
-//		} catch (FinderException e) {
-//			java.util.logging.Logger.getLogger(getClass().getName()).log(
-//					Level.WARNING, 
-//					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
-//					"'s by id's: '" + primaryKeys);
-//		}
-
 		return providers;
 	}
 
@@ -417,7 +408,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 
 		CourseProvider courseProvider = null;
 		if (!StringUtil.isEmpty(primaryKey)) {
-			courseProvider = findByPrimaryKeyRecursively(primaryKey);
+			courseProvider = findByPrimaryKey(primaryKey);
 		}
 
 		if (courseProvider == null) {
@@ -487,13 +478,13 @@ public class CourseProviderHomeImpl extends IDOFactory
 		try {
 			courseProvider.store();
 			java.util.logging.Logger.getLogger(getClass().getName()).info(
-					CourseProvider.class.getName() +
+					getEntityInterfaceClass().getSimpleName() +
 					" by id: " + courseProvider.getPrimaryKey().toString() +
 					" stored!");
 		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING,
-					"Failed to create " + CourseProvider.class.getName() +
+					"Failed to create " + getEntityInterfaceClass().getSimpleName() +
 					" cause of: ", e);
 			return null;
 		}
