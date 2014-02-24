@@ -17,7 +17,7 @@ import java.util.Locale;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
 
-public class CourseChoiceComparator implements Comparator {
+public class CourseChoiceComparator implements Comparator<CourseChoice> {
 
 	public static final int NAME_SORT = 1;
 	public static final int DATE_SORT = 2;
@@ -32,9 +32,7 @@ public class CourseChoiceComparator implements Comparator {
 		this.compareBy = compareBy;
 	}
 
-	public int compare(Object arg0, Object arg1) {
-		CourseChoice choice1 = (CourseChoice) arg0;
-		CourseChoice choice2 = (CourseChoice) arg1;
+	public int compare(CourseChoice choice1, CourseChoice choice2) {
 		collator = Collator.getInstance(locale);
 
 		int returner = 0;

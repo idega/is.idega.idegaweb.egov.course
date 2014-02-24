@@ -42,10 +42,12 @@ import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 
 public class CourseWaitingList extends CourseBlock {
@@ -106,14 +108,24 @@ public class CourseWaitingList extends CourseBlock {
 		}
 		
 		if (action == ACTION_ACCEPT) {
-			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
+			String[] choices = iwc.getParameterValues(PARAMETER_CHOICE_PK);
+			if (ArrayUtil.isEmpty(choices)) {
+				return Boolean.FALSE;
+			}
+
 			Course course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
+			if (course == null) {
+				return Boolean.FALSE;
+			}
+
 			if (course.getFreePlaces(false) >= choices.length) {
 				for (String choice : choices) {
 					getBusiness().acceptChoice(choice, iwc.getCurrentLocale());
 				}
+
 				return true;
 			}
+
 			return false;
 		}
 		
@@ -126,7 +138,7 @@ public class CourseWaitingList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
@@ -166,7 +178,7 @@ public class CourseWaitingList extends CourseBlock {
 		else {
 			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCoursesMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_YEAR + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
 		}
-		List functions = new ArrayList();
+		List<String> functions = new ArrayList<String>();
 		functions.add(script2.toString());
 		functions.add(script.toString());
 		functions.add(script3.toString());
@@ -199,12 +211,12 @@ public class CourseWaitingList extends CourseBlock {
 		Integer typePK = null;
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
 			typePK = new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK));
-			Collection courseTypes = getBusiness().getCourseTypes(typePK, true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(typePK, true);
 			courseType.addMenuElements(courseTypes);
 		}
 		else if (type != null) {
 			typePK = new Integer(type.getPrimaryKey().toString());
-			Collection courseTypes = getBusiness().getCourseTypes(typePK, true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(typePK, true);
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -248,9 +260,7 @@ public class CourseWaitingList extends CourseBlock {
 					iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, 
 					fromDate, toDate);
 
-			Iterator iter = courses.iterator();
-			while (iter.hasNext()) {
-				Course element = (Course) iter.next();
+			for (Course element: courses) {
 				String name = "";
 				if (showIDInName) {
 					CourseType type = element.getCourseType();
@@ -375,17 +385,17 @@ public class CourseWaitingList extends CourseBlock {
 		int iRow = 1;
 
 		Course course = null;
-		Collection choices = new ArrayList();
+		Collection<CourseChoice> choices = new ArrayList<CourseChoice>();
 		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), true);
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 		}
 
-		Iterator iter = choices.iterator();
+		Iterator<CourseChoice> iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = group.createRow();
 
-			CourseChoice choice = (CourseChoice) iter.next();
+			CourseChoice choice = iter.next();
 			User user = choice.getUser();
 			Address address = getUserBusiness().getUsersMainAddress(user);
 			PostalCode postalCode = null;
@@ -394,7 +404,9 @@ public class CourseWaitingList extends CourseBlock {
 			}
 			Phone phone = getUserBusiness().getChildHomePhone(user);
 			
-			CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString());
+			CheckBox box = new CheckBox(
+					PARAMETER_CHOICE_PK, 
+					choice.getPrimaryKey().toString());
 			box.setDisabled(choice.getUniqueID() != null);
 
 			if (iRow == course.getMax()) {
@@ -446,19 +458,17 @@ public class CourseWaitingList extends CourseBlock {
 
 			cell = row.createCell();
 			cell.setStyleClass("postalCode");
-			if (postalCode != null) {
-				cell.add(new Text(postalCode.getPostalAddress()));
-			}
-			else {
+			if (postalCode != null && !StringUtil.isEmpty(postalCode.getPostalCode())) {
+				cell.add(new Text(postalCode.getPostalCode()));
+			} else {
 				cell.add(new Text(CoreConstants.MINUS));
 			}
 
 			cell = row.createCell();
 			cell.setStyleClass("homePhone");
-			if (phone != null) {
+			if (phone != null && !StringUtil.isEmpty(phone.getNumber())) {
 				cell.add(new Text(phone.getNumber()));
-			}
-			else {
+			} else {
 				cell.add(new Text(CoreConstants.MINUS));
 			}
 

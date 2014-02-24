@@ -132,7 +132,7 @@ public class CourseParticipantsList extends CourseBlock {
 		}
 		
 		if (action == ACTION_STORE) {
-			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
+			String[] choices = iwc.getParameterValues(PARAMETER_CHOICE_PK);
 			for (String choice : choices) {
 				boolean noPayment = iwc.isParameterSet(PARAMETER_COURSE_PARTICIPANT_PAYMENT + choice);
 				getBusiness().setNoPayment(choice, noPayment);
@@ -533,14 +533,13 @@ public class CourseParticipantsList extends CourseBlock {
 			CourseProvider school = course.getProvider();
 			schoolId = school == null ? null : school.getPrimaryKey().toString();
 		}
+
 		String schoolTypeId = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
 		String courseTypeId = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
-		Iterator<CourseChoice> iter = choices.iterator();
 		String loadingMessage = getResourceBundle().getLocalizedString("loading", "Loading");
-		while (iter.hasNext()) {
+		for (CourseChoice choice : choices) {
 			row = group.createRow();
 
-			CourseChoice choice = (CourseChoice) iter.next();
 			User user = choice.getUser();
 			Address address = getUserBusiness().getUsersMainAddress(user);
 			PostalCode postalCode = null;
@@ -551,8 +550,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 			if (iRow == course.getMax()) {
 				row.setStyleClass("lastAvailable");
-			}
-			else if (iRow == (course.getMax() + 1)) {
+			} else if (iRow == (course.getMax() + 1)) {
 				row.setStyleClass("firstExceedingParticipant");
 			}
 
@@ -564,7 +562,9 @@ public class CourseParticipantsList extends CourseBlock {
 			cell.setStyleClass("firstColumn");
 			cell.setStyleClass("number");
 			cell.add(new Text(String.valueOf(iRow)));
-			cell.add(new HiddenInput(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString()));
+			cell.add(new HiddenInput(
+					PARAMETER_CHOICE_PK, 
+					choice.getPrimaryKey().toString()));
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
 
@@ -694,6 +694,7 @@ public class CourseParticipantsList extends CourseBlock {
 					}
 				}
 			}
+
 			if (addCheckboxes) {
 				cell = row.createCell();
 				cell.setStyleClass("created");
