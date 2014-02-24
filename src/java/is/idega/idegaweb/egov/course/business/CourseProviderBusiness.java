@@ -113,6 +113,10 @@ public interface CourseProviderBusiness extends IBOService {
 	public static final String PARAMETER_ROOT_SCHOOL_ADMINISTRATORS_GROUP = "school_administrators_group_id";
 
 	public static final String ROOT_SCHOOL_ADMINISTRATORS_GROUP = "provider_administrators_group_id";
+
+	public static final String ROOT_MUSIC_SCHOOL_ADMINISTRATORS_GROUP = "music_administrators_group_id";
+
+	public static final String ROOT_ADULT_EDUCATION_ADMINISTRATORS_GROUP = "adult_education_administrators_group_id";
 	
 	/**
 	 *
