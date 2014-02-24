@@ -626,7 +626,7 @@ public class CourseParticipantsList extends CourseBlock {
 			if (!addCheckboxes) {
 				cell = row.createCell();
 				cell.setStyleClass("address");
-				if (address != null) {
+				if (address != null && !StringUtil.isEmpty(address.getStreetAddress())) {
 					cell.add(new Text(address.getStreetAddress()));
 				}
 				else {
