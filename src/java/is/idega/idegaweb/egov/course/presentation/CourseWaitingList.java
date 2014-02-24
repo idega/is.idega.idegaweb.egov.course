@@ -18,7 +18,6 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import com.idega.business.IBORuntimeException;
@@ -144,25 +143,22 @@ public class CourseWaitingList extends CourseBlock {
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
-		if (!isSchoolUser()) {
-			DropdownMenu providers = null;
-			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getAllProvidersDropdown(iwc);
-			}
-			else if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getProvidersDropdown(iwc);
-			}
+		DropdownMenu providers = null;
+		if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
+			providers = getAllProvidersDropdown(iwc);
+		} else {
+			providers = getProvidersDropdown(iwc);
+		}
 
-			if (providers != null) {
-				providers.setToSubmit();
+		if (providers != null) {
+			providers.setToSubmit();
 
-				Layer formItem = new Layer(Layer.DIV);
-				formItem.setStyleClass("formItem");
-				Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
-				formItem.add(label);
-				formItem.add(providers);
-				layer.add(formItem);
-			}
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
+			formItem.add(label);
+			formItem.add(providers);
+			layer.add(formItem);
 		}
 
 		StringBuffer script2 = new StringBuffer();
@@ -391,11 +387,9 @@ public class CourseWaitingList extends CourseBlock {
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 		}
 
-		Iterator<CourseChoice> iter = choices.iterator();
-		while (iter.hasNext()) {
+		for (CourseChoice choice : choices) {
 			row = group.createRow();
 
-			CourseChoice choice = iter.next();
 			User user = choice.getUser();
 			Address address = getUserBusiness().getUsersMainAddress(user);
 			PostalCode postalCode = null;
