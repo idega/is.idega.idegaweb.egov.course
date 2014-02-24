@@ -1802,9 +1802,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return course.getMax();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getProviders()
+	 */
 	@Override
 	public <P extends CourseProvider> Collection<P> getProviders() {
-		return getSchoolBusiness().findAllSchoolsByType(getAllAfterschoolCareSchoolTypes());
+		return getSchoolBusiness().findAllSchoolsByType(
+				getAllAfterschoolCareSchoolTypes());
 	}
 
 	@Override

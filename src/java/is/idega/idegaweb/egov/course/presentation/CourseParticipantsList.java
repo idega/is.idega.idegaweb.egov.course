@@ -141,36 +141,32 @@ public class CourseParticipantsList extends CourseBlock {
 	}
 
 	protected Layer getNavigation(IWContext iwc) throws RemoteException {
-		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
-
-		Layer layer = new Layer(Layer.DIV);
-		layer.setStyleClass("formSection");
-
 		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
-		if (!isSchoolUser()) {
-			DropdownMenu providers = null;
-			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getAllProvidersDropdown(iwc);
-			}
-			else if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getProvidersDropdown(iwc);
-			}
+		Layer layer = new Layer(Layer.DIV);
+		layer.setStyleClass("formSection");
 
-			if (providers != null) {
-				providers.setToSubmit();
+		DropdownMenu providers = null;
+		if (iwc.getAccessController().hasRole(
+				CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
+			providers = getAllProvidersDropdown(iwc);
+		} else {
+			providers = getProvidersDropdown(iwc);
+		}
 
-				Layer formItem = new Layer(Layer.DIV);
-				formItem.setStyleClass("formItem");
-				Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
-				formItem.add(label);
-				formItem.add(providers);
-				layer.add(formItem);
-			}
+		if (providers != null) {
+			providers.setToSubmit();
+
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
+			formItem.add(label);
+			formItem.add(providers);
+			layer.add(formItem);
 		}
 
 		StringBuffer script2 = new StringBuffer();
@@ -179,13 +175,19 @@ public class CourseParticipantsList extends CourseBlock {
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 		StringBuffer script3 = new StringBuffer();
 		script3.append("function setCourseOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
+		
+		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(
+				CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
 		StringBuffer script4 = new StringBuffer();
 		if (showAllCourses) {
-			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
-		}
-		else {
+			script4.append("function changeCourseValues() {\n\t")
+			.append("CourseDWRUtil.getCourseMapDWR('")
+			.append((getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n")
+			.append("}");
+		} else {
 			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCoursesMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_YEAR + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
 		}
+
 		List<String> functions = new ArrayList<String>();
 		functions.add(script2.toString());
 		functions.add(script.toString());
@@ -371,7 +373,9 @@ public class CourseParticipantsList extends CourseBlock {
 		return link;
 	}
 
-	protected Table2 getParticipants(IWContext iwc, boolean addViewParticipantLink, boolean addCheckboxes) throws RemoteException {
+	protected Table2 getParticipants(IWContext iwc, 
+			boolean addViewParticipantLink, 
+			boolean addCheckboxes) throws RemoteException {
 		if (addCheckboxes) {
 			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, getBundle().getVirtualPathWithFileNameString("javascript/CourseParticipantsListHelper.js"));
 		}

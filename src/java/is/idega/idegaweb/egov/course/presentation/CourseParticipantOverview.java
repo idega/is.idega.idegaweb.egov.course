@@ -12,11 +12,12 @@ import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -88,19 +89,24 @@ public class CourseParticipantOverview extends CourseBlock {
 		return null;
 	}
 
-	protected Collection getSchoolsProviders(IWContext iwc) {
-		if (iwc.isParameterSet(PARAMETER_PROVIDER_PK)) {
-			return Arrays.asList(new String[] { iwc.getParameter(PARAMETER_PROVIDER_PK) });
-		}
-		else {
-			try {
-				return getSession().getSchoolsForUser();
-			}
-			catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
+	/**
+	 * 
+	 * @param iwc is current context, not used at all;
+	 * @return entities connected to {@link User} or 
+	 * all entities with {@link CourseProviderCategory#CATEGORY_AFTER_SCHOOL_CARE}
+	 * category if current {@link User} is 
+	 * {@link CourseConstants#SUPER_ADMINISTRATOR_ROLE_KEY} or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected Collection<CourseProvider> getSchoolsProviders(IWContext iwc) {
+		
+//		String providerId = iwc.getParameter(PARAMETER_PROVIDER_PK);
+//		if (!StringUtil.isEmpty(providerId)) {
+//			return 
+//		}
+
+		return getSession().getSchoolsForUser();
 	}
 
 	public void present(IWContext iwc) {

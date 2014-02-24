@@ -13,7 +13,6 @@ import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.business.CourseSession;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -31,22 +30,17 @@ public class CourseParticipantsFinder extends CitizenFinder {
 
 	@Override
 	protected Collection<User> filterResults(IWContext iwc, Collection<User> users) {
-		try {
-			Collection<User> participants = new ArrayList<User>();
-			Collection<CourseProvider> providers = getSession(iwc).getSchoolsForUser();
+		Collection<CourseProvider> providers = getSession(iwc).getSchoolsForUser();
 
-			for (Iterator<User> iter = users.iterator(); iter.hasNext();) {
-				User user = iter.next();
-				if (getBusiness(iwc).isRegisteredAtProviders(user, providers)) {
-					participants.add(user);
-				}
+		Collection<User> participants = new ArrayList<User>();
+		for (Iterator<User> iter = users.iterator(); iter.hasNext();) {
+			User user = iter.next();
+			if (getBusiness(iwc).isRegisteredAtProviders(user, providers)) {
+				participants.add(user);
 			}
+		}
 
-			return participants;
-		}
-		catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		}
+		return participants;
 	}
 
 	@Override

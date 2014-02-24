@@ -595,9 +595,13 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public int getNumberOfFreePlaces(Course course) throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProviders
+	 * 
+	 * @return all providers of 
+	 * {@link CourseProviderCategory#CATEGORY_AFTER_SCHOOL_CARE} or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public <P extends CourseProvider> Collection<P> getProviders() throws RemoteException;
+	public <P extends CourseProvider> Collection<P> getProviders();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProviders

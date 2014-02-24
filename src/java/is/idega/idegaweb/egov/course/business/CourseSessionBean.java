@@ -11,12 +11,11 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
 
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOSessionBean;
 import com.idega.user.data.User;
 
@@ -99,21 +98,24 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		}
 	}
 
-	public Collection<CourseProvider> getSchoolsForUser() throws RemoteException {
-		Collection<CourseProvider> schools = new ArrayList<CourseProvider>();
-		if (isSchoolProvider()) {
-			schools.add(getProvider());
-		}
-		else {
-			if (this.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, getUserContext())) {
-				schools.addAll(getCourseBusiness().getProviders());
-			}
-			else if (this.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, getUserContext())) {
-				schools.addAll(getCourseBusiness().getProvidersForUser(getUserContext().getCurrentUser()));
-			}
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseSession#getSchoolsForUser()
+	 */
+	public Collection<CourseProvider> getSchoolsForUser() {
+		/*
+		 * For school logic only...
+		 */
+		if (getAccessController().hasRole(
+				CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, 
+				getUserContext())) {
+			return getCourseBusiness().getProviders();
 		}
 
-		return schools;
+		/*
+		 * Everything else...
+		 */
+		return getCourseBusiness().getProvidersForUser(	getCurrentUser());
 	}
 
 	public boolean getIsAllProvidersSelected() {
@@ -124,30 +126,57 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		this.allProvidersSelected = selected;
 	}
 	
-	private CourseBusiness getCourseBusiness() {
-		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(getIWApplicationContext(), CourseBusiness.class);
+	private CourseBusiness courseBusiness = null;
+
+	protected CourseBusiness getCourseBusiness() {
+		if (this.courseBusiness == null) {
+			try {
+				this.courseBusiness = (CourseBusiness) IBOLookup
+						.getServiceInstance(getIWApplicationContext(), 
+								CourseBusiness.class);
+			} catch (IBOLookupException ile) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseBusiness.class.getSimpleName() + 
+						" cause of: ", ile);
+			}
 		}
-		catch (IBOLookupException ile) {
-			throw new IBORuntimeException(ile);
-		}
+
+		return this.courseBusiness;
 	}
 
-	private CourseProviderBusiness getSchoolBusiness() {
-		try {
-			return (CourseProviderBusiness) IBOLookup.getServiceInstance(getIWApplicationContext(), CourseProviderBusiness.class);
+	private CourseProviderBusiness courseProviderBusiness = null;
+
+	protected CourseProviderBusiness getSchoolBusiness() {
+		if (this.courseProviderBusiness == null) {
+			try {
+				this.courseProviderBusiness = (CourseProviderBusiness) IBOLookup
+						.getServiceInstance(getIWApplicationContext(), 
+								CourseProviderBusiness.class);
+			} catch (IBOLookupException ile) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderBusiness.class.getSimpleName() + 
+						" cause of: ", ile);
+			}
 		}
-		catch (IBOLookupException ile) {
-			throw new IBORuntimeException(ile);
-		}
+
+		return this.courseProviderBusiness;
 	}
 
-	private CourseProviderUserBusiness getSchoolUserBusiness() {
-		try {
-			return (CourseProviderUserBusiness) IBOLookup.getServiceInstance(this.getIWApplicationContext(), CourseProviderUserBusiness.class);
+	private CourseProviderUserBusiness courseProviderUserBusiness = null;
+
+	protected CourseProviderUserBusiness getSchoolUserBusiness() {
+		if (this.courseProviderUserBusiness == null) {
+			try {
+				this.courseProviderUserBusiness = (CourseProviderUserBusiness) IBOLookup
+						.getServiceInstance(getIWApplicationContext(), 
+								CourseProviderUserBusiness.class);
+			} catch (IBOLookupException ile) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderUserBusiness.class.getSimpleName() + 
+						" cause of: ", ile);
+			}
 		}
-		catch (IBOLookupException ile) {
-			throw new IBORuntimeException(ile);
-		}
+
+		return this.courseProviderUserBusiness;
 	}
 }

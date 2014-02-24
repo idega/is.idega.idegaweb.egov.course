@@ -731,10 +731,10 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			Collection<? extends CourseProviderUserType> userType) {
 		IDOQuery sql = idoQuery();
 		sql.useDefaultAlias = Boolean.TRUE;
-		sql.appendSelectAllFrom(this)
-		.appendJoinOn(school)
-		.appendJoinOn(user)
-		.appendJoinOn(userType);
+		sql.appendSelectAllFrom(this);
+		sql.appendJoinOn(school);
+		sql.appendJoinOn(user);
+		sql.appendJoinOn(userType);
 		return sql;
 	}
 

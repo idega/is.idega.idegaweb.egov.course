@@ -85,6 +85,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import is.idega.idegaweb.egov.course.event.CourseProviderUserUpdatedEvent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -97,6 +98,7 @@ import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDOHome;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOStoreException;
@@ -150,17 +152,21 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			return Collections.emptyList();
 		}
 
-		CourseProviderUserBMPBean entity = (CourseProviderUserBMPBean) idoCheckOutPooledEntity();
-		if (entity == null) {
-			return Collections.emptyList();
+		Collection<? extends CourseProviderUser> foundUsers = null;
+		ArrayList<CourseProviderUser> providerUsers = new ArrayList<CourseProviderUser>();
+		for (IDOHome home : getHomesForSubtypes()) {
+			if (home instanceof CourseProviderUserHome) {
+				foundUsers = ((CourseProviderUserHome) home).findByUsers(users);
+			} else {
+				foundUsers = null;
+			}
+
+			if (!ListUtil.isEmpty(foundUsers)) {
+				providerUsers.addAll(foundUsers);
+			}
 		}
 
-		Collection<Object> ids = entity.ejbFindPrimaryKeys(null, users, null);
-		if (ListUtil.isEmpty(ids)) {
-			return Collections.emptyList();
-		}
-
-		return findSubTypesByPrimaryKeysIDO(ids);
+		return providerUsers;
 	}
 	
 	/*

@@ -1,12 +1,16 @@
 package is.idega.idegaweb.egov.course.business;
 
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.idega.business.IBOSession;
+import com.idega.user.data.User;
 
 public interface CourseSession extends IBOSession {
 	/**
@@ -29,11 +33,17 @@ public interface CourseSession extends IBOSession {
 	 */
 	public void setProviderPK(Object providerPK) throws RemoteException;
 
+
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#getSchoolsForUser
+	 * 
+	 * @return entities connected to {@link User} or 
+	 * all entities with {@link CourseProviderCategory#CATEGORY_AFTER_SCHOOL_CARE}
+	 * category if current {@link User} is 
+	 * {@link CourseConstants#SUPER_ADMINISTRATOR_ROLE_KEY} or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<CourseProvider> getSchoolsForUser() throws RemoteException,
-			RemoteException;
+	public Collection<CourseProvider> getSchoolsForUser();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseSessionBean#getIsAllProvidersSelected
