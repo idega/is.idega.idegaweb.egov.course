@@ -76,18 +76,15 @@ public class CourseParticipantsStatistics extends CourseBlock {
 			section.add(heading);
 
 			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
-			Collection areas = getBusiness().getSchoolAreas();
+			Collection<CourseProviderArea> areas = getBusiness().getSchoolAreas();
 
-			Collection userProviders = null;
-			if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+			Collection<CourseProvider> userProviders = null;
+			if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
 				userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
 			}
 
-			Iterator iter = areas.iterator();
-			while (iter.hasNext()) {
-				CourseProviderArea area = (CourseProviderArea) iter.next();
-
-				Collection providers = getBusiness().getProviders(area, type);
+			for (CourseProviderArea area: areas) {
+				Collection<CourseProvider> providers = getBusiness().getProviders(area, type);
 				if (userProviders != null) {
 					providers.retainAll(userProviders);
 				}
@@ -199,7 +196,7 @@ public class CourseParticipantsStatistics extends CourseBlock {
 		cell.setStyleClass("provider");
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("provider", "Provider")));
 
-		Map genderTotals = new HashMap();
+		Map<Gender, Integer> genderTotals = new HashMap<Gender, Integer>();
 		genderTotals.put(male, new Integer(0));
 		genderTotals.put(female, new Integer(0));
 

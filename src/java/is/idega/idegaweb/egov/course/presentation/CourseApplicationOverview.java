@@ -44,6 +44,7 @@ import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
@@ -96,8 +97,7 @@ public class CourseApplicationOverview extends CourseBlock {
 						}
 						break;
 				}
-			}
-			else {
+			} else {
 				add(new Text("No application found..."));
 			}
 		}
@@ -330,9 +330,10 @@ public class CourseApplicationOverview extends CourseBlock {
 					cell.setStyleClass("days");
 					if (course.getCoursePrice() > 0) {
 						cell.add(new Text(String.valueOf(IWTimestamp.getDaysBetween(startDate, endDate) + 1)));
-					}
-					else {
+					} else if (coursePrice != null) {
 						cell.add(new Text(String.valueOf(coursePrice.getNumberOfDays())));
+					} else {
+						cell.add(new Text(CoreConstants.MINUS));
 					}
 				}
 				
