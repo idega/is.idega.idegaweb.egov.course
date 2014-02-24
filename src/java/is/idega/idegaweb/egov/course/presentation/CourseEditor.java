@@ -234,30 +234,28 @@ public class CourseEditor extends CourseBlock {
 		jsActions.add(script.toString());
 		PresentationUtil.addJavaScriptActionsToBody(iwc, jsActions);
 
-		if (!isSchoolUser()) {
-			DropdownMenu providers = null;
-			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getAllProvidersDropdown(iwc);
-			} else if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getProvidersDropdown(iwc);
-			}
+		DropdownMenu providers = null;
+		if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
+			providers = getAllProvidersDropdown(iwc);
+		} else {
+			providers = getProvidersDropdown(iwc);
+		}
 
-			Collection<? extends CourseProvider> providersList = getBusiness().getProviders();
-			if (providersList.size() == 1) {
-				CourseProvider school = providersList.iterator().next();
-				if (getSession() != null)
-					getSession().setProvider(school);
-				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
-			} else if (providers != null) {
-				providers.setToSubmit();
+		Collection<? extends CourseProvider> providersList = getBusiness().getProviders();
+		if (providersList.size() == 1) {
+			CourseProvider school = providersList.iterator().next();
+			if (getSession() != null)
+				getSession().setProvider(school);
+			layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
+		} else if (providers != null) {
+			providers.setToSubmit();
 
-				Layer formItem = new Layer(Layer.DIV);
-				formItem.setStyleClass("formItem");
-				Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
-				formItem.add(label);
-				formItem.add(providers);
-				layer.add(formItem);
-			}
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
+			formItem.add(label);
+			formItem.add(providers);
+			layer.add(formItem);
 		}
 
 		DropdownMenu schoolType = new DropdownMenu(PARAMETER_SCHOOL_TYPE_PK);
