@@ -420,7 +420,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 			if (StringUtil.isEmpty(idegaUserPrimaryKey) && user != null) {
 				idegaUserPrimaryKey = user.getPrimaryKey().toString();
 			}
-			
+
 			/* Updating existing users or creating new one */
 			user = getUserBusiness().update(idegaUserPrimaryKey, name, eMail, phone);
 			if (user == null) {
@@ -428,6 +428,18 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 						Level.WARNING, 
 						"Failed to create " + getEntityInterfaceClass().getName() + 
 						" because failed to create or update " + User.class.getName());
+			}
+		}
+
+		/*
+		 * Preventing from duplicates
+		 */
+		if (courseProviderUser == null && user != null) {
+			Collection<? extends CourseProviderUser> result = findByUsers(
+					Arrays.asList(user)
+					);
+			if (!ListUtil.isEmpty(result)) {
+				courseProviderUser = result.iterator().next();
 			}
 		}
 

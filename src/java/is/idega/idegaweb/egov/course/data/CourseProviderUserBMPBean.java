@@ -471,7 +471,11 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 			List<String> providerIds = getIDOUtil().getPrimaryKeys(this.getCourseProviders());
 			if (!ListUtil.isEmpty(providerIds)) {
 			cpuue = new CourseProviderUserUpdatedEvent(
-					String.valueOf(this.getUserId()), null, providerIds, null);
+					String.valueOf(this.getUserId()), 
+					null, 
+					providerIds, 
+					null
+				);
 			}
 
 			try {
