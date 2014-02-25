@@ -136,7 +136,7 @@ public interface CourseProviderHome extends IDOHome {
 	 * <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public CourseProvider update(
+	CourseProvider update(
 			String primaryKey,
 			String name,
 			String providerId,
@@ -152,6 +152,52 @@ public interface CourseProviderHome extends IDOHome {
 			Boolean hasPreCare,
 			Boolean hasPostCare, boolean notify
 			);
+
+	/**
+	 *
+	 * <p>Creates or updates entity in data source.</p>
+	 * @param courseProvider is {@link CourseProvider}, entity
+	 * by given id will be updated, if not <code>null</code>;
+	 * @param name is {@link CourseProvider#getName()}, not <code>null</code>;
+	 * @param providerId
+	 * @param communeId is {@link Commune#getPrimaryKey()},
+	 * skipped if <code>null</code>;
+	 * @param phone is {@link Phone#getNumber()}, skipped if <code>null</code>;
+	 * @param webPage
+	 * @param info
+	 * @param organizationNumber
+	 * @param zipArea is {@link PostalCode#getName()},
+	 * skipped if <code>null</code>;
+	 * @param zipCode is {@link PostalCode#getPostalCode()},
+	 * skipped if <code>null</code>;
+	 * @param address is {@link Address#getStreetAddress()},
+	 * skipped if <code>null</code>;
+	 * @param courseProviderArea id {@link CourseProviderArea#getPrimaryKey()},
+	 * skipped if <code>null</code>;
+	 * @param hasPreCare
+	 * @param hasPostCare
+	 * @param notify <code>true</code> if it is needed to fire
+	 * {@link CourseProviderUpdatedEvent}, <code>false</code> otherwise;
+	 * @return created/updated {@link CourseProvider} or
+	 * <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	CourseProvider update(
+			CourseProvider courseProvider, 
+			String name,
+			String providerId, 
+			String communeId, 
+			String phone, 
+			String webPage,
+			String info, 
+			String organizationNumber, 
+			String zipArea,
+			String zipCode, 
+			String address, 
+			String courseProviderAreaId,
+			Boolean hasPreCare, 
+			Boolean hasPostCare, 
+			boolean notify);
 
 	/**
 	 *

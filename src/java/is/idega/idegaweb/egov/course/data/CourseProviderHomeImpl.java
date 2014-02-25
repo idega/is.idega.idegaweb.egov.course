@@ -397,20 +397,34 @@ public class CourseProviderHomeImpl extends IDOFactory
 
 	/*
 	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Boolean, java.lang.Boolean)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Boolean, java.lang.Boolean, boolean)
 	 */
-	@Override
 	public CourseProvider update(String primaryKey, String name,
 			String providerId, String communeId, String phone, String webPage,
 			String info, String organizationNumber, String zipArea,
 			String zipCode, String address, String courseProviderAreaId,
 			Boolean hasPreCare, Boolean hasPostCare, boolean notify) {
-
 		CourseProvider courseProvider = null;
 		if (!StringUtil.isEmpty(primaryKey)) {
 			courseProvider = findByPrimaryKey(primaryKey);
 		}
 
+		return update(courseProvider, name, providerId, communeId, phone, 
+				webPage, info, organizationNumber, zipArea, zipCode, address, 
+				courseProviderAreaId, hasPreCare, hasPostCare, notify);
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Boolean, java.lang.Boolean)
+	 */
+	@Override
+	public CourseProvider update(CourseProvider courseProvider, String name,
+			String providerId, String communeId, String phone, String webPage,
+			String info, String organizationNumber, String zipArea,
+			String zipCode, String address, String courseProviderAreaId,
+			Boolean hasPreCare, Boolean hasPostCare, boolean notify) {
 		if (courseProvider == null) {
 			try {
 				courseProvider = super.createIDO();

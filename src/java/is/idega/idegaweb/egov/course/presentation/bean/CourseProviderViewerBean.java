@@ -112,7 +112,7 @@ import com.idega.util.ListUtil;
 public class CourseProviderViewerBean {
 
 	public List<CourseProviderBean> getCourseProviders() {
-		Collection<? extends CourseProvider> courseProviders = getCourseProviderHome().find();
+		Collection<? extends CourseProvider> courseProviders = getCourseProviderHome().findAllRecursively();
 		if (ListUtil.isEmpty(courseProviders)) {
 			return Collections.emptyList();
 		}

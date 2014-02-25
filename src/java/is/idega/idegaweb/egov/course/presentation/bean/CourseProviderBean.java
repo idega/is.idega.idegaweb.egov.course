@@ -380,6 +380,10 @@ public class CourseProviderBean {
 		if (this.courseProvider == null) {
 			String courseProviderId = CoreUtil.getIWContext()
 					.getParameter(COURSE_PROVIDER_ID);
+			if (StringUtil.isEmpty(courseProviderId)) {
+				courseProviderId = this.id;
+			}
+
 			if (!StringUtil.isEmpty(courseProviderId)) {
 				this.courseProvider = getCourseProviderHome().findByPrimaryKeyRecursively(
 						courseProviderId
@@ -436,7 +440,8 @@ public class CourseProviderBean {
 
 	public void submit() {
 		// Update
-		if (getCourseProviderHome().update(this.id, this.name, this.providerId, 
+		if (getCourseProviderHome().update(getCourseProvider(), 
+				this.name, this.providerId, 
 				this.municipalityId, this.phone, this.webPage, this.info, 
 				this.organizationNumber, this.zipArea, this.zipCode, 
 				this.address, this.courseProviderAreaId, null, null, true) != null) {
