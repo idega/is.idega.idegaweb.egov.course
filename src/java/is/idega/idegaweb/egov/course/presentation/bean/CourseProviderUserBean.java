@@ -172,7 +172,9 @@ public class CourseProviderUserBean {
 	}
 
 	public boolean hasType() {
-		if (StringUtil.isEmpty(getCourseProviderUserTypeId()) || "-1".equals(getCourseProviderUserTypeId())) {
+		if (StringUtil.isEmpty(getCourseProviderUserTypeId()) 
+				|| "-1".equals(getCourseProviderUserTypeId())
+				|| "0".equals(getCourseProviderUserTypeId())) {
 			return Boolean.FALSE;
 		} else {
 			return Boolean.TRUE;
@@ -411,6 +413,19 @@ public class CourseProviderUserBean {
 					SUBMITTED, 
 					Boolean.TRUE.toString());	
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("\n" + super.toString());
+		sb.append("\n\tgetId():").append(getId())
+		.append("\n\tgetName(): ").append(getName())
+		.append("\n\tgeteMail(): ").append(geteMail());
+		return sb.toString();
 	}
 
 	private CourseProviderHome courseProviderHome = null;

@@ -224,4 +224,17 @@ public class CourseProviderUsersAreaGroup {
 
 		return Boolean.FALSE;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("\n" + super.toString());
+		sb.append("\n\tgetKey(): ").append(getKey())
+		.append("\n\tgetName(): ").append(getName());
+
+		return sb.toString();
+	}
 }

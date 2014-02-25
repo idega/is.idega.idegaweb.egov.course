@@ -180,6 +180,7 @@ public class CourseProviderUsersViewerBean {
 
 		// FIXME Move to recursive search later as for providers...
 		Collection<? extends CourseProviderUserType> userTypes = getCourseProviderUserTypeHome().find();
+
 		ArrayList<CourseProviderUsersAreaGroup> groupedUsers = new ArrayList<CourseProviderUsersAreaGroup>(providers.size());
 
 		/* Multiple providers */
