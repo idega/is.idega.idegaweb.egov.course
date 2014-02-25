@@ -153,14 +153,17 @@ public class CourseProviderUsersViewerBean {
 	}
 	
 	public Map<String, String> getCourseProviders() {
-		Collection<? extends CourseProvider> providers = getCourseProviderHome().find();
+		Collection<? extends CourseProvider> providers = getCourseProviderHome()
+				.findAllRecursively();
 		if (ListUtil.isEmpty(providers)) {
 			return Collections.emptyMap();
 		}
 
 		TreeMap<String, String> providersMap = new TreeMap<String, String>();
 		for (CourseProvider provider : providers) {
-			providersMap.put(provider.getSchoolName(), provider.getPrimaryKey().toString());
+			providersMap.put(
+					provider.getSchoolName(), 
+					provider.getPrimaryKey().toString());
 		}
 
 		return providersMap;
@@ -172,8 +175,11 @@ public class CourseProviderUsersViewerBean {
 			return Collections.emptyList();
 		}
 
+		Collection<CourseProvider> providers = getCourseProviderHome()
+				.findAllRecursively();
+
+		// FIXME Move to recursive search later as for providers...
 		Collection<? extends CourseProviderUserType> userTypes = getCourseProviderUserTypeHome().find();
-		Collection<CourseProvider> providers = getCourseProviderHome().findAllRecursively();
 		ArrayList<CourseProviderUsersAreaGroup> groupedUsers = new ArrayList<CourseProviderUsersAreaGroup>(providers.size());
 
 		/* Multiple providers */
@@ -204,7 +210,7 @@ public class CourseProviderUsersViewerBean {
 	public List<CourseProviderUserBean> getCourseProviderUsers() {
 		Collection<? extends CourseProviderUser> courseProviderUsers = null;
 		if (StringUtil.isEmpty(getCourseProviderIds())) {
-			courseProviderUsers = getCourseProviderUserHome().find();
+			courseProviderUsers = getCourseProviderUserHome().findAllRecursively();
 		} else {
 			// FIXME make simple passing by id
 			courseProviderUsers = getCourseProviderUserHome().find(

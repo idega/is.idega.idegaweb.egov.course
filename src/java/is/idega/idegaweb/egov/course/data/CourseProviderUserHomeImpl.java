@@ -301,6 +301,26 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#findAllRecursively()
+	 */
+	@Override
+	public Collection<? extends CourseProviderUser> findAllRecursively() {
+		ArrayList<CourseProviderUser> providerUsers = new ArrayList<CourseProviderUser>();
+		for (IDOHome home : getHomesForSubtypes()) {
+			Collection<? extends CourseProviderUser> results = null;
+			if (home instanceof CourseProviderUserHome) {
+				results = ((CourseProviderUserHome) home).find();
+				if (!ListUtil.isEmpty(results)) {
+					providerUsers.addAll(results);
+				}
+			}
+		}
+
+		return providerUsers;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#findByPrimaryKeyRecursively(java.lang.String)
 	 */
 	@Override
@@ -410,34 +430,16 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 				);
 		return user;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(
-	 * java.lang.String, 
-	 * java.lang.String, 
-	 * java.lang.String, 
-	 * java.lang.String, 
-	 * java.lang.String, 
-	 * java.lang.String
-	 * )
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(is.idega.idegaweb.egov.course.data.CourseProviderUser, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Collection, boolean)
 	 */
 	@Override
-	public CourseProviderUser update(
-			String id, 
-			String idegaUserPrimaryKey, 
-			String name,
-			String phone, 
-			String eMail,
-			String courseProviderUserTypeId, 
-			Collection<String> courseProviderIds, 
-			boolean forceId) {
-
-		/* Searching for existing one by primary key */
-		CourseProviderUser courseProviderUser = null;
-		if (!StringUtil.isEmpty(id)) {
-			courseProviderUser = findByPrimaryKey(id);
-		}
+	public CourseProviderUser update(CourseProviderUser courseProviderUser,
+			String idegaUserPrimaryKey, String name, String phone,
+			String eMail, String courseProviderUserTypeId,
+			Collection<String> courseProviderIds, boolean forceId) {
 
 		/* Getting connected user if it is supported */
 		User user = null;
@@ -478,7 +480,39 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 				user,
 				getCourseProviderUserTypeHome().find(courseProviderUserTypeId), 
 				getCourseProviderHome().find(courseProviderIds), 
-				forceId ? id : null);
+				null);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(
+	 * 	java.lang.String, 
+	 * 	java.lang.String, 
+	 * 	java.lang.String, 
+	 * 	java.lang.String, 
+	 * 	java.lang.String, 
+	 * 	java.lang.String
+	 * )
+	 */
+	@Override
+	public CourseProviderUser update(
+			String id, 
+			String idegaUserPrimaryKey, 
+			String name,
+			String phone, 
+			String eMail,
+			String courseProviderUserTypeId, 
+			Collection<String> courseProviderIds, 
+			boolean forceId) {
+
+		/* Searching for existing one by primary key */
+		CourseProviderUser courseProviderUser = null;
+		if (!StringUtil.isEmpty(id)) {
+			courseProviderUser = findByPrimaryKey(id);
+		}
+
+		return update(courseProviderUser, idegaUserPrimaryKey, name, phone, eMail, 
+				courseProviderUserTypeId, courseProviderIds, forceId);
 	}
 
 	/*

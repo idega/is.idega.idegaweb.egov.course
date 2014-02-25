@@ -150,6 +150,39 @@ public interface CourseProviderUserHome extends IDOHome {
 	/**
 	 * 
 	 * <p>Creates/updates {@link CourseProviderUser} in data source.</p>
+	 * @param user is {@link CourseProviderUser}, new one created 
+	 * if <code>null</code>;
+	 * @param idegaUserPrimaryKey is {@link User#getPrimaryKey()}, if you want to
+	 * update existing {@link User}, if <code>null</code> probably new one
+	 * will be created, unless it will be found by email and name;
+	 * @param name is {@link User#getName()} of connected {@link User}, 
+	 * skipped if <code>null</code> and id is provided;
+	 * @param phone is one of {@link User#getPhones()}, 
+	 * skipped if <code>null</code>;
+	 * @param eMail is one of {@link User#getEmails()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseProviderUserTypeId is {@link CourseProviderUserType#getPrimaryKey()},
+	 * skipped if <code>null</code>;
+	 * @param courseProviderIds id {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param forceId if it is necessary that created entity could have 
+	 * this primary key;
+	 * @return created/updated entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public CourseProviderUser update(
+			CourseProviderUser user, 
+			String idegaUserPrimaryKey, 
+			String name, 
+			String phone,
+			String eMail, 
+			String courseProviderUserTypeId, 
+			Collection<String> courseProviderIds, 
+			boolean forceId);
+
+	/**
+	 * 
+	 * <p>Creates/updates {@link CourseProviderUser} in data source.</p>
 	 * @param id is {@link CourseProviderUser#getPrimaryKey()}, new one created 
 	 * if <code>null</code>;
 	 * @param idegaUserPrimaryKey is {@link User#getPrimaryKey()}, if you want to
@@ -177,7 +210,8 @@ public interface CourseProviderUserHome extends IDOHome {
 			String phone,
 			String eMail, 
 			String courseProviderUserTypeId, 
-			Collection<String> courseProviderIds, boolean forceId);
+			Collection<String> courseProviderIds, 
+			boolean forceId);
 	/**
 	 * 
 	 * <p>Creates/updates {@link CourseProviderUser} in data source.</p>
@@ -188,7 +222,8 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * then nothing happens;
 	 * @param userType skipped if <code>null</code>;
 	 * @param courseProviders skipped, if <code>null</code>;
-	 * @param forcedId TODO
+	 * @param forcedId if it is necessary that created entity could have 
+	 * this primary key;
 	 * @return created/updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -205,6 +240,15 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<? extends CourseProviderUser> find();
+
+	/**
+	 * 
+	 * <p>Searches in sub-types.</p>
+	 * @return all entities from data source or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<? extends CourseProviderUser> findAllRecursively();
 
 	/**
 	 * 
