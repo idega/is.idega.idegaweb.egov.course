@@ -201,6 +201,31 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 		return Collections.emptyList();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#findBySchoolRecursively(is.idega.idegaweb.egov.course.data.CourseProvider)
+	 */
+	@Override
+	public Collection<? extends CourseProviderUser> findBySchoolRecursively(
+			CourseProvider school) {
+		if (school == null ) {
+			return Collections.emptyList();
+		}
+
+		ArrayList<CourseProviderUser> users = new ArrayList<CourseProviderUser>();
+		for (IDOHome home : getHomesForSubtypes()) {
+			Collection<? extends CourseProviderUser> results = null;
+			if (home instanceof CourseProviderUserHome) {
+				results = ((CourseProviderUserHome) home).findBySchool(school);
+				if (!ListUtil.isEmpty(results)) {
+					users.addAll(results);
+				}
+			}
+		}
+
+		return users;
+	}
+	
 	/* (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.home.CourseProviderUserHome#findBySchool(
 	 * is.idega.idegaweb.egov.course.data.CourseProvider)
@@ -389,8 +414,13 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(
-	 * java.lang.String, java.lang.String, java.lang.String, java.lang.String, 
-	 * java.lang.String, java.lang.String)
+	 * java.lang.String, 
+	 * java.lang.String, 
+	 * java.lang.String, 
+	 * java.lang.String, 
+	 * java.lang.String, 
+	 * java.lang.String
+	 * )
 	 */
 	@Override
 	public CourseProviderUser update(

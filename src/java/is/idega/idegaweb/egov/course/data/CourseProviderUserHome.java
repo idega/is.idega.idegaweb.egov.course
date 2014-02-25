@@ -263,4 +263,16 @@ public interface CourseProviderUserHome extends IDOHome {
 	 */
 	Collection<? extends CourseProviderUser> findByUsersInSubTypes(
 			Collection<User> users);
+
+	/**
+	 * 
+	 * <p>Same as {@link CourseProviderUserHome#findBySchool(CourseProvider)},
+	 * but performs deep search in sub-types.</p>
+	 * @param school to search by, not <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<? extends CourseProviderUser> findBySchoolRecursively(
+			CourseProvider school);
 }

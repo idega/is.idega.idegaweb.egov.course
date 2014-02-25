@@ -505,7 +505,8 @@ public class CourseProviderHomeImpl extends IDOFactory
 	public void remove(CourseProvider provider) {
 		if (provider != null) {
 			/* Removing relations first, TODO could be optimized a little... */
-			Collection<? extends CourseProviderUser> users = getCourseProviderUserHome().findBySchool(provider);
+			Collection<? extends CourseProviderUser> users = getCourseProviderUserHome()
+					.findBySchoolRecursively(provider);
 			if (!ListUtil.isEmpty(users)) {
 				for (CourseProviderUser user : users) {
 					getCourseProviderUserHome().remove(user, provider);
