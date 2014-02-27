@@ -114,7 +114,7 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 	public static final String COLUMN_CATEGORY = "CATEGORY";
 
 	@Override
-	public Class getPrimaryKeyClass() {
+	public Class<String> getPrimaryKeyClass() {
 		return String.class;
 	}
 

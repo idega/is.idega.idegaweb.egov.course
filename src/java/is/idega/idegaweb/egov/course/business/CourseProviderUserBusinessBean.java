@@ -100,6 +100,7 @@ import com.idega.business.IBOServiceBean;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.user.business.GroupBusiness;
+import com.idega.user.business.UserBusiness;
 import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.ListUtil;
@@ -137,9 +138,26 @@ public class CourseProviderUserBusinessBean extends IBOServiceBean implements
 	 */
 	@Override
 	public CourseProvider getFirstManagingChildCareForUser(User user) {
+		if (user == null) {
+			return null;
+		}
+
 		Group rootGroup = getCourseProviderBusiness().getRootProviderAdministratorGroup();
-		if (user.getPrimaryGroup().equals(rootGroup)) {
-			return getFirstSchool(user);
+		
+		Collection<Group> userGroups = null;
+		try {
+			userGroups = getUserBusiness().getUserGroups(user);
+		} catch (Exception e1) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get groups for user by name: " + user.getName());
+		}
+
+		if (!ListUtil.isEmpty(userGroups)) {
+			for (Group userGroup : userGroups) {
+				if (userGroup.equals(rootGroup)) {
+					return getFirstSchool(user);
+				}
+			}
 		}
 
 		Collection<CourseProvider> schools = null;
@@ -164,11 +182,30 @@ public class CourseProviderUserBusinessBean extends IBOServiceBean implements
 	 */
 	@Override
 	public CourseProvider getFirstManagingSchoolForUser(User user) {
+		if (user == null) {
+			return null;
+		}
+		
 		Group rootGroup = getCourseProviderBusiness().getRootSchoolAdministratorGroup();
 		Group highSchoolRootGroup = getCourseProviderBusiness().getRootHighSchoolAdministratorGroup();
 		Group adultEducationRootGroup = getCourseProviderBusiness().getRootAdultEducationAdministratorGroup();
-		if (user.getPrimaryGroup().equals(rootGroup) || user.getPrimaryGroup().equals(highSchoolRootGroup) || user.getPrimaryGroup().equals(adultEducationRootGroup)) {
-			return getFirstSchool(user);
+
+		Collection<Group> userGroups = null;
+		try {
+			userGroups = getUserBusiness().getUserGroups(user);
+		} catch (Exception e1) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get groups for user by name: " + user.getName());
+		}
+
+		if (!ListUtil.isEmpty(userGroups)) {
+			for (Group userGroup : userGroups) {
+				if (userGroup.equals(rootGroup)
+						|| userGroup.equals(highSchoolRootGroup)
+						|| userGroup.equals(adultEducationRootGroup)) {
+					return getFirstSchool(user);
+				}
+			}
 		}
 
 		Collection<CourseProvider> schools = null;
@@ -238,6 +275,24 @@ public class CourseProviderUserBusinessBean extends IBOServiceBean implements
 		}
 
 		return courseProviderIDs;
+	}
+
+	private UserBusiness userBusiness = null;
+
+	protected UserBusiness getUserBusiness() {
+		if (this.userBusiness == null) {
+			try {
+				this.userBusiness = IBOLookup.getServiceInstance(
+						getIWApplicationContext(), 
+						UserBusiness.class);
+			} catch (IBOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + UserBusiness.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.userBusiness;
 	}
 
 	private CourseProviderBusiness courseProviderBusiness = null;
