@@ -165,7 +165,8 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 	/**
 	 * 
 	 * <p>Check if it is one of extending entities.</p>
-	 * @return
+	 * @return <code>true</code> if one of subclass, <code>false</code>
+	 * otherwise.
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	protected boolean isSubclass() {
@@ -178,10 +179,13 @@ public class CourseProviderCategoryBMPBean extends GenericEntity implements
 	 */
 	@Override
 	public void store() throws IDOStoreException {
-		super.store();
 		if (isSubclass()) {
-			getCourseProviderCategoryHome().update(getPrimaryKey().toString());
+			CourseProviderCategory updatedEntity = getCourseProviderCategoryHome().update(
+					getPrimaryKey() != null ? getPrimaryKey().toString() : null);
+			setPrimaryKey(updatedEntity.getPrimaryKey().toString());
 		}
+
+		super.store();
 	}
 
 	/*

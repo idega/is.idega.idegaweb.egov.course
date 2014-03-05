@@ -90,7 +90,10 @@ import java.util.logging.Level;
 import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
+import com.idega.data.IDOStoreException;
 import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
@@ -120,7 +123,7 @@ public class CourseProviderTypeBMPBean extends GenericEntity implements CoursePr
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
-	    addAttribute(COLUMN_NAME, "Schooltype", true, true, String.class);
+	    addAttribute(COLUMN_NAME, "Schooltype", String.class);
 	    addAttribute(COLUMN_LOC_KEY, "Localization key", String.class);
 	    addManyToOneRelationship(COLUMN_SCHOOL_CATEGORY, CourseProviderCategory.class);
 	}
@@ -195,6 +198,34 @@ public class CourseProviderTypeBMPBean extends GenericEntity implements CoursePr
 	@Override
 	public void setLocalizationKey(String key) {
 		setColumn(COLUMN_LOC_KEY, key);
+	}
+
+	/**
+	 * 
+	 * <p>Check if it is one of extending entities.</p>
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean isSubclass() {
+		return !getClass().equals(CourseProviderTypeBMPBean.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#store()
+	 */
+	@Override
+	public void store() throws IDOStoreException {
+		if (isSubclass()) {
+			CourseProviderType courseProviderType = getCourseProviderTypeHome()
+					.update(getPrimaryKey() != null ? getPrimaryKey().toString() : null,
+							getName(),
+							getLocalizationKey(),
+							getCategory());
+			setPrimaryKey(courseProviderType.getPrimaryKey());
+		}
+
+		super.store();
 	}
 
 	protected SelectQuery getQueryByCategory(String category) {
@@ -304,5 +335,22 @@ public class CourseProviderTypeBMPBean extends GenericEntity implements CoursePr
 		}
 
 		return Collections.emptyList();
+	}
+
+	private CourseProviderTypeHome courseProviderTypeHome = null;
+
+	protected CourseProviderTypeHome getCourseProviderTypeHome() {
+		if (this.courseProviderTypeHome == null) {
+			try {
+				this.courseProviderTypeHome = (CourseProviderTypeHome) IDOLookup
+						.getHome(CourseProviderType.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderTypeHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderTypeHome;
 	}
 }

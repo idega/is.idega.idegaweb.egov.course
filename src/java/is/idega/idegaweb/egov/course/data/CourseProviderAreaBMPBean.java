@@ -92,8 +92,13 @@ import javax.ejb.EJBLocalObject;
 import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOEntity;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
+import com.idega.data.IDOStoreException;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 
 /**
  * <p>{@link EJBLocalObject} implementation for {@link CourseProviderArea}</p>
@@ -239,16 +244,19 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 	@Override
 	public void remove() {
 		String primaryKey = this.getPrimaryKey().toString();
+		if (isSubclass()) {
+			getCourseProviderAreaHome().remove(primaryKey);
+		}
 
 		try {
 			super.remove();
 			java.util.logging.Logger.getLogger(getClass().getName()).info(
-					this.getClass().getName() + 
+					this.getClass().getSimpleName() + 
 					" by id: '" + primaryKey + "' removed!");
 		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to remove " + this.getClass().getName() + 
+					"Failed to remove " + this.getClass().getSimpleName() + 
 					" by id: '" + primaryKey + 
 					"' cause of: ", e);
 		}
@@ -367,5 +375,84 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 		}
 
 		return Collections.emptyList();
+	}
+
+	/**
+	 * 
+	 * <p>Check if it is one of extending entities.</p>
+	 * @return <code>true</code> if one of subclass, <code>false</code>
+	 * otherwise.
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean isSubclass() {
+		return !getClass().equals(CourseProviderAreaBMPBean.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#store()
+	 */
+	@Override
+	public void store() throws IDOStoreException {
+		if (isSubclass()) {
+			CourseProviderArea updatedEntity = getCourseProviderAreaHome().update(
+					getPrimaryKey() != null ? getPrimaryKey().toString() : null, 
+					getSchoolAreaName(), 
+					getSchoolAreaInfo(), 
+					getSchoolAreaCity(), 
+					getAccountingKey(), 
+					getCategory() != null ? getCategory().toString() : null);
+			if (updatedEntity != null) {
+				setPrimaryKey(updatedEntity.getPrimaryKey().toString());
+			}
+		}
+
+		super.store();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#equals(com.idega.data.IDOEntity)
+	 */
+	@Override
+	public boolean equals(IDOEntity entity) {
+		if (!(entity instanceof CourseProviderArea)) {
+			return Boolean.FALSE;
+		}
+
+		Object entityPrimaryKey = entity.getPrimaryKey();
+		if (entityPrimaryKey == null || 
+				StringUtil.isEmpty(entityPrimaryKey.toString())) {
+			return Boolean.FALSE;
+		}
+
+		Object currentPrimaryKey = getPrimaryKey();
+		if (currentPrimaryKey == null || 
+				StringUtil.isEmpty(currentPrimaryKey.toString())) {
+			return Boolean.FALSE;
+		}
+
+		if (!currentPrimaryKey.toString().equals(entityPrimaryKey.toString())) {
+			return Boolean.FALSE;
+		}
+
+		return Boolean.TRUE;
+	}
+
+	private CourseProviderAreaHome courseProviderAreaHome = null;
+
+	protected CourseProviderAreaHome getCourseProviderAreaHome() {
+		if (this.courseProviderAreaHome == null) {
+			try {
+				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup
+						.getHome(CourseProviderArea.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderAreaHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderAreaHome;
 	}
 }

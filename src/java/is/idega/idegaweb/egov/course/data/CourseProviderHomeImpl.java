@@ -90,6 +90,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -427,11 +428,13 @@ public class CourseProviderHomeImpl extends IDOFactory
 			Boolean hasPreCare, Boolean hasPostCare, boolean notify) {
 		if (courseProvider == null) {
 			try {
-				courseProvider = super.createIDO();
+				courseProvider = createEntity();
+				Logger.getLogger(getClass().getName()).info(
+						"Created " + courseProvider.getClass().getSimpleName());
 			} catch (CreateException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
+				Logger.getLogger(getClass().getName()).log(
 						Level.WARNING,
-						"Failed to create " + CourseProvider.class.getName() +
+						"Failed to create " + getEntityInterfaceClass().getSimpleName() +
 						" cause of: ", e);
 				return null;
 			}
@@ -498,7 +501,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING,
-					"Failed to create " + getEntityInterfaceClass().getSimpleName() +
+					"Failed to update " + getEntityInterfaceClass().getSimpleName() +
 					" cause of: ", e);
 			return null;
 		}
