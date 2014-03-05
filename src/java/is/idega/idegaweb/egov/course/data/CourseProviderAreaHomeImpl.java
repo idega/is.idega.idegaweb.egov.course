@@ -128,7 +128,7 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to find " + CourseProviderArea.class.getName() + 
+					"Failed to find " + CourseProviderArea.class.getSimpleName() + 
 					"'s by id's: '" + ids + "'", e);
 		}
 
@@ -159,7 +159,7 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Did not found " + CourseProviderArea.class.getName() + 
+					"Did not found " + CourseProviderArea.class.getSimpleName() + 
 					" by primary key: " + primaryKey, e);
 		}
 
@@ -171,7 +171,7 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderAreaHome#find()
 	 */
 	@Override
-	public Collection<CourseProviderArea> find() {
+	public <T extends CourseProviderArea> Collection<T> find() {
 		CourseProviderAreaBMPBean entity = (CourseProviderAreaBMPBean) idoCheckOutPooledEntity();
 		Collection<?> ids = entity.ejbFind();
 		idoCheckInPooledEntity(entity);
@@ -246,7 +246,7 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 			} catch (CreateException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
 						Level.WARNING, 
-						"Failed to create " + CourseProviderArea.class.getName() + 
+						"Failed to create " + CourseProviderArea.class.getSimpleName() + 
 						" cause of: ", e);
 				return null;
 			}
@@ -282,7 +282,7 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 		} catch (IDOStoreException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to store " + CourseProviderArea.class.getName() + 
+					"Failed to store " + CourseProviderArea.class.getSimpleName() + 
 					" cause of: ", e);
 			return null;
 		}
@@ -305,17 +305,17 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 				try {
 					provider.store();
 					java.util.logging.Logger.getLogger(getClass().getName()).info(
-							"Relation between " + area.getClass().getName() + 
+							"Relation between " + area.getClass().getSimpleName() + 
 							" by id: '" + area.getPrimaryKey() + 
-							"' and " + provider.getClass().getName() + 
+							"' and " + provider.getClass().getSimpleName() + 
 							" by id: '" + provider.getPrimaryKey() + 
 							"' removed!");
 				} catch (Exception e) {
 					java.util.logging.Logger.getLogger(getClass().getName()).log(
 							Level.WARNING, 
-							"Failed to remove relation between " + area.getClass().getName() + 
+							"Failed to remove relation between " + area.getClass().getSimpleName() + 
 							" by id: '" + area.getPrimaryKey() + 
-							"' and " + provider.getClass().getName() + 
+							"' and " + provider.getClass().getSimpleName() + 
 							" by id: '" + provider.getPrimaryKey() + 
 							"' cause of: ", e);
 				}

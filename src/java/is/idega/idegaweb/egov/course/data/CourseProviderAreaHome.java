@@ -113,7 +113,7 @@ public interface CourseProviderAreaHome extends IDOHome {
 	 * {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<CourseProviderArea> find();
+	public <T extends CourseProviderArea> Collection<T> find();
 	
 	public Collection<CourseProviderArea> findAllSchoolAreas(CourseProviderCategory category);
 
