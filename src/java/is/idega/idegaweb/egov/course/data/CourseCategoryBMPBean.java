@@ -11,8 +11,9 @@ package is.idega.idegaweb.egov.course.data;
 
 
 
-public class CourseCategoryBMPBean extends CourseProviderTypeBMPBean implements CourseCategory, CourseProviderType {
+public class CourseCategoryBMPBean extends CourseProviderTypeBMPBean implements CourseCategory {
 
+	private static final long serialVersionUID = 7430846460198119589L;
 	public static final String ALLOWS_ALL_CHILDREN = "allows_all_children";
 	public static final String HAS_CARE = "has_care";
 	public static final String USE_FIXED_PRICING = "use_fixed_pricing";
