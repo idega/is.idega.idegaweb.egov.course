@@ -472,11 +472,16 @@ public class CourseList extends CourseBlock {
 			}
 
 			if (isSchoolSuperAdministrator(iwc)) {
-				CourseProvider provider = course.getProvider();
-
 				cell = row.createCell();
 				cell.setStyleClass("provider");
-				cell.add(new Text(provider.getSchoolName()));
+
+				CourseProvider provider = course.getProvider();
+				if (provider != null) {
+					cell.add(new Text(provider.getSchoolName()));
+				} else {
+					cell.add(new Text(CoreConstants.MINUS));
+				}
+				
 			}
 
 			cell = row.createCell();
