@@ -115,7 +115,7 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 		/*
 		 * Everything else...
 		 */
-		return getCourseBusiness().getProvidersForUser(	getCurrentUser());
+		return getSchoolBusiness().getProvidersForUser(	getCurrentUser());
 	}
 
 	public boolean getIsAllProvidersSelected() {

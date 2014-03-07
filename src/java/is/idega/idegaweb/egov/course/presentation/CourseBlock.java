@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.faces.component.UIComponent;
 
@@ -86,6 +87,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	private CourseBusiness business;
 	private CourseSession session;
 	private CitizenBusiness uBusiness;
+	private CourseProviderBusiness courseProviderBusiness = null;
 
 	private IWResourceBundle iwrb;
 	private IWBundle iwb;
@@ -160,6 +162,21 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	protected CitizenBusiness getUserBusiness() {
 		return this.uBusiness;
+	}
+
+	protected CourseProviderBusiness getCourseProviderBusiness() {
+		if (this.courseProviderBusiness == null) {
+			try {
+				this.courseProviderBusiness = IBOLookup.getServiceInstance(
+						getIWApplicationContext(), CourseProviderBusiness.class);
+			} catch (IBOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderBusiness.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderBusiness;
 	}
 
 	private CourseBusiness getBusiness(IWApplicationContext iwac) {
@@ -284,7 +301,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 			IWResourceBundle iwrb = getResourceBundle(iwc);
 
 			SelectorUtility util = new SelectorUtility();
-			DropdownMenu providers = (DropdownMenu) util.getSelectorFromIDOEntities(new DropdownMenu(PARAMETER_PROVIDER_PK), getBusiness(iwc).getProvidersForUser(iwc.getCurrentUser()), "getSchoolName");
+			DropdownMenu providers = (DropdownMenu) util.getSelectorFromIDOEntities(new DropdownMenu(PARAMETER_PROVIDER_PK), getCourseProviderBusiness().getProvidersForUser(iwc.getCurrentUser()), "getSchoolName");
 			providers.addMenuElementFirst("", iwrb.getLocalizedString("select_provider", "Select provider"));
 			if (getSession(iwc).getProvider() != null) {
 				providers.setSelectedElement(getSession(iwc).getProvider().getPrimaryKey().toString());
@@ -849,7 +866,6 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	}
 
 	protected <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user) {
-		return getBusiness().getHandledCourseProviders(user);
+		return getCourseProviderBusiness().getHandledCourseProviders(user);
 	}
-
 }

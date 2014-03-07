@@ -620,11 +620,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public Map<String, String> getProvidersDWR(int userPK, int typePK, String country) throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersForUser
-	 */
-	public Collection<CourseProvider> getProvidersForUser(User user);
-
-	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getApplicationMap
 	 */
 	public Map<CourseApplication, Collection<CourseChoice>> getApplicationMap(User user, Collection<CourseProvider> schools)
@@ -938,8 +933,6 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 */
 	public Collection<Course> getCoursesByTypes(Collection<String> typesIds)
 			throws RemoteException, RemoteException;
-
-	public <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user);
 
 	/**
 	 * 

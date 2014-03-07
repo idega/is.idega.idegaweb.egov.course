@@ -411,7 +411,7 @@ public class CourseList extends CourseBlock {
 						toDate);
 			} else {
 				foundCourses = getBusiness().getCourses(
-						getBusiness().getProvidersForUser(iwc.getCurrentUser()), 
+						getCourseProviderBusiness().getProvidersForUser(iwc.getCurrentUser()), 
 						schoolTypePK != null ? schoolTypePK.toString() : null, 
 						courseTypePK != null ? courseTypePK.toString() : null, 
 						fromDate, 

@@ -82,6 +82,7 @@ import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
+import com.idega.core.accesscontrol.business.AccessController;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
@@ -107,6 +108,7 @@ import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 
@@ -928,14 +930,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	 */
 	@Override
 	public Collection<CourseType> getCourseTypes(
-			Integer schoolTypePK, 
+			Integer courseCategoryPrimaryKey, 
 			boolean valid) {
-		if (schoolTypePK == null) {
+		if (courseCategoryPrimaryKey == null) {
 			return Collections.emptyList();
 		}
 
 		CourseCategory courseCategory = getCourseCategoryHome()
-				.findByPrimaryKey(schoolTypePK.toString());
+				.findByPrimaryKey(courseCategoryPrimaryKey.toString());
 		if (courseCategory == null) {
 			return Collections.emptyList();
 		}
@@ -1753,11 +1755,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			return Collections.emptyList();
 		}
 
-		String typePK = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
-		if (typePK != null) {
+		String typePK = getIWApplicationContext().getApplicationSettings()
+				.getProperty(CourseConstants.PROPERTY_HIDDEN_SCHOOL_TYPE);
+		if (!StringUtil.isEmpty(typePK)) {
 			CourseProviderType type = null;
 			for (CourseProviderType schoolType : schoolTypes) {
-				if (schoolType.equals(schoolType.getPrimaryKey().toString())) {
+				if (typePK.equals(schoolType.getPrimaryKey().toString())) {
 					type = schoolType;
 				}
 			}
@@ -1822,34 +1825,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			CourseProviderArea area,
 			CourseProviderType type) {
 		return getSchoolBusiness().findAllSchoolsByAreaAndType(area, type);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getProvidersForUser(com.idega.user.data.User)
-	 */
-	@Override
-	public Collection<CourseProvider> getProvidersForUser(User user) {
-		if (user == null) {
-			Collections.emptyList();
-		}
-
-		Collection<? extends CourseProviderUser> schoolUsers = getCourseProviderUserHome()
-				.findByUsersInSubTypes(Arrays.asList(user));
-		if (ListUtil.isEmpty(schoolUsers)) {
-			return Collections.emptyList();
-		}
-
-		Collection<CourseProvider> courseProviders = new ArrayList<CourseProvider>();
-		for (CourseProviderUser schoolUser: schoolUsers) {
-			Collection<? extends CourseProvider> providers = schoolUser
-					.getCourseProviders();
-			if (!ListUtil.isEmpty(providers)) {
-				courseProviders.addAll(providers);
-			}
-		}
-
-		return courseProviders;
 	}
 
 	private CourseProviderUserHome courseProviderUserHome = null;
@@ -3458,32 +3433,32 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getHandledCourseProviders(com.idega.user.data.User)
-	 */
-	@Override
-	public Collection<CourseProvider> getHandledCourseProviders(User user) {
-		if (user == null) {
-			return null;
+	private AccessController accessController = null;
+
+	protected AccessController getAccessController() {
+		if (this.accessController == null) {
+			this.accessController = IWMainApplication
+					.getDefaultIWMainApplication().getAccessController();
 		}
 
-		try {
-			if (IWMainApplication.getDefaultIWMainApplication().getAccessController().getAdministratorUser().getId().equals(user.getId())) {
-				CourseProviderHome sscHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
-				return sscHome.find();
+		return this.accessController;
+	}
+
+	private CourseProviderHome courseProviderHome = null;
+
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup
+						.getHome(CourseProvider.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
-		try {
-			CourseProviderHome sscHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
-			return sscHome.findByHandlers(Arrays.asList(user));
-		} catch (Exception e) {
-
-		}
-		return null;
+		return this.courseProviderHome;
 	}
 
 	private CourseProviderTypeHome courseProviderTypeHome = null;

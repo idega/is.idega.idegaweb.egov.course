@@ -8,6 +8,7 @@
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
@@ -21,10 +22,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
 import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWResourceBundle;
@@ -85,20 +88,20 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 				CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
 				CourseProviderArea area = getSchoolBusiness(iwc).getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
-				Collection providers = getBusiness().getProviders(area, type);
+				Collection<CourseProvider> providers = getBusiness().getProviders(area, type);
 
 				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-					Collection userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
+					Collection<CourseProvider> userProviders = getCourseProviderBusiness()
+							.getProvidersForUser(iwc.getCurrentUser());
 					providers.retainAll(userProviders);
 				}
 
-				Iterator iter = providers.iterator();
-				while (iter.hasNext()) {
-					CourseProvider provider = (CourseProvider) iter.next();
+				for (CourseProvider provider : providers) {
+					Collection<Course> courses = getBusiness().getCourses(
+							provider, type, fromDate, toDate);
 
-					Collection courses = getBusiness().getCourses(provider, type, fromDate, toDate);
-
-					addResults(iwc, iwrb, type, courses, section, provider.getName(), fromDate, toDate);
+					addResults(iwc, iwrb, type, courses, section, 
+							provider.getName(), fromDate, toDate);
 
 					Layer clearLayer = new Layer(Layer.DIV);
 					clearLayer.setStyleClass("Clear");
@@ -329,5 +332,22 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 	public void setSchoolTypePK(String schoolTypePK) {
 		this.schoolTypePK = schoolTypePK;
+	}
+
+	private CourseProviderBusiness courseProviderBusiness = null;
+
+	protected CourseProviderBusiness getCourseProviderBusiness() {
+		if (this.courseProviderBusiness == null) {
+			try {
+				this.courseProviderBusiness = IBOLookup.getServiceInstance(
+						getIWApplicationContext(), CourseProviderBusiness.class);
+			} catch (IBOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderBusiness.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderBusiness;
 	}
 }
