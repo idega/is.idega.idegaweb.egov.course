@@ -145,7 +145,7 @@ public class CourseProviderViewerBean {
 	}
 
 	public void remove(String courseProviderId) {
-		getCourseProviderHome().remove(courseProviderId);		
+		getCourseProviderHome().remove(getCourseProviderHome().findByPrimaryKeyRecursively(courseProviderId));		
 	}
 	
 	private CourseProviderHome courseProviderHome = null;

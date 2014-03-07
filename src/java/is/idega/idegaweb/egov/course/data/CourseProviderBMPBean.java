@@ -97,7 +97,6 @@ import com.idega.data.GenericEntity;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
-import com.idega.data.IDORelationshipException;
 import com.idega.data.IDOStoreException;
 import com.idega.user.data.Group;
 import com.idega.util.ListUtil;
@@ -414,16 +413,9 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 	 * @see is.idega.idegaweb.egov.course.data.CourseProvider#getSchoolTypes()
 	 */
 	@Override
-	public Collection<CourseProviderType> getCourseProviderTypes() {
-		try {
-			return idoGetRelatedEntities(CourseProviderType.class);
-		} catch (IDORelationshipException e) {
-			getLogger().log(
-					Level.WARNING,
-					"Failed to get course provider types, cause of:", e);
-		}
-
-		return Collections.emptyList();
+	public <T extends CourseProviderType> Collection<T> getCourseProviderTypes() {
+		throw new UnsupportedOperationException(
+				"Method is implemented in subclasses!");
 	}
 
 	/*
@@ -474,19 +466,23 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 	 */
 	@Override
 	public void remove() {
+		String primaryKey = this.getPrimaryKey().toString();
 		try {
-			String primaryKey = this.getPrimaryKey().toString();
 			super.remove();
+			if (isSubclass()) {
+				getCourseProviderHome().remove(primaryKey);
+			}
+
 			ELUtil.getInstance().publishEvent(new CourseProviderUpdatedEvent(
 					primaryKey, true));
 			java.util.logging.Logger.getLogger(getClass().getName()).info(
-					this.getClass().getName() +
+					getClass().getSimpleName() +
 					" by id: '" + primaryKey + "' removed!");
 		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING,
-					"Unable to remove " + this.getClass().getName() +
-					" by primary key: '" + this.getPrimaryKey().toString() +
+					"Unable to remove " + getClass().getSimpleName() +
+					" by primary key: '" + getPrimaryKey().toString() +
 					"' cause of:", e);
 		}
 	}

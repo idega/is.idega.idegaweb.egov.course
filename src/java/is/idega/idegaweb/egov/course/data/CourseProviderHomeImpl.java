@@ -541,7 +541,7 @@ public class CourseProviderHomeImpl extends IDOFactory
 	 */
 	@Override
 	public void remove(String primaryKey) {
-		remove(findByPrimaryKeyRecursively(primaryKey));
+		remove(findByPrimaryKey(primaryKey));
 	}
 
 	/*
