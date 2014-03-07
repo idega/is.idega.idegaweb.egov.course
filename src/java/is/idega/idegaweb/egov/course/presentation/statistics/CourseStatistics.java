@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.presentation.CourseBlock;
@@ -21,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -44,6 +46,7 @@ import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
+import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
@@ -54,88 +57,68 @@ public class CourseStatistics extends CourseBlock {
 	private static final String PARAMETER_FROM = "prm_from";
 	private static final String PARAMETER_TO = "prm_to";
 
-//	private Object schoolTypePK;
 	private String courseProviderTypePK;
 
-	private CourseProviderAreaHome courseProviderAreaHome = null;
-
-	protected CourseProviderAreaHome getCourseProviderAreaHome() {
-		if (this.courseProviderAreaHome == null) {
-			try {
-				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup.getHome(CourseProviderArea.class);
-			} catch (IDOLookupException e) {
-				getLogger().log(Level.WARNING, 
-						"Failed to get " + CourseProviderAreaHome.class + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.courseProviderAreaHome;
+	protected String getCourseProviderType() {
+		return this.courseProviderTypePK;
 	}
-	
+
 	private Collection<CourseProvider> courseProviders = null;
 
-	private Collection<CourseProviderArea> getAreas(IWContext iwc) {
-		Collection<CourseProvider> userProviders = courseProviders;
-		if (ListUtil.isEmpty(userProviders)) {
-			if (!hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)
-					&& (hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc))) {
-				userProviders = getBusiness().getProvidersForUser(iwc.getCurrentUser());
-			} else {
-				return getBusiness().getSchoolAreas();
+	protected Collection<CourseProvider> getCourseProviders() {
+		IWContext iwc = CoreUtil.getIWContext();
+		if (ListUtil.isEmpty(this.courseProviders)) {
+			if (hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
+				this.courseProviders = getCourseProviderBusiness()
+						.getProvidersByType(getCourseProviderType());
+			} else if (hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
+				this.courseProviders = getCourseProviderBusiness()
+						.getProvidersByUserAndType(
+								iwc.getCurrentUser(), 
+								getCourseProviderType());
 			}
 		}
 
-		return getCourseProviderAreaHome().findAllByProviders(userProviders);
+		return this.courseProviders;
 	}
 
 	private Collection<CourseType> getCourseTypes() throws RemoteException {
-		if (courseProviders == null && isValidCourseProviderTypePK()) {
+		if (ListUtil.isEmpty(getCourseProviders()) && isValidCourseProviderTypePK()) {
 			return getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
 		}
 
-		if (courseProviders == null) {
+		Collection<CourseProviderType> providerTypes = getCourseProviderBusiness()
+				.getCourseProviderTypes(getCourseProviders());
+		if (ListUtil.isEmpty(providerTypes)) {
 			return Collections.emptyList();
 		}
 
 		Map<String, CourseType> allTypes = new HashMap<String, CourseType>();
-		for (CourseProvider provider: courseProviders) {
-			Collection<CourseProviderType> providerTypes = provider.getCourseProviderTypes();
-			if (ListUtil.isEmpty(providerTypes)) {
-				continue;
-			}
-
-			for (CourseProviderType courseProviderType: providerTypes) {
-				Collection<CourseType> types = getBusiness().getCourseTypes(new Integer(courseProviderType.getPrimaryKey().toString()), false);
-				if (!ListUtil.isEmpty(types)) {
-					for (CourseType type: types) {
-						allTypes.put(type.getPrimaryKey().toString(), type);
-					}
-				}
+		for (CourseProviderType courseProviderType: providerTypes) {
+			Collection<CourseType> types = getBusiness().getCourseTypes(
+					new Integer(courseProviderType.getPrimaryKey().toString()), 
+					false);
+			for (CourseType type: types) {
+				allTypes.put(type.getPrimaryKey().toString(), type);
 			}
 		}
+
 		return allTypes.values();
 	}
 
-	private CourseProviderType getProviderType(IWContext iwc) throws RemoteException {
-		if (courseProviders == null && isValidCourseProviderTypePK()) {
-			return getSchoolBusiness(iwc).getSchoolType(new Integer(courseProviderTypePK));
+	private CourseProviderType getProviderType(IWContext iwc) {
+		if (ListUtil.isEmpty(getCourseProviders()) && isValidCourseProviderTypePK()) {
+			return getCourseProviderBusiness().getSchoolType(
+					new Integer(courseProviderTypePK));
 		}
 
-		if (courseProviders == null) {
+		Collection<CourseProviderType> providerTypes = getCourseProviderBusiness()
+				.getCourseProviderTypes(getCourseProviders());
+		if (ListUtil.isEmpty(providerTypes)) {
 			return null;
 		}
 
-		for (CourseProvider provider: courseProviders) {
-			Collection<CourseProviderType> providerTypes = provider.getCourseProviderTypes();
-			if (ListUtil.isEmpty(providerTypes)) {
-				continue;
-			}
-
-			return providerTypes.iterator().next();
-		}
-
-		return null;
+		return providerTypes.iterator().next();
 	}
 
 	private boolean isValidCourseProviderTypePK() {
@@ -145,15 +128,11 @@ public class CourseStatistics extends CourseBlock {
 	@Override
 	public void present(IWContext iwc) {
 		try {
-			if (!isValidCourseProviderTypePK() && iwc.isLoggedOn()) {
-				courseProviders = getHandledCourseProviders(iwc.getCurrentUser());
-			}
-			if (!isValidCourseProviderTypePK() && courseProviders == null) {
-				add("Course provider type is not set and no course providers are available for the current user");
+			if (!isValidCourseProviderTypePK() && ListUtil.isEmpty(getCourseProviders())) {
+				add("Course provider type is not set and no course providers " +
+						"are available for the current user");
 				return;
 			}
-
-			IWResourceBundle iwrb = getResourceBundle(iwc);
 
 			Form form = new Form();
 			form.setStyleClass("adminForm");
@@ -166,33 +145,19 @@ public class CourseStatistics extends CourseBlock {
 			section.setStyleClass("statisticsLayer");
 			form.add(section);
 
-			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_statistics", "Course statistics"));
+			IWResourceBundle iwrb = getResourceBundle(iwc);
+			Heading1 heading = new Heading1(iwrb.getLocalizedString(
+					"course.course_statistics", "Course statistics"));
 			section.add(heading);
 
 			CourseProviderType type = getProviderType(iwc);
 			Collection<CourseType> courseTypes = getCourseTypes();
-			Collection<CourseProviderArea> areas = getAreas(iwc);
-
-			Collection<CourseProvider> userProviders = null;
-			if (ListUtil.isEmpty(this.courseProviders)) {
-				if (!hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)
-						&& (hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc))) {
-					userProviders = getBusiness().getProvidersForUser(
-							iwc.getCurrentUser());
-				}
-			} else {
-				userProviders = courseProviders;
-			}
-
-			for (Iterator<CourseProviderArea> iter = areas.iterator(); iter.hasNext();) {
-				CourseProviderArea area = iter.next();
-
-				Collection<CourseProvider> providers = getBusiness().getProviders(area, type);
-				if (!ListUtil.isEmpty(userProviders)) {
-					providers.retainAll(userProviders);
-				}
-
-				addResults(iwc, iwrb, type, providers, courseTypes, section, area.getName());
+			
+			Map<CourseProviderArea, List<CourseProvider>> sortedProviders = getCourseProviderBusiness()
+					.getProvidersByAreas(getCourseProviders());
+			for (CourseProviderArea area : sortedProviders.keySet()) {
+				addResults(iwc, iwrb, type, sortedProviders.get(area), 
+						courseTypes, section, area.getName());
 
 				Layer clearLayer = new Layer(Layer.DIV);
 				clearLayer.setStyleClass("Clear");
@@ -208,8 +173,7 @@ public class CourseStatistics extends CourseBlock {
 				back.setPageToOpen(getBackPage());
 				buttonLayer.add(back);
 			}
-		}
-		catch (RemoteException re) {
+		} catch (RemoteException re) {
 			throw new IBORuntimeException(re);
 		}
 	}
@@ -392,6 +356,48 @@ public class CourseStatistics extends CourseBlock {
 		setCourseProviderTypePK(courseProviderTypePK);
 	}
 
+	protected boolean hasRole(String role, IWContext iwc) {
+		AccessController controller = getAccessController(iwc);
+		if (controller == null) {
+			return Boolean.FALSE;
+		}
+
+		return controller.hasRole(iwc.getCurrentUser(), role);
+	}
+
+	private CourseProviderHome courseProviderHome = null;
+
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup
+						.getHome(CourseProvider.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderHome;
+	}
+
+	private CourseProviderAreaHome courseProviderAreaHome = null;
+
+	protected CourseProviderAreaHome getCourseProviderAreaHome() {
+		if (this.courseProviderAreaHome == null) {
+			try {
+				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup.getHome(CourseProviderArea.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderAreaHome.class + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderAreaHome;
+	}
+
 	private AccessController accessController = null;
 
 	protected AccessController getAccessController(IWContext iwc) {
@@ -400,14 +406,5 @@ public class CourseStatistics extends CourseBlock {
 		}
 
 		return this.accessController;
-	}
-
-	protected boolean hasRole(String role, IWContext iwc) {
-		AccessController controller = getAccessController(iwc);
-		if (controller == null) {
-			return Boolean.FALSE;
-		}
-
-		return controller.hasRole(iwc.getCurrentUser(), role);
 	}
 }

@@ -99,7 +99,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
@@ -112,6 +114,7 @@ import com.idega.data.IDOLookupException;
 import com.idega.user.business.GroupBusiness;
 import com.idega.user.data.Group;
 import com.idega.user.data.GroupHome;
+import com.idega.user.data.User;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -128,6 +131,144 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 		CourseProviderBusiness {
 
 	private static final long serialVersionUID = -859935297306293052L;
+
+	@Override
+	public Collection<CourseProvider> getProvidersByType(String typePrimaryKey) {
+		Collection<CourseProvider> courseProviders = getCourseProviderHome().findAllRecursively();
+
+		CourseProviderType type = getCourseProviderTypeHome().find(typePrimaryKey);
+		if (type == null) {
+			return courseProviders;
+		}
+
+		Collection<CourseProviderType> courseProviderTypes = null;
+		ArrayList<CourseProvider> matchedResult = new ArrayList<CourseProvider>(
+				courseProviders.size());
+		for (CourseProvider courseProvider : courseProviders) {
+			courseProviderTypes = courseProvider.getCourseProviderTypes();
+			if (!ListUtil.isEmpty(courseProviderTypes) && courseProviderTypes.contains(type)) {
+				matchedResult.add(courseProvider);
+			}
+		}
+
+		return matchedResult;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getHandledCourseProviders(com.idega.user.data.User)
+	 */
+	@Override
+	public Collection<CourseProvider> getHandledCourseProviders(User user) {
+		return getProvidersForUser(user);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getProvidersForUser(com.idega.user.data.User)
+	 */
+	@Override
+	public Collection<CourseProvider> getProvidersForUser(User user) {
+		if (user == null) {
+			Collections.emptyList();
+		}
+
+		Collection<? extends CourseProviderUser> schoolUsers = getCourseProviderUserHome()
+				.findByUsersInSubTypes(Arrays.asList(user));
+		if (ListUtil.isEmpty(schoolUsers)) {
+			return Collections.emptyList();
+		}
+
+		Collection<CourseProvider> courseProviders = new ArrayList<CourseProvider>();
+		for (CourseProviderUser schoolUser: schoolUsers) {
+			Collection<? extends CourseProvider> providers = schoolUser
+					.getCourseProviders();
+			if (!ListUtil.isEmpty(providers)) {
+				courseProviders.addAll(providers);
+			}
+		}
+
+		return courseProviders;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getProvidersByUserAndType(com.idega.user.data.User, java.lang.String)
+	 */
+	@Override
+	public Collection<CourseProvider> getProvidersByUserAndType(User user,
+			String typePrimaryKey) {
+		CourseProviderType type = getCourseProviderTypeHome().find(typePrimaryKey);
+		if (type == null) {
+			return getProvidersForUser(user);
+		}
+
+		Collection<CourseProviderType> providerTypes = null;
+		Collection<CourseProvider> providersByUser = getProvidersForUser(user);
+		ArrayList<CourseProvider> matchedResults = new ArrayList<CourseProvider>(
+				providersByUser.size());
+		for (CourseProvider provider : providersByUser) {
+			providerTypes = provider.getCourseProviderTypes();
+			if (!ListUtil.isEmpty(providerTypes) && providerTypes.contains(type)) {
+				matchedResults.add(provider);
+			}
+		}
+
+		return matchedResults;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getProvidersByAreas(java.util.Collection)
+	 */
+	@Override
+	public Map<CourseProviderArea, List<CourseProvider>> getProvidersByAreas(
+			Collection<CourseProvider> courseProviders) {
+		if (ListUtil.isEmpty(courseProviders)) {
+			return Collections.emptyMap();
+		}
+
+		TreeMap<CourseProviderArea, List<CourseProvider>> result = null;
+		result = new TreeMap<CourseProviderArea, List<CourseProvider>>();
+		for (CourseProvider provider : courseProviders) {
+			/* Skipping providers without areas for now... */
+			CourseProviderArea area = provider.getCourseProviderArea();
+			if (area != null) {
+				List<CourseProvider> providersList = result.get(area);
+				if (ListUtil.isEmpty(providersList)) {
+					providersList = new ArrayList<CourseProvider>();
+					result.put(area, providersList);
+				}
+
+				providersList.add(provider);
+			}
+		}
+
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getCourseProviderTypes(java.util.Collection)
+	 */
+	@Override
+	public Collection<CourseProviderType> getCourseProviderTypes(
+			Collection<? extends CourseProvider> courseProviders) {
+		if (ListUtil.isEmpty(courseProviders)) {
+			return Collections.emptyList();
+		}
+
+		Collection<CourseProviderType> types = null;
+		ArrayList<CourseProviderType> providerTypes = new ArrayList<CourseProviderType>();
+		for (CourseProvider provider : courseProviders) {
+			types = provider.getCourseProviderTypes();
+			if (!ListUtil.isEmpty(types)) {
+				providerTypes.addAll(types);
+			}
+		}
+
+		return providerTypes;
+	}
 
 	/* (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getSchool(java.lang.Object)
@@ -426,6 +567,23 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 	private GroupHome groupHome = null;
 
 	private GroupBusiness groupBusiness = null;
+
+	private CourseProviderHome courseProviderHome = null;
+
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup
+						.getHome(CourseProvider.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderHome;
+	}
 
 	protected GroupBusiness getGroupBusiness() {
 		if (this.groupBusiness == null) {

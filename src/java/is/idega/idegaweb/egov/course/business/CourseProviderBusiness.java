@@ -90,6 +90,8 @@ import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import com.idega.business.IBOService;
 import com.idega.data.IDOHome;
@@ -249,4 +251,75 @@ public interface CourseProviderBusiness extends IBOService {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Group getRootProviderAdministratorGroup();
+
+	/**
+	 * 
+	 * @param courseProviders to get {@link CourseProviderType}s for, 
+	 * not <code>null</code>;
+	 * @return {@link CourseProviderType}s for given {@link CourseProvider}s
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProviderType> getCourseProviderTypes(
+			Collection<? extends CourseProvider> courseProviders);
+
+	/**
+	 * 
+	 * <p>Sorts given {@link CourseProvider}s by {@link CourseProviderArea}s
+	 * they belong to.</p>
+	 * @param courseProviders to sort, not <code>null</code>;
+	 * @return sorted {@link CourseProvider}s or {@link Collections#emptyMap()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Map<CourseProviderArea, List<CourseProvider>> getProvidersByAreas(
+			Collection<CourseProvider> courseProviders);
+
+	/**
+	 * 
+	 * <p>Searches for sub-types of {@link CourseProviderUser}s by given
+	 * user, then finds all sub-types of {@link CourseProvider}s, which
+	 * are connected to those {@link CourseProviderUser}s. Method is
+	 * very heavy, use it responsibly...</p>
+	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
+	 * @return {@link CourseProvider}s found for {@link User} or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProvider> getProvidersForUser(User user);
+	
+	/**
+	 * 
+	 * <p>Searches for sub-types of {@link CourseProviderUser}s by given
+	 * user, then finds all sub-types of {@link CourseProvider}s, which
+	 * are connected to those {@link CourseProviderUser}s. Method is
+	 * very heavy, use it responsibly...</p>
+	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
+	 * @param type is {@link CourseProviderType#getPrimaryKey()}, skipped
+	 * if <code>null</code>;
+	 * @return {@link CourseProvider}s found for {@link User} or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProvider> getProvidersByUserAndType(User user, String type);
+
+	/**
+	 * 
+	 * <p>Searches for sub-types of {@link CourseProvider} by criteria:</p>
+	 * @param type is {@link CourseProviderType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @return {@link CourseProvider}s by given criteria or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProvider> getProvidersByType(String type);
+
+	/**
+	 * 
+	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
+	 * @return {@link CourseProvider}s or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<P extends CourseProvider> Collection<P> getHandledCourseProviders(User user);
 }
