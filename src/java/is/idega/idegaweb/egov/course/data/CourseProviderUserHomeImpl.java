@@ -284,7 +284,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#find()
 	 */
 	@Override
-	public Collection<CourseProviderUser> find() {
+	public <T extends CourseProviderUser> Collection<T> find() {
 		CourseProviderUserBMPBean entity = (CourseProviderUserBMPBean) idoCheckOutPooledEntity();
 		Collection<Object> ids = entity.ejbFindPrimaryKeys(null, null, null);
 		try {

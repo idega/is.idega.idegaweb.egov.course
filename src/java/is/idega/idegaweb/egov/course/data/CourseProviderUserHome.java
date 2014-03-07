@@ -239,7 +239,7 @@ public interface CourseProviderUserHome extends IDOHome {
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<? extends CourseProviderUser> find();
+	public <T extends CourseProviderUser> Collection<T> find();
 
 	/**
 	 * 

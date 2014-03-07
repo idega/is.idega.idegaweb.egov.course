@@ -90,6 +90,7 @@ import java.util.logging.Level;
 import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOEntity;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
@@ -99,6 +100,7 @@ import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.data.query.WildCardColumn;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 
 /**
  * <p>Implementation for {@link CourseProviderType} EJB entity</p>
@@ -226,6 +228,33 @@ public class CourseProviderTypeBMPBean extends GenericEntity implements CoursePr
 		}
 
 		super.store();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#equals(com.idega.data.IDOEntity)
+	 */
+	@Override
+	public boolean equals(IDOEntity entity) {
+		if (!(entity instanceof CourseProviderType)) {
+			return Boolean.FALSE;
+		}
+
+		Object entityPrimaryKey = entity.getPrimaryKey();
+		if (entityPrimaryKey == null || StringUtil.isEmpty(entityPrimaryKey.toString())) {
+			return Boolean.FALSE;
+		}
+
+		Object currentPrimaryKey = getPrimaryKey();
+		if (currentPrimaryKey == null || StringUtil.isEmpty(currentPrimaryKey.toString())) {
+			return Boolean.FALSE;
+		}
+
+		if (!currentPrimaryKey.toString().equals(entityPrimaryKey.toString())) {
+			return Boolean.FALSE;
+		}
+
+		return Boolean.TRUE;
 	}
 
 	protected SelectQuery getQueryByCategory(String category) {
