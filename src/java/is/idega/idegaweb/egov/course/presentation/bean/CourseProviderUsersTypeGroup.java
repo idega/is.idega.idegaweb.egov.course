@@ -87,7 +87,6 @@ import is.idega.idegaweb.egov.course.data.CourseProviderUserType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.idega.util.CoreConstants;
@@ -126,7 +125,7 @@ public class CourseProviderUsersTypeGroup {
 
 	public List<CourseProviderUserBean> getUsers() {
 		if (this.users == null) {
-			Collections.emptyList();
+			this.users = new ArrayList<CourseProviderUserBean>();
 		}
 	
 		return users;
@@ -149,15 +148,15 @@ public class CourseProviderUsersTypeGroup {
 			return Boolean.FALSE;
 		}
 
-		if (getKey() != null && !getKey().equals(bean.getCourseProviderUserTypeId())) {
-			return Boolean.FALSE;
+		if (StringUtil.isEmpty(getKey())) {
+			if (!bean.hasType()) {
+				return getUsers().add(bean);
+			}
+		} else if (getKey().equals(bean.getCourseProviderUserTypeId())) {
+			return getUsers().add(bean);
 		}
 
-		if (this.users == null) {
-			this.users = new ArrayList<CourseProviderUserBean>();
-		}
-
-		return this.users.add(bean);
+		return Boolean.FALSE;
 	}
 
 	public void addAll(Collection<CourseProviderUserBean> beans) {

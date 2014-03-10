@@ -93,7 +93,6 @@ import is.idega.idegaweb.egov.course.presentation.CourseProviderUserEditor;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderUsersViewer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -102,7 +101,6 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
-import javax.faces.event.ValueChangeEvent;
 
 import com.idega.builder.business.BuilderLogic;
 import com.idega.core.contact.data.Email;
@@ -128,45 +126,15 @@ import com.idega.util.StringUtil;
  */
 public class CourseProviderUsersViewerBean {
 
-	private String courseProviderIds = null;
+	private CourseProviderViewerBean courseProviderViewerBean = null;
 
-	public String getCourseProviderIds() {
-		return courseProviderIds;
+	public CourseProviderViewerBean getCourseProviderViewerBean() {
+		return courseProviderViewerBean;
 	}
 
-	public void setCourseProviderIds(String courseProviderIds) {
-		if (StringUtil.isEmpty(courseProviderIds)) {
-			this.courseProviderIds = null;
-		} else {
-			this.courseProviderIds = courseProviderIds;
-		}
-	}
-
-	public void selectedProviderChange(ValueChangeEvent event) {
-		Object value = event.getNewValue();
-		if (value != null && !value.equals("-1")) {
-			setCourseProviderIds(value.toString());
-			CoreUtil.getIWContext().setMultipartParameter(
-					CourseProviderUserBean.COURSE_PROVIDER_ID, 
-					getCourseProviderIds());
-		}
-	}
-	
-	public Map<String, String> getCourseProviders() {
-		Collection<? extends CourseProvider> providers = getCourseProviderHome()
-				.findAllRecursively();
-		if (ListUtil.isEmpty(providers)) {
-			return Collections.emptyMap();
-		}
-
-		TreeMap<String, String> providersMap = new TreeMap<String, String>();
-		for (CourseProvider provider : providers) {
-			providersMap.put(
-					provider.getSchoolName(), 
-					provider.getPrimaryKey().toString());
-		}
-
-		return providersMap;
+	public void setCourseProviderViewerBean(
+			CourseProviderViewerBean courseProviderViewerBean) {
+		this.courseProviderViewerBean = courseProviderViewerBean;
 	}
 
 	public List<CourseProviderUsersAreaGroup> getGroupedUsers() {
@@ -175,17 +143,16 @@ public class CourseProviderUsersViewerBean {
 			return Collections.emptyList();
 		}
 
-		Collection<CourseProvider> providers = getCourseProviderHome()
-				.findAllRecursively();
-
 		// FIXME Move to recursive search later as for providers...
 		Collection<? extends CourseProviderUserType> userTypes = getCourseProviderUserTypeHome().find();
 
-		ArrayList<CourseProviderUsersAreaGroup> groupedUsers = new ArrayList<CourseProviderUsersAreaGroup>(providers.size());
+		List<CourseProviderBean> providers = getCourseProviderViewerBean()
+				.getCourseProviders();
 
-		/* Multiple providers */
+		/* Users with providers */
+		ArrayList<CourseProviderUsersAreaGroup> groupedUsers = new ArrayList<CourseProviderUsersAreaGroup>(providers.size());
 		CourseProviderUsersAreaGroup group = null;
-		for (CourseProvider provider: providers) {
+		for (CourseProviderBean provider: providers) {
 			group = new CourseProviderUsersAreaGroup(provider, users, userTypes);
 			if (!ListUtil.isEmpty(group.getUsers())) {
 				groupedUsers.add(group);
@@ -193,14 +160,7 @@ public class CourseProviderUsersViewerBean {
 		}
 
 		/* Users without providers */
-		boolean noProviders = ListUtil.isEmpty(providers);
-		group = new CourseProviderUsersAreaGroup(null, null, userTypes);
-		for (CourseProviderUserBean user : users) {
-			if (!user.hasCourseProvider() || noProviders) {
-				group.add(user);
-			}
-		}
-
+		group = new CourseProviderUsersAreaGroup(null, users, userTypes);
 		if (!ListUtil.isEmpty(group.getUsers())) {
 			groupedUsers.add(group);
 		}
@@ -208,22 +168,35 @@ public class CourseProviderUsersViewerBean {
 		return groupedUsers;
 	}
 
+	/**
+	 * 
+	 * @return {@link CourseProviderUser}s filtered by visibility of 
+	 * {@link CourseProvider}s for current {@link User} or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<? extends CourseProviderUser> getCourseProviderUserEntities() {
+		if (getCourseProviderViewerBean().hasFullAccessRights()) {
+			if (CourseProviderUsersViewerBean.class.equals(this.getClass())) {
+				return getCourseProviderUserHome().findAllRecursively();
+			} else {
+				return getCourseProviderUserHome().find();
+			}
+		} 
+
+		return getCourseProviderUserHome().find(
+				getCourseProviderViewerBean().getCourseProviderEntities());
+	}
+
+	/**
+	 * 
+	 * @return all visible {@link CourseProviderUser}s for this {@link User}
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public List<CourseProviderUserBean> getCourseProviderUsers() {
-		Collection<? extends CourseProviderUser> courseProviderUsers = null;
-		if (StringUtil.isEmpty(getCourseProviderIds())) {
-			courseProviderUsers = getCourseProviderUserHome().findAllRecursively();
-		} else {
-			// FIXME make simple passing by id
-			courseProviderUsers = getCourseProviderUserHome().find(
-					getCourseProviderHome().find(Arrays.asList(getCourseProviderIds())));
-		}
-
-		if (ListUtil.isEmpty(courseProviderUsers)) {
-			return Collections.emptyList();
-		}
-
-		ArrayList<CourseProviderUserBean> beans = new ArrayList<CourseProviderUserBean>(courseProviderUsers.size());
-		for (CourseProviderUser courseProvider : courseProviderUsers) {
+		ArrayList<CourseProviderUserBean> beans = new ArrayList<CourseProviderUserBean>();
+		for (CourseProviderUser courseProvider : getCourseProviderUserEntities()) {
 			beans.add(new CourseProviderUserBean(courseProvider));
 		}
 
@@ -249,6 +222,17 @@ public class CourseProviderUsersViewerBean {
 		return uri;
 	}
 
+	/**
+	 * 
+	 * <p>Removed relation between {@link CourseProviderUser} 
+	 * and {@link CourseProvider} or {@link CourseProviderUser} itself.</p>
+	 * @param courseProviderUserId is {@link CourseProviderUser#getPrimaryKey()}
+	 * to remove, not <code>null</code>;
+	 * @param courseProviderId is {@link CourseProvider#getPrimaryKey()} of
+	 * provider to remove relation with or <code>null</code> if 
+	 * {@link CourseProviderUser} should be removed instead of relation;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public void remove(String courseProviderUserId, String courseProviderId) {
 		if (!StringUtil.isEmpty(courseProviderId) && !StringUtil.isEmpty(courseProviderUserId)) {
 			getCourseProviderUserHome().remove(
@@ -259,6 +243,17 @@ public class CourseProviderUsersViewerBean {
 		}
 	}
 
+	/**
+	 * 
+	 * <p>Prepares information about {@link User} for jQuery autocomplete
+	 * in form.</p>
+	 * @param email is {@link Email} to find {@link User}s by, 
+	 * not <code>null</code>;
+	 * @return {@link User#getName()} and {@link User#getPersonalID()} as key 
+	 * and information about {@link User} as value or 
+	 * {@link Collections#emptyMap()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public Map<String, UserDWR> getAutocompleteMails(String email) {
 		if (StringUtil.isEmpty(email) || email.length() < 3) {
 			return Collections.emptyMap();
@@ -308,6 +303,13 @@ public class CourseProviderUsersViewerBean {
 		return addresses;
 	}
 
+	/**
+	 * 
+	 * @param user to get {@link Phone} for, not <code>null</code>;
+	 * @return parsed home {@link Phone#getNumber()} for {@link User} or 
+	 * <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	protected String getPhoneNumber(User user) {
 		if (user == null) {
 			return null;
@@ -329,6 +331,14 @@ public class CourseProviderUsersViewerBean {
 		return phone.getNumber();
 	}
 
+	/**
+	 * 
+	 * <p>Parses {@link Email} for {@link User}.</p>
+	 * @param user to get {@link Email} for, not <code>null</code>;
+	 * @return queried {@link Email#getEmailAddress()} for {@link User}
+	 * or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	protected String getEmailAddress(User user) {
 		if (user == null) {
 			return null;
@@ -350,6 +360,10 @@ public class CourseProviderUsersViewerBean {
 		return email.getEmailAddress();
 	}
 
+	/*
+	 * EJB homes and business logic
+	 */
+	
 	private UserHome userHome = null;
 
 	protected UserHome getUserHome() {

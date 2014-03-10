@@ -82,21 +82,31 @@
  */
 package is.idega.idegaweb.egov.course.presentation.bean;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderHome;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderEditor;
 import is.idega.idegaweb.egov.course.presentation.CourseProvidersViewer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.idega.builder.business.BuilderLogic;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
+import com.idega.core.accesscontrol.business.AccessController;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.presentation.IWContext;
+import com.idega.user.business.UserBusiness;
+import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
@@ -111,14 +121,34 @@ import com.idega.util.ListUtil;
  */
 public class CourseProviderViewerBean {
 
-	public List<CourseProviderBean> getCourseProviders() {
-		Collection<? extends CourseProvider> courseProviders = getCourseProviderHome().findAllRecursively();
-		if (ListUtil.isEmpty(courseProviders)) {
-			return Collections.emptyList();
+	public Map<String, String> getCourseProvidersMap() {
+		Collection<CourseProviderBean> providers = getCourseProviders();
+		if (ListUtil.isEmpty(providers)) {
+			return Collections.emptyMap();
 		}
 
-		ArrayList<CourseProviderBean> beans = new ArrayList<CourseProviderBean>(courseProviders.size());
-		for (CourseProvider courseProvider : courseProviders) {
+		TreeMap<String, String> providersMap = new TreeMap<String, String>();
+		for (CourseProviderBean provider : providers) {
+			providersMap.put(
+					provider.getName(), 
+					provider.getId());
+		}
+
+		return providersMap;
+	}
+	
+	public Collection<CourseProvider> getCourseProviderEntities() {
+		if (hasFullAccessRights()) {
+			return getCourseProviderHome().findAllRecursively();
+		} else {
+			return getCourseProviderHome().findByHandlers(
+					Arrays.asList(getCurrentUser()));
+		}
+	}
+
+	public List<CourseProviderBean> getCourseProviders() {
+		ArrayList<CourseProviderBean> beans = new ArrayList<CourseProviderBean>();
+		for (CourseProvider courseProvider : getCourseProviderEntities()) {
 			beans.add(new CourseProviderBean(courseProvider));
 		}
 
@@ -147,7 +177,69 @@ public class CourseProviderViewerBean {
 	public void remove(String courseProviderId) {
 		getCourseProviderHome().remove(getCourseProviderHome().findByPrimaryKeyRecursively(courseProviderId));		
 	}
+
+	public boolean hasFullAccessRights() {
+		User user = getCurrentUser();
+		if (user != null) {
+			/*
+			 * Courses super administrator
+			 */
+			if (getAccessController().hasRole(
+					user, CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY)) {
+				return Boolean.TRUE;
+			}
+
+			/*
+			 * Traditional super administrator
+			 */
+			User administrator = null;
+			try {
+				administrator = getAccessController().getAdministratorUser();
+			} catch (Exception e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get administrator cause of: ", e);
+			}
+
+			if (user.equals(administrator)) {
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
 	
+	private AccessController accessController = null;
+
+	protected AccessController getAccessController() {
+		if (this.accessController == null) {
+			this.accessController = CoreUtil.getIWContext().getAccessController();
+		}
+
+		return this.accessController;
+	}
+
+	protected User getCurrentUser() {
+		return CoreUtil.getIWContext().getCurrentUser();
+	}
+
+	private UserBusiness userBusiness = null;
+
+	protected UserBusiness getUserBusiness() {
+		if (this.userBusiness == null) {
+			try {
+				this.userBusiness = IBOLookup.getServiceInstance(
+						CoreUtil.getIWContext(), 
+						UserBusiness.class);
+			} catch (IBOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get " + UserBusiness.class.getSimpleName()
+						+ " cause of: ", e);
+			}
+		}
+
+		return this.userBusiness;
+	}
+
 	private CourseProviderHome courseProviderHome = null;
 
 	protected CourseProviderHome getCourseProviderHome() {
