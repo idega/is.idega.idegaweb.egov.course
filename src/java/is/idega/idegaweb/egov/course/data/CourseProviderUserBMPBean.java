@@ -106,6 +106,7 @@ import com.idega.data.IDOQuery;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.IDOStoreException;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
@@ -750,5 +751,19 @@ public class CourseProviderUserBMPBean extends GenericEntity implements
 	 */
 	protected boolean isSubclass() {
 		return !getClass().equals(CourseProviderUserBMPBean.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(CoreConstants.NEWLINE);
+		sb.append(super.toString());
+		sb.append("\n\tgetName(): ").append(getName());
+		sb.append("\n\tgetSchoolId(): ").append(getSchoolId());
+		sb.append("\n\tgetUser(): ").append(getUser());
+		return sb.toString();
 	}
 }
