@@ -111,7 +111,6 @@ import com.idega.util.ArrayUtil;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
-import com.idega.util.datastructures.map.MapUtil;
 
 /**
  * <p>JSF managed bean for {@link CourseProvider}</p>
@@ -394,13 +393,7 @@ public class CourseProviderUserBean {
 
 	public void submit() {
 		if (this.superAdminSelected) {
-			Map<String, String> allProviders = getCourseProviders();
-			if (!MapUtil.isEmpty(allProviders)) {
-				Collection<String> values = allProviders.values();
-				if (!ListUtil.isEmpty(values)) {
-					setCourseProviderIds(values.toArray(new String[values.size()]));
-				}
-			}
+			setCourseProviderIds(null);
 		}
 
 		// Update
