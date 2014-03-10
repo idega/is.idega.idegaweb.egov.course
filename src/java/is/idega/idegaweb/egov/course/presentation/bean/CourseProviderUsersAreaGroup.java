@@ -116,11 +116,11 @@ public class CourseProviderUsersAreaGroup {
 	private Collection<? extends CourseProviderUserType> types = null;
 
 	public CourseProviderUsersAreaGroup(
-			CourseProvider provider,
+			CourseProviderBean provider,
 			List<CourseProviderUserBean> users,
 			Collection<? extends CourseProviderUserType> types) {
 		if (provider != null) {
-			this.key = provider.getPrimaryKey().toString();
+			this.key = provider.getId();
 			this.name = provider.getName();
 		}
 
@@ -145,7 +145,7 @@ public class CourseProviderUsersAreaGroup {
 
 	protected Collection<? extends CourseProviderUserType> getTypes() {
 		if (this.types == null) {
-			return Collections.emptyList();
+			this.types = new ArrayList<CourseProviderUserType>();
 		}
 		
 		return this.types;
@@ -156,9 +156,8 @@ public class CourseProviderUsersAreaGroup {
 			return Collections.emptyList();
 		}
 
-		ArrayList<CourseProviderUsersTypeGroup> groupedBeans = new ArrayList<CourseProviderUsersTypeGroup>(getTypes().size());
-
 		/* Sorting beans by types */
+		ArrayList<CourseProviderUsersTypeGroup> groupedBeans = new ArrayList<CourseProviderUsersTypeGroup>(getTypes().size());
 		CourseProviderUsersTypeGroup groupedUsersBean = null;
 		for (CourseProviderUserType type : getTypes()) {
 			groupedUsersBean = new CourseProviderUsersTypeGroup(type, getUsers());
@@ -167,24 +166,20 @@ public class CourseProviderUsersAreaGroup {
 			}
 		}
 
-		/* If types not provided, then all users returned in one group */
-		boolean noTypes = ListUtil.isEmpty(getTypes());
-		groupedUsersBean = new CourseProviderUsersTypeGroup();
-		for (CourseProviderUserBean user : getUsers()) {
-			if (!user.hasType() || noTypes) {
-				groupedUsersBean.add(user);
-			}
-		}
-		
+		/* When no types provided */
+		groupedUsersBean = new CourseProviderUsersTypeGroup(null, getUsers());
 		if (!ListUtil.isEmpty(groupedUsersBean.getUsers())) {
 			groupedBeans.add(groupedUsersBean);
 		}
-			
 
 		return groupedBeans;
 	}
 
 	public List<CourseProviderUserBean> getUsers() {
+		if (this.users == null) {
+			this.users = new ArrayList<CourseProviderUserBean>();
+		}
+
 		return users;
 	}
 
@@ -195,31 +190,31 @@ public class CourseProviderUsersAreaGroup {
 			}
 		}
 	}
-	
+
+	/**
+	 * 
+	 * @param user to add, not <code>null</code>;
+	 * @return <code>true</code> if added, <code>false</code> otherwise;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public boolean add(CourseProviderUserBean user) {
 		if (user == null) {
 			return Boolean.FALSE;
 		}
 
-		if (this.users == null) {
-			this.users = new ArrayList<CourseProviderUserBean>();
-		}
-
-		/* It does not matter, when all users added to one provider */
-		if (getKey() == null) {
-			return this.users.add(user);
-		}
-
 		String[] courseProviderIds = user.getCourseProviderIds();
-		if (ArrayUtil.isEmpty(courseProviderIds)) {
-			return Boolean.FALSE;
-		}
-
-		/* Adding to this provider if user belongs to */
-		for (String courseProviderId: courseProviderIds) {
-			if (getKey().equals(courseProviderId)) {
-				return this.users.add(user);
+		if (StringUtil.isEmpty(getKey())) {
+			if (ArrayUtil.isEmpty(courseProviderIds)) {
+				return getUsers().add(user);
 			}
+		} else if (!ArrayUtil.isEmpty(courseProviderIds)) {
+			for (String courseProviderId: courseProviderIds) {
+				if (getKey().equals(courseProviderId)) {
+					return getUsers().add(user);
+				}
+			}
+		} else if (user.isSuperAdminSelected()) {
+			return getUsers().add(user);
 		}
 
 		return Boolean.FALSE;
