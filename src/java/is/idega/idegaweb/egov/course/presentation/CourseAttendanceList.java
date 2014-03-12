@@ -13,6 +13,7 @@ import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -20,7 +21,6 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import com.idega.business.IBORuntimeException;
@@ -89,22 +89,15 @@ public class CourseAttendanceList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		if (!isSchoolUser()) {
-			DropdownMenu providers = null;
-			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getAllProvidersDropdown(iwc);
-			}
-			else if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getProvidersDropdown(iwc);
-			}
-
-			Collection providersList = getBusiness().getProviders();
+			DropdownMenu providers = getProvidersDropdown(iwc);
+			Collection<CourseProvider> providersList = getBusiness().getProviders();
 			if (providersList.size() == 1) {
 				CourseProvider school = (CourseProvider) providersList.iterator().next();
 				getSession().setProvider(school);
@@ -153,7 +146,8 @@ public class CourseAttendanceList extends CourseBlock {
 		schoolType.keepStatusOnAction(true);
 
 		if (getSession().getProvider() != null) {
-			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			Collection<CourseProviderType> schoolTypes = getBusiness()
+					.getSchoolTypes(getSession().getProvider());
 			schoolType.addMenuElements(schoolTypes);
 		}
 
@@ -164,7 +158,8 @@ public class CourseAttendanceList extends CourseBlock {
 		courseType.keepStatusOnAction(true);
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE)) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE)), true);
+			Collection<CourseType> courseTypes = getBusiness()
+					.getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE)), true);
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -199,7 +194,13 @@ public class CourseAttendanceList extends CourseBlock {
 		course.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course", "Select course"));
 
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_SCHOOL_TYPE) && iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
-			List courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey().toString(), iwc.getParameter(PARAMETER_SCHOOL_TYPE), iwc.getParameter(PARAMETER_COURSE_TYPE), fromDate, toDate));
+			List<Course> courses = new ArrayList<Course>(getBusiness().getCourses(
+							-1, 
+							getSession().getProvider().getPrimaryKey().toString(), 
+							iwc.getParameter(PARAMETER_SCHOOL_TYPE), 
+							iwc.getParameter(PARAMETER_COURSE_TYPE), 
+							fromDate, 
+							toDate));
 			if (showAllCourses) {
 				Collections.reverse(courses);
 			}
@@ -272,7 +273,7 @@ public class CourseAttendanceList extends CourseBlock {
 
 	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
 		boolean hasCare = true;
-		Collection choices = new ArrayList();
+		Collection<CourseChoice> choices = new ArrayList<CourseChoice>();
 		if (getSession().getProvider() != null && iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 			Course course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 			CourseType type = course.getCourseType();
@@ -325,11 +326,8 @@ public class CourseAttendanceList extends CourseBlock {
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 
-		Iterator iter = choices.iterator();
-		while (iter.hasNext()) {
+		for (CourseChoice choice : choices) {
 			row = group.createRow();
-
-			CourseChoice choice = (CourseChoice) iter.next();
 			User user = choice.getUser();
 			boolean preCare = choice.getDayCare() == CourseConstants.DAY_CARE_PRE || choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST;
 			boolean postCare = choice.getDayCare() == CourseConstants.DAY_CARE_POST || choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST;

@@ -234,12 +234,7 @@ public class CourseEditor extends CourseBlock {
 		jsActions.add(script.toString());
 		PresentationUtil.addJavaScriptActionsToBody(iwc, jsActions);
 
-		DropdownMenu providers = null;
-		if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-			providers = getAllProvidersDropdown(iwc);
-		} else {
-			providers = getProvidersDropdown(iwc);
-		}
+		DropdownMenu providers = getProvidersDropdown(iwc);
 
 		Collection<? extends CourseProvider> providersList = getBusiness().getProviders();
 		if (providersList.size() == 1) {
@@ -288,10 +283,12 @@ public class CourseEditor extends CourseBlock {
 		courseType.keepStatusOnAction(true);
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
+			Collection<CourseType> courseTypes = getBusiness()
+					.getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
 			courseType.addMenuElements(courseTypes);
 		} else if (type != null) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
+			Collection<CourseType> courseTypes = getBusiness()
+					.getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
 			courseType.addMenuElements(courseTypes);
 		}
 

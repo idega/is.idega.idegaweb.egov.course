@@ -150,14 +150,7 @@ public class CourseParticipantsList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		DropdownMenu providers = null;
-		if (iwc.getAccessController().hasRole(
-				CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-			providers = getAllProvidersDropdown(iwc);
-		} else {
-			providers = getProvidersDropdown(iwc);
-		}
-
+		DropdownMenu providers = getProvidersDropdown(iwc);
 		if (providers != null) {
 			providers.setToSubmit();
 

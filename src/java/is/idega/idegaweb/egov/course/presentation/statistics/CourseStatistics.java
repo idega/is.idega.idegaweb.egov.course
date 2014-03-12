@@ -7,7 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
-import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
@@ -46,37 +45,20 @@ import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
-import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
-import com.idega.util.StringHandler;
-import com.idega.util.StringUtil;
 
 public class CourseStatistics extends CourseBlock {
 
 	private static final String PARAMETER_FROM = "prm_from";
 	private static final String PARAMETER_TO = "prm_to";
 
-	private String courseProviderTypePK;
-
-	protected String getCourseProviderType() {
-		return this.courseProviderTypePK;
-	}
-
 	private Collection<CourseProvider> courseProviders = null;
 
 	protected Collection<CourseProvider> getCourseProviders() {
-		IWContext iwc = CoreUtil.getIWContext();
 		if (ListUtil.isEmpty(this.courseProviders)) {
-			if (hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				this.courseProviders = getCourseProviderBusiness()
-						.getProvidersByType(getCourseProviderType());
-			} else if (hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				this.courseProviders = getCourseProviderBusiness()
-						.getProvidersByUserAndType(
-								iwc.getCurrentUser(), 
-								getCourseProviderType());
-			}
+			this.courseProviders = getCourseProviderBusiness()
+					.getProvidersForCurrentUser(getType());
 		}
 
 		return this.courseProviders;
@@ -84,7 +66,7 @@ public class CourseStatistics extends CourseBlock {
 
 	private Collection<CourseType> getCourseTypes() throws RemoteException {
 		if (ListUtil.isEmpty(getCourseProviders()) && isValidCourseProviderTypePK()) {
-			return getBusiness().getCourseTypes(new Integer(courseProviderTypePK), false);
+			return getBusiness().getCourseTypes(getType(), false);
 		}
 
 		Collection<CourseProviderType> providerTypes = getCourseProviderBusiness()
@@ -108,8 +90,7 @@ public class CourseStatistics extends CourseBlock {
 
 	private CourseProviderType getProviderType(IWContext iwc) {
 		if (ListUtil.isEmpty(getCourseProviders()) && isValidCourseProviderTypePK()) {
-			return getCourseProviderBusiness().getSchoolType(
-					new Integer(courseProviderTypePK));
+			return getType();
 		}
 
 		Collection<CourseProviderType> providerTypes = getCourseProviderBusiness()
@@ -122,7 +103,7 @@ public class CourseStatistics extends CourseBlock {
 	}
 
 	private boolean isValidCourseProviderTypePK() {
-		return !StringUtil.isEmpty(courseProviderTypePK) && !"-1".equals(courseProviderTypePK) && StringHandler.isNumeric(courseProviderTypePK);
+		return getType() != null;
 	}
 
 	@Override
@@ -343,7 +324,7 @@ public class CourseStatistics extends CourseBlock {
 	}
 
 	public void setCourseProviderTypePK(String courseProviderTypePK) {
-		this.courseProviderTypePK = courseProviderTypePK;
+		setCourseProviderType(courseProviderTypePK);
 	}
 
 	@Deprecated
