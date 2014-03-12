@@ -7,7 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
-import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
@@ -17,7 +16,7 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.ejb.FinderException;
@@ -44,17 +43,16 @@ import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.user.business.GenderBusiness;
 import com.idega.user.data.Gender;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 
 public class CourseParticipantsStatistics extends CourseBlock {
 
 	private static final String PARAMETER_FROM = "prm_from";
 	private static final String PARAMETER_TO = "prm_to";
 
-	private Object schoolTypePK;
-
 	public void present(IWContext iwc) {
 		try {
-			if (schoolTypePK == null) {
+			if (getType() == null) {
 				add("No school type set");
 				return;
 			}
@@ -72,25 +70,18 @@ public class CourseParticipantsStatistics extends CourseBlock {
 			section.setStyleClass("statisticsLayer");
 			form.add(section);
 
-			Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_participants_statistics", "Course participants statistics"));
+			Heading1 heading = new Heading1(iwrb.getLocalizedString(
+					"course.course_participants_statistics", 
+					"Course participants statistics"));
 			section.add(heading);
 
-			CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
-			Collection<CourseProviderArea> areas = getBusiness().getSchoolAreas();
-
-			Collection<CourseProvider> userProviders = null;
-			if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				userProviders = getCourseProviderBusiness().getProvidersForUser(iwc.getCurrentUser());
-			}
-
-			for (CourseProviderArea area: areas) {
-				Collection<CourseProvider> providers = getBusiness().getProviders(area, type);
-				if (userProviders != null) {
-					providers.retainAll(userProviders);
-				}
-
-				if (!providers.isEmpty()) {
-					addResults(iwc, iwrb, type, providers, section, area.getName());
+			Map<CourseProviderArea, List<CourseProvider>> providersByAreas = null;
+			providersByAreas = getCourseProviderBusiness()
+					.getProvidersByAreasForCurrentUser(getType());
+			for (CourseProviderArea area: providersByAreas.keySet()) {
+				List<CourseProvider> providers = providersByAreas.get(area);
+				if (!ListUtil.isEmpty(providers)) {
+					addResults(iwc, iwrb, getType(), providers, section, area.getName());
 
 					Layer clearLayer = new Layer(Layer.DIV);
 					clearLayer.setStyleClass("Clear");
@@ -166,7 +157,9 @@ public class CourseParticipantsStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection providers, Layer section, String header) throws RemoteException {
+	private void addResults(IWContext iwc, IWResourceBundle iwrb, 
+			CourseProviderType type, Collection<CourseProvider> providers, 
+			Layer section, String header) throws RemoteException {
 		Gender male = null;
 		Gender female = null;
 		try {
@@ -220,9 +213,7 @@ public class CourseParticipantsStatistics extends CourseBlock {
 		int iRow = 1;
 
 		int total = 0;
-		Iterator iter = providers.iterator();
-		while (iter.hasNext()) {
-			CourseProvider provider = (CourseProvider) iter.next();
+		for (CourseProvider provider: providers) {
 
 			row = group.createRow();
 			cell = row.createCell();
@@ -234,11 +225,11 @@ public class CourseParticipantsStatistics extends CourseBlock {
 
 			int maleSum = getBusiness().getNumberOfChoices(provider, type, male, fromDate, toDate);
 			sum += maleSum;
-			genderTotals.put(male, new Integer(((Integer) genderTotals.get(male)).intValue() + maleSum));
+			genderTotals.put(male, new Integer(genderTotals.get(male).intValue() + maleSum));
 
 			int femaleSum = getBusiness().getNumberOfChoices(provider, type, female, fromDate, toDate);
 			sum += femaleSum;
-			genderTotals.put(female, new Integer(((Integer) genderTotals.get(female)).intValue() + femaleSum));
+			genderTotals.put(female, new Integer(genderTotals.get(female).intValue() + femaleSum));
 
 			cell = row.createCell();
 			cell.setStyleClass("male");
@@ -299,6 +290,6 @@ public class CourseParticipantsStatistics extends CourseBlock {
 	}
 
 	public void setSchoolTypePK(String schoolTypePK) {
-		this.schoolTypePK = schoolTypePK;
+		setCourseProviderType(schoolTypePK);
 	}
 }

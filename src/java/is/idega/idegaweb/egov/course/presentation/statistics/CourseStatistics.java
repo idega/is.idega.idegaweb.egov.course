@@ -65,7 +65,7 @@ public class CourseStatistics extends CourseBlock {
 	}
 
 	private Collection<CourseType> getCourseTypes() throws RemoteException {
-		if (ListUtil.isEmpty(getCourseProviders()) && isValidCourseProviderTypePK()) {
+		if (getType() != null) {
 			return getBusiness().getCourseTypes(getType(), false);
 		}
 
@@ -89,17 +89,17 @@ public class CourseStatistics extends CourseBlock {
 	}
 
 	private CourseProviderType getProviderType(IWContext iwc) {
-		if (ListUtil.isEmpty(getCourseProviders()) && isValidCourseProviderTypePK()) {
+		if (getType() != null) {
 			return getType();
 		}
 
 		Collection<CourseProviderType> providerTypes = getCourseProviderBusiness()
 				.getCourseProviderTypes(getCourseProviders());
-		if (ListUtil.isEmpty(providerTypes)) {
-			return null;
+		if (!ListUtil.isEmpty(providerTypes)) {
+			return providerTypes.iterator().next();
 		}
 
-		return providerTypes.iterator().next();
+		return null;
 	}
 
 	private boolean isValidCourseProviderTypePK() {
