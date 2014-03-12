@@ -52,8 +52,17 @@ public class CourseList extends CourseBlock {
 
 	protected static final String PARAMETER_SORTING = "prm_sorting";
 
-	private CourseProviderType type = null;
 	private boolean showTypes = true;
+
+	@Override
+	public CourseProviderType getType() {
+		CourseProviderType type = super.getType();
+		if (type != null) {
+			showTypes = false;
+		}
+
+		return type;
+	}
 
 	@Override
 	public void present(IWContext iwc) {
@@ -103,58 +112,60 @@ public class CourseList extends CourseBlock {
 		PresentationUtil.addJavaScriptActionToBody(iwc, script2.toString());
 		PresentationUtil.addJavaScriptActionToBody(iwc, script.toString());
 
+		/*
+		 * Providers drop-down
+		 */
 		if (!isSchoolUser()) {
-			DropdownMenu providers = null;
-			if (iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getAllProvidersDropdown(iwc);
-			}
-			else if (iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-				providers = getProvidersDropdown(iwc);
-			}
-
-			Collection<CourseProvider> providersList = getBusiness().getProviders();
+			Collection<CourseProvider> providersList = getCourseProviderBusiness()
+					.getProvidersForCurrentUser(getType());
 			if (providersList.size() == 1) {
 				CourseProvider school = providersList.iterator().next();
 				getSession().setProvider(school);
-				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
-			}
-			else if (providers != null) {
+				layer.add(new HiddenInput(
+						PARAMETER_PROVIDER_PK, 
+						school.getPrimaryKey().toString()));
+			} else {
+				DropdownMenu providers = getProvidersDropdown(iwc);
 				providers.setToSubmit();
 
 				Layer formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
-				Label label = new Label(getResourceBundle().getLocalizedString("provider", "Provider"), providers);
+				Label label = new Label(
+						getLocalizedString("provider", "Provider", iwc), 
+						providers);
 				formItem.add(label);
 				formItem.add(providers);
 				layer.add(formItem);
 			}
 		}
 
+		/*
+		 * Course provider types
+		 */
 		DropdownMenu schoolType = new DropdownMenu(PARAMETER_SCHOOL_TYPE_PK);
 		schoolType.setId(PARAMETER_SCHOOL_TYPE_PK);
 		schoolType.setOnChange("changeValues();");
 		schoolType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_school_type", "Select school type"));
 		schoolType.keepStatusOnAction(true);
 
+		Collection<CourseProviderType> schoolTypes = null;
 		if (getSession().getProvider() != null) {
-			Collection<CourseProviderType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
-			if (schoolTypes.size() == 1) {
-				showTypes = false;
-				type = schoolTypes.iterator().next();
-				schoolType.setSelectedElement(type.getPrimaryKey().toString());
-			}
-			schoolType.addMenuElements(schoolTypes);
-		}
-		else {
-			Collection<CourseProviderType> schoolTypes = getBusiness().getAllAfterschoolCareSchoolTypes();
-			if (schoolTypes.size() == 1) {
-				showTypes = false;
-				type = schoolTypes.iterator().next();
-				schoolType.setSelectedElement(type.getPrimaryKey().toString());
-			}
-			schoolType.addMenuElements(schoolTypes);
+			schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+		} else {
+			schoolTypes = getBusiness().getAllAfterschoolCareSchoolTypes();	
 		}
 
+		if (schoolTypes.size() == 1) {
+			showTypes = false;
+			setType(schoolTypes.iterator().next());
+			schoolType.setSelectedElement(getType().getPrimaryKey().toString());
+		}
+
+		schoolType.addMenuElements(schoolTypes);
+
+		/*
+		 * Course types
+		 */
 		DropdownMenu courseType = new DropdownMenu(PARAMETER_COURSE_TYPE_PK);
 		courseType.setId(PARAMETER_COURSE_TYPE_PK);
 		courseType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course_type", "Select course type"));
@@ -163,8 +174,8 @@ public class CourseList extends CourseBlock {
 		Collection<CourseType> courseTypes = null;
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
 			courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
-		} else if (type != null) {
-			courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
+		} else if (getType() != null) {
+			courseTypes = getBusiness().getCourseTypes(new Integer(getType().getPrimaryKey().toString()), true);
 		} else {
 			courseTypes = getBusiness().getCourseTypes();
 		}
@@ -220,8 +231,8 @@ public class CourseList extends CourseBlock {
 			formItem.add(schoolType);
 			layer.add(formItem);
 		}
-		else if (type != null) {
-			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
+		else if (getType() != null) {
+			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, getType().getPrimaryKey().toString()));
 		}
 
 		Layer formItem = new Layer(Layer.DIV);
@@ -371,8 +382,8 @@ public class CourseList extends CourseBlock {
 			if (schoolTypePK.intValue() < 0) {
 				schoolTypePK = null;
 			}
-		} else if (type != null) {
-			schoolTypePK = new Integer(type.getPrimaryKey().toString());
+		} else if (getType() != null) {
+			schoolTypePK = new Integer(getType().getPrimaryKey().toString());
 		}
 
 		Integer courseTypePK = null;

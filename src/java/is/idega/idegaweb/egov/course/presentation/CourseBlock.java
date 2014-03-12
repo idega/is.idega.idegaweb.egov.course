@@ -17,6 +17,7 @@ import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.business.CourseSession;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
@@ -51,7 +52,6 @@ import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Label;
-import com.idega.presentation.ui.util.SelectorUtility;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
@@ -97,6 +97,31 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	private boolean iHasErrors = false;
 	private Map<String, String> iErrors;
+
+	private String courseProviderType = null;	
+	
+	public String getCourseProviderType() {
+		return courseProviderType;
+	}
+
+	public void setCourseProviderType(String courseProviderType) {
+		this.courseProviderType = courseProviderType;
+	}
+
+	private CourseProviderType type = null;
+
+	public CourseProviderType getType() {
+		if (this.type == null) {
+			this.type = getCourseProviderBusiness().getSchoolType(
+					getCourseProviderType());
+		}
+
+		return type;
+	}
+
+	public void setType(CourseProviderType type) {
+		this.type = type;
+	}
 
 	@Override
 	public boolean actionPerformed(IWContext iwc) {
@@ -297,39 +322,31 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	}
 
 	protected DropdownMenu getProvidersDropdown(IWContext iwc) {
+		IWResourceBundle iwrb = getResourceBundle(iwc);
+		DropdownMenu providers = new DropdownMenu(PARAMETER_PROVIDER_PK);
+		providers.addMenuElementFirst("", iwrb.getLocalizedString(
+				"select_provider", "Select provider"));
+
+		Collection<CourseProvider> providerEntities = getCourseProviderBusiness()
+				.getProvidersForCurrentUser(getType());
+		for (CourseProvider providerEntity : providerEntities) {
+			providers.addMenuElement(
+					providerEntity.getPrimaryKey().toString(), 
+					providerEntity.getSchoolName());
+		}
+
 		try {
-			IWResourceBundle iwrb = getResourceBundle(iwc);
-
-			SelectorUtility util = new SelectorUtility();
-			DropdownMenu providers = (DropdownMenu) util.getSelectorFromIDOEntities(new DropdownMenu(PARAMETER_PROVIDER_PK), getCourseProviderBusiness().getProvidersForUser(iwc.getCurrentUser()), "getSchoolName");
-			providers.addMenuElementFirst("", iwrb.getLocalizedString("select_provider", "Select provider"));
 			if (getSession(iwc).getProvider() != null) {
-				providers.setSelectedElement(getSession(iwc).getProvider().getPrimaryKey().toString());
+				providers.setSelectedElement(getSession(iwc).getProvider()
+						.getPrimaryKey().toString());
 			}
-
-			return providers;
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to set select provider cause of:", e);
 		}
-		catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		}
-	}
 
-	protected DropdownMenu getAllProvidersDropdown(IWContext iwc) {
-		try {
-			IWResourceBundle iwrb = getResourceBundle(iwc);
 
-			SelectorUtility util = new SelectorUtility();
-			DropdownMenu providers = (DropdownMenu) util.getSelectorFromIDOEntities(new DropdownMenu(PARAMETER_PROVIDER_PK), getBusiness(iwc).getProviders(), "getSchoolName");
-			providers.addMenuElementFirst("", iwrb.getLocalizedString("select_provider", "Select provider"));
-			if (getSession(iwc).getProvider() != null) {
-				providers.setSelectedElement(getSession(iwc).getProvider().getPrimaryKey().toString());
-			}
-
-			return providers;
-		}
-		catch (RemoteException re) {
-			throw new IBORuntimeException(re);
-		}
+		return providers;
 	}
 
 	protected void addChildInformationOverview(IWContext iwc, Layer section, IWResourceBundle iwrb, User owner, Child child) throws RemoteException {
