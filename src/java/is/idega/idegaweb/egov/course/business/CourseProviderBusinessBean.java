@@ -82,6 +82,7 @@
  */
 package is.idega.idegaweb.egov.course.business;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
@@ -103,6 +104,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 
@@ -132,6 +134,85 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 
 	private static final long serialVersionUID = -859935297306293052L;
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#hasFullAccessRights()
+	 */
+	@Override
+	public boolean hasFullAccessRights() {
+		User user = getCurrentUser();
+		if (user != null) {
+
+			/*
+			 * Courses super administrator
+			 */
+			if (getAccessController().hasRole(
+					user, CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY)) {
+				return Boolean.TRUE;
+			}
+
+			/*
+			 * Traditional super administrator
+			 */
+			User administrator = null;
+			try {
+				administrator = getAccessController().getAdministratorUser();
+			} catch (Exception e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get administrator cause of: ", e);
+			}
+
+			if (user.equals(administrator)) {
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getAreasForCurrentUser()
+	 */
+	@Override
+	public Collection<CourseProviderArea> getAreasForCurrentUser() {
+		User user = getCurrentUser();
+		if (user != null) {
+			if (hasFullAccessRights()) {
+				return getCourseProviderAreaHome().findAll();
+			}
+
+			return getCourseProviderAreaHome().findAllByProviders(
+					getProvidersForCurrentUser()
+					);
+		}
+
+		return Collections.emptyList();
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getProvidersForCurrentUser()
+	 */
+	@Override
+	public Collection<CourseProvider> getProvidersForCurrentUser() {
+		User user = getCurrentUser();
+		if (user != null) {
+			if (hasFullAccessRights()) {
+				return getCourseProviderHome().findAllRecursively();
+			}
+
+			return getProvidersForUser(user);
+		}
+
+		return Collections.emptyList();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getProvidersByType(java.lang.String)
+	 */
 	@Override
 	public Collection<CourseProvider> getProvidersByType(String typePrimaryKey) {
 		Collection<CourseProvider> courseProviders = getCourseProviderHome().findAllRecursively();

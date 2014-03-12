@@ -82,6 +82,7 @@
  */
 package is.idega.idegaweb.egov.course.business;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
 import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
@@ -322,4 +323,29 @@ public interface CourseProviderBusiness extends IBOService {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	<P extends CourseProvider> Collection<P> getHandledCourseProviders(User user);
+
+	/**
+	 * 
+	 * @return <code>true</code> if current {@link User} has role 
+	 * {@link CourseConstants#SUPER_ADMINISTRATOR_ROLE_KEY}
+	 * or is system administrator, <code>false</code> otherwise.
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	boolean hasFullAccessRights();
+
+	/**
+	 * 
+	 * @return {@link CourseProviderArea}s visible for current {@link User} or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProviderArea> getAreasForCurrentUser();
+
+	/**
+	 * 
+	 * @return {@link CourseProvider}s visible for current {@link User} or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProvider> getProvidersForCurrentUser();
 }
