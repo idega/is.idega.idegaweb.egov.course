@@ -8,7 +8,6 @@
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
@@ -20,14 +19,11 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
 import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWResourceBundle;
@@ -86,9 +82,12 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM))).getDate() : null;
 				Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO))).getDate() : null;
 
-				CourseProviderType type = getSchoolBusiness(iwc).getSchoolType(new Integer(schoolTypePK.toString()));
-				CourseProviderArea area = getSchoolBusiness(iwc).getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
-				Collection<CourseProvider> providers = getBusiness().getProviders(area, type);
+				CourseProviderType type = getSchoolBusiness(iwc)
+						.getSchoolType(new Integer(schoolTypePK.toString()));
+				CourseProviderArea area = getSchoolBusiness(iwc)
+						.getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
+				Collection<CourseProvider> providers = getBusiness()
+						.getProviders(area, type);
 
 				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
 					Collection<CourseProvider> userProviders = getCourseProviderBusiness()
@@ -141,7 +140,8 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		DropdownMenu schoolArea = new DropdownMenu(PARAMETER_AREA);
 		schoolArea.addMenuElementFirst("", localize("select_school_area", "Select school area"));
 		schoolArea.keepStatusOnAction(true);
-		Collection areas = getBusiness().getSchoolAreas();
+		Collection<CourseProviderArea> areas = getCourseProviderBusiness()
+				.getAreasForCurrentUser();
 		schoolArea.addMenuElements(areas);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
@@ -190,7 +190,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection courses, Layer section, String header, Date fromDate, Date toDate) throws RemoteException {
+	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection<Course> courses, Layer section, String header, Date fromDate, Date toDate) throws RemoteException {
 		Gender male = null;
 		Gender female = null;
 		try {
@@ -224,9 +224,9 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		cell.setStyleClass("courseType");
 		cell.add(new Text(this.getResourceBundle(iwc).getLocalizedString("course_type", "Course type")));
 
-		Map genderTotals = new HashMap();
-		genderTotals.put(male, new Integer(0));
-		genderTotals.put(female, new Integer(0));
+		Map<Gender, Integer> genderTotals = new HashMap<Gender, Integer>();
+		genderTotals.put(male, 0);
+		genderTotals.put(female, 0);
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("male");
@@ -246,9 +246,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		int iRow = 1;
 
 		int total = 0;
-		Iterator iter = courses.iterator();
-		while (iter.hasNext()) {
-			Course course = (Course) iter.next();
+		for (Course course : courses) {
 			CourseType courseType = course.getCourseType();
 
 			row = group.createRow();
@@ -265,7 +263,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 			int maleSum = getBusiness().getNumberOfChoices(course, male);
 			sum += maleSum;
-			genderTotals.put(male, new Integer(((Integer) genderTotals.get(male)).intValue() + maleSum));
+			genderTotals.put(male, new Integer((genderTotals.get(male)).intValue() + maleSum));
 
 			int femaleSum = getBusiness().getNumberOfChoices(course, female);
 			sum += femaleSum;
@@ -332,22 +330,5 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 	public void setSchoolTypePK(String schoolTypePK) {
 		this.schoolTypePK = schoolTypePK;
-	}
-
-	private CourseProviderBusiness courseProviderBusiness = null;
-
-	protected CourseProviderBusiness getCourseProviderBusiness() {
-		if (this.courseProviderBusiness == null) {
-			try {
-				this.courseProviderBusiness = IBOLookup.getServiceInstance(
-						getIWApplicationContext(), CourseProviderBusiness.class);
-			} catch (IBOLookupException e) {
-				getLogger().log(Level.WARNING, 
-						"Failed to get " + CourseProviderBusiness.class.getSimpleName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.courseProviderBusiness;
 	}
 }
