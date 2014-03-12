@@ -132,7 +132,7 @@ public class CourseProviderAreasViewerBean {
 	}
 
 	public List<CourseProviderAreaBean> getCourseProviders() {
-		Collection<CourseProviderArea> courseProviders = getCourseProviderAreaHome().find();
+		Collection<CourseProviderArea> courseProviders = getCourseProviderAreaHome().findAll();
 		if (ListUtil.isEmpty(courseProviders)) {
 			return Collections.emptyList();
 		}

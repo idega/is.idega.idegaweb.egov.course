@@ -171,16 +171,19 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderAreaHome#find()
 	 */
 	@Override
-	public <T extends CourseProviderArea> Collection<T> find() {
+	public <T extends CourseProviderArea> Collection<T> findAll() {
 		CourseProviderAreaBMPBean entity = (CourseProviderAreaBMPBean) idoCheckOutPooledEntity();
-		Collection<?> ids = entity.ejbFind();
-		idoCheckInPooledEntity(entity);
+		Collection<Object> ids = entity.ejbFindAll();
+		if (ListUtil.isEmpty(ids)) {
+			return Collections.emptyList();
+		}
+
 		try {
 			return getEntityCollectionForPrimaryKeys(ids);
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to get " + CourseProviderArea.class.getName() + 
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
 					" by id's: " + ids);
 		}
 

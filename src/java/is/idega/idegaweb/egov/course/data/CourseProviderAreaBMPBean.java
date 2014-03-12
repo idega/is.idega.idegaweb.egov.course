@@ -361,7 +361,7 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 		return Collections.emptyList();
 	}
 
-	public Collection<Object> ejbFind() {
+	public Collection<Object> ejbFindAll() {
 		IDOQuery sql = idoQuery();
 		sql.appendSelectAllFrom(getEntityName());
 		sql.appendOrderBy(COLUMN_NAME);
