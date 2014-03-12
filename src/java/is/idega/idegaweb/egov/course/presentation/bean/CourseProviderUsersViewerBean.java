@@ -177,15 +177,19 @@ public class CourseProviderUsersViewerBean {
 	 */
 	public Collection<? extends CourseProviderUser> getCourseProviderUserEntities() {
 		if (getCourseProviderViewerBean().hasFullAccessRights()) {
-			if (CourseProviderUsersViewerBean.class.equals(this.getClass())) {
-				return getCourseProviderUserHome().findAllRecursively();
-			} else {
+			if (isSubclass()) {
 				return getCourseProviderUserHome().find();
+			} else {
+				return getCourseProviderUserHome().findAllRecursively();
 			}
 		} 
 
 		return getCourseProviderUserHome().find(
 				getCourseProviderViewerBean().getCourseProviderEntities());
+	}
+
+	public boolean isSubclass() {
+		return !CourseProviderUsersViewerBean.class.equals(this.getClass());
 	}
 
 	/**
