@@ -120,4 +120,6 @@ public interface CourseProviderArea extends IDOEntity {
 	 * @see javax.ejb.EJBLocalObject#remove()
 	 */
 	public void remove();
+
+	public void setPrimaryKey(String string);
 }

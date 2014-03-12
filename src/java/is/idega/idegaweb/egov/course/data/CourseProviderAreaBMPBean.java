@@ -119,6 +119,14 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 	public static final String COLUMN_SCHOOL_CATEGORY = "SCHOOL_CATEGORY";
 	public final static String COLUMN_INFO = "AREA_INFO";
 	public final static String COLUMN_CITY = "AREA_CITY";
+
+	@Override
+	public void setPrimaryKey(String string) {
+		if (!StringUtil.isEmpty(string)) {
+			setPrimaryKey(Integer.valueOf(string));
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.idega.data.GenericEntity#getName()
@@ -402,9 +410,7 @@ public class CourseProviderAreaBMPBean extends GenericEntity implements
 					getSchoolAreaCity(), 
 					getAccountingKey(), 
 					getCategory() != null ? getCategory().toString() : null);
-			if (updatedEntity != null) {
-				setPrimaryKey(updatedEntity.getPrimaryKey().toString());
-			}
+			setPrimaryKey(updatedEntity.getPrimaryKey().toString());
 		}
 
 		super.store();
