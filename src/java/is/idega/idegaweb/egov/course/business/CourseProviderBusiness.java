@@ -348,4 +348,14 @@ public interface CourseProviderBusiness extends IBOService {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Collection<CourseProvider> getProvidersForCurrentUser();
+
+	/**
+	 * 
+	 * @param type to filter by, all {@link CourseProvider}s will be returned
+	 * if <code>null</code>;
+	 * @return {@link CourseProvider}s visible for current {@link User} or
+	 * {@link Collections#emptyList()} on failure; 
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProvider> getProvidersForCurrentUser(CourseProviderType type);
 }
