@@ -152,7 +152,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<Object> ejbFindAllByCategories(
-			Collection<CourseCategory> courseCategories, 
+			Collection<CourseProviderType> courseCategories, 
 			boolean valid) {
 		if (ListUtil.isEmpty(courseCategories)) {
 			return Collections.emptyList();

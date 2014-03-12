@@ -67,7 +67,7 @@ public class CourseTypeHomeImpl extends IDOFactory implements CourseTypeHome {
 	 */
 	@Override
 	public Collection<CourseType> findAllByCategory(
-			Collection<CourseCategory> courseCategories, 
+			Collection<CourseProviderType> courseCategories, 
 			boolean valid) {
 		if (ListUtil.isEmpty(courseCategories)) {
 			return Collections.emptyList();

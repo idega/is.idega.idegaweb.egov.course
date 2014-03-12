@@ -40,6 +40,6 @@ public interface CourseTypeHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Collection<CourseType> findAllByCategory(
-			Collection<CourseCategory> courseCategories, 
+			Collection<CourseProviderType> courseCategories, 
 			boolean valid);
 }
