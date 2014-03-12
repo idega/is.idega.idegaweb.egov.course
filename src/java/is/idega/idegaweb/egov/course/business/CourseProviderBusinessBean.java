@@ -355,6 +355,16 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getProvidersByAreasForCurrentUser(is.idega.idegaweb.egov.course.data.CourseProviderType)
+	 */
+	@Override
+	public Map<CourseProviderArea, List<CourseProvider>> getProvidersByAreasForCurrentUser(
+			CourseProviderType type) {
+		return getProvidersByAreas(getProvidersForCurrentUser(type));
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getCourseProviderTypes(java.util.Collection)
 	 */
 	@Override
