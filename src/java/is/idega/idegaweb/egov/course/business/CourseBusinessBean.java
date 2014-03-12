@@ -942,8 +942,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			return Collections.emptyList();
 		}
 
-		return getCourseTypeHome().findAllByCategory(
-				Arrays.asList(courseCategory), valid);
+		return getCourseTypes(courseCategory, valid);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourseTypes(is.idega.idegaweb.egov.course.data.CourseProviderType, boolean)
+	 */
+	@Override
+	public Collection<CourseType> getCourseTypes(
+			CourseProviderType category,
+			boolean valid) {
+		if (category != null) {
+			return getCourseTypeHome().findAllByCategory(
+					Arrays.asList(category), valid);
+		}
+
+		return Collections.emptyList();
 	}
 
 	@Override

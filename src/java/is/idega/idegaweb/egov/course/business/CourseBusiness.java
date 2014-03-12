@@ -942,4 +942,13 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Collection<CourseType> getCourseTypes();
+
+	/**
+	 * 
+	 * @param category is {@link CourseCategory}, not <code>null</code>;
+	 * @param valid is not disabled;
+	 * @return {@link Collection} of entities or {@link Collections#emptyList()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseType> getCourseTypes(CourseProviderType category, boolean valid);
 }
