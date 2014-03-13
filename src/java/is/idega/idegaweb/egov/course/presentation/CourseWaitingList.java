@@ -67,7 +67,9 @@ public class CourseWaitingList extends CourseBlock {
 
 			boolean success = parseAction(iwc);
 			if (!success) {
-				PresentationUtil.addJavascriptAlertOnLoad(iwc, localize("accept_choices.max_reached", "You can not accept beyond max for course."));
+				PresentationUtil.addJavascriptAlertOnLoad(iwc, localize(
+						"accept_choices.max_reached", 
+						"You can not accept beyond max for course."));
 			}
 			
 			form.add(getNavigation(iwc));
@@ -132,7 +134,8 @@ public class CourseWaitingList extends CourseBlock {
 	}
 
 	protected Layer getNavigation(IWContext iwc) throws RemoteException {
-		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
+		boolean showAllCourses = iwc.getApplicationSettings().getBoolean(
+				CourseConstants.PROPERTY_SHOW_ALL_COURSES, false);
 
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
