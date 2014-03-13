@@ -7,7 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
 
-import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderArea;
@@ -53,11 +52,9 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 	private static final String PARAMETER_FROM = "prm_from";
 	private static final String PARAMETER_TO = "prm_to";
 
-	private Object schoolTypePK;
-
 	public void present(IWContext iwc) {
 		try {
-			if (schoolTypePK == null) {
+			if (getType() == null) {
 				add("No school type set");
 				return;
 			}
@@ -82,29 +79,25 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM))).getDate() : null;
 				Date toDate = iwc.isParameterSet(PARAMETER_TO) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO))).getDate() : null;
 
-				CourseProviderType type = getSchoolBusiness(iwc)
-						.getSchoolType(new Integer(schoolTypePK.toString()));
-				CourseProviderArea area = getSchoolBusiness(iwc)
-						.getSchoolArea(new Integer(iwc.getParameter(PARAMETER_AREA)));
-				Collection<CourseProvider> providers = getBusiness()
-						.getProviders(area, type);
+				CourseProviderType type = getType();
+				CourseProviderArea selectedArea = getSchoolBusiness(iwc)
+						.getSchoolArea(iwc.getParameter(PARAMETER_AREA));
 
-				if (!iwc.getAccessController().hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, iwc) && iwc.getAccessController().hasRole(CourseConstants.ADMINISTRATOR_ROLE_KEY, iwc)) {
-					Collection<CourseProvider> userProviders = getCourseProviderBusiness()
-							.getProvidersForUser(iwc.getCurrentUser());
-					providers.retainAll(userProviders);
-				}
-
+				Collection<CourseProvider> providers = getCourseProviderBusiness()
+						.getProvidersForCurrentUser(getType());
 				for (CourseProvider provider : providers) {
-					Collection<Course> courses = getBusiness().getCourses(
-							provider, type, fromDate, toDate);
+					CourseProviderArea area = provider.getCourseProviderArea();
+					if (selectedArea.equals(area)) {
+						Collection<Course> courses = getBusiness().getCourses(
+								provider, type, fromDate, toDate);
 
-					addResults(iwc, iwrb, type, courses, section, 
-							provider.getName(), fromDate, toDate);
+						addResults(iwc, iwrb, type, courses, section, 
+								provider.getName(), fromDate, toDate);
 
-					Layer clearLayer = new Layer(Layer.DIV);
-					clearLayer.setStyleClass("Clear");
-					section.add(clearLayer);
+						Layer clearLayer = new Layer(Layer.DIV);
+						clearLayer.setStyleClass("Clear");
+						section.add(clearLayer);
+					}
 				}
 			}
 
@@ -141,7 +134,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		schoolArea.addMenuElementFirst("", localize("select_school_area", "Select school area"));
 		schoolArea.keepStatusOnAction(true);
 		Collection<CourseProviderArea> areas = getCourseProviderBusiness()
-				.getAreasForCurrentUser();
+				.getAreasForCurrentUser(getType());
 		schoolArea.addMenuElements(areas);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
@@ -329,6 +322,6 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 	}
 
 	public void setSchoolTypePK(String schoolTypePK) {
-		this.schoolTypePK = schoolTypePK;
+		setCourseProviderType(schoolTypePK);
 	}
 }
