@@ -175,20 +175,18 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getAreasForCurrentUser()
 	 */
 	@Override
-	public Collection<CourseProviderArea> getAreasForCurrentUser() {
-		User user = getCurrentUser();
-		if (user != null) {
-			if (hasFullAccessRights()) {
-				return getCourseProviderAreaHome().findAll();
+	public Collection<CourseProviderArea> getAreasForCurrentUser(CourseProviderType type) {
+		if (hasFullAccessRights()) {
+			if (type != null) {
+				return getCourseProviderAreaHome().findAllByProviders(
+						getProvidersByType(type));
 			}
 
-			return getCourseProviderAreaHome().findAllByProviders(
-					getProvidersForCurrentUser()
-					);
+			return getCourseProviderAreaHome().findAll();
 		}
 
-		return Collections.emptyList();
-
+		return getCourseProviderAreaHome().findAllByProviders(
+				getProvidersForCurrentUser(type));
 	}
 
 	/*
@@ -236,28 +234,36 @@ public class CourseProviderBusinessBean extends IBOServiceBean implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getProvidersByType(is.idega.idegaweb.egov.course.data.CourseProviderType)
+	 */
+	@Override
+	public Collection<CourseProvider> getProvidersByType(CourseProviderType type) {
+		Collection<CourseProvider> courseProviders = getCourseProviderHome().findAllRecursively();
+		if (type != null) {
+			ArrayList<CourseProvider> matchedResult = new ArrayList<CourseProvider>(
+					courseProviders.size());
+
+			Collection<CourseProviderType> courseProviderTypes = null;
+			for (CourseProvider courseProvider : courseProviders) {
+				courseProviderTypes = courseProvider.getCourseProviderTypes();
+				if (!ListUtil.isEmpty(courseProviderTypes) && courseProviderTypes.contains(type)) {
+					matchedResult.add(courseProvider);
+				}
+			}
+
+			return matchedResult;
+		}
+
+		return courseProviders;
+	}
+	
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.business.CourseProviderBusiness#getProvidersByType(java.lang.String)
 	 */
 	@Override
 	public Collection<CourseProvider> getProvidersByType(String typePrimaryKey) {
-		Collection<CourseProvider> courseProviders = getCourseProviderHome().findAllRecursively();
-
-		CourseProviderType type = getCourseProviderTypeHome().find(typePrimaryKey);
-		if (type == null) {
-			return courseProviders;
-		}
-
-		Collection<CourseProviderType> courseProviderTypes = null;
-		ArrayList<CourseProvider> matchedResult = new ArrayList<CourseProvider>(
-				courseProviders.size());
-		for (CourseProvider courseProvider : courseProviders) {
-			courseProviderTypes = courseProvider.getCourseProviderTypes();
-			if (!ListUtil.isEmpty(courseProviderTypes) && courseProviderTypes.contains(type)) {
-				matchedResult.add(courseProvider);
-			}
-		}
-
-		return matchedResult;
+		return getProvidersByType(getCourseProviderTypeHome().find(typePrimaryKey));
 	}
 
 	/*

@@ -317,6 +317,16 @@ public interface CourseProviderBusiness extends IBOService {
 
 	/**
 	 * 
+	 * <p>Searches for sub-types of {@link CourseProvider} by criteria:</p>
+	 * @param type to filter by, skipped if <code>null</code>;
+	 * @return {@link CourseProvider}s by given criteria or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseProvider> getProvidersByType(CourseProviderType type);
+
+	/**
+	 * 
 	 * @param user to get {@link CourseProvider}s for, not <code>null</code>;
 	 * @return {@link CourseProvider}s or {@link Collections#emptyList()}
 	 * on failure;
@@ -335,11 +345,12 @@ public interface CourseProviderBusiness extends IBOService {
 
 	/**
 	 * 
+	 * @param type to filter by, skipped if <code>null</code>;
 	 * @return {@link CourseProviderArea}s visible for current {@link User} or
 	 * {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	Collection<CourseProviderArea> getAreasForCurrentUser();
+	Collection<CourseProviderArea> getAreasForCurrentUser(CourseProviderType type);
 
 	/**
 	 * 
