@@ -76,8 +76,6 @@ public class CourseParticipantsList extends CourseBlock {
 
 	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
 
-	protected CourseProviderType type = null;
-	
 	protected ICPage changeEmailResponsePage = null;
 
 	protected static final String PARAMETER_USER_PK = "cf_user_pk";
@@ -195,12 +193,16 @@ public class CourseParticipantsList extends CourseBlock {
 		schoolType.keepStatusOnAction(true);
 
 		boolean showTypes = true;
+		if (getType() != null) {
+			showTypes = false;
+		}
+
 		if (getSession().getProvider() != null) {
 			Collection<CourseProviderType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = schoolTypes.iterator().next();
-				schoolType.setSelectedElement(type.getPrimaryKey().toString());
+				setType(schoolTypes.iterator().next());
+				schoolType.setSelectedElement(getType().getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);
 		}
@@ -217,8 +219,8 @@ public class CourseParticipantsList extends CourseBlock {
 			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(typePK, true);
 			courseType.addMenuElements(courseTypes);
 		}
-		else if (type != null) {
-			typePK = new Integer(type.getPrimaryKey().toString());
+		else if (getType() != null) {
+			typePK = new Integer(getType().getPrimaryKey().toString());
 			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(typePK, true);
 			courseType.addMenuElements(courseTypes);
 		}
@@ -298,8 +300,8 @@ public class CourseParticipantsList extends CourseBlock {
 			formItem.add(schoolType);
 			layer.add(formItem);
 		}
-		else if (type != null) {
-			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
+		else if (getType() != null) {
+			layer.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, getType().getPrimaryKey().toString()));
 		}
 
 		Layer formItem = new Layer(Layer.DIV);
