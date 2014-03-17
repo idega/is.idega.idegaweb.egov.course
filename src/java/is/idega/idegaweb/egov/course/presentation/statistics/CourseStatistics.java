@@ -66,7 +66,7 @@ public class CourseStatistics extends CourseBlock {
 
 	private Collection<CourseType> getCourseTypes() throws RemoteException {
 		if (getType() != null) {
-			return getBusiness().getCourseTypes(getType(), false);
+			return getBusiness().getCourseTypes(getType(), Boolean.TRUE);
 		}
 
 		Collection<CourseProviderType> providerTypes = getCourseProviderBusiness()
@@ -79,7 +79,7 @@ public class CourseStatistics extends CourseBlock {
 		for (CourseProviderType courseProviderType: providerTypes) {
 			Collection<CourseType> types = getBusiness().getCourseTypes(
 					new Integer(courseProviderType.getPrimaryKey().toString()), 
-					false);
+					Boolean.TRUE);
 			for (CourseType type: types) {
 				allTypes.put(type.getPrimaryKey().toString(), type);
 			}
