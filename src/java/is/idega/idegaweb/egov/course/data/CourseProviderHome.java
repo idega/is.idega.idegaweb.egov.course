@@ -281,8 +281,19 @@ public interface CourseProviderHome extends IDOHome {
 	 * @return entities by criteria or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public <P extends CourseProvider> Collection<P> findByType(Collection<? extends CourseProviderType> types);
+	public <P extends CourseProvider> Collection<P> findByType(
+			Collection<? extends CourseProviderType> types);
 
+	/**
+	 * 
+	 * <p>Searches in sub-types</p>
+	 * @param types to search by, not <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<P extends CourseProvider> Collection<P> findByTypeRecursively(
+			Collection<? extends CourseProviderType> types);
+	
 	/**
 	 *
 	 * @param areas to search by, not <code>null</code>;

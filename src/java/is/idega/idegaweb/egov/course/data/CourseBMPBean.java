@@ -440,7 +440,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	 *
 	 * <p>Constructs SQL query</p>
 	 * @param courseProviders to filter by, skipped if <code>null</code>;
-	 * @param couserProviderTypes to filter by, skipped if <code>null</code>;
+	 * @param courseProviderTypes to filter by, skipped if <code>null</code>;
 	 * @param courseTypes to filter by, skipped if <code>null</code>;
 	 * @param birthDateFrom is floor of age of course attender,
 	 * skipped if <code>null</code>;
@@ -459,7 +459,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	 */
 	public IDOQuery getQuery(
 			Collection<? extends CourseProvider> courseProviders,
-			Collection<? extends CourseProviderType> couserProviderTypes,
+			Collection<? extends CourseProviderType> courseProviderTypes,
 			Collection<? extends CourseType> courseTypes,
 			Date birthDateFrom,
 			Date birthDateTo,
@@ -475,12 +475,22 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		/* Filtering by course providers */
 		if (!ListUtil.isEmpty(courseProviders)) {
-			query.appendJoinOn(courseProviders);
-		}
+			/* Filtering by course provider types */
+			if (!ListUtil.isEmpty(courseProviderTypes)) {
+				Collection<CourseProvider> providersByTypes = getCourseProviderHome()
+						.findByTypeRecursively(courseProviderTypes);
+				if (!ListUtil.isEmpty(providersByTypes)) {
+					courseProviders.retainAll(providersByTypes);
+				}
+			}
 
-		/* Filtering by course provider types */
-		if (!ListUtil.isEmpty(couserProviderTypes)) {
-			query.appendJoinOn(couserProviderTypes);
+			query.appendJoinOn(courseProviders);
+		} else {
+			/* Filtering by course provider types */
+			if (!ListUtil.isEmpty(courseProviderTypes)) {
+				query.appendJoinOn(getCourseProviderHome()
+						.findByTypeRecursively(courseProviderTypes));
+			}
 		}
 
 		/* Filtering by course types */

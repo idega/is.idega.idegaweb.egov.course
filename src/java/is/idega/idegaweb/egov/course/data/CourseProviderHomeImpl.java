@@ -246,10 +246,34 @@ public class CourseProviderHomeImpl extends IDOFactory
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#findByTypeRecursively(java.util.Collection)
+	 */
+	@Override
+	public <P extends CourseProvider> Collection<P> findByTypeRecursively(
+			Collection<? extends CourseProviderType> types) {
+		ArrayList<P> providers = new ArrayList<P>();
+		if (!ListUtil.isEmpty(types)) {
+			Collection<P> foundProviders = null;
+			for (IDOHome home : getHomesForSubtypes()) {
+				if (home instanceof CourseProviderHome) {
+					foundProviders = ((CourseProviderHome) home).findByType(types);
+					if (!ListUtil.isEmpty(foundProviders)) {
+						providers.addAll(foundProviders);
+					}
+				}
+			}
+		}
+
+		return providers;
+	}
+	
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#findByType(java.util.Collection)
 	 */
 	@Override
-	public <P extends CourseProvider> Collection<P> findByType(Collection<? extends CourseProviderType> types) {
+	public <P extends CourseProvider> Collection<P> findByType(
+			Collection<? extends CourseProviderType> types) {
 		if (ListUtil.isEmpty(types)) {
 			return Collections.emptyList();
 		}
