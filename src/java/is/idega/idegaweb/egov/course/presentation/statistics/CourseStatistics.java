@@ -45,6 +45,7 @@ import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 
@@ -311,10 +312,14 @@ public class CourseStatistics extends CourseBlock {
 
 		for (Iterator<CourseProvider> prIter = providers.iterator(); prIter.hasNext();) {
 			CourseProvider provider = prIter.next();
-			int providerSum = providerTotals.get(provider).intValue();
-
 			cell = row.createCell();
-			cell.add(new Text(String.valueOf(providerSum)));
+
+			Integer result = providerTotals.get(provider);
+			if (result != null) {
+				cell.add(new Text(result.toString()));
+			} else {
+				cell.add(new Text(CoreConstants.MINUS));
+			}
 		}
 
 		cell = row.createCell();
