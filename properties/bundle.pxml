@@ -6,6 +6,19 @@
       <value>
         <map>
           <key>
+            <name>is.idega.idegaweb.egov.course.presentation.CourseRegistrationViaHandler</name>
+            <value>
+              <map>
+                <key>
+                  <name>component_property_file</name>
+                  <type>java.lang.String</type>
+                  <value>is.idega.idegaweb.egov.course.presentation.CourseRegistrationViaHandler.pxml</value>
+                </key>
+              </map>
+            </value>
+            <type>map</type>
+          </key>
+          <key>
             <name>is.idega.idegaweb.egov.course.presentation.CourseDiscountEditor</name>
             <value>
               <map>
