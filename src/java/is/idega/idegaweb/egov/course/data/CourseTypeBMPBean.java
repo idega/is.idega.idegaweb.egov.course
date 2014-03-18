@@ -166,7 +166,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		if (valid) {
 			query.appendWhereEquals(
 					IDOQuery.ENTITY_TO_SELECT + CoreConstants.DOT + COLUMN_DISABLED, 
-					Boolean.FALSE);
+					"\'N\'");
 			query.appendOrIsNull(COLUMN_DISABLED);
 		}
 
