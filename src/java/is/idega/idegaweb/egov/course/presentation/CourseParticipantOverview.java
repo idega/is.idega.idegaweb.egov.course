@@ -345,12 +345,17 @@ public class CourseParticipantOverview extends CourseBlock {
 			}
 		}
 
+		form.add(getBottomLayer());
+		add(form);
+	}
+	
+	protected Layer getBottomLayer() {
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
-		form.add(bottom);
 
 		Link home = getButtonLink(getResourceBundle().getLocalizedString("back", "Back"));
 		home.setStyleClass("buttonHome");
+
 		if (parametersToMaintainBackButton != null) {
 			AdvancedProperty parameter = null;
 			for (int i = 0; i < parametersToMaintainBackButton.size(); i++) {
@@ -358,12 +363,13 @@ public class CourseParticipantOverview extends CourseBlock {
 				home.addParameter(parameter.getId(), parameter.getValue());
 			}
 		}
+
 		if (getResponsePage() != null) {
 			home.setPage(getResponsePage());
 		}
-		bottom.add(home);
 
-		add(form);
+		bottom.add(home);
+		return bottom;
 	}
 
 	public void setLinkToPrintOut(UIComponent linkToPrintOut) {
