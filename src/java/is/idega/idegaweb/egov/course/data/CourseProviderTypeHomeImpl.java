@@ -224,12 +224,12 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 		try {
 			type.store();
 			java.util.logging.Logger.getLogger(getClass().getName()).info(
-					CourseProviderType.class.getSimpleName() + " by id: '" + 
+					getEntityInterfaceClass().getSimpleName() + " by id: '" + 
 							type.getPrimaryKey() + "' successfully updated!");
 			return type;
 		} catch (IDOStoreException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-					"Failed to update " + CourseProviderType.class.getSimpleName() + 
+					"Failed to update " + getEntityInterfaceClass().getSimpleName() + 
 					" by id: '" + type.getPrimaryKey() + "' cause of: ", e);
 		}
 
@@ -267,13 +267,13 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 			try {
 				type = createIDO();
 				java.util.logging.Logger.getLogger(getClass().getName()).info(
-						CourseProviderType.class.getSimpleName()
+						getEntityInterfaceClass().getSimpleName()
 								+ " successfully created!");
 			} catch (CreateException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
 						Level.WARNING,
 						"Failed to create "
-								+ CourseProviderType.class.getSimpleName()
+								+ getEntityInterfaceClass().getSimpleName()
 								+ " cause of: ", e);
 			}
 		}
