@@ -8,7 +8,6 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
 import com.idega.data.IDOHome;
-import com.idega.data.IDORelationshipException;
 
 public interface CourseTypeHome extends IDOHome {
 
@@ -23,9 +22,28 @@ public interface CourseTypeHome extends IDOHome {
 	 */
 	public CourseType findByPrimaryKey(Object pk);
 
-	public Collection<CourseType> findAll(boolean valid) throws FinderException;
+	/**
+	 * 
+	 * @param valid is not {@link CourseType#isDisabled()};
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<CourseType> findAll(boolean valid);
 
-	public Collection<CourseType> findAllBySchoolType(Object schoolTypePK, boolean valid) throws FinderException, IDORelationshipException;
+	/**
+	 * 
+	 * @param schoolTypePK is {@link CourseProviderType#getPrimaryKey()},
+	 * not <code>null</code>;
+	 * @param valid tells that {@link CourseProviderType} is not disabled;
+	 * @return {@link CourseType}s by {@link CourseProviderType}s or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @see CourseTypeHome#findAllByCategory(Collection, boolean);
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<CourseType> findAllBySchoolType(
+			Object schoolTypePK, 
+			boolean valid);
 
 	public CourseType findByAbbreviation(String abbreviation) throws FinderException;
 	
@@ -40,6 +58,17 @@ public interface CourseTypeHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Collection<CourseType> findAllByCategory(
-			Collection<CourseProviderType> courseCategories, 
+			Collection<? extends CourseCategory> courseCategories, 
 			boolean valid);
+
+	/**
+	 * 
+	 * @param types to search by, not <code>null</code>;
+	 * @param valid tells that {@link CourseCategory} is not disabled;
+	 * @return {@link CourseType}s by {@link CourseCategory}s or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<CourseType> findByCourseProviderTypes(
+			Collection<? extends CourseProviderType> types, boolean valid);
 }

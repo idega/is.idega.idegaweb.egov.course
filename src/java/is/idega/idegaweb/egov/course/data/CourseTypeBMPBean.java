@@ -8,11 +8,8 @@ import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOQuery;
-import com.idega.data.IDORelationshipException;
 import com.idega.data.query.Column;
 import com.idega.data.query.MatchCriteria;
-import com.idega.data.query.OR;
-import com.idega.data.query.Order;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.util.CoreConstants;
@@ -129,18 +126,36 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		setColumn(COLUMN_DISABLED, disabled);
 	}
 
-	// Finders
-	public Collection<Object> ejbFindAll(boolean valid) throws FinderException {
-		Table table = new Table(this);
+	/**
+	 * 
+	 * @param valid is not {@link CourseType#isDisabled()};
+	 * @return {@link Collection} of {@link CourseType#getPrimaryKey()} 
+	 * by criteria or {@link Collections#emptyList()} on fialure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Object> ejbFindAll(boolean valid) {
+		IDOQuery query = idoQuery();
+		query.useDefaultAlias = Boolean.TRUE;
+		query.appendSelectAllFrom(this);
 
-		SelectQuery query = new SelectQuery(table);
-		query.addColumn(new Column(table, getIDColumnName()));
 		if (valid) {
-			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, false)));
+			query.appendWhereEquals(
+					IDOQuery.ENTITY_TO_SELECT + CoreConstants.DOT + COLUMN_DISABLED, 
+					"\'N\'");
+			query.appendOrIsNull(COLUMN_DISABLED);
 		}
-		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
 
-		return this.idoFindPKsByQuery(query);
+		query.appendOrderBy(IDOQuery.ENTITY_TO_SELECT + CoreConstants.DOT + COLUMN_NAME);
+
+		try {
+			return idoFindPKsByQuery(query);
+		} catch (FinderException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get primary keys for " + CourseType.class.getSimpleName() + 
+					" by query: '" + query + "'");
+		}
+
+		return Collections.emptyList();
 	}
 
 	/**
@@ -152,7 +167,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<Object> ejbFindAllByCategories(
-			Collection<CourseProviderType> courseCategories, 
+			Collection<? extends CourseCategory> courseCategories, 
 			boolean valid) {
 		if (ListUtil.isEmpty(courseCategories)) {
 			return Collections.emptyList();
@@ -181,20 +196,6 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		}
 
 		return Collections.emptyList();
-	}
-	
-	public Collection<Object> ejbFindAllBySchoolType(Object schoolTypePK, boolean valid) throws FinderException, IDORelationshipException {
-		Table table = new Table(this);
-
-		SelectQuery query = new SelectQuery(table);
-		query.addColumn(new Column(table, getIDColumnName()));
-		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_SCHOOL_TYPE), MatchCriteria.EQUALS, schoolTypePK));
-		if (valid) {
-			query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_DISABLED), false), new MatchCriteria(table.getColumn(COLUMN_DISABLED), MatchCriteria.EQUALS, false)));
-		}
-		query.addOrder(new Order(table.getColumn(COLUMN_NAME), true));
-
-		return this.idoFindPKsByQuery(query);
 	}
 
 	public Object ejbFindByAbbreviation(String abbreviation) throws FinderException {
