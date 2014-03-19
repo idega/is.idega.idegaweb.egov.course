@@ -954,24 +954,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			CourseProviderType category,
 			boolean valid) {
 		if (category != null) {
-			return getCourseTypeHome().findAllByCategory(
+			return getCourseTypeHome().findByCourseProviderTypes(
 					Arrays.asList(category), valid);
 		}
 
 		return Collections.emptyList();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourseTypes()
+	 */
 	@Override
 	public Collection<CourseType> getCourseTypes() {
-		try {
-			return getCourseTypeHome().findAll(true);
-		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get valid " + CourseType.class.getSimpleName() + 
-					"s cause of: ", e);
-		}
-
-		return Collections.emptyList();
+		return getCourseTypeHome().findAll(true);
 	}
 
 	@Override
@@ -1690,24 +1686,39 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return new ArrayList<Course>();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getAllCourseTypes(boolean)
+	 */
 	@Override
 	public Collection<CourseType> getAllCourseTypes(boolean valid) {
-		try {
-			return getCourseTypeHome().findAll(valid);
-		} catch (FinderException e) {
-			e.printStackTrace();
-		}
-		return new ArrayList<CourseType>();
+		return getCourseTypeHome().findAll(valid);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getAllCourseTypes(java.lang.Integer, boolean)
+	 */
 	@Override
-	public Collection<CourseType> getAllCourseTypes(Integer schoolTypePK, boolean valid) {
-		try {
-			return getCourseTypeHome().findAllBySchoolType(schoolTypePK, valid);
-		} catch (Exception e) {
-			e.printStackTrace();
+	public Collection<CourseType> getAllCourseTypes(
+			Integer schoolTypePK, 
+			boolean valid) {
+		return getCourseTypeHome().findAllBySchoolType(schoolTypePK, valid);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getAllCourseTypes(is.idega.idegaweb.egov.course.data.CourseProviderType, boolean)
+	 */
+	@Override
+	public Collection<CourseType> getAllCourseTypes(
+			CourseProviderType schoolType, boolean valid) {
+		if (schoolType != null) {
+			return getCourseTypeHome().findByCourseProviderTypes(
+					Arrays.asList(schoolType), valid);
 		}
-		return new ArrayList<CourseType>();
+		
+		return getAllCourseTypes(valid);
 	}
 
 	/*

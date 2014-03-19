@@ -527,15 +527,35 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public Collection<Course> getAllCourses(CourseProvider provider) throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAllCourseTypes
+	 * 
+	 * @param valid is not {@link CourseType#isDisabled()};
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<CourseType> getAllCourseTypes(boolean valid) throws RemoteException;
+	public Collection<CourseType> getAllCourseTypes(boolean valid);
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAllCourseTypes
+	 * 
+	 * @param schoolTypePK is {@link CourseProviderType#getPrimaryKey()} to
+	 * search by, not <code>null</code>;
+	 * @param valid is not {@link CourseType#isDisabled()};
+	 * @return entities by criteria or {@link Collections#emptyList()} on 
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<CourseType> getAllCourseTypes(Integer schoolTypePK, boolean valid)
-			throws RemoteException;
+	public Collection<CourseType> getAllCourseTypes(Integer schoolTypePK, boolean valid);
+
+	/**
+	 * 
+	 * @param schoolType to search by, skipped if null;
+	 * @param valid is not {@link CourseType#isDisabled()};
+	 * @return entities by criteria or {@link Collections#emptyList()} on 
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<CourseType> getAllCourseTypes(
+			CourseProviderType schoolType, boolean valid);
 
 	/**
 	 * 
