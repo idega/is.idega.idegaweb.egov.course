@@ -1,20 +1,16 @@
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.data.CourseCategory;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -51,7 +47,7 @@ public class CourseTypeEditor extends CourseBlock {
 	private static final int ACTION_SAVE = 4;
 	private static final int ACTION_DELETE = 5;
 
-	private String category = null;
+//	private String category = null;
 
 	public void present(IWContext iwc) {
 		try {
@@ -75,7 +71,7 @@ public class CourseTypeEditor extends CourseBlock {
 				break;
 
 			case ACTION_DELETE:
-				if (!getCourseBusiness(iwc).deleteCourseType(
+				if (!getBusiness().deleteCourseType(
 						iwc.getParameter(PARAMETER_COURSE_TYPE_PK))) {
 					PresentationUtil
 							.addJavascriptAlertOnLoad(
@@ -111,7 +107,7 @@ public class CourseTypeEditor extends CourseBlock {
 
 		if (name != null && !"".equals(name.trim())) {
 			try {
-				getCourseBusiness(iwc).storeCourseType(pk, name, description,
+				getBusiness().storeCourseType(pk, name, description,
 						localizationKey, schoolTypePK, accountingKey, disabled);
 			} catch (CreateException ce) {
 				add(ce.getMessage());
@@ -121,6 +117,19 @@ public class CourseTypeEditor extends CourseBlock {
 				throw new IBORuntimeException(re);
 			}
 		}
+	}
+	
+	protected Collection<CourseProviderType> getCourseProviderTypes(
+			CourseProviderType courseProviderType) {
+		if (getType() != null) {
+			if (courseProviderType != null) {
+				return Arrays.asList(courseProviderType, getType());
+			}
+
+			return Arrays.asList(getType());
+		}
+
+		return getBusiness().getAllAfterschoolCareSchoolTypes();
 	}
 	
 	public void showEditor(IWContext iwc, Object courseTypePK)
@@ -138,39 +147,41 @@ public class CourseTypeEditor extends CourseBlock {
 				"Fill in the desired values and click 'Save'.")));
 		section.add(helpLayer);
 
-		CourseType type = getCourseBusiness(iwc).getCourseType(courseTypePK);
-
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		TextInput inputLocalization = new TextInput(PARAMETER_LOCALIZATION_KEY);
 		TextArea inputDesc = new TextArea(PARAMETER_DESCRIPTION);
-		Collection<? extends CourseProviderType> schoolTypes = null;
-		if (category == null) {
-			schoolTypes = getCourseBusiness(iwc).getAllAfterschoolCareSchoolTypes();
-		} else {
-			schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes(category);			
-		}
-
-		DropdownMenu inputSchoolTypes = new DropdownMenu(schoolTypes,
-				PARAMETER_SCHOOL_TYPE_PK);
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
 		CheckBox disabled = new CheckBox(PARAMETER_DISABLED);
 
+		DropdownMenu inputSchoolTypes = null;
+		CourseType type = getBusiness().getCourseType(courseTypePK);
 		if (type != null) {
 			inputName.setContent(type.getName());
 			inputLocalization.setContent(type.getLocalizationKey());
 			inputDesc.setContent(type.getDescription());
+
 			CourseCategory category = type.getCourseCategory();
+			inputSchoolTypes = new DropdownMenu(
+					getCourseProviderTypes(category),
+					PARAMETER_SCHOOL_TYPE_PK);
 			if (category != null) {
 				inputSchoolTypes.setSelectedElement(category.getPrimaryKey()
 						.toString());
 			}
+
 			if (type.getAccountingKey() != null) {
 				inputAccounting.setValue(type.getAccountingKey());
 			}
+
 			disabled.setChecked(type.isDisabled());
 
-			form.add(new HiddenInput(PARAMETER_COURSE_TYPE_PK, courseTypePK
-					.toString()));
+			form.add(new HiddenInput(
+					PARAMETER_COURSE_TYPE_PK, 
+					courseTypePK.toString()));
+		} else {
+			inputSchoolTypes = new DropdownMenu(
+					getCourseProviderTypes(null),
+					PARAMETER_SCHOOL_TYPE_PK);
 		}
 
 		Layer layer;
@@ -223,8 +234,8 @@ public class CourseTypeEditor extends CourseBlock {
 		layer.setStyleClass("formItem");
 		layer.setStyleClass("radioButtonItem");
 		label = new Label(localize("disabled", "Disabled"), disabled);
-		layer.add(disabled);
 		layer.add(label);
+		layer.add(disabled);
 		section.add(layer);
 
 		Layer clearLayer = new Layer(Layer.DIV);
@@ -263,23 +274,6 @@ public class CourseTypeEditor extends CourseBlock {
 		column.setSpan(2);
 		column.setWidth("12");
 
-		Collection courseTypes = null;
-		try {
-			if (category != null) {
-				Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes(category);
-				Iterator it = schoolTypes.iterator();
-				courseTypes = new ArrayList();
-				while (it.hasNext()) {
-					CourseProviderType type = (CourseProviderType) it.next();
-					courseTypes.addAll(getCourseBusiness(iwc).getAllCourseTypes((Integer) type.getPrimaryKey(), false));
-				}
-			} else {
-				courseTypes = getCourseBusiness(iwc).getAllCourseTypes(false);
-			}
-		} catch (RemoteException rex) {
-			courseTypes = new ArrayList();
-		}
-
 		TableRowGroup group = table.createHeaderRowGroup();
 		TableRow row = group.createRow();
 		TableCell2 cell = row.createHeaderCell();
@@ -309,10 +303,15 @@ public class CourseTypeEditor extends CourseBlock {
 		cell.add(new Text(localize("delete", "Delete")));
 
 		group = table.createBodyRowGroup();
+
 		int iRow = 1;
-		java.util.Iterator iter = courseTypes.iterator();
-		while (iter.hasNext()) {
-			CourseType cType = (CourseType) iter.next();
+		Collection<CourseType> courseTypes = getBusiness().getAllCourseTypes(
+				getType(), false);
+		for (CourseType cType: courseTypes) {
+			if (cType == null) {
+				continue;
+			}
+			
 			row = group.createRow();
 
 			try {
@@ -384,6 +383,7 @@ public class CourseTypeEditor extends CourseBlock {
 			}
 			iRow++;
 		}
+
 		form.add(table);
 
 		Layer buttonLayer = new Layer(Layer.DIV);
@@ -402,22 +402,5 @@ public class CourseTypeEditor extends CourseBlock {
 		buttonLayer.add(newLink);
 
 		add(form);
-	}
-
-	public CourseBusiness getCourseBusiness(IWContext iwc) {
-		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwc,
-					CourseBusiness.class);
-		} catch (IBOLookupException e) {
-			throw new IBORuntimeException(e);
-		}
-	}
-
-	public String getSchoolCategory() {
-		return this.category;
-	}
-
-	public void setSchoolCategory(String category) {
-		this.category = category;
 	}
 }
