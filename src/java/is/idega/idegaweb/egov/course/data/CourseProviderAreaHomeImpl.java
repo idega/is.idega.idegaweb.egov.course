@@ -192,6 +192,29 @@ public class CourseProviderAreaHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderAreaHome#findByPrimaryKeys(java.util.Collection)
+	 */
+	@Override
+	public <T extends CourseProviderArea> Collection<T> findByPrimaryKeys(
+			Collection<String> primaryKeys) {
+		if (ListUtil.isEmpty(primaryKeys)) {
+			return Collections.emptyList();
+		}
+
+		try {
+			return getEntityCollectionForPrimaryKeys(primaryKeys);
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING, 
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
+					" by id's: " + primaryKeys);
+		}
+
+		return Collections.emptyList();
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderAreaHome#findAllByProviders(java.util.Collection)
 	 */
 	@Override

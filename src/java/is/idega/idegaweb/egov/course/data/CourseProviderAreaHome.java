@@ -170,4 +170,16 @@ public interface CourseProviderAreaHome extends IDOHome {
 	 */
 	<T extends CourseProviderArea> Collection<T> findAllByProviders(
 			Collection<? extends CourseProvider> providers);
+
+	/**
+	 * 
+	 * @param primaryKeys is {@link Collection} of 
+	 * {@link CourseProviderArea#getPrimaryKey()} to search by, 
+	 * not <code>null</code>;
+	 * @return entities by primary keys or {@link Collections#emptyList()}
+	 * on failure; 
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	<T extends CourseProviderArea> Collection<T> findByPrimaryKeys(
+			Collection<String> primaryKeys);
 }
