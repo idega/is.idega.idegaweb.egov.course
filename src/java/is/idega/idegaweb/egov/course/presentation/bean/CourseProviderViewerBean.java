@@ -84,6 +84,10 @@ package is.idega.idegaweb.egov.course.presentation.bean;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderArea;
+import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
+import is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderHome;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderEditor;
 import is.idega.idegaweb.egov.course.presentation.CourseProvidersViewer;
@@ -98,10 +102,14 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.FinderException;
+
 import com.idega.builder.business.BuilderLogic;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.core.accesscontrol.business.AccessController;
+import com.idega.core.location.data.Commune;
+import com.idega.core.location.data.CommuneHome;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.presentation.IWContext;
@@ -110,6 +118,7 @@ import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 
 /**
  * <p>JSF managed bean for {@link CourseProvidersViewer}</p>
@@ -120,6 +129,52 @@ import com.idega.util.ListUtil;
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
 public class CourseProviderViewerBean {
+	
+	public static final String COURSE_PROVIDER_CATEGORY_ID = "course_provider_category";
+	
+	public Map<String, String> getCourseProviderAreas() {
+		String categoryId = CoreUtil.getIWContext()
+				.getParameter(COURSE_PROVIDER_CATEGORY_ID);
+
+		CourseProviderCategory courseProviderCategory = null;
+		if (!StringUtil.isEmpty(categoryId)) {
+			courseProviderCategory = getCourseProviderCategoryHome().find(categoryId);
+		}
+
+		Collection<CourseProviderArea> areas = getCourseProviderAreaHome()
+				.findAllSchoolAreas(courseProviderCategory);
+		if (ListUtil.isEmpty(areas)) {
+			return Collections.emptyMap();
+		}
+
+		TreeMap<String, String> areasMap = new TreeMap<String, String>();
+		for (CourseProviderArea area: areas) {
+			areasMap.put(area.getName(), area.getPrimaryKey().toString());
+		}
+
+		return areasMap;
+	}
+
+	public Map<String, String> getMunicipalities() {
+		Collection<Commune> communes = null;
+		try {
+			communes = getCommuneHome().findAllCommunes();
+		} catch (FinderException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING, "No communes found!");
+		}
+
+		if (ListUtil.isEmpty(communes)) {
+			return Collections.emptyMap();
+		}
+
+		TreeMap<String, String> communesMap = new TreeMap<String, String>();
+		for (Commune commune : communes) {
+			communesMap.put(commune.getCommuneName(), commune.getPrimaryKey().toString());
+		}
+
+		return communesMap;
+	}
 
 	public Map<String, String> getCourseProvidersMap() {
 		Collection<CourseProviderBean> providers = getCourseProviders();
@@ -256,5 +311,58 @@ public class CourseProviderViewerBean {
 		}
 
 		return courseProviderHome;
+	}
+
+	private CommuneHome communeHome = null;
+
+	protected CommuneHome getCommuneHome() {
+		if (this.communeHome == null) {
+			try {
+				this.communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, 
+						"Failed to get " + CommuneHome.class.getName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.communeHome;
+	}
+
+	private CourseProviderCategoryHome courseProviderCategory = null;
+
+	protected CourseProviderCategoryHome getCourseProviderCategoryHome() {
+		if (this.courseProviderCategory == null) {
+			try {
+				this.courseProviderCategory = (CourseProviderCategoryHome) IDOLookup
+						.getHome(CourseProviderCategory.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to get " + 
+								CourseProviderCategoryHome.class.getName() + 
+								" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderCategory;
+	}
+
+	private CourseProviderAreaHome courseProviderAreaHome = null;
+
+	protected CourseProviderAreaHome getCourseProviderAreaHome() {
+		if (this.courseProviderAreaHome == null) {
+			try {
+				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup
+						.getHome(CourseProviderArea.class);
+			} catch (IDOLookupException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, 
+						"Failed to get " + CourseProviderAreaHome.class.getName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderAreaHome;
 	}
 }

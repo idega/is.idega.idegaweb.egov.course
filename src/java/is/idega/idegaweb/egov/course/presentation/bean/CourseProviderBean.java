@@ -83,31 +83,18 @@
 package is.idega.idegaweb.egov.course.presentation.bean;
 
 import is.idega.idegaweb.egov.course.data.CourseProvider;
-import is.idega.idegaweb.egov.course.data.CourseProviderArea;
-import is.idega.idegaweb.egov.course.data.CourseProviderAreaHome;
-import is.idega.idegaweb.egov.course.data.CourseProviderCategory;
-import is.idega.idegaweb.egov.course.data.CourseProviderCategoryHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderHome;
 import is.idega.idegaweb.egov.course.presentation.CourseProviderEditor;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Level;
-
-import javax.ejb.FinderException;
 
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogic;
-import com.idega.core.location.data.Commune;
-import com.idega.core.location.data.CommuneHome;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.util.CoreUtil;
-import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
 /**
@@ -121,32 +108,31 @@ import com.idega.util.StringUtil;
 public class CourseProviderBean {
 
 	public static final String COURSE_PROVIDER_ID = "course_provider_id";
-	public static final String COURSE_PROVIDER_CATEGORY_ID = "course_provider_category";
 	public static final String SUBMITTED = "submitted";
 
 	private String id = null;
 
-	private String providerId = null;
+	protected String providerId = null;
 
-	private String organizationNumber = null;
+	protected String organizationNumber = null;
 
-	private String name = null;
+	protected String name = null;
 
-	private String address = null;
+	protected String address = null;
 
 	private String zipCode = null;
 
 	private String zipArea = null;
 	
-	private String phone = null;
+	protected String phone = null;
 
-	private String webPage = null;
+	protected String webPage = null;
 
 	private String info = null;
 
-	private String municipalityId = null;
+	protected String municipalityId = null;
 
-	private String courseProviderAreaId = null;
+	protected String courseProviderAreaId = null;
 	
 	private CourseProvider courseProvider = null;
 
@@ -178,49 +164,6 @@ public class CourseProviderBean {
 		return String.valueOf(getCourseProvider().getCommuneId());
 	}
 
-	public String getMunicipality() {
-		if (StringUtil.isEmpty(getMunicipalityId())) {
-			return null;
-		}
-
-		Commune entity = null;
-		try {
-			entity = getCommuneHome().findByPrimaryKey(getMunicipalityId());
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to get " + Commune.class.getName() + 
-					" by id: " + getMunicipalityId());
-		}
-
-		if (entity == null) {
-			return null;
-		}
-
-		return entity.getCommuneName();
-	}
-
-	public Map<String, String> getMunicipalities() {
-		Collection<Commune> communes = null;
-		try {
-			communes = getCommuneHome().findAllCommunes();
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, "No communes found!");
-		}
-
-		if (ListUtil.isEmpty(communes)) {
-			return Collections.emptyMap();
-		}
-
-		TreeMap<String, String> communesMap = new TreeMap<String, String>();
-		for (Commune commune : communes) {
-			communesMap.put(commune.getCommuneName(), commune.getPrimaryKey().toString());
-		}
-
-		return communesMap;
-	}
-
 	public void setMunicipalityId(String municipality) {
 		if (StringUtil.isEmpty(municipality) || municipality.equals("-1")) {
 			this.municipalityId = null;
@@ -243,29 +186,6 @@ public class CourseProviderBean {
 		} else {
 			this.courseProviderAreaId = courseProviderArea;
 		}
-	}
-
-	public Map<String, String> getCourseProviderAreas() {
-		String categoryId = CoreUtil.getIWContext()
-				.getParameter(COURSE_PROVIDER_CATEGORY_ID);
-
-		CourseProviderCategory courseProviderCategory = null;
-		if (!StringUtil.isEmpty(categoryId)) {
-			courseProviderCategory = getCourseProviderCategoryHome().find(categoryId);
-		}
-
-		Collection<CourseProviderArea> areas = getCourseProviderAreaHome()
-				.findAllSchoolAreas(courseProviderCategory);
-		if (ListUtil.isEmpty(areas)) {
-			return Collections.emptyMap();
-		}
-
-		TreeMap<String, String> areasMap = new TreeMap<String, String>();
-		for (CourseProviderArea area: areas) {
-			areasMap.put(area.getName(), area.getPrimaryKey().toString());
-		}
-
-		return areasMap;
 	}
 
 	public String getProviderId() {
@@ -451,42 +371,6 @@ public class CourseProviderBean {
 		}
 	}
 
-	private CourseProviderCategoryHome courseProviderCategory = null;
-
-	protected CourseProviderCategoryHome getCourseProviderCategoryHome() {
-		if (this.courseProviderCategory == null) {
-			try {
-				this.courseProviderCategory = (CourseProviderCategoryHome) IDOLookup
-						.getHome(CourseProviderCategory.class);
-			} catch (IDOLookupException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, "Failed to get " + 
-								CourseProviderCategoryHome.class.getName() + 
-								" cause of: ", e);
-			}
-		}
-
-		return this.courseProviderCategory;
-	}
-
-	private CourseProviderAreaHome courseProviderAreaHome = null;
-
-	protected CourseProviderAreaHome getCourseProviderAreaHome() {
-		if (this.courseProviderAreaHome == null) {
-			try {
-				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup
-						.getHome(CourseProviderArea.class);
-			} catch (IDOLookupException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + CourseProviderAreaHome.class.getName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.courseProviderAreaHome;
-	}
-
 	private CourseProviderHome courseProviderHome = null;
 
 	protected CourseProviderHome getCourseProviderHome() {
@@ -503,22 +387,5 @@ public class CourseProviderBean {
 		}
 
 		return this.courseProviderHome;
-	}
-
-	private CommuneHome communeHome = null;
-
-	protected CommuneHome getCommuneHome() {
-		if (this.communeHome == null) {
-			try {
-				this.communeHome = (CommuneHome) IDOLookup.getHome(Commune.class);
-			} catch (IDOLookupException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + CommuneHome.class.getName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.communeHome;
 	}
 }
