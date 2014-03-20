@@ -434,7 +434,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		} catch (IDOException e) {
 			getLogger().log(Level.WARNING, 
 					"Failed to get primary keys for " + getInterfaceClass() + 
-					" by query: '" + sql + "'");
+					" by query: '" + sql + "'", e);
 		}
 
 		return -1;
