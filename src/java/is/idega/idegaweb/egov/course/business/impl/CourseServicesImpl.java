@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -53,20 +54,18 @@ public class CourseServicesImpl extends DefaultSpringBean implements CourseServi
 		return getServiceInstance(CourseBusiness.class);
 	}
 
-	@SuppressWarnings("unchecked")
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseServices#getAllAvailableCourses()
+	 */
+	@Override
 	public Collection<Course> getAllAvailableCourses() {
 		CourseBusiness courseBusiness = getCourseBusiness();
 		if (courseBusiness == null) {
 			return null;
 		}
-		
-		try {
-			return courseBusiness.getAllCourses();
-		} catch (RemoteException e) {
-			getLogger().log(Level.WARNING, "Error getting all courses", e);
-		}
-		
-		return null;
+
+		return courseBusiness.getAllCourses();
 	}
 
 	public Course getCourseById(String courseId) {

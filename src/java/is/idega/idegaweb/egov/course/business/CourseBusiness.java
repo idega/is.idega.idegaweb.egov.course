@@ -517,14 +517,21 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAllCourses
+	 * 
+	 * @return all {@link Course}s in data source or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getAllCourses() throws RemoteException;
+	public Collection<Course> getAllCourses();
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAllCourses
+	 * 
+	 * @param provider to search by, not <code>null</code>;
+	 * @return {@link Course}s found in data source or 
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getAllCourses(CourseProvider provider) throws RemoteException;
+	public Collection<Course> getAllCourses(CourseProvider provider);
 
 	/**
 	 * 

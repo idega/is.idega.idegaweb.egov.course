@@ -1662,28 +1662,22 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getAllCourses()
+	 */
 	@Override
 	public Collection<Course> getAllCourses() {
-		try {
-			return getCourseHome().findAll();
-		} catch (FinderException e) {
-			e.printStackTrace();
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		}
-		return new ArrayList<Course>();
+		return getCourseHome().findAll();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getAllCourses(is.idega.idegaweb.egov.course.data.CourseProvider)
+	 */
 	@Override
 	public Collection<Course> getAllCourses(CourseProvider provider) {
-		try {
-			return getCourseHome().findAllByProvider(provider);
-		} catch (FinderException e) {
-			e.printStackTrace();
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		}
-		return new ArrayList<Course>();
+		return getCourseHome().findAllByProvider(provider);
 	}
 
 	/*
