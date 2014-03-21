@@ -98,16 +98,12 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 
 	/*
 	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAll(java.lang.Object, java.lang.Object, java.lang.Object, int, java.sql.Date, java.sql.Date)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAllPrimaryKeys(java.lang.String, java.lang.String, java.lang.String, int, java.sql.Date, java.sql.Date)
 	 */
 	@Override
-	public Collection<Course> findAll(
-			String providerPK, 
-			String schoolTypePK, 
-			String courseTypePK, 
-			int birthYear, 
-			Date fromDate, 
-			Date toDate) {
+	public Collection<Object> findAllPrimaryKeys(String providerPK,
+			String schoolTypePK, String courseTypePK, int birthYear,
+			Date fromDate, Date toDate) {
 		CourseBMPBean entity = (CourseBMPBean) this.idoCheckOutPooledEntity();
 		if (entity == null) {
 			return Collections.emptyList();
@@ -124,23 +120,32 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			birthDate = new Date(calendar.getTimeInMillis());
 		}
 
-		Logger.getLogger(getClass().getName()).info(
-				"Searching for primary keys of courses has started!");
-		long startTime = System.currentTimeMillis();
-		Collection<Object> ids = entity.ejbFindAll(
+		return entity.ejbFindAll(
 				provider != null ? Arrays.asList(provider) : null, 
 				providerType != null ? Arrays.asList(providerType) : null, 
 				courseType != null ? Arrays.asList(courseType) : null, 
 				birthDate, birthDate, 
 				fromDate, toDate, 
 				null, null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAll(java.lang.Object, java.lang.Object, java.lang.Object, int, java.sql.Date, java.sql.Date)
+	 */
+	@Override
+	public Collection<Course> findAll(
+			String providerPK, 
+			String schoolTypePK, 
+			String courseTypePK, 
+			int birthYear, 
+			Date fromDate, 
+			Date toDate) {
+		Collection<Object> ids = findAllPrimaryKeys(providerPK, schoolTypePK, 
+				courseTypePK, birthYear, fromDate, toDate);
 		if (ListUtil.isEmpty(ids)) {
 			return Collections.emptyList();
 		}
-
-		Logger.getLogger(getClass().getName()).info(
-				"Searching for primary keys of courses has ended! " +
-				"Query took: " + String.valueOf(System.currentTimeMillis() - startTime) + " ms.");
 
 		try {
 			return this.getEntityCollectionForPrimaryKeys(ids);

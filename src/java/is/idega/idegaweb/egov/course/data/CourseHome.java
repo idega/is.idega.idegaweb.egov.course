@@ -91,6 +91,32 @@ public interface CourseHome extends IDOHome {
 	 * skipped if <code>null</code>;
 	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
 	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @param fromDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @param toDate is {@link Course#getStartDate()} to filter by,
+	 * skipped if <code>null</code>;
+	 * @return {@link Collection} of {@link Course#getPrimaryKey()} by criteria 
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Object> findAllPrimaryKeys(
+			String providerPK, 
+			String schoolTypePK, 
+			String courseTypePK, 
+			int birthYear, 
+			Date fromDate, 
+			Date toDate);
+
+	/**
+	 * 
+	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
 	 * @return {@link Collection} of {@link Course}s or
 	 * {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
