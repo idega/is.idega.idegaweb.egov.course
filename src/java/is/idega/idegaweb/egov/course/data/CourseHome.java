@@ -28,11 +28,32 @@ public interface CourseHome extends IDOHome {
 	 */
 	public Course findByPrimaryKey(Object pk);
 
-	public Collection<Course> findAll() throws FinderException, IDORelationshipException;
+	/**
+	 * 
+	 * @return all {@link Course}s or {@link Collections#emptyList()} on
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Course> findAll();
 
-	public Collection<Course> findAllByProvider(CourseProvider provider) throws FinderException, IDORelationshipException;
+	/**
+	 * 
+	 * @param provider to search by, not <code>null</code>;
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Course> findAllByProvider(CourseProvider provider);
 
-	public Collection<Course> findAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException;
+	/**
+	 * 
+	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
+	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
+	 * @return entities by criteria or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<Course> findAllByBirthYear(int birthYear);
 
 	/**
 	 * 

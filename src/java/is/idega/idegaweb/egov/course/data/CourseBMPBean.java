@@ -1,6 +1,5 @@
 package is.idega.idegaweb.egov.course.data;
 
-import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
 import java.sql.Date;
@@ -18,8 +17,6 @@ import javax.ejb.FinderException;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
@@ -40,7 +37,6 @@ import com.idega.data.query.Table;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.Group;
 import com.idega.util.CoreConstants;
-import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 
 public class CourseBMPBean extends GenericEntity implements Course {
@@ -145,7 +141,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	@Override
 	public CourseProvider getProvider() {
-		return getCourseProviderBusiness().getSchool(getProviderId());
+		return getCourseProviderHome().findByPrimaryKeyRecursively(getProviderId());
 	}
 
 	@Override
@@ -413,19 +409,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		setColumn(COLUMN_POST_CARE, hasPostCare);
 	}
 
-	// Finders
-	public Collection<Integer> ejbFindAll() throws FinderException, IDORelationshipException {
-		return ejbFindAll(null, null, null, -1, null, null);
-	}
-
-	public Collection<Integer> ejbFindAllByProvider(CourseProvider provider) throws FinderException, IDORelationshipException {
-		return ejbFindAll(provider.getPrimaryKey().toString(), null, null, -1, null, null);
-	}
-
-	public Collection<Integer> ejbFindAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException {
-		return ejbFindAll(null, null, null, birthYear, null, null);
-	}
-
 	protected Integer getYear(Date date) {
 		if (date == null) {
 			return null;
@@ -480,6 +463,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				Collection<CourseProvider> providersByTypes = getCourseProviderHome()
 						.findByTypeRecursively(courseProviderTypes);
 				if (!ListUtil.isEmpty(providersByTypes)) {
+					courseProviders = new ArrayList<CourseProvider>(courseProviders);
 					courseProviders.retainAll(providersByTypes);
 				}
 			}
@@ -491,11 +475,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				query.appendJoinOn(getCourseProviderHome()
 						.findByTypeRecursively(courseProviderTypes));
 			}
-		}
-
-		/* Filtering by course types */
-		if (!ListUtil.isEmpty(courseTypes)) {
-			query.appendJoinOn(courseTypes);
 		}
 
 		/* Filtering by groups, which has access */
@@ -531,6 +510,19 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			query.append(COLUMN_BIRTHYEAR_TO)
 			.appendGreaterThanOrEqualsSign()
 			.append(getYear(birthDateTo));
+		}
+
+		/* Filtering by course types */
+		if (!ListUtil.isEmpty(courseTypes)) {
+			if (appendAnd) {
+				query.appendAnd();
+			} else {
+				query.appendWhere();
+				appendAnd = Boolean.TRUE;
+			}
+
+			query.append(COLUMN_COURSE_TYPE);
+			query.appendInCollectionWithSingleQuotes(courseTypes);
 		}
 
 		/* Filtering by course date */
@@ -627,122 +619,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return Collections.emptyList();
 	}
-	
-	private CourseProviderHome courseProviderHome = null;
-
-	private CourseProviderTypeHome courseProviderTypeHome = null;
-
-	private CourseTypeHome courseTypeHome = null;
-
-	protected CourseTypeHome getCourseTypeHome() {
-		if (this.courseTypeHome == null) {
-			try {
-				this.courseTypeHome = (CourseTypeHome) IDOLookup.getHome(CourseType.class);
-			} catch (IDOLookupException e) {
-				getLogger().log(Level.WARNING, 
-						"Failed to get " + CourseTypeHome.class.getSimpleName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.courseTypeHome;
-	}
-
-	protected CourseProviderTypeHome getCourseProviderTypeHome() {
-		if (this.courseProviderTypeHome == null) {
-			try {
-				this.courseProviderTypeHome = (CourseProviderTypeHome) IDOLookup
-						.getHome(CourseProviderType.class);
-			} catch (IDOLookupException e) {
-				getLogger().log(Level.WARNING, 
-						"failed to get " + CourseProviderTypeHome.class.getSimpleName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.courseProviderTypeHome;
-	}
-
-	protected CourseProviderHome getCourseProviderHome() {
-		if (this.courseProviderHome == null) {
-			try {
-				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(
-						CourseProvider.class);
-			} catch (IDOLookupException e) {
-				getLogger().log(Level.WARNING, 
-						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.courseProviderHome;
-	}
-	
-	/**
-	 * 
-	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
-	 * skipped if <code>null</code>;
-	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
-	 * skipped if <code>null</code>;
-	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
-	 * skipped if <code>null</code>;
-	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
-	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
-	 * @param fromDate is {@link Course#getStartDate()} to filter by,
-	 * skipped if <code>null</code>;
-	 * @param toDate is {@link Course#getStartDate()} to filter by,
-	 * skipped if <code>null</code>;
-	 * @return {@link Collection} of {@link Course#getPrimaryKey()} or
-	 * {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public Collection<Integer> ejbFindAll(
-			String providerPK, 
-			String schoolTypePK, 
-			String courseTypePK, 
-			int birthYear, 
-			Date fromDate, 
-			Date toDate) {
-
-		CourseProvider provider = getCourseProviderHome().findByPrimaryKeyRecursively(providerPK);
-		CourseProviderType providerType = getCourseProviderTypeHome().find(schoolTypePK);
-		CourseType courseType = getCourseTypeHome().findByPrimaryKey(courseTypePK);
-		
-		Date birthDate = null;
-		if (birthYear > 0) {
-			Calendar calendar = Calendar.getInstance();
-			calendar.set(Calendar.YEAR, birthYear);
-			birthDate = new Date(calendar.getTimeInMillis());
-		}
-
-		return convertPrimaryKeys(ejbFindAll(
-				provider != null ? Arrays.asList(provider) : null, 
-				providerType != null ? Arrays.asList(providerType) : null, 
-				courseType != null ? Arrays.asList(courseType) : null, 
-				birthDate, birthDate, 
-				fromDate, toDate, 
-				null, null));
-	}
-
-	/**
-	 * 
-	 * @param providerPK is {@link CourseProvider#getPrimaryKey()}, 
-	 * skipped if <code>null</code>;
-	 * @param schoolTypePK is {@link CourseType#getPrimaryKey()}, 
-	 * skipped if <code>null</code>;
-	 * @param courseTypePK is {@link CourseType#getPrimaryKey()}, 
-	 * skipped if <code>null</code>;
-	 * @param birthYear is between {@link Course#getBirthyearFrom()} and
-	 * {@link Course#getBirthyearTo()}, skipped if less that 0;
-	 * @return {@link Collection} of {@link Course#getPrimaryKey()} or
-	 * {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public Collection<Integer> ejbFindAll(String providerPK, 
-			String schoolTypePK, String courseTypePK, int birthYear) {
-		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, 
-				birthYear, null, null);
-	}
 
 	// TODO can be merged
 	public Collection<Integer> ejbFindAll(Collection<?> providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
@@ -769,59 +645,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.addOrder(table, COLUMN_NAME, true);
 
 		return this.idoFindPKsByQuery(query);
-	}
-
-	/**
-	 *
-	 * @param keys to convert, not <code>null</code>;
-	 * @return converted {@link Integer}s, where it was possible to convert;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	protected Collection<Integer> convertPrimaryKeys(Collection<Object> keys) {
-		if (ListUtil.isEmpty(keys)) {
-			return Collections.emptyList();
-		}
-
-		ArrayList<Integer> integers = new ArrayList<Integer>(keys.size());
-		for (Object key : keys) {
-			try {
-				integers.add(Integer.valueOf(key.toString()));
-			} catch (NullPointerException e) {
-				getLogger().warning("Failed to convert: '" + key + "' to " + Integer.class.getSimpleName());
-			}
-		}
-
-		return integers;
-	}
-
-	/**
-	 *
-	 * <p>Finds all primary keys by following criteria:</p>
-	 * @param provider to filter by, skipped if <code>null</code>;
-	 * @param type to filter by, skipped if <code>null</code>;
-	 * @param courseType to filter by, skipped if <code>null</code>;
-	 * @param fromDate is floor for course start date,
-	 * skipped if <code>null</code>;
-	 * @param toDate is ceiling for course start date,
-	 * skipped if <code>null</code>;
-	 * @return primary keys found data source or {@link Collections#emptyList()}
-	 * on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public Collection<Integer> ejbFindAll(
-			CourseProvider provider,
-			CourseProviderType type,
-			CourseType courseType,
-			Date fromDate,
-			Date toDate) {
-
-		return convertPrimaryKeys(ejbFindAll(
-				provider != null ? Arrays.asList(provider) : null,
-				type != null ? Arrays.asList(type) : null,
-				courseType != null ? Arrays.asList(courseType) : null,
-				null, null,
-				fromDate, toDate,
-				null, null));
 	}
 
 	// TODO can be merged
@@ -1075,18 +898,20 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		store();
 	}
 
-	private CourseProviderBusiness courseProviderBusiness = null;
+	private CourseProviderHome courseProviderHome;
 
-	protected CourseProviderBusiness getCourseProviderBusiness() {
-		if (this.courseProviderBusiness == null) {
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
 			try {
-				this.courseProviderBusiness = IBOLookup.getServiceInstance(
-						CoreUtil.getIWContext(), CourseProviderBusiness.class);
-			} catch (IBOLookupException e) {
-				Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
+				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(
+						CourseProvider.class);
+			} catch (IDOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
 			}
 		}
 
-		return this.courseProviderBusiness;
+		return this.courseProviderHome;
 	}
 }

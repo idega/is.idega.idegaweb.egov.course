@@ -4,6 +4,8 @@ package is.idega.idegaweb.egov.course.data;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -62,25 +64,36 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAll()
+	 */
 	@Override
-	public Collection findAll() throws FinderException, IDORelationshipException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAll();
-		return this.getEntityCollectionForPrimaryKeys(ids);
+	public Collection<Course> findAll() {
+		return findAll(null, null, null, null, null, null, null, null, null);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAllByProvider(is.idega.idegaweb.egov.course.data.CourseProvider)
+	 */
 	@Override
-	public Collection findAllByProvider(CourseProvider provider) throws FinderException, IDORelationshipException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAllByProvider(provider);
-		return this.getEntityCollectionForPrimaryKeys(ids);
+	public Collection<Course> findAllByProvider(CourseProvider provider) {
+		if (provider != null) {
+			return findAll(Arrays.asList(provider), null, null, null, null, 
+					null, null, null, null);
+		}
+
+		return Collections.emptyList();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAllByBirthYear(int)
+	 */
 	@Override
-	public Collection findAllByBirthYear(int birthYear) throws FinderException, IDORelationshipException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAllByBirthYear(birthYear);
-		return this.getEntityCollectionForPrimaryKeys(ids);
+	public Collection<Course> findAllByBirthYear(int birthYear) {
+		return findAll(null, null, null, birthYear, null, null);
 	}
 
 	/*
@@ -100,8 +113,35 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			return Collections.emptyList();
 		}
 
-		Collection<Integer> ids = entity.ejbFindAll(providerPK, schoolTypePK, 
-				courseTypePK, birthYear, fromDate, toDate);
+		CourseProvider provider = getCourseProviderHome().findByPrimaryKey(providerPK);
+		CourseProviderType providerType = getCourseProviderTypeHome().find(schoolTypePK);
+		CourseType courseType = getCourseTypeHome().findByPrimaryKey(courseTypePK);
+		
+		Date birthDate = null;
+		if (birthYear > 0) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.YEAR, birthYear);
+			birthDate = new Date(calendar.getTimeInMillis());
+		}
+
+		Logger.getLogger(getClass().getName()).info(
+				"Searching for primary keys of courses has started!");
+		long startTime = System.currentTimeMillis();
+		Collection<Object> ids = entity.ejbFindAll(
+				provider != null ? Arrays.asList(provider) : null, 
+				providerType != null ? Arrays.asList(providerType) : null, 
+				courseType != null ? Arrays.asList(courseType) : null, 
+				birthDate, birthDate, 
+				fromDate, toDate, 
+				null, null);
+		if (ListUtil.isEmpty(ids)) {
+			return Collections.emptyList();
+		}
+
+		Logger.getLogger(getClass().getName()).info(
+				"Searching for primary keys of courses has ended! " +
+				"Query took: " + String.valueOf(System.currentTimeMillis() - startTime) + " ms.");
+
 		try {
 			return this.getEntityCollectionForPrimaryKeys(ids);
 		} catch (FinderException e) {
@@ -119,22 +159,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAll(String providerPK, String schoolTypePK, String courseTypePK, int birthYear) {
-		CourseBMPBean entity = (CourseBMPBean) this.idoCheckOutPooledEntity();
-		if (entity == null) {
-			return Collections.emptyList();
-		}
-		
-		Collection<Integer> ids = entity.ejbFindAll(providerPK, schoolTypePK, 
-				courseTypePK, birthYear);
-		try {
-			return getEntityCollectionForPrimaryKeys(ids);
-		} catch (FinderException e) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getSimpleName() +
-					" by id's: " + ids);
-		}
-
-		return Collections.emptyList();
+		return findAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
 	}
 
 	@Override
@@ -190,23 +215,16 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	public Collection<Course> findAllByProviderAndSchoolTypeAndCourseType(
 			CourseProvider provider, CourseProviderType type, 
 			CourseType courseType, Date fromDate, Date toDate) {
-		CourseBMPBean entity = (CourseBMPBean) idoCheckOutPooledEntity();
-		Collection<Integer> ids = entity.ejbFindAll(provider, type, courseType, 
-				fromDate, toDate);
-		if (ListUtil.isEmpty(ids)) {
-			return Collections.emptyList();
-		}
-
-		try {
-			return getEntityCollectionForPrimaryKeys(ids);
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
-					"'s by id's: '" + ids + "' cause of: ", e);
-		}
-
-		return Collections.emptyList();
+		return findAll(
+				provider != null ? Arrays.asList(provider) : null, 
+				type != null ? Arrays.asList(type) : null, 
+				courseType != null ? Arrays.asList(courseType) : null, 
+				null, 
+				null, 
+				fromDate, 
+				toDate, 
+				null, 
+				null);
 	}
 
 	@Override
@@ -600,7 +618,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			try {
 				this.userHome = (UserHome) IDOLookup.getHome(User.class);
 			} catch (IDOLookupException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
+				Logger.getLogger(getClass().getName()).log(
 						Level.WARNING, 
 						"Failed to get " + UserHome.class.getSimpleName() + 
 						" cause of: ", e);
@@ -608,6 +626,38 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		}
 
 		return this.userHome;
+	}
+
+	private CourseProviderTypeHome courseProviderTypeHome = null;
+
+	protected CourseProviderTypeHome getCourseProviderTypeHome() {
+		if (this.courseProviderTypeHome == null) {
+			try {
+				this.courseProviderTypeHome = (CourseProviderTypeHome) IDOLookup
+						.getHome(CourseProviderType.class);
+			} catch (IDOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"failed to get " + CourseProviderTypeHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderTypeHome;
+	}
+
+	protected CourseProviderHome getCourseProviderHome() {
+		if (this.courseProviderHome == null) {
+			try {
+				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(
+						CourseProvider.class);
+			} catch (IDOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseProviderHome;
 	}
 
 	public int getNextCourseNumber() {
