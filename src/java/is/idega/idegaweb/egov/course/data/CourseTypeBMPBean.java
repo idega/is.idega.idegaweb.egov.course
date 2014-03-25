@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
+import com.idega.data.IDOContainer;
 import com.idega.data.IDOQuery;
 import com.idega.data.query.Column;
 import com.idega.data.query.MatchCriteria;
@@ -56,35 +57,46 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		return getStringColumnValue(COLUMN_NAME);
 	}
 
+	@Override
 	public String getDescription() {
 		return getStringColumnValue(COLUMN_DESCRIPTION);
 	}
 
+	@Override
 	public String getLocalizationKey() {
 		return getStringColumnValue(COLUMN_LOCALIZATION_KEY);
 	}
 
+	@Override
 	public CourseCategory getCourseCategory() {
 		return (CourseCategory) getColumnValue(COLUMN_SCHOOL_TYPE);
 	}
 
+	@Override
 	public String getAccountingKey() {
 		return getStringColumnValue(COLUMN_ACCOUNTING_KEY);
 	}
 
+	@Override
 	public String getAbbreviation() {
 		return getStringColumnValue(COLUMN_ABBREVIATION);
 	}
 
+	@Override
 	public int getOrder() {
 		return getIntColumnValue(COLUMN_ORDER);
 	}
 
+	@Override
 	public boolean showAbbreviation() {
 		return getBooleanColumnValue(COLUMN_SHOW_ABBREVIATION, false);
 	}
 
+	@Override
 	public boolean isDisabled() {
+		IDOContainer.getInstance().flushAllBeanCache();
+		IDOContainer.getInstance().flushAllQueryCache();
+
 		return getBooleanColumnValue(COLUMN_DISABLED, false);
 	}
 
@@ -94,42 +106,50 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		setColumn(COLUMN_NAME, name);
 	}
 
+	@Override
 	public void setDescription(String description) {
 		setColumn(COLUMN_DESCRIPTION, description);
 	}
 
+	@Override
 	public void setLocalizationKey(String localizationKey) {
 		setColumn(COLUMN_LOCALIZATION_KEY, localizationKey);
 	}
 
+	@Override
 	public void setCourseCategory(CourseCategory category) {
 		setColumn(COLUMN_SCHOOL_TYPE, category);
 	}
 
+	@Override
 	public void setAccountingKey(String key) {
 		setColumn(COLUMN_ACCOUNTING_KEY, key);
 	}
 
+	@Override
 	public void setAbbreviation(String abbreviation) {
 		setColumn(COLUMN_ABBREVIATION, abbreviation);
 	}
 
+	@Override
 	public void setOrder(int order) {
 		setColumn(COLUMN_ORDER, order);
 	}
 
+	@Override
 	public void setShowAbbreviation(boolean showAbbreviation) {
 		setColumn(COLUMN_SHOW_ABBREVIATION, showAbbreviation);
 	}
-	
+
+	@Override
 	public void setDisabled(boolean disabled) {
 		setColumn(COLUMN_DISABLED, disabled);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param valid is not {@link CourseType#isDisabled()};
-	 * @return {@link Collection} of {@link CourseType#getPrimaryKey()} 
+	 * @return {@link Collection} of {@link CourseType#getPrimaryKey()}
 	 * by criteria or {@link Collections#emptyList()} on fialure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -140,7 +160,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 
 		if (valid) {
 			query.appendWhereEquals(
-					IDOQuery.ENTITY_TO_SELECT + CoreConstants.DOT + COLUMN_DISABLED, 
+					IDOQuery.ENTITY_TO_SELECT + CoreConstants.DOT + COLUMN_DISABLED,
 					"\'N\'");
 			query.appendOrIsNull(COLUMN_DISABLED);
 		}
@@ -150,8 +170,8 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		try {
 			return idoFindPKsByQuery(query);
 		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get primary keys for " + CourseType.class.getSimpleName() + 
+			getLogger().log(Level.WARNING,
+					"Failed to get primary keys for " + CourseType.class.getSimpleName() +
 					" by query: '" + query + "'");
 		}
 
@@ -159,7 +179,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param courseCategories to search by, not <code>null</code>;
 	 * @param valid tells that {@link CourseCategory} is not disabled;
 	 * @return {@link Collection} of {@link CourseType#getPrimaryKey()} or
@@ -167,7 +187,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<Object> ejbFindAllByCategories(
-			Collection<? extends CourseCategory> courseCategories, 
+			Collection<? extends CourseCategory> courseCategories,
 			boolean valid) {
 		if (ListUtil.isEmpty(courseCategories)) {
 			return Collections.emptyList();
@@ -180,7 +200,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 
 		if (valid) {
 			query.appendWhereEquals(
-					IDOQuery.ENTITY_TO_SELECT + CoreConstants.DOT + COLUMN_DISABLED, 
+					IDOQuery.ENTITY_TO_SELECT + CoreConstants.DOT + COLUMN_DISABLED,
 					"\'N\'");
 			query.appendOrIsNull(COLUMN_DISABLED);
 		}
@@ -190,8 +210,8 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		try {
 			return idoFindPKsByQuery(query);
 		} catch (FinderException e) {
-			getLogger().log(Level.WARNING, 
-					"Failed to get primary keys for " + getClass().getSimpleName() + 
+			getLogger().log(Level.WARNING,
+					"Failed to get primary keys for " + getClass().getSimpleName() +
 					" by query: '" + query.toString());
 		}
 
@@ -207,7 +227,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 
 		return this.idoFindOnePKByQuery(query);
 	}
-	
+
 	public Object ejbFindByName(String name) throws FinderException {
 		Table table = new Table(this);
 

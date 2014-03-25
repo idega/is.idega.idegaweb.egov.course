@@ -49,6 +49,7 @@ public class CourseTypeEditor extends CourseBlock {
 
 //	private String category = null;
 
+	@Override
 	public void present(IWContext iwc) {
 		try {
 			switch (parseAction(iwc)) {
@@ -118,7 +119,7 @@ public class CourseTypeEditor extends CourseBlock {
 			}
 		}
 	}
-	
+
 	protected Collection<CourseProviderType> getCourseProviderTypes(
 			CourseProviderType courseProviderType) {
 		if (getType() != null) {
@@ -131,7 +132,7 @@ public class CourseTypeEditor extends CourseBlock {
 
 		return getBusiness().getAllAfterschoolCareSchoolTypes();
 	}
-	
+
 	public void showEditor(IWContext iwc, Object courseTypePK)
 			throws java.rmi.RemoteException {
 		Form form = new Form();
@@ -176,7 +177,7 @@ public class CourseTypeEditor extends CourseBlock {
 			disabled.setChecked(type.isDisabled());
 
 			form.add(new HiddenInput(
-					PARAMETER_COURSE_TYPE_PK, 
+					PARAMETER_COURSE_TYPE_PK,
 					courseTypePK.toString()));
 		} else {
 			inputSchoolTypes = new DropdownMenu(
@@ -311,7 +312,7 @@ public class CourseTypeEditor extends CourseBlock {
 			if (cType == null) {
 				continue;
 			}
-			
+
 			row = group.createRow();
 
 			try {
