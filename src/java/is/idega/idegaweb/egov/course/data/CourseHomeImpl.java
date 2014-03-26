@@ -56,8 +56,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			return (Course) super.findByPrimaryKeyIDO(pk);
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
+					Level.WARNING,
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() +
 					" by primary key: '" + pk + "'");
 		}
 
@@ -80,7 +80,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	@Override
 	public Collection<Course> findAllByProvider(CourseProvider provider) {
 		if (provider != null) {
-			return findAll(Arrays.asList(provider), null, null, null, null, 
+			return findAll(Arrays.asList(provider), null, null, null, null,
 					null, null, null, null);
 		}
 
@@ -112,7 +112,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		CourseProvider provider = getCourseProviderHome().findByPrimaryKey(providerPK);
 		CourseProviderType providerType = getCourseProviderTypeHome().find(schoolTypePK);
 		CourseType courseType = getCourseTypeHome().findByPrimaryKey(courseTypePK);
-		
+
 		Date birthDate = null;
 		if (birthYear > 0) {
 			Calendar calendar = Calendar.getInstance();
@@ -121,11 +121,11 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		}
 
 		return entity.ejbFindAll(
-				provider != null ? Arrays.asList(provider) : null, 
-				providerType != null ? Arrays.asList(providerType) : null, 
-				courseType != null ? Arrays.asList(courseType) : null, 
-				birthDate, birthDate, 
-				fromDate, toDate, 
+				provider != null ? Arrays.asList(provider) : null,
+				providerType != null ? Arrays.asList(providerType) : null,
+				courseType != null ? Arrays.asList(courseType) : null,
+				birthDate, birthDate,
+				fromDate, toDate,
 				null, null);
 	}
 
@@ -135,13 +135,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAll(
-			String providerPK, 
-			String schoolTypePK, 
-			String courseTypePK, 
-			int birthYear, 
-			Date fromDate, 
+			String providerPK,
+			String schoolTypePK,
+			String courseTypePK,
+			int birthYear,
+			Date fromDate,
 			Date toDate) {
-		Collection<Object> ids = findAllPrimaryKeys(providerPK, schoolTypePK, 
+		Collection<Object> ids = findAllPrimaryKeys(providerPK, schoolTypePK,
 				courseTypePK, birthYear, fromDate, toDate);
 		if (ListUtil.isEmpty(ids)) {
 			return Collections.emptyList();
@@ -150,8 +150,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		try {
 			return this.getEntityCollectionForPrimaryKeys(ids);
 		} catch (FinderException e) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-					"Failed to get " + Course.class.getSimpleName() + 
+			Logger.getLogger(getClass().getName()).log(Level.WARNING,
+					"Failed to get " + Course.class.getSimpleName() +
 					" by ids: '" + ids + "'");
 		}
 
@@ -168,9 +168,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	}
 
 	@Override
-	public Collection findAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
+	public Collection<Course> findAll(Collection providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAll(providers, schoolTypePK, courseTypePK);
+		Collection <?>ids = ((CourseBMPBean) entity).ejbFindAll(providers, schoolTypePK, courseTypePK);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
@@ -181,13 +181,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			Collection<? extends CourseType> courseTypes,
 			Date birthDateFrom,
 			Date birthDateTo,
-			Date fromDate, 
+			Date fromDate,
 			Date toDate,
 			Boolean isPrivate,
 			Collection<Group> groupsWithAccess) {
 		CourseBMPBean entity = (CourseBMPBean) idoCheckOutPooledEntity();
 		Collection<Object> ids = entity.ejbFindAll(
-				courseProviders, 
+				courseProviders,
 				couserProviderTypes,
 				courseTypes,
 				birthDateFrom,
@@ -204,31 +204,31 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			return getEntityCollectionForPrimaryKeys(ids);
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to get " + getEntityInterfaceClass().getSimpleName() + 
+					Level.WARNING,
+					"Failed to get " + getEntityInterfaceClass().getSimpleName() +
 					"'s by id's: '" + ids + "' cause of: ", e);
 		}
 
 		return Collections.emptyList();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAllByProviderAndSchoolTypeAndCourseType(is.idega.idegaweb.egov.course.data.CourseProvider, is.idega.idegaweb.egov.course.data.CourseProviderType, is.idega.idegaweb.egov.course.data.CourseType, java.sql.Date, java.sql.Date)
 	 */
 	@Override
 	public Collection<Course> findAllByProviderAndSchoolTypeAndCourseType(
-			CourseProvider provider, CourseProviderType type, 
+			CourseProvider provider, CourseProviderType type,
 			CourseType courseType, Date fromDate, Date toDate) {
 		return findAll(
-				provider != null ? Arrays.asList(provider) : null, 
-				type != null ? Arrays.asList(type) : null, 
-				courseType != null ? Arrays.asList(courseType) : null, 
-				null, 
-				null, 
-				fromDate, 
-				toDate, 
-				null, 
+				provider != null ? Arrays.asList(provider) : null,
+				type != null ? Arrays.asList(type) : null,
+				courseType != null ? Arrays.asList(courseType) : null,
+				null,
+				null,
+				fromDate,
+				toDate,
+				null,
 				null);
 	}
 
@@ -266,10 +266,10 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public int getCountByProviderAndSchoolTypeAndCourseType(
-			CourseProvider provider, 
-			CourseProviderType type, 
-			CourseType courseType, 
-			Date fromDate, 
+			CourseProvider provider,
+			CourseProviderType type,
+			CourseType courseType,
+			Date fromDate,
 			Date toDate) {
 		Collection<Course> courses = findAllByProviderAndSchoolTypeAndCourseType(
 				provider, type, courseType, fromDate, toDate);
@@ -288,23 +288,23 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	}
 
 	@Override
-	public Collection findAllWithNoCourseNumber() throws FinderException {
+	public Collection<Course> findAllWithNoCourseNumber() throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAllWithNoCourseNumber();
+		Collection<?> ids = ((CourseBMPBean) entity).ejbFindAllWithNoCourseNumber();
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
 	@Override
-	public Collection findAllByTypes(Collection<String> typesIds) throws FinderException {
+	public Collection<Course> findAllByTypes(Collection<String> typesIds) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAllByTypes(typesIds);
+		Collection<?> ids = ((CourseBMPBean) entity).ejbFindAllByTypes(typesIds);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
 	@Override
 	public Collection<Course> findAllByUser(String user) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection ids = ((CourseBMPBean) entity).ejbFindAllByUser(user);
+		Collection<?> ids = ((CourseBMPBean) entity).ejbFindAllByUser(user);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
@@ -321,9 +321,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				course.remove();
 			} catch (Exception e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to " + getEntityInterfaceClass().getSimpleName() + 
-						" by id: '" + course.getPrimaryKey() + 
+						Level.WARNING,
+						"Failed to " + getEntityInterfaceClass().getSimpleName() +
+						" by id: '" + course.getPrimaryKey() +
 						"' cause of: ", e);
 			}
 		}
@@ -352,19 +352,19 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			Float cost,
 			Boolean openForRegistration,
 			java.util.Date registrationEnd,
-			Boolean hasPreCare, 
+			Boolean hasPreCare,
 			Boolean hasPostCare,
 			Boolean isPrivate,
 			Collection<Group> groupsWithAccess) {
 
-		if (course == null) { 
+		if (course == null) {
 			try {
 				course = create();
 			} catch (CreateException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to create new entity for " + 
-						getEntityInterfaceClass().getSimpleName() + 
+						Level.WARNING,
+						"Failed to create new entity for " +
+						getEntityInterfaceClass().getSimpleName() +
 						" cause of: ", e);
 			}
 		}
@@ -410,7 +410,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		if (endDate != null) {
 			course.setEndDate(new Timestamp(endDate.getTime()));
 		}
-		
+
 		if (registrationEnd != null) {
 			course.setRegistrationEnd(new Timestamp(registrationEnd.getTime()));
 		}
@@ -452,15 +452,15 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			if (!ListUtil.isEmpty(groupsWithAccess)) {
 				course.setGroupsWithAccess(groupsWithAccess);
 			}
-			
+
 			if (isPrivate != null && !isPrivate) {
 				course.removeGroupsWithAccess();
 			}
 		} catch (IDOStoreException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
+					Level.WARNING,
 					"Failed to store " + getEntityInterfaceClass().getSimpleName() +
-					" by id: '" + course.getPrimaryKey() + "' " + 
+					" by id: '" + course.getPrimaryKey() + "' " +
 					"cause of: ", e);
 			return null;
 		}
@@ -474,24 +474,24 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Course update(
-			String primaryKey, 
-			int courseNumber, 
+			String primaryKey,
+			int courseNumber,
 			String name,
-			String handlerPersonalId, 
-			String courseTypePrimaryKey, 
+			String handlerPersonalId,
+			String courseTypePrimaryKey,
 			String providerPrimaryKey,
-			String coursePricePrimaryKey, 
-			java.util.Date startDate, 
+			String coursePricePrimaryKey,
+			java.util.Date startDate,
 			java.util.Date endDate,
-			String accountingKey, 
-			Integer birthYearFrom, 
+			String accountingKey,
+			Integer birthYearFrom,
 			Integer birthYearTo,
-			Integer maxPer, 
-			Float price, 
-			Float cost, 
-			Boolean openForRegistration, 
-			java.util.Date registrationEnd, 
-			Boolean hasPreCare, 
+			Integer maxPer,
+			Float price,
+			Float cost,
+			Boolean openForRegistration,
+			java.util.Date registrationEnd,
+			Boolean hasPreCare,
 			Boolean hasPostCare,
 			Boolean isPrivate,
 			Collection<String> groupsWithAccessPrimaryKeys) {
@@ -502,18 +502,18 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				handler = getUserHome().findByPersonalID(handlerPersonalId);
 			} catch (FinderException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).warning(
-						"Failed to get " + User.class.getSimpleName() + 
+						"Failed to get " + User.class.getSimpleName() +
 						" by personal id: '" + handlerPersonalId + "'");
 			}
 		}
 
 		return update(
 				findByPrimaryKey(primaryKey), courseNumber, name, handler,
-				getCourseTypeHome().findByPrimaryKey(courseTypePrimaryKey), 
+				getCourseTypeHome().findByPrimaryKey(courseTypePrimaryKey),
 				getCourseProvider().findByPrimaryKeyRecursively(providerPrimaryKey),
 				getCoursePriceHome().findByPrimaryKey(coursePricePrimaryKey),
-				startDate, endDate, accountingKey, birthYearFrom, birthYearTo, 
-				maxPer, price, cost, openForRegistration, registrationEnd, 
+				startDate, endDate, accountingKey, birthYearFrom, birthYearTo,
+				maxPer, price, cost, openForRegistration, registrationEnd,
 				hasPreCare, hasPostCare, isPrivate,
 				getGroupHome().findGroups(groupsWithAccessPrimaryKeys));
 	}
@@ -529,25 +529,25 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			java.util.Date endDate, String accountingKey, Integer birthYearFrom,
 			Integer birthYearTo,
 			Integer maximumParticipantsNumber, java.util.Date registrationEndDate, ArrayList<Group> accessGroups) {
-		
+
 		User handler = null;
 		if (!StringUtil.isEmpty(courseHandlerPersonalId)) {
 			try {
 				handler = getUserHome().findByPersonalID(courseHandlerPersonalId);
 			} catch (FinderException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).warning(
-						"Failed to get " + User.class.getSimpleName() + 
+						"Failed to get " + User.class.getSimpleName() +
 						" by personal id: '" + courseHandlerPersonalId + "'");
 			}
 		}
 
-		return update(course, -1, name, handler, 
+		return update(course, -1, name, handler,
 				getCourseTypeHome().findByPrimaryKey(courseTypeId), center, null,
-				startDate, endDate, accountingKey, birthYearFrom, birthYearTo, 
-				maximumParticipantsNumber, null, null, null, registrationEndDate, 
+				startDate, endDate, accountingKey, birthYearFrom, birthYearTo,
+				maximumParticipantsNumber, null, null, null, registrationEndDate,
 				null, null, true, accessGroups);
 	}
-	
+
 	private GroupHome groupHome = null;
 
 	protected GroupHome getGroupHome() {
@@ -556,8 +556,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				this.groupHome = (GroupHome) IDOLookup.getHome(Group.class);
 			} catch (IDOLookupException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + GroupHome.class + 
+						Level.WARNING,
+						"Failed to get " + GroupHome.class +
 						" cause of: ", e);
 			}
 		}
@@ -573,8 +573,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				this.coursePriceHome = (CoursePriceHome) IDOLookup.getHome(CoursePrice.class);
 			} catch (IDOLookupException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + CoursePriceHome.class.getSimpleName() + 
+						Level.WARNING,
+						"Failed to get " + CoursePriceHome.class.getSimpleName() +
 						" cause of: ", e);
 			}
 		}
@@ -590,8 +590,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
 			} catch (IDOLookupException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + CourseProvider.class.getSimpleName() + 
+						Level.WARNING,
+						"Failed to get " + CourseProvider.class.getSimpleName() +
 						" cause of: ", e);
 			}
 		}
@@ -607,8 +607,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				this.courseTypeHome = (CourseTypeHome) IDOLookup.getHome(CourseType.class);
 			} catch (IDOLookupException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + CourseTypeHome.class.getSimpleName() + 
+						Level.WARNING,
+						"Failed to get " + CourseTypeHome.class.getSimpleName() +
 						" cause of: ", e);
 			}
 		}
@@ -624,8 +624,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				this.userHome = (UserHome) IDOLookup.getHome(User.class);
 			} catch (IDOLookupException e) {
 				Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + UserHome.class.getSimpleName() + 
+						Level.WARNING,
+						"Failed to get " + UserHome.class.getSimpleName() +
 						" cause of: ", e);
 			}
 		}
@@ -641,8 +641,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				this.courseProviderTypeHome = (CourseProviderTypeHome) IDOLookup
 						.getHome(CourseProviderType.class);
 			} catch (IDOLookupException e) {
-				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-						"failed to get " + CourseProviderTypeHome.class.getSimpleName() + 
+				Logger.getLogger(getClass().getName()).log(Level.WARNING,
+						"failed to get " + CourseProviderTypeHome.class.getSimpleName() +
 						" cause of: ", e);
 			}
 		}
@@ -656,8 +656,8 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(
 						CourseProvider.class);
 			} catch (IDOLookupException e) {
-				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+				Logger.getLogger(getClass().getName()).log(Level.WARNING,
+						"Failed to get " + CourseProviderHome.class.getSimpleName() +
 						" cause of: ", e);
 			}
 		}
