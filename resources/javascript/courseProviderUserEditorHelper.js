@@ -3,10 +3,19 @@ jQuery(window).load(function () {
 		rules: {
 			"typeForm:name" : {
 				required: true
+			},
+			"typeForm:newPassword" : {
+				required:	true
+			},
+			"typeForm:retypedPassword" : {
+				required:	true,
+				equalTo:	"input[id='typeForm:newPassword']"
 			}
 		},
 		messages: {
 			"typeForm:typeForm" : CourseProviderUserEditorHelper.FIELD_IS_REQUIRED,
+			"typeForm:newPassword":		CourseProviderUserEditorHelper.FIELD_IS_REQUIRED,
+			"passwordReset:retypedPassword":	CourseProviderUserEditorHelper.PASSWORDS_DO_NOT_MATCH
 		}
 	});
 
@@ -27,6 +36,7 @@ var CourseProviderUserEditorHelper = {
 	FIELD_IS_REQUIRED: "Field is required!",
 	SAVING: "Saving...",
 	AVAILABLE_EMAILS: [],
+	PASSWORDS_DO_NOT_MATCH: "Passwords do not match!",
 	getUserInfo:	function(request, callback) {
 		var response = [];
 		var query = jQuery.ui.autocomplete.escapeRegex(request.term);
@@ -42,7 +52,7 @@ var CourseProviderUserEditorHelper = {
 	},
 
 	loadUserMails:	function(mail) {
-		if (mail == null || mail.length != 3) {
+		if (mail == null || mail.length > 2) {
 			return null;
 		}
 

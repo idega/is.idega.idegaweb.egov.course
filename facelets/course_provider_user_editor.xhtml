@@ -32,6 +32,7 @@
 		CourseProviderUserEditorHelper.FIELD_IS_REQUIRED = "#{localizedStrings['is.idega.idegaweb.egov.course']['field_is_required']}";
 		CourseProviderUserEditorHelper.SAVING = "#{localizedStrings['is.idega.idegaweb.egov.course']['saving']}";
 		CourseProviderUserEditorHelper.LOADING = "#{localizedStrings['is.idega.idegaweb.egov.course']['loading']}";
+		CourseProviderUserEditorHelper.PASSWORDS_DO_NOT_MATCH = "#{localizedStrings['com.idega.block.login']['password_validation_error']}"
 	</script>
 	<h:panelGroup
 		rendered="#{courseProviderUserBean.submitted}">
@@ -62,7 +63,7 @@
 						itemLabel="#{localizedStrings['is.idega.idegaweb.egov.course']['select_user_type']}"
 						itemValue="-1"/>
 					<f:selectItems
-						value="#{courseProviderUserBean.courseProviderUserTypes}"/>
+						value="#{courseProviderUsersViewerBean.courseProviderUserTypes}"/>
 				</h:selectOneMenu>
 			</h:panelGroup>
 			<h:panelGroup
@@ -80,7 +81,7 @@
 					value="#{courseProviderUserBean.courseProviderIds}"
 					layout="pageDirection">
 					<f:selectItems
-						value="#{courseProviderUserBean.courseProviders}"/>
+						value="#{courseProviderViewerBean.courseProvidersMap}"/>
 				</h:selectManyCheckbox>
 			</h:panelGroup>
 			<h:panelGroup
@@ -120,6 +121,30 @@
 				<h:inputText
 					id="phone"
 					value="#{courseProviderUserBean.phone}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:outputLabel
+					for="newPassword"
+					value="#{localizedStrings['com.idega.block.login']['reset.new_password']}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:inputSecret
+					disabled="#{courseProviderUserBean.id == null}"
+					id="newPassword"
+					value="#{courseProviderUserBean.password}"
+					autocomplete="off"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:outputLabel
+					for="retypedPassword"
+					value="#{localizedStrings['com.idega.block.login']['reset.verify_password']}"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:inputSecret
+					disabled="#{courseProviderUserBean.id == null}"
+					id="retypedPassword"
+					value="#{courseProviderUserBean.retypedPassword}"
+					autocomplete="off"/>
 			</h:panelGroup>
 			<h:panelGroup>
 				<h:commandButton

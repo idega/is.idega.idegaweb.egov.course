@@ -90,12 +90,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
+import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
 import com.idega.data.IDOHome;
@@ -433,14 +435,18 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
-	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(is.idega.idegaweb.egov.course.data.CourseProviderUser, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Collection, boolean)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(is.idega.idegaweb.egov.course.data.CourseProviderUser, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Collection)
 	 */
 	@Override
-	public CourseProviderUser update(CourseProviderUser courseProviderUser,
-			String idegaUserPrimaryKey, String name, String phone,
-			String eMail, String courseProviderUserTypeId,
-			Collection<String> courseProviderIds, boolean forceId) {
-
+	public CourseProviderUser update(
+			CourseProviderUser courseProviderUser,
+			String idegaUserPrimaryKey, 
+			String name, 
+			String phone,
+			String eMail, 
+			String password, 
+			String courseProviderUserTypeId,
+			Collection<String> courseProviderIds) {
 		/* Getting connected user if it is supported */
 		User user = null;
 		if (!CourseProviderUserHomeImpl.class.equals(getClass())) {
@@ -460,6 +466,18 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 						Level.WARNING, 
 						"Failed to create " + getEntityInterfaceClass().getName() + 
 						" because failed to create or update " + User.class.getName());
+			}
+		}
+
+		if (!StringUtil.isEmpty(idegaUserPrimaryKey) && !StringUtil.isEmpty(password)) {
+			try {
+				LoginDBHandler.changePassword(
+						Integer.valueOf(idegaUserPrimaryKey), 
+						password);
+			} catch (Exception e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to change password for user by id: '" + 
+								idegaUserPrimaryKey + "' cause of: ", e);
 			}
 		}
 
@@ -483,6 +501,24 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 				null);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(is.idega.idegaweb.egov.course.data.CourseProviderUser, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Collection, boolean)
+	 */
+	@Override
+	public CourseProviderUser update(
+			CourseProviderUser courseProviderUser,
+			String idegaUserPrimaryKey, 
+			String name, 
+			String phone,
+			String eMail, 
+			String courseProviderUserTypeId,
+			Collection<String> courseProviderIds) {
+
+		return update(courseProviderUser, idegaUserPrimaryKey, name, phone,
+				eMail, null, courseProviderUserTypeId, courseProviderIds);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderUserHome#update(
@@ -512,7 +548,7 @@ public class CourseProviderUserHomeImpl extends IDOFactory implements
 		}
 
 		return update(courseProviderUser, idegaUserPrimaryKey, name, phone, eMail, 
-				courseProviderUserTypeId, courseProviderIds, forceId);
+				courseProviderUserTypeId, courseProviderIds);
 	}
 
 	/*
