@@ -84,6 +84,9 @@ package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.presentation.bean.CourseProviderUsersViewerBean;
+
+import java.io.IOException;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -107,6 +110,45 @@ public class CourseProviderUsersViewer extends IWBaseComponent {
 
 	public static final String FACELET_FILENAME = "course_provider_users_viewer.xhtml";
 
+	private CourseProviderUsersViewerBean managedBean;
+	
+	private boolean unassingedUsersVisible;
+
+	public CourseProviderUsersViewerBean getManagedBean(FacesContext ctx) {
+		if (this.managedBean == null) {
+			this.managedBean = getBeanInstance(getManagedBeanName());
+		}
+
+		return managedBean;
+	}
+
+	public void setManagedBean(CourseProviderUsersViewerBean managedBean) {
+		this.managedBean = managedBean;
+	}
+
+	public boolean isUnassingedUsersVisible() {
+		return unassingedUsersVisible;
+	}
+
+	public void setUnassingedUsersVisible(boolean unassingedUsersVisible) {
+		this.unassingedUsersVisible = unassingedUsersVisible;
+	}
+
+	protected String getManagedBeanName() {
+		return "courseProviderUsersViewerBean";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.presentation.IWBaseComponent#encodeBegin(javax.faces.context.FacesContext)
+	 */
+	@Override
+	public void encodeBegin(FacesContext context) throws IOException {
+		getManagedBean(context)
+			.setUnassingedUsersVisible(isUnassingedUsersVisible());
+		super.encodeBegin(context);
+	}
+	
 	protected String getLocalizedString(FacesContext context, String key, String value) {
 		if (StringUtil.isEmpty(key) || StringUtil.isEmpty(value)) {
 			return null;
@@ -117,10 +159,14 @@ public class CourseProviderUsersViewer extends IWBaseComponent {
 		if (iwResourceBundle == null) {
 			return null;
 		}
-		
+
 		return iwResourceBundle.getLocalizedString(key, value);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.presentation.IWBaseComponent#initializeComponent(javax.faces.context.FacesContext)
+	 */
 	@Override
 	protected void initializeComponent(FacesContext context) {
 		super.initializeComponent(context);

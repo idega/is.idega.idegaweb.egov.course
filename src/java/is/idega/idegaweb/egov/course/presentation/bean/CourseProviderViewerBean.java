@@ -192,7 +192,7 @@ public class CourseProviderViewerBean {
 		return providersMap;
 	}
 	
-	public Collection<CourseProvider> getCourseProviderEntities() {
+	public Collection<? extends CourseProvider> getCourseProviderEntities() {
 		if (hasFullAccessRights()) {
 			return getCourseProviderHome().findAllRecursively();
 		} else {

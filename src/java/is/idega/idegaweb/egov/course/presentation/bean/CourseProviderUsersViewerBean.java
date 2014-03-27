@@ -85,6 +85,7 @@ package is.idega.idegaweb.egov.course.presentation.bean;
 import is.idega.idegaweb.egov.course.business.UserDWR;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderHome;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserType;
@@ -99,6 +100,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 
@@ -111,6 +113,7 @@ import com.idega.data.IDOLookupException;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
 import com.idega.user.data.UserHome;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
@@ -126,7 +129,17 @@ import com.idega.util.StringUtil;
  */
 public class CourseProviderUsersViewerBean {
 
+	private boolean unassingedUsersVisible;
+
 	private CourseProviderViewerBean courseProviderViewerBean = null;
+
+	public boolean isUnassingedUsersVisible() {
+		return unassingedUsersVisible;
+	}
+
+	public void setUnassingedUsersVisible(boolean unassingedUsersVisible) {
+		this.unassingedUsersVisible = unassingedUsersVisible;
+	}
 
 	public CourseProviderViewerBean getCourseProviderViewerBean() {
 		return courseProviderViewerBean;
@@ -160,9 +173,11 @@ public class CourseProviderUsersViewerBean {
 		}
 
 		/* Users without providers */
-		group = new CourseProviderUsersAreaGroup(null, users, userTypes);
-		if (!ListUtil.isEmpty(group.getUsers())) {
-			groupedUsers.add(group);
+		if (isUnassingedUsersVisible()) {
+			group = new CourseProviderUsersAreaGroup(null, users, userTypes);
+			if (!ListUtil.isEmpty(group.getUsers())) {
+				groupedUsers.add(group);
+			}
 		}
 
 		return groupedUsers;
@@ -189,7 +204,7 @@ public class CourseProviderUsersViewerBean {
 	}
 
 	public boolean isSubclass() {
-		return !CourseProviderUsersViewerBean.class.equals(this.getClass());
+		return !CourseProviderUsersViewerBean.class.equals(getClass());
 	}
 
 	/**
@@ -205,6 +220,23 @@ public class CourseProviderUsersViewerBean {
 		}
 
 		return beans;
+	}
+
+	/**
+	 * 
+	 * @return {@link Map} of {@link CourseProviderType#getName()}
+	 * and {@link CourseProviderType#getPrimaryKey()} or 
+	 * {@link Collections#emptyMap()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Map<String, String> getCourseProviderUserTypes() {
+		TreeMap<String, String> userTypes = new TreeMap<String, String>();
+		Collection<CourseProviderUserType> types = getCourseProviderUserTypeHome().find();
+		for (CourseProviderUserType type : types) {
+			userTypes.put(type.getName(), type.getPrimaryKey().toString());
+		}
+
+		return userTypes;
 	}
 
 	public String getEditorLink() {
@@ -259,23 +291,31 @@ public class CourseProviderUsersViewerBean {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Map<String, UserDWR> getAutocompleteMails(String email) {
-		if (StringUtil.isEmpty(email) || email.length() < 3) {
+		if (StringUtil.isEmpty(email)) {
 			return Collections.emptyMap();
 		}
 
 		Collection<User> users = null;
-		try {
-			users = getUserHome().findUsersByEmail(email, false, true);
-		} catch (FinderException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(
-					Level.WARNING, 
-					"Failed to get users by part of email address: '" + email  + "'");
+		if (email.contains(CoreConstants.AT)) {
+			String[] splitted = email.split(CoreConstants.AT);
+			if (!ArrayUtil.isEmpty(splitted)) {
+				String splitEnd = splitted[splitted.length - 1];
+				if (!StringUtil.isEmpty(splitEnd) && splitEnd.contains(CoreConstants.DOT)) {
+					try {
+						users = getUserHome().findUsersByEmail(email, false, true);
+					} catch (FinderException e) {
+						Logger.getLogger(getClass().getName()).log(
+								Level.WARNING, 
+								"Failed to get users by part of email address: '" + email  + "'");
+					}
+				}
+			}	
 		}
 
 		if (ListUtil.isEmpty(users)) {
 			return Collections.emptyMap();
 		}
-		
+
 		Map<String, UserDWR> addresses = new TreeMap<String, UserDWR>();
 		for (User user : users) {
 			StringBuilder info = new StringBuilder();
