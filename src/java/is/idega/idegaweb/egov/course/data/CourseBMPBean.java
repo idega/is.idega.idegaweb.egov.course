@@ -274,6 +274,25 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return getBooleanColumnValue(COLUMN_VISIBILITY, false);
 	}
 
+	@Override
+	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
+		try {
+			return super.idoGetRelatedEntities(itemType);
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	@Override
+	public Collection<CoursePrice> getAllPrices() {
+		try {
+			return super.idoGetRelatedEntities(CoursePrice.class);
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	// Setters
 
 	/*
@@ -810,16 +829,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
-		try {
-			return super.idoGetRelatedEntities(itemType);
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
 	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException {
 		super.idoAddTo(item);
 	}
@@ -870,16 +879,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	public Collection<CoursePrice> getAllPrices() {
-		try {
-			return super.idoGetRelatedEntities(CoursePrice.class);
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
 	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
 		this.idoRemoveFrom(price);
 
@@ -906,8 +905,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(
 						CourseProvider.class);
 			} catch (IDOLookupException e) {
-				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-						"Failed to get " + CourseProviderHome.class.getSimpleName() + 
+				Logger.getLogger(getClass().getName()).log(Level.WARNING,
+						"Failed to get " + CourseProviderHome.class.getSimpleName() +
 						" cause of: ", e);
 			}
 		}
