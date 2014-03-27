@@ -83,7 +83,6 @@
 package is.idega.idegaweb.egov.course.presentation.bean;
 
 import is.idega.idegaweb.egov.course.data.CourseProvider;
-import is.idega.idegaweb.egov.course.data.CourseProviderHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderUser;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserHome;
 import is.idega.idegaweb.egov.course.data.CourseProviderUserType;
@@ -93,10 +92,7 @@ import is.idega.idegaweb.egov.course.presentation.CourseProviderUserEditor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Level;
 
 import javax.faces.event.ValueChangeEvent;
@@ -140,6 +136,10 @@ public class CourseProviderUserBean {
 	
 	private String phone = null;
 
+	private String password = null;
+
+	private String retypedPassword = null;
+
 	private Boolean superAdminSelected = null;
 	
 	private CourseProviderUser courseProviderUser = null;
@@ -148,6 +148,22 @@ public class CourseProviderUserBean {
 	
 	public CourseProviderUserBean(CourseProviderUser courseProviderUser) {
 		this.courseProviderUser = courseProviderUser;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	public String getRetypedPassword() {
+		return retypedPassword;
+	}
+
+	public void setRetypedPassword(String retypedPassword) {
+		this.retypedPassword = retypedPassword;
 	}
 
 	public String getId() {
@@ -210,22 +226,6 @@ public class CourseProviderUserBean {
 		}
 	}
 
-	public Map<String, String> getCourseProviders() {
-		Collection<? extends CourseProvider> providers = getCourseProviderHome().findAllRecursively();
-		if (ListUtil.isEmpty(providers)) {
-			return Collections.emptyMap();
-		}
-
-		TreeMap<String, String> providersMap = new TreeMap<String, String>();
-		for (CourseProvider provider: providers) {
-			providersMap.put(
-					provider.getSchoolName(), 
-					provider.getPrimaryKey().toString());
-		}
-
-		return providersMap;
-	}
-
 	public String getCourseProviderUserTypeId() {
 		if (StringUtil.isEmpty(this.courseProviderUserTypeId)
 				&& getCourseProviderUser() != null) {
@@ -242,16 +242,6 @@ public class CourseProviderUserBean {
 		} else {
 			this.courseProviderUserTypeId = courseProviderTypeId;
 		}
-	}
-
-	public Map<String, String> getCourseProviderUserTypes() {
-		TreeMap<String, String> userTypes = new TreeMap<String, String>();
-		Collection<CourseProviderUserType> types = getCourseProviderUserTypeHome().find();
-		for (CourseProviderUserType type : types) {
-			userTypes.put(type.getName(), type.getPrimaryKey().toString());
-		}
-
-		return userTypes;
 	}
 
 	public void selectedTypeChange(ValueChangeEvent event) {
@@ -355,13 +345,17 @@ public class CourseProviderUserBean {
 			}
 
 			if (!StringUtil.isEmpty(courseProviderUserId)) {
-				this.courseProviderUser = getCourseProviderUserHome().findByPrimaryKeyRecursively(
-						courseProviderUserId
-						);
+				this.courseProviderUser = getCourseProviderUser(courseProviderUserId);
 			}
 		}
 
 		return this.courseProviderUser;
+	}
+
+	protected CourseProviderUser getCourseProviderUser(String primaryKey) {
+		return getCourseProviderUserHome().findByPrimaryKeyRecursively(
+				primaryKey
+				);
 	}
 
 	public void setCourseProvider(CourseProviderUser courseProviderUser) {
@@ -399,9 +393,9 @@ public class CourseProviderUserBean {
 		// Update
 		if (getCourseProviderUserHome().update(
 				getCourseProviderUser(), this.idegaUserId, this.name, 
-				this.phone, this.eMail, 
+				this.phone, this.eMail, this.password,
 				this.courseProviderUserTypeId, 
-				this.courseProviderIds != null ? Arrays.asList(this.courseProviderIds) : null, false) != null) {
+				this.courseProviderIds != null ? Arrays.asList(this.courseProviderIds) : null) != null) {
 			CoreUtil.getIWContext().setMultipartParameter(
 					SUBMITTED, 
 					Boolean.TRUE.toString());	
@@ -419,23 +413,6 @@ public class CourseProviderUserBean {
 		.append("\n\tgetName(): ").append(getName())
 		.append("\n\tgeteMail(): ").append(geteMail());
 		return sb.toString();
-	}
-
-	private CourseProviderHome courseProviderHome = null;
-
-	protected CourseProviderHome getCourseProviderHome() {
-		if (this.courseProviderHome == null) {
-			try {
-				this.courseProviderHome = (CourseProviderHome) IDOLookup.getHome(CourseProvider.class);
-			} catch (IDOLookupException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, 
-						"Failed to get " + CourseProviderHome.class.getName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.courseProviderHome;
 	}
 
 	private CourseProviderUserHome courseProviderUserHome = null;
