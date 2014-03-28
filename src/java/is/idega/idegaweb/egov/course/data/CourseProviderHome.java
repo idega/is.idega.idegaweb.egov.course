@@ -255,8 +255,8 @@ public interface CourseProviderHome extends IDOHome {
 	 * failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	Collection<? extends CourseProvider> findByPrimaryKeys(
-			Collection<Object> primaryKeys);
+	<T extends CourseProvider> Collection<T> findByPrimaryKeys(
+			Collection<String> primaryKeys);
 
 	/**
 	 *

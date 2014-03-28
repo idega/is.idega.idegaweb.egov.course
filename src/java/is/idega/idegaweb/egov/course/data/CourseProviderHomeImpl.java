@@ -230,8 +230,13 @@ public class CourseProviderHomeImpl extends IDOFactory
 		return providers;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderHome#findByPrimaryKeys(java.util.Collection)
+	 */
 	@Override
-	public Collection<? extends CourseProvider> findByPrimaryKeys(Collection<Object> primaryKeys) {
+	public <T extends CourseProvider> Collection<T> findByPrimaryKeys(
+			Collection<String> primaryKeys) {
 		if (ListUtil.isEmpty(primaryKeys)) {
 			return Collections.emptyList();
 		}
