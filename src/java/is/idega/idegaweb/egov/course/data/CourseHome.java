@@ -224,6 +224,14 @@ public interface CourseHome extends IDOHome {
 
 	/**
 	 * 
+	 * <p>Removes entity.</p>
+	 * @param course is entity to remove, not <code>null</code>;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	void remove(Course course);
+
+	/**
+	 * 
 	 * <p>Creates, updates {@link Course}</p>
 	 * @param course to update, new one created if <code>null</code>;
 	 * @param courseNumber

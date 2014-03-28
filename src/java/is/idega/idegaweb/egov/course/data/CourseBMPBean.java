@@ -438,6 +438,56 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return calendar.get(Calendar.YEAR);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.data.GenericEntity#remove()
+	 */
+	@Override
+	public void remove() throws RemoveException {
+		Collection<ChildCourse> childCourses = getChildCourseHome().findChildCourses(this);
+		if (!ListUtil.isEmpty(childCourses)) {
+			
+			/*
+			 * Removing child courses
+			 */
+			getLogger().info("Found child courses! They will be removed!");
+			for (ChildCourse childCourse : childCourses) {
+				childCourse.removeGroupsWithAccess();
+
+				try {
+					childCourse.remove();
+					Logger.getLogger(getClass().getName()).log(Level.INFO,
+							"Removed " + childCourse.getClass().getSimpleName() +
+							" by id: '" + childCourse.getPrimaryKey() + "'");
+				} catch (Exception e) {
+					Logger.getLogger(getClass().getName()).log(Level.WARNING,
+							"Failed to " + childCourse.getClass().getSimpleName() +
+							" by id: '" + childCourse.getPrimaryKey() +
+							"' cause of: ", e);
+				}
+			}
+		}
+
+		super.remove();
+	}
+
+	private ChildCourseHome childCourseHome = null;
+
+	protected ChildCourseHome getChildCourseHome() {
+		if (this.childCourseHome == null) {
+			try {
+				this.childCourseHome = (ChildCourseHome) IDOLookup
+						.getHome(ChildCourse.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + ChildCourseHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.childCourseHome;
+	}
+
 	/**
 	 *
 	 * <p>Constructs SQL query</p>

@@ -314,14 +314,24 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public void remove(String primaryKey) {
-		Course course = findByPrimaryKey(primaryKey);
+		remove(findByPrimaryKey(primaryKey));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#remove(is.idega.idegaweb.egov.course.data.Course)
+	 */
+	@Override
+	public void remove(Course course) {
 		if (course != null) {
 			try {
 				course.removeGroupsWithAccess();
 				course.remove();
+				Logger.getLogger(getClass().getName()).log(Level.INFO,
+						"Removed " + getEntityInterfaceClass().getSimpleName() +
+						" by id: '" + course.getPrimaryKey() + "'");
 			} catch (Exception e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING,
+				Logger.getLogger(getClass().getName()).log(Level.WARNING,
 						"Failed to " + getEntityInterfaceClass().getSimpleName() +
 						" by id: '" + course.getPrimaryKey() +
 						"' cause of: ", e);

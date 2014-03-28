@@ -97,8 +97,7 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 	}
 	@Override
 	public String getProviderId() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getProviderId() : parentCourse.getProviderId();
+		return super.getProviderId();
 	}
 	@Override
 	public CourseType getCourseType() {
@@ -204,12 +203,7 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 	}
 	@Override
 	public void removeGroupsWithAccess() {
-		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.removeGroupsWithAccess();
-		} else {
-			parentCourse.removeGroupsWithAccess();
-		}
+		super.removeGroupsWithAccess();
 	}
 	@Override
 	public void setPrivate(boolean isPrivate) {
