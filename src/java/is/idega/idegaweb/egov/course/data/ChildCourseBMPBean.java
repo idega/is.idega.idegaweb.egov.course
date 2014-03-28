@@ -4,6 +4,9 @@ import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 
@@ -37,12 +40,24 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 		setColumn(PARENT_COURSE_ID, parentCourse);
 	}
 
-	public Collection<Integer> ejbFindChildCourses(Course parentCourse) throws FinderException {
+	public Collection<Integer> ejbFindChildCourses(Course parentCourse) {
 		Table table = new Table(this);
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
-		query.addCriteria(new MatchCriteria(table.getColumn(PARENT_COURSE_ID), MatchCriteria.EQUALS, parentCourse.getPrimaryKey()));
-		return this.idoFindPKsByQuery(query);
+		query.addCriteria(new MatchCriteria(
+				table.getColumn(PARENT_COURSE_ID), 
+				MatchCriteria.EQUALS, 
+				parentCourse.getPrimaryKey()));
+
+		try {
+			return idoFindPKsByQuery(query);
+		} catch (FinderException e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get primary keys for " + getInterfaceClass().getSimpleName() + 
+					"'s by query: '" + query + "' cause of: ", e);
+		}
+
+		return Collections.emptyList();
 	}
 
 	@Override
