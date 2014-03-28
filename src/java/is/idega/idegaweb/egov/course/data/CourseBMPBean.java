@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -494,9 +495,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	/**
 	 *
 	 * <p>Constructs SQL query</p>
-	 * @param courseProviders to filter by, skipped if <code>null</code>;
+	 * @param courseProvidersIds is {@link Collection} of 
+	 * {@link CourseProvider#getPrimaryKey()} to filter by, 
+	 * skipped if <code>null</code>;
 	 * @param courseProviderTypes to filter by, skipped if <code>null</code>;
-	 * @param courseTypes to filter by, skipped if <code>null</code>;
+	 * @param courseTypesIds is {@link Collection} of {@link CourseType#getPrimaryKey()} 
+	 * to filter by, skipped if <code>null</code>;
 	 * @param birthDateFrom is floor of age of course attender,
 	 * skipped if <code>null</code>;
 	 * @param birthDateTo is ceiling of age of course attender,
@@ -515,9 +519,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public IDOQuery getQuery(
-			Collection<? extends CourseProvider> courseProviders,
+			Collection<String> courseProvidersIds,
 			Collection<? extends CourseProviderType> courseProviderTypes,
-			Collection<? extends CourseType> courseTypes,
+			Collection<String> courseTypesIds,
 			Date birthDateFrom,
 			Date birthDateTo,
 			Date fromDate,
@@ -528,7 +532,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		/* This table */
 		IDOQuery query = idoQuery();
 		query.useDefaultAlias = Boolean.TRUE;
-		query.appendSelectAllFrom(this);
+		query.appendSelectDistinctFrom(this);
 
 		/* Filtering by groups, which has access */
 		if (!ListUtil.isEmpty(groupsWithAccess)) {
@@ -540,20 +544,20 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			Collection<CourseProvider> providersByTypes = getCourseProviderHome()
 					.findByTypeRecursively(courseProviderTypes);
 			if (!ListUtil.isEmpty(providersByTypes)) {
-				if (ListUtil.isEmpty(courseProviders)) {
-					courseProviders = new ArrayList<CourseProvider>(providersByTypes);
+				List<String> providerByTypesIDs = IDOUtil.getInstance().getPrimaryKeys(
+						providersByTypes);
+				if (ListUtil.isEmpty(courseProvidersIds)) {
+					courseProvidersIds = new ArrayList<String>(providerByTypesIDs);
 				} else {
 					/* Avoids unsupported operation exception */
-					courseProviders = new ArrayList<CourseProvider>(courseProviders);
-					courseProviders.retainAll(providersByTypes);
+					courseProvidersIds = new ArrayList<String>(courseProvidersIds);
+					courseProvidersIds.retainAll(providerByTypesIDs);
 				}
 			}
 		}
 
 		/* Filtering by course providers */
-		Collection<String> courseProviderPrimaryKeys = IDOUtil.getInstance()
-				.getPrimaryKeys(courseProviders);
-		if (!ListUtil.isEmpty(courseProviderPrimaryKeys)) {			
+		if (!ListUtil.isEmpty(courseProvidersIds)) {			
 			String primaryKeyColumnName;
 			try {
 				primaryKeyColumnName = getEntityDefinition()
@@ -599,12 +603,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 					.append(CoreConstants.DOT).append(COLUMN_PROVIDER);
 
 			/*
-			 * Converting to array
-			 */
-			String[] primaryKeysArray = courseProviderPrimaryKeys.toArray(
-					new String[courseProviderPrimaryKeys.size()]);
-
-			/*
 			 * The big miracle...
 			 */
 			query.append(IDOQuery.JOIN).append(ENTITY_NAME).append(CoreConstants.SPACE)
@@ -616,7 +614,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 								primaryKeyColumnOfExternalEntity.toString())
 					.appendAnd()
 						.append(getProviderIdColumn())
-						.appendInArrayWithSingleQuotes(primaryKeysArray)
+						.appendInForStringCollectionWithSingleQuotes(courseProvidersIds)
 				.append(CoreConstants.BRACKET_RIGHT)
 				.appendOr()
 				.append(CoreConstants.BRACKET_LEFT)
@@ -625,7 +623,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 								parentKeyOfExternalEntity.toString())
 					.appendAnd()
 						.append(providerIdOfExternalEntity.toString())
-						.appendInArrayWithSingleQuotes(primaryKeysArray)
+						.appendInForStringCollectionWithSingleQuotes(courseProvidersIds)
 				.append(CoreConstants.BRACKET_RIGHT)
 			.append(CoreConstants.BRACKET_RIGHT);
 		}
@@ -661,7 +659,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		}
 
 		/* Filtering by course types */
-		if (!ListUtil.isEmpty(courseTypes)) {
+		if (!ListUtil.isEmpty(courseTypesIds)) {
 			if (appendAnd) {
 				query.appendAnd();
 			} else {
@@ -669,8 +667,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				appendAnd = Boolean.TRUE;
 			}
 
-			query.append(getTypeColumn())	
-					.appendInCollectionWithSingleQuotes(courseTypes);
+			query.append(getTypeColumn())
+					.appendInForStringCollectionWithSingleQuotes(courseTypesIds);
 		}
 
 		/* 
@@ -740,9 +738,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	/**
 	 *
 	 * <p>Finds all primary keys by following criteria:</p>
-	 * @param courseProviders to filter by, skipped if <code>null</code>;
+	 * @param courseProviders is {@link Collection} of 
+	 * {@link CourseProvider#getPrimaryKey()}
+	 * to filter by, skipped if <code>null</code>;
 	 * @param couserProviderTypes to filter by, skipped if <code>null</code>;
-	 * @param courseTypes to filter by, skipped if <code>null</code>;
+	 * @param courseTypes is {@link Collection} of {@link CourseType#getPrimaryKey()} 
+	 * to filter by, skipped if <code>null</code>;
 	 * @param birthDateFrom is floor of age of course attender,
 	 * skipped if <code>null</code>;
 	 * @param birthDateTo is ceiling of age of course attender,
@@ -760,9 +761,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Collection<Object> ejbFindAll(
-			Collection<? extends CourseProvider> courseProviders,
+			Collection<String> courseProviders,
 			Collection<? extends CourseProviderType> couserProviderTypes,
-			Collection<? extends CourseType> courseTypes,
+			Collection<String> courseTypes,
 			Date birthDateFrom,
 			Date birthDateTo,
 			Date fromDate,
@@ -915,9 +916,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			Date fromDate, Date toDate
 	) {
 		IDOQuery query = getQuery(
-				provider != null ? Arrays.asList(provider) : null,
+				provider != null ? Arrays.asList(provider.getPrimaryKey().toString()) : null,
 				type != null ? Arrays.asList(type) : null,
-				courseType != null ? Arrays.asList(courseType) : null,
+				courseType != null ? Arrays.asList(courseType.getPrimaryKey().toString()) : null,
 				null, null,
 				fromDate, toDate,
 				null, null);
