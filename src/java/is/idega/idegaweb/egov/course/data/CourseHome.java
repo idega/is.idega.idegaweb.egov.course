@@ -217,9 +217,12 @@ public interface CourseHome extends IDOHome {
 	/**
 	 * 
 	 * <p>All {@link Course}s by following criteria:</p>
-	 * @param courseProviders to filter by, skipped if <code>null</code>;
+	 * @param courseProviders is {@link Collection} of 
+	 * {@link CourseProvider#getPrimaryKey()}
+	 * to filter by, skipped if <code>null</code>;
 	 * @param couserProviderTypes to filter by, skipped if <code>null</code>;
-	 * @param courseTypes to filter by, skipped if <code>null</code>;
+	 * @param courseTypes is {@link Collection} of {@link CourseType#getPrimaryKey()}
+	 * to filter by, skipped if <code>null</code>;
 	 * @param birthDateFrom is floor of age of course attender, 
 	 * skipped if <code>null</code>;
 	 * @param birthDateTo is ceiling of age of course attender, 
@@ -238,9 +241,9 @@ public interface CourseHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Collection<Course> findAll(
-			Collection<? extends CourseProvider> courseProviders,
+			Collection<String> courseProviders,
 			Collection<? extends CourseProviderType> couserProviderTypes,
-			Collection<? extends CourseType> courseTypes, Date birthDateFrom,
+			Collection<String> courseTypes, Date birthDateFrom,
 			Date birthDateTo, Date fromDate, Date toDate, Boolean isPrivate,
 			Collection<Group> groupsWithAccess, boolean notChild);
 

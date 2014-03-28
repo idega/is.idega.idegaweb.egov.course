@@ -21,6 +21,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDOStoreException;
+import com.idega.data.IDOUtil;
 import com.idega.user.data.Group;
 import com.idega.user.data.GroupHome;
 import com.idega.user.data.User;
@@ -101,17 +102,19 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAllPrimaryKeys(java.lang.String, java.lang.String, java.lang.String, int, java.sql.Date, java.sql.Date)
 	 */
 	@Override
-	public Collection<Object> findAllPrimaryKeys(String providerPK,
-			String schoolTypePK, String courseTypePK, int birthYear,
-			Date fromDate, Date toDate) {
+	public Collection<Object> findAllPrimaryKeys(
+			String providerPK,
+			String schoolTypePK, 
+			String courseTypePK, 
+			int birthYear,
+			Date fromDate, 
+			Date toDate) {
 		CourseBMPBean entity = (CourseBMPBean) this.idoCheckOutPooledEntity();
 		if (entity == null) {
 			return Collections.emptyList();
 		}
 
-		CourseProvider provider = getCourseProviderHome().findByPrimaryKey(providerPK);
 		CourseProviderType providerType = getCourseProviderTypeHome().find(schoolTypePK);
-		CourseType courseType = getCourseTypeHome().findByPrimaryKey(courseTypePK);
 
 		Date birthDate = null;
 		if (birthYear > 0) {
@@ -122,9 +125,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 
 		// TODO needs parameter to exclude selection from child courses
 		return entity.ejbFindAll(
-				provider != null ? Arrays.asList(provider) : null,
+				!StringUtil.isEmpty(providerPK) ? Arrays.asList(providerPK) : null,
 				providerType != null ? Arrays.asList(providerType) : null,
-				courseType != null ? Arrays.asList(courseType) : null,
+				!StringUtil.isEmpty(courseTypePK) ? Arrays.asList(courseTypePK) : null,
 				birthDate, birthDate,
 				fromDate, toDate,
 				null, null);
@@ -187,9 +190,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			Boolean isPrivate,
 			Collection<Group> groupsWithAccess) {
 		return findAll(
-				courseProviders, 
+				!ListUtil.isEmpty(courseProviders) ? IDOUtil.getInstance().getPrimaryKeys(courseProviders) : null, 
 				couserProviderTypes, 
-				courseTypes, 
+				!ListUtil.isEmpty(courseTypes) ? IDOUtil.getInstance().getPrimaryKeys(courseTypes) : null, 
 				birthDateFrom, 
 				birthDateTo, 
 				fromDate, 
@@ -206,9 +209,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAll(
-			Collection<? extends CourseProvider> courseProviders,
+			Collection<String> courseProviders,
 			Collection<? extends CourseProviderType> couserProviderTypes,
-			Collection<? extends CourseType> courseTypes,
+			Collection<String> courseTypes,
 			Date birthDateFrom,
 			Date birthDateTo,
 			Date fromDate,

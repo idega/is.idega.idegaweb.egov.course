@@ -1032,8 +1032,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Map<Object, String> getCoursesMapDWR(int providerPK, int schoolTypePK,
-			int courseTypePK, int year, String country) {
+	public Map<Object, String> getCoursesMapDWR(
+			int providerPK, 
+			int schoolTypePK,
+			int courseTypePK, 
+			int year, 
+			String country) {
 		boolean showIDInName = getIWApplicationContext()
 				.getApplicationSettings().getBoolean(
 						CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
