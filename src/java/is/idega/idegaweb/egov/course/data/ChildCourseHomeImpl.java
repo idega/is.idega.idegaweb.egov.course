@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.data.IDOStoreException;
 import com.idega.user.data.Group;
 import com.idega.util.ListUtil;
@@ -70,7 +72,8 @@ public class ChildCourseHomeImpl extends CourseHomeImpl implements ChildCourseHo
 		/*
 		 * Updating parent course first
 		 */
-		parentCourse = super.update(parentCourse, name, courseHandlerPersonalId, null,
+		parentCourse = getCourseHome().update(parentCourse, name, 
+				courseHandlerPersonalId, null,
 				courseTypeId, startDate, endDate, accountingKey, birthYearFrom,
 				birthYearTo, maximumParticipantsNumber, registrationEndDate, 
 				accessGroups);
@@ -179,5 +182,21 @@ public class ChildCourseHomeImpl extends CourseHomeImpl implements ChildCourseHo
 		}
 
 		return childCourse;
+	}
+
+	private CourseHome courseHome = null;
+
+	protected CourseHome getCourseHome() {
+		if (this.courseHome == null) {
+			try {
+				this.courseHome = (CourseHome) IDOLookup.getHome(Course.class);
+			} catch (IDOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get " + CourseHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.courseHome;
 	}
 }

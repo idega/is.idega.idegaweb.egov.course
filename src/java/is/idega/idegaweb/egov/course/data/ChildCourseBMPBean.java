@@ -193,195 +193,145 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 
 	//	Setters
 	@Override
-	public void setGroupsWithAccess(Collection<Group> groups) {
-		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setGroupsWithAccess(groups);
-		} else {
-			parentCourse.setGroupsWithAccess(groups);
-		}
-	}
-	@Override
-	public void removeGroupsWithAccess() {
-		super.removeGroupsWithAccess();
-	}
-	@Override
 	public void setPrivate(boolean isPrivate) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setPrivate(isPrivate);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setPrivate(isPrivate);
 		}
 	}
+
 	@Override
 	public void setName(String name) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setName(name);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setName(name);
 		}
 	}
+
 	@Override
 	public void setUser(String user) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setUser(user);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setUser(user);
 		}
 	}
+
 	@Override
 	public void setDescription(String description) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setDescription(description);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setDescription(description);
 		}
 	}
-	@Override
-	public void setProvider(CourseProvider provider) {
-		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setProvider(provider);
-		} else {
-			parentCourse.setProvider(provider);
-		}
-	}
+
 	@Override
 	public void setCourseType(CourseType courseType) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setCourseType(courseType);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setCourseType(courseType);
 		}
 	}
+
 	@Override
 	public void setPrice(CoursePrice price) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setPrice(price);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setPrice(price);
 		}
 	}
+
 	@Override
 	public void setCoursePrice(float price) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setCoursePrice(price);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setCoursePrice(price);
 		}
 	}
+
 	@Override
 	public void setCourseCost(float cost) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setCourseCost(cost);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setCourseCost(cost);
 		}
 	}
+
 	@Override
 	public void setAccountingKey(String key) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setAccountingKey(key);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setAccountingKey(key);
 		}
 	}
+
 	@Override
 	public void setStartDate(Timestamp startDate) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setStartDate(startDate);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setStartDate(startDate);
 		}
 	}
+
 	@Override
 	public void setEndDate(Timestamp endDate) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setEndDate(endDate);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setEndDate(endDate);
 		}
 	}
+
 	@Override
 	public void setRegistrationEnd(Timestamp registrationEnd) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setRegistrationEnd(registrationEnd);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setRegistrationEnd(registrationEnd);
 		}
 	}
+
 	@Override
 	public void setBirthyearFrom(int from) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setBirthyearFrom(from);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setBirthyearFrom(from);
 		}
 	}
+
 	@Override
 	public void setBirthyearTo(int to) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setBirthyearTo(to);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setBirthyearTo(to);
 		}
 	}
+
 	@Override
 	public void setMax(int max) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setMax(max);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setMax(max);
 		}
 	}
-	@Override
-	public void setCourseNumber(int number) {
-		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setCourseNumber(number);
-		} else {
-			parentCourse.setCourseNumber(number);
-		}
-	}
+
 	@Override
 	public void setOpenForRegistration(boolean openForRegistration) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setOpenForRegistration(openForRegistration);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setOpenForRegistration(openForRegistration);
 		}
 	}
+
 	@Override
 	public void setHasPreCare(boolean hasPreCare) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setHasPreCare(hasPreCare);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setHasPreCare(hasPreCare);
 		}
 	}
+
 	@Override
 	public void setHasPostCare(boolean hasPostCare) {
 		Course parentCourse = getParentCourse();
-		if (parentCourse == null) {
-			super.setHasPostCare(hasPostCare);
-		} else {
+		if (parentCourse != null) {
 			parentCourse.setHasPostCare(hasPostCare);
 		}
 	}
