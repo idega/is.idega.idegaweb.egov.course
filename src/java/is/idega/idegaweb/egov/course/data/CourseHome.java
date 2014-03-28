@@ -216,6 +216,36 @@ public interface CourseHome extends IDOHome {
 
 	/**
 	 * 
+	 * <p>All {@link Course}s by following criteria:</p>
+	 * @param courseProviders to filter by, skipped if <code>null</code>;
+	 * @param couserProviderTypes to filter by, skipped if <code>null</code>;
+	 * @param courseTypes to filter by, skipped if <code>null</code>;
+	 * @param birthDateFrom is floor of age of course attender, 
+	 * skipped if <code>null</code>;
+	 * @param birthDateTo is ceiling of age of course attender, 
+	 * skipped if <code>null</code>;
+	 * @param fromDate is floor for course start date, 
+	 * skipped if <code>null</code>;
+	 * @param toDate is ceiling for course start date, 
+	 * skipped if <code>null</code>;
+	 * @param isPrivate tells if {@link Course}s can be viewed by all, 
+	 * skipped if <code>null</code>;
+	 * @param groupsWithAccess is {@link Group}, which can view private 
+	 * {@link Course}s, skipped if <code>null</code>;
+	 * @param notChild <code>true</code> if {@link ChildCourse}s
+	 * should be excluded;
+	 * @return entities or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<Course> findAll(
+			Collection<? extends CourseProvider> courseProviders,
+			Collection<? extends CourseProviderType> couserProviderTypes,
+			Collection<? extends CourseType> courseTypes, Date birthDateFrom,
+			Date birthDateTo, Date fromDate, Date toDate, Boolean isPrivate,
+			Collection<Group> groupsWithAccess, boolean notChild);
+
+	/**
+	 * 
 	 * <p>Removes entity.</p>
 	 * @param primaryKey is {@link Course#getPrimaryKey()}, not null;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -347,9 +377,9 @@ public interface CourseHome extends IDOHome {
 	 * @param maximumParticipantsNumber is maximum number of attendants, 
 	 * skipped if <code>null</code>;
 	 * @param registrationEndDate
-	 * @param accessGroups
-	 * @return tells which {@link Group} {@link User}s can
+	 * @param accessGroups tells which {@link Group} {@link User}s can
 	 * attend/manage course, skipped if <code>null</code>;
+	 * @return created/updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Course update(Course course, String name,
@@ -357,5 +387,7 @@ public interface CourseHome extends IDOHome {
 			String courseTypeId, java.util.Date startDate,
 			java.util.Date endDate, String accountingKey, Integer birthYearFrom,
 			Integer birthYearTo,
-			Integer maximumParticipantsNumber, java.util.Date registrationEndDate, ArrayList<Group> accessGroups);
+			Integer maximumParticipantsNumber, 
+			java.util.Date registrationEndDate,
+			ArrayList<Group> accessGroups);
 }

@@ -120,6 +120,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			birthDate = new Date(calendar.getTimeInMillis());
 		}
 
+		// TODO needs parameter to exclude selection from child courses
 		return entity.ejbFindAll(
 				provider != null ? Arrays.asList(provider) : null,
 				providerType != null ? Arrays.asList(providerType) : null,
@@ -185,6 +186,36 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			Date toDate,
 			Boolean isPrivate,
 			Collection<Group> groupsWithAccess) {
+		return findAll(
+				courseProviders, 
+				couserProviderTypes, 
+				courseTypes, 
+				birthDateFrom, 
+				birthDateTo, 
+				fromDate, 
+				toDate, 
+				isPrivate, 
+				groupsWithAccess, 
+				Boolean.FALSE);
+//		FIXME Do or do not exclude child courses?
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAll(java.util.Collection, java.util.Collection, java.util.Collection, java.sql.Date, java.sql.Date, java.sql.Date, java.sql.Date, java.lang.Boolean, java.util.Collection, boolean)
+	 */
+	@Override
+	public Collection<Course> findAll(
+			Collection<? extends CourseProvider> courseProviders,
+			Collection<? extends CourseProviderType> couserProviderTypes,
+			Collection<? extends CourseType> courseTypes,
+			Date birthDateFrom,
+			Date birthDateTo,
+			Date fromDate,
+			Date toDate,
+			Boolean isPrivate,
+			Collection<Group> groupsWithAccess,
+			boolean notChild) {
 		CourseBMPBean entity = (CourseBMPBean) idoCheckOutPooledEntity();
 		Collection<Object> ids = entity.ejbFindAll(
 				courseProviders,

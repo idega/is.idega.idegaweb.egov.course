@@ -14,17 +14,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
+import com.idega.data.IDOCompositePrimaryKeyException;
 import com.idega.data.IDOException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.data.IDOUtil;
 import com.idega.data.query.AND;
 import com.idega.data.query.Column;
 import com.idega.data.query.CountColumn;
@@ -506,6 +509,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	 * skipped if <code>null</code>;
 	 * @param groupsWithAccess is {@link Group}, which can view private
 	 * {@link Course}s, skipped if <code>null</code>;
+	 * @param notChild <code>true</code> if 
+	 * {@link ChildCourse}s should be excluded;
 	 * @return query by criteria;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -525,36 +530,110 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.useDefaultAlias = Boolean.TRUE;
 		query.appendSelectAllFrom(this);
 
-		/* Filtering by course providers */
-		if (!ListUtil.isEmpty(courseProviders)) {
-			/* Filtering by course provider types */
-			if (!ListUtil.isEmpty(courseProviderTypes)) {
-				Collection<CourseProvider> providersByTypes = getCourseProviderHome()
-						.findByTypeRecursively(courseProviderTypes);
-				if (!ListUtil.isEmpty(providersByTypes)) {
-					courseProviders = new ArrayList<CourseProvider>(courseProviders);
-					courseProviders.retainAll(providersByTypes);
-				}
-			}
-
-			query.appendJoinOn(courseProviders);
-		} else {
-			/* Filtering by course provider types */
-			if (!ListUtil.isEmpty(courseProviderTypes)) {
-				query.appendJoinOn(getCourseProviderHome()
-						.findByTypeRecursively(courseProviderTypes));
-			}
-		}
-
 		/* Filtering by groups, which has access */
 		if (!ListUtil.isEmpty(groupsWithAccess)) {
 			query.appendJoinOn(groupsWithAccess);
 		}
 
+		/* Filtering by course provider types */
+		if (!ListUtil.isEmpty(courseProviderTypes)) {
+			Collection<CourseProvider> providersByTypes = getCourseProviderHome()
+					.findByTypeRecursively(courseProviderTypes);
+			if (!ListUtil.isEmpty(providersByTypes)) {
+				if (ListUtil.isEmpty(courseProviders)) {
+					courseProviders = new ArrayList<CourseProvider>(providersByTypes);
+				} else {
+					/* Avoids unsupported operation exception */
+					courseProviders = new ArrayList<CourseProvider>(courseProviders);
+					courseProviders.retainAll(providersByTypes);
+				}
+			}
+		}
+
+		/* Filtering by course providers */
+		Collection<String> courseProviderPrimaryKeys = IDOUtil.getInstance()
+				.getPrimaryKeys(courseProviders);
+		if (!ListUtil.isEmpty(courseProviderPrimaryKeys)) {			
+			String primaryKeyColumnName;
+			try {
+				primaryKeyColumnName = getEntityDefinition()
+						.getPrimaryKeyDefinition().getField().getSQLFieldName();
+			} catch (IDOCompositePrimaryKeyException e) {
+				primaryKeyColumnName = "COU_COURSE_ID";
+				getLogger().log(Level.WARNING, 
+						"Failed to get name primary key column. Will use: '" 
+								+ primaryKeyColumnName + "' Problem: ", e);
+			}
+
+			/*
+			 * selected_entity.COU_COURSE_ID
+			 */
+			StringBuilder primaryKeyColumnOfCurrentEntity = new StringBuilder();
+			primaryKeyColumnOfCurrentEntity.append(IDOQuery.ENTITY_TO_SELECT)
+					.append(CoreConstants.DOT).append(primaryKeyColumnName);
+
+			/*
+			 * selected_entity_1
+			 */
+			String joinedEntityName = IDOQuery.ENTITY_TO_SELECT + "_1";
+
+			/*
+			 * selected_entity_1.COU_COURSE_ID
+			 */
+			StringBuilder primaryKeyColumnOfExternalEntity = new StringBuilder();
+			primaryKeyColumnOfExternalEntity.append(joinedEntityName)
+					.append(CoreConstants.DOT).append(primaryKeyColumnName);
+
+			/*
+			 * selected_entity_1.PARENT_COURSE_ID
+			 */
+			StringBuilder parentKeyOfExternalEntity = new StringBuilder();
+			parentKeyOfExternalEntity.append(joinedEntityName)
+					.append(CoreConstants.DOT).append(ChildCourseBMPBean.PARENT_COURSE_ID);
+
+			/*
+			 * selected_entity_1.PROVIDER_ID
+			 */
+			StringBuilder providerIdOfExternalEntity = new StringBuilder();
+			providerIdOfExternalEntity.append(joinedEntityName)
+					.append(CoreConstants.DOT).append(COLUMN_PROVIDER);
+
+			/*
+			 * Converting to array
+			 */
+			String[] primaryKeysArray = courseProviderPrimaryKeys.toArray(
+					new String[courseProviderPrimaryKeys.size()]);
+
+			/*
+			 * The big miracle...
+			 */
+			query.append(IDOQuery.JOIN).append(ENTITY_NAME).append(CoreConstants.SPACE)
+			.append(joinedEntityName).append(CoreConstants.SPACE)
+			.append(IDOQuery.ON).append(CoreConstants.BRACKET_LEFT)
+				.append(CoreConstants.BRACKET_LEFT)
+						.appendEquals(
+								primaryKeyColumnOfCurrentEntity.toString(), 
+								primaryKeyColumnOfExternalEntity.toString())
+					.appendAnd()
+						.append(getProviderIdColumn())
+						.appendInArrayWithSingleQuotes(primaryKeysArray)
+				.append(CoreConstants.BRACKET_RIGHT)
+				.appendOr()
+				.append(CoreConstants.BRACKET_LEFT)
+						.appendEquals(
+								primaryKeyColumnOfCurrentEntity.toString(), 
+								parentKeyOfExternalEntity.toString())
+					.appendAnd()
+						.append(providerIdOfExternalEntity.toString())
+						.appendInArrayWithSingleQuotes(primaryKeysArray)
+				.append(CoreConstants.BRACKET_RIGHT)
+			.append(CoreConstants.BRACKET_RIGHT);
+		}
+
 		/* Filtering by local conditions */
 		boolean appendAnd = Boolean.FALSE;
 
-		/* Filtering by birth date */
+		/* Filtering by birth date from */
 		if (birthDateFrom != null && birthDateFrom.getTime() > 0) {
 			if (appendAnd) {
 				query.appendAnd();
@@ -563,11 +642,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				appendAnd = Boolean.TRUE;
 			}
 
-			query.append(COLUMN_BIRTHYEAR_FROM)
+			query.append(getBirthyearFromColumn())
 			.appendLessThanOrEqualsSign()
 			.append(getYear(birthDateFrom));
 		}
 
+		/* Filtering by birth date to */
 		if (birthDateTo != null && birthDateTo.getTime() > 0) {
 			if (appendAnd) {
 				query.appendAnd();
@@ -576,9 +656,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				appendAnd = Boolean.TRUE;
 			}
 
-			query.append(COLUMN_BIRTHYEAR_TO)
-			.appendGreaterThanOrEqualsSign()
-			.append(getYear(birthDateTo));
+			query.append(getBirthyearToColumn()).appendGreaterThanOrEqualsSign()
+					.append(getYear(birthDateTo));
 		}
 
 		/* Filtering by course types */
@@ -590,11 +669,13 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				appendAnd = Boolean.TRUE;
 			}
 
-			query.append(COLUMN_COURSE_TYPE);
-			query.appendInCollectionWithSingleQuotes(courseTypes);
+			query.append(getTypeColumn())	
+					.appendInCollectionWithSingleQuotes(courseTypes);
 		}
 
-		/* Filtering by course date */
+		/* 
+		 * Filtering by floor of course start date 
+		 */
 		if (fromDate != null && fromDate.getTime() > 0) {
 			if (appendAnd) {
 				query.appendAnd();
@@ -603,11 +684,14 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				appendAnd = Boolean.TRUE;
 			}
 
-			query.append(COLUMN_START_DATE)
-			.appendGreaterThanOrEqualsSign()
-			.append(fromDate);
+			query.append(getStartDateColumn())
+					.appendGreaterThanOrEqualsSign()
+					.append(fromDate);
 		}
 
+		/* 
+		 * Filtering by ceiling of course start date
+		 */
 		if (toDate != null && toDate.getTime() > 0) {
 			if (appendAnd) {
 				query.appendAnd();
@@ -616,9 +700,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				appendAnd = Boolean.TRUE;
 			}
 
-			query.append(COLUMN_START_DATE)
-			.appendLessThanOrEqualsSign()
-			.append(toDate);
+			query.append(getStartDateColumn())
+					.appendLessThanOrEqualsSign()
+					.append(toDate);
 		}
 
 		/* Filtering public or private ones */
@@ -630,19 +714,29 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				appendAnd = Boolean.TRUE;
 			}
 
-			query.appendEquals(COLUMN_VISIBILITY, isPrivate);
+			query.appendEquals(getVisiblityColumn(), isPrivate);
 		}
 
+		/*
+		 * selected_entity.PARENT_COURSE_ID != NULL
+		 */
+		if (appendAnd) {
+			query.appendAnd();
+		} else {
+			query.appendWhere();
+			appendAnd = Boolean.TRUE;
+		}
+
+		query.append(getParentCourseIdColumn()).appendIsNull();
+
 		/* Ordered by: */
-		query.appendOrderBy(COLUMN_START_DATE)
+		query.appendOrderBy(getStartDateColumn())
 		.append(CoreConstants.COMMA)
 		.append(CoreConstants.SPACE)
-		.append(IDOQuery.ENTITY_TO_SELECT)
-		.append(CoreConstants.DOT)
-		.append(COLUMN_NAME);
+		.append(getNameColumn());
 		return query;
 	}
-
+	
 	/**
 	 *
 	 * <p>Finds all primary keys by following criteria:</p>
@@ -945,6 +1039,102 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		}
 
 		store();
+	}
+
+	/**
+	 * 
+	 * @return selected_entity.NAME;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getNameColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(COLUMN_NAME);
+		return sb.toString();
+	}
+
+	/**
+	 * 
+	 * @return selected_entity.PROVIDER_ID;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getProviderIdColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(COLUMN_PROVIDER);
+		return sb.toString();
+	}
+
+	/**
+	 * 
+	 * @return selected_entity.BIRTHYEAR_FROM;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getBirthyearFromColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(COLUMN_BIRTHYEAR_FROM);
+		return sb.toString();
+	}
+	
+	/**
+	 * 
+	 * @return selected_entity.BIRTHYEAR_TO;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getBirthyearToColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(COLUMN_BIRTHYEAR_TO);
+		return sb.toString();
+	}
+	
+	/**
+	 * 
+	 * @return selected_entity.COU_COURSE_TYPE_ID;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getTypeColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(COLUMN_COURSE_TYPE);
+		return sb.toString();
+	}
+
+	/**
+	 * 
+	 * @return selected_entity.START_DATE;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getStartDateColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(COLUMN_START_DATE);
+		return sb.toString();
+	}
+
+	/**
+	 * 
+	 * @return selected_entity.IS_VISIBLE;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getVisiblityColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(COLUMN_VISIBILITY);
+		return sb.toString();
+	}
+	
+	/**
+	 * 
+	 * @return selected_entity.PARENT_COURSE_ID
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	private String getParentCourseIdColumn() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(IDOQuery.ENTITY_TO_SELECT)
+				.append(CoreConstants.DOT).append(ChildCourseBMPBean.PARENT_COURSE_ID);
+		return sb.toString();
 	}
 
 	private CourseProviderHome courseProviderHome;
