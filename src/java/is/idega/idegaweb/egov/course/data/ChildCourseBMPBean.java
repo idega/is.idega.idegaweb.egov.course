@@ -19,7 +19,7 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 
 	private static final long serialVersionUID = 7425610935661180112L;
 
-	private static final String PARENT_COURSE_ID = "parent_course_id";
+	public static final String PARENT_COURSE_ID = "parent_course_id";
 
 	@Override
 	public void initializeAttributes() {
