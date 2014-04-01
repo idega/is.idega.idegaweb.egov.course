@@ -73,7 +73,9 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 				section.setStyleClass("statisticsLayer");
 				form.add(section);
 
-				Heading1 heading = new Heading1(iwrb.getLocalizedString("course.course_participants_statistics", "Course participants statistics"));
+				Heading1 heading = new Heading1(iwrb.getLocalizedString(
+						"course.course_participants_statistics", 
+						"Course participants statistics"));
 				section.add(heading);
 
 				Date fromDate = iwc.isParameterSet(PARAMETER_FROM) ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM))).getDate() : null;
@@ -89,7 +91,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 					CourseProviderArea area = provider.getCourseProviderArea();
 					if (selectedArea.equals(area)) {
 						Collection<Course> courses = getBusiness().getCourses(
-								provider, type, fromDate, toDate);
+								provider, type, fromDate, toDate, Boolean.TRUE);
 
 						addResults(iwc, iwrb, type, courses, section, 
 								provider.getName(), fromDate, toDate);
@@ -183,7 +185,9 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		return layer;
 	}
 
-	private void addResults(IWContext iwc, IWResourceBundle iwrb, CourseProviderType type, Collection<Course> courses, Layer section, String header, Date fromDate, Date toDate) throws RemoteException {
+	private void addResults(IWContext iwc, IWResourceBundle iwrb, 
+			CourseProviderType type, Collection<Course> courses, 
+			Layer section, String header, Date fromDate, Date toDate) throws RemoteException {
 		Gender male = null;
 		Gender female = null;
 		try {
