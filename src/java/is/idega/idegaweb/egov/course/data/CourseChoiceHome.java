@@ -61,8 +61,23 @@ public interface CourseChoiceHome extends IDOHome {
 			CourseProviderType type, Gender gender, Date fromDate, Date toDate)
 			throws IDOException;
 
-	public int getCountByCourseAndGender(Course course, Gender gender)
-			throws IDOException;
+	/**
+	 * 
+	 * @param course to search by, not <code>null</code>;
+	 * @param gender to search by, not <code>null</code>;
+	 * @return number of {@link CourseChoice}s by criteria or 0 on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	int getCountByCourseAndGender(Course course, Gender gender);
+
+	/**
+	 * 
+	 * @param course to search by, not <code>null</code>;
+	 * @param gender to search by, not <code>null</code>;
+	 * @return number of {@link CourseChoice}s by criteria or 0 on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	int getCountByCourseAndGender(Collection<Course> course, Gender gender);
 
 	public int getCountByUserAndCourse(User user, Course course)
 			throws IDOException;

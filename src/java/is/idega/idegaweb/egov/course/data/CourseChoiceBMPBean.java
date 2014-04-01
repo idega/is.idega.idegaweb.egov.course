@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
@@ -468,18 +469,66 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		return idoGetNumberOfRecords(query);
 	}
 
-	public int ejbHomeGetCountByCourseAndGender(Course course, Gender gender) throws IDOException {
+	/**
+	 * 
+	 * @param course to search by, not <code>null</code>;
+	 * @param gender to search by, not <code>null</code>;
+	 * @return number of {@link CourseChoice}s by criteria or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public int ejbHomeGetCountByCourseAndGender(Course course, Gender gender) {
+		if (course != null) {
+			return ejbFindByCourseAndGender(Arrays.asList(course), gender);
+		}
+
+		return 0;
+	}
+
+	/**
+	 * 
+	 * @param courses to search by, not <code>null</code>;
+	 * @param gender to search by, not <code>null</code>;
+	 * @return number of {@link CourseChoice}s by criteria or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public int ejbFindByCourseAndGender(
+			Collection<Course> courses, Gender gender) {
 		Table table = new Table(this);
 		Table user = new Table(User.class);
 
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new CountColumn(table, getIDColumnName()));
-		query.addJoin(table, user);
-		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_COURSE), MatchCriteria.EQUALS, course));
-		query.addCriteria(new MatchCriteria(user.getColumn("IC_GENDER_ID"), MatchCriteria.EQUALS, gender));
-		query.addCriteria(new OR(new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), new MatchCriteria(table.getColumn(COLUMN_VALID))));
 
-		return idoGetNumberOfRecords(query);
+		try {
+			query.addJoin(table, user);
+		} catch (IDORelationshipException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to join entities: " + CourseChoice.class.getSimpleName() + 
+					" and " + User.class.getSimpleName() + " cause of: ", e);
+			return 0;
+		}
+
+		query.addCriteria(new InCriteria(table.getColumn(COLUMN_COURSE), courses));
+		query.addCriteria(new MatchCriteria(
+				user.getColumn("IC_GENDER_ID"), MatchCriteria.EQUALS, gender));
+		query.addCriteria(
+				new OR(
+						new MatchCriteria(table.getColumn(COLUMN_VALID), MatchCriteria.EQUALS, true), 
+						new MatchCriteria(table.getColumn(COLUMN_VALID))
+				)
+		);
+
+		try {
+			return idoGetNumberOfRecords(query);
+		} catch (IDOException e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get primary keys for " + getInterfaceClass().getSimpleName() + 
+					" by query: '" + query + "' cause of: ", e);
+		}
+
+		return 0;
 	}
 
 	public int ejbHomeGetCountByUserAndCourse(User user, Course course) throws IDOException {

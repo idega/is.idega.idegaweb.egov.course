@@ -147,13 +147,29 @@ public class CourseChoiceHomeImpl extends IDOFactory implements
 		return theReturn;
 	}
 
-	public int getCountByCourseAndGender(Course course, Gender gender)
-			throws IDOException {
-		IDOEntity entity = this.idoCheckOutPooledEntity();
-		int theReturn = ((CourseChoiceBMPBean) entity)
-				.ejbHomeGetCountByCourseAndGender(course, gender);
-		this.idoCheckInPooledEntity(entity);
-		return theReturn;
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceHome#getCountByCourseAndGender(is.idega.idegaweb.egov.course.data.Course, com.idega.user.data.Gender)
+	 */
+	@Override
+	public int getCountByCourseAndGender(Course course, Gender gender) {
+		CourseChoiceBMPBean entity = (CourseChoiceBMPBean) this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return 0;
+		}
+
+		return entity.ejbHomeGetCountByCourseAndGender(course, gender);
+	}
+
+	@Override
+	public int getCountByCourseAndGender(
+			Collection<Course> course, Gender gender) {
+		CourseChoiceBMPBean entity = (CourseChoiceBMPBean) this.idoCheckOutPooledEntity();
+		if (entity == null) {
+			return 0;
+		}
+
+		return entity.ejbFindByCourseAndGender(course, gender);
 	}
 
 	public int getCountByUserAndCourse(User user, Course course)
