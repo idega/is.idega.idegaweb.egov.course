@@ -104,6 +104,7 @@ import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
@@ -1380,8 +1381,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		cDWR.setFrom(Integer.toString(course.getBirthyearFrom()));
 		cDWR.setTo(Integer.toString(course.getBirthyearTo()));
 		cDWR.setDescription(course.getDescription());
-		cDWR.setProvider(course.getProvider().getName());
 		cDWR.setFull(isFull(course));
+
+		CourseProvider courseProvider = course.getProvider();
+		if (courseProvider != null) {
+			cDWR.setProvider(courseProvider.getName());
+		} else {
+			cDWR.setProvider(CoreConstants.MINUS);
+		}
+
 
 		IWTimestamp from = new IWTimestamp(course.getStartDate());
 
@@ -2607,8 +2615,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		sendMessageToParents(application, choice, subject, body, locale, null);
 	}
 
-	private void sendMessageToParents(CourseApplication application,
-			CourseChoice choice, String subject, String body, Locale locale, String bcc) {
+	private void sendMessageToParents(
+			CourseApplication application,
+			CourseChoice choice, 
+			String subject, 
+			String body, 
+			Locale locale, 
+			String bcc) {
 		try {
 			if (locale == null) {
 				locale = getIWApplicationContext().getApplicationSettings()

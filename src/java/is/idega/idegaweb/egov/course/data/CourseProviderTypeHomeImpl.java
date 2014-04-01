@@ -167,7 +167,7 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 	 */
 	@Override
 	public CourseProviderType find(String primaryKey) {
-		if (StringUtil.isEmpty(primaryKey)) {
+		if (StringUtil.isEmpty(primaryKey) || primaryKey.equals("-1")) {
 			return null;
 		}
 

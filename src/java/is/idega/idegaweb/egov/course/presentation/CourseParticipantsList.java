@@ -514,7 +514,7 @@ public class CourseParticipantsList extends CourseBlock {
 			choices = new ArrayList<CourseChoice>(getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), false));
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
 			type = course.getCourseType();
-			if (type.getAbbreviation() != null) {
+			if (type != null && type.getAbbreviation() != null) {
 				table.setStyleClass("abbr_" + type.getAbbreviation());
 			}
 

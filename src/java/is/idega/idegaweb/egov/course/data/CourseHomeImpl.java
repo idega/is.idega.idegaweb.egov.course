@@ -123,6 +123,14 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			birthDate = new Date(calendar.getTimeInMillis());
 		}
 
+		if (StringUtil.isEmpty(courseTypePK) || courseTypePK.equals("-1")) {
+			courseTypePK = null;
+		}
+
+		if (StringUtil.isEmpty(providerPK) || providerPK.equals("-1")) {
+			providerPK = null;
+		}
+		
 		// TODO needs parameter to exclude selection from child courses
 		return entity.ejbFindAll(
 				!StringUtil.isEmpty(providerPK) ? Arrays.asList(providerPK) : null,
