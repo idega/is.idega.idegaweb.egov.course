@@ -30,10 +30,25 @@ public class ChildCourseHomeImpl extends CourseHomeImpl implements ChildCourseHo
 		return (ChildCourse) super.createIDO();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.ChildCourseHome#findChildCourses(is.idega.idegaweb.egov.course.data.Course, java.lang.String)
+	 */
 	@Override
-	public Collection<ChildCourse> findChildCourses(Course parentCourse) {
+	public Collection<ChildCourse> findChildCourses(
+			Course parentCourse,
+			String courseProviderId) {
+		if (parentCourse == null) {
+			return Collections.emptyList();
+		}
+
 		ChildCourseBMPBean entity = (ChildCourseBMPBean) idoCheckOutPooledEntity();
-		Collection<Integer> ids = entity.ejbFindChildCourses(parentCourse);
+		if (entity == null) {
+			return Collections.emptyList();
+		}
+
+		Collection<String> ids = entity.ejbFindChildCourses(
+				parentCourse, courseProviderId);
 		if (ListUtil.isEmpty(ids)) {
 			return Collections.emptyList();
 		}
@@ -47,6 +62,15 @@ public class ChildCourseHomeImpl extends CourseHomeImpl implements ChildCourseHo
 		}
 
 		return Collections.emptyList();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.ChildCourseHome#findChildCourses(is.idega.idegaweb.egov.course.data.Course)
+	 */
+	@Override
+	public Collection<ChildCourse> findChildCourses(Course parentCourse) {
+		return findChildCourses(parentCourse, null);
 	}
 
 	/*

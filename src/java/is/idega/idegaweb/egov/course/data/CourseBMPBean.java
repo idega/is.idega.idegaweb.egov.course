@@ -49,29 +49,30 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public static final String ENTITY_NAME = "COU_COURSE";
 
-	private static final String COLUMN_COURSE_NUMBER = "COURSE_NUMBER";
-	private static final String COLUMN_NAME = "NAME";
-	private static final String COLUMN_USER = "USER_NAME";
-	private static final String COLUMN_DESCRIPTION = "DESCRIPTION";
+	public static final String COLUMN_COURSE_NUMBER = "COURSE_NUMBER";
+	public static final String COLUMN_NAME = "NAME";
+	public static final String COLUMN_USER = "USER_NAME";
+	public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
 
-	private static final String COLUMN_COURSE_TYPE = "COU_COURSE_TYPE_ID";
-	private static final String COLUMN_PROVIDER = "PROVIDER_ID";
-	private static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
-	private static final String COLUMN_COURSE_PRICE = "COU_COURSE_PRICE_ID";
-	private static final String COLUMN_PRICE = "COURSE_PRICE";
-	private static final String COLUMN_COST = "COURSE_COST";
-	private static final String COLUMN_PRE_CARE = "HAS_PRE_CARE";
-	private static final String COLUMN_POST_CARE = "HAS_POST_CARE";
+	public static final String COLUMN_COURSE_TYPE = "COU_COURSE_TYPE_ID";
+	public static final String COLUMN_PROVIDER = "PROVIDER_ID";
+	public static final String COLUMN_ACCOUNTING_KEY = "ACCOUNTING_KEY";
+	public static final String COLUMN_COURSE_PRICE = "COU_COURSE_PRICE_ID";
+	public static final String COLUMN_PRICE = "COURSE_PRICE";
+	public static final String COLUMN_COST = "COURSE_COST";
+	public static final String COLUMN_PRE_CARE = "HAS_PRE_CARE";
+	public static final String COLUMN_POST_CARE = "HAS_POST_CARE";
 
-	private static final String COLUMN_START_DATE = "START_DATE";
-	private static final String COLUMN_END_DATE = "END_DATE";
-	private static final String COLUMN_REGISTRATION_END = "REGISTRATION_END";
-	private static final String COLUMN_BIRTHYEAR_FROM = "BIRTHYEAR_FROM";
-	private static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
-	private static final String COLUMN_MAX_PARTICIPANTS = "MAX_PER";
-	private static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION",
+	public static final String COLUMN_START_DATE = "START_DATE";
+	public static final String COLUMN_END_DATE = "END_DATE";
+	public static final String COLUMN_REGISTRATION_END = "REGISTRATION_END";
+	public static final String COLUMN_BIRTHYEAR_FROM = "BIRTHYEAR_FROM";
+	public static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
+	public static final String COLUMN_MAX_PARTICIPANTS = "MAX_PER";
+	public static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION",
 								COLUMN_COURSE_PRICES = "COURSE_PRICES";
 	public static final String COLUMN_VISIBILITY = "IS_VISIBLE";
+	public static final String PARENT_COURSE_ID = "parent_course_id";
 
 	@Override
 	public String getEntityName() {
@@ -122,24 +123,51 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		if (entities == null || entities.isEmpty()) {
 			return;
 		}
+
 		for (RentableItem entity: entities.values()) {
 			addManyToManyRelationShip(entity.getClass());
 		}
+
+		addOneToOneRelationship(PARENT_COURSE_ID, Course.class);
+	}
+
+	/**
+	 * 
+	 * @return parent {@link Course} if this {@link Course} has one;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Course getParentCourse() {
+		return (Course) getColumnValue(ChildCourseBMPBean.PARENT_COURSE_ID);
 	}
 
 	// Getters
 	@Override
 	public String getName() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getName();
+		}
+
 		return getStringColumnValue(COLUMN_NAME);
 	}
 
 	@Override
 	public String getUser() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getUser();
+		}
+
 		return getStringColumnValue(COLUMN_USER);
 	}
 
 	@Override
 	public String getDescription() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getDescription();
+		}
+
 		return getStringColumnValue(COLUMN_DESCRIPTION);
 	}
 
@@ -155,70 +183,127 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	@Override
 	public CourseType getCourseType() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getCourseType();
+		}
+
 		return (CourseType) getColumnValue(COLUMN_COURSE_TYPE);
 	}
 
 	@Override
 	public CoursePrice getPrice() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getPrice();
+		}
+
 		return (CoursePrice) getColumnValue(COLUMN_COURSE_PRICE);
 	}
 
 	@Override
 	public float getCoursePrice() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getCoursePrice();
+		}
+		
 		return getFloatColumnValue(COLUMN_PRICE, -1);
 	}
 
 	@Override
 	public float getCourseCost() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getCourseCost();
+		}
+
 		return getFloatColumnValue(COLUMN_COST, -1);
 	}
 
 	@Override
 	public String getAccountingKey() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getAccountingKey();
+		}
+
 		return getStringColumnValue(COLUMN_ACCOUNTING_KEY);
 	}
 
 	@Override
 	public Timestamp getStartDate() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getStartDate();
+		}
+
 		return getTimestampColumnValue(COLUMN_START_DATE);
 	}
 
 	@Override
 	public Timestamp getEndDate() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getEndDate();
+		}
+		
 		return getTimestampColumnValue(COLUMN_END_DATE);
 	}
 
 	@Override
 	public Timestamp getRegistrationEnd() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getRegistrationEnd();
+		}
+
 		return getTimestampColumnValue(COLUMN_REGISTRATION_END);
 	}
 
 	@Override
 	public int getBirthyearFrom() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getBirthyearFrom();
+		}
+
 		return getIntColumnValue(COLUMN_BIRTHYEAR_FROM);
 	}
 
 	@Override
 	public int getBirthyearTo() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getBirthyearTo();
+		}
+		
 		return getIntColumnValue(COLUMN_BIRTHYEAR_TO);
 	}
 
 	@Override
 	public int getMax() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getMax();
+		}
+
 		return getIntColumnValue(COLUMN_MAX_PARTICIPANTS);
 	}
 
 	@Override
 	public int getFreePlaces(boolean countOffers) {
+		Course parentCourse = getParentCourse();
+
 		try {
 			CourseChoiceHome home = (CourseChoiceHome) getIDOHome(CourseChoice.class);
-			return getMax() - home.getCountByCourse(this, countOffers);
-		}
-		catch (IDOLookupException e) {
-			e.printStackTrace();
-		}
-		catch (IDOException e) {
-			e.printStackTrace();
+			return getMax() - home.getCountByCourse(
+					parentCourse == null ? this : parentCourse, 
+					countOffers);
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, 
+					"Failed to get " + CourseChoice.class.getSimpleName() + 
+					"'s cause of: ", e);
 		}
 
 		return getMax();
@@ -231,21 +316,41 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	@Override
 	public int getCourseNumber() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getCourseNumber();
+		}
+
 		return getIntColumnValue(COLUMN_COURSE_NUMBER);
 	}
 
 	@Override
 	public boolean isOpenForRegistration() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.isOpenForRegistration();
+		}
+
 		return getBooleanColumnValue(COLUMN_OPEN_FOR_REGISTRATION, true);
 	}
 
 	@Override
 	public boolean hasPreCare() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.hasPreCare();
+		}
+		
 		return getBooleanColumnValue(COLUMN_PRE_CARE, true);
 	}
 
 	@Override
 	public boolean hasPostCare() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.hasPreCare();
+		}
+
 		return getBooleanColumnValue(COLUMN_POST_CARE, true);
 	}
 
@@ -256,6 +361,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	@Override
 	public Collection<Group> getGroupsWithAccess() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getGroupsWithAccess();
+		}
+
 		try {
 			return idoGetRelatedEntities(Group.class);
 		} catch (IDORelationshipException e) {
@@ -275,25 +385,47 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	 */
 	@Override
 	public boolean isPrivate() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.isPrivate();
+		}
+
 		return getBooleanColumnValue(COLUMN_VISIBILITY, false);
 	}
 
 	@Override
-	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
+	public Collection<? extends RentableItem> getRentableItems(
+			Class<? extends RentableItem> itemType) {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			return parentCourse.getRentableItems(itemType);
+		}
+
 		try {
 			return super.idoGetRelatedEntities(itemType);
 		} catch (IDORelationshipException e) {
-			e.printStackTrace();
+			getLogger().log(Level.WARNING, 
+					"Failed to get rentable items cause of: ", e);
 		}
+
 		return null;
 	}
+
 	@Override
 	public Collection<CoursePrice> getAllPrices() {
+		Course parentCourse = getParentCourse();
+		if (parentCourse != null) {
+			parentCourse.getAllPrices();
+		}
+		
 		try {
 			return super.idoGetRelatedEntities(CoursePrice.class);
 		} catch (IDORelationshipException e) {
-			e.printStackTrace();
+			getLogger().log(Level.WARNING, 
+					"Failed to get related " + CoursePrice.class.getSimpleName() + 
+					"'s cause of: ", e);
 		}
+
 		return null;
 	}
 

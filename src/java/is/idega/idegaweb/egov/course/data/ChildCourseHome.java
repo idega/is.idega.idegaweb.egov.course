@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +16,28 @@ public interface ChildCourseHome extends CourseHome {
 	@Override
 	public ChildCourse create() throws CreateException;
 
-	public Collection<ChildCourse> findChildCourses(Course parentCourse);
+	/**
+	 * 
+	 * @param parentCourse is {@link Course} which has {@link ChildCourse}s,
+	 * not <code>null</code>;
+	 * @return {@link Collection} of entities or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<ChildCourse> findChildCourses(Course parentCourse);
+
+	/**
+	 * 
+	 * @param parentCourse is {@link Course} which has {@link ChildCourse}s,
+	 * not <code>null</code>;
+	 * @param courseProviderId is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @return {@link Collection} of entities or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<ChildCourse> findChildCourses(
+			Course parentCourse, String courseProviderId);
 
 	/**
 	 * 

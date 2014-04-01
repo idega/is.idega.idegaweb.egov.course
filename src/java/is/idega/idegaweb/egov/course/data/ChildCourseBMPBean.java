@@ -1,7 +1,5 @@
 package is.idega.idegaweb.egov.course.data;
 
-import is.idega.idegaweb.egov.course.data.rent.RentableItem;
-
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,24 +8,16 @@ import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 
-import com.idega.data.IDOException;
-import com.idega.data.IDOLookupException;
-import com.idega.data.query.Column;
-import com.idega.data.query.MatchCriteria;
-import com.idega.data.query.SelectQuery;
-import com.idega.data.query.Table;
-import com.idega.user.data.Group;
+import com.idega.data.IDOQuery;
+import com.idega.util.StringUtil;
 
 public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 
 	private static final long serialVersionUID = 7425610935661180112L;
 
-	public static final String PARENT_COURSE_ID = "parent_course_id";
-
 	@Override
 	public void initializeAttributes() {
 		super.initializeAttributes();
-		addOneToOneRelationship(PARENT_COURSE_ID, Course.class);
 	}
 
 	@Override
@@ -40,14 +30,29 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 		setColumn(PARENT_COURSE_ID, parentCourse);
 	}
 
-	public Collection<Integer> ejbFindChildCourses(Course parentCourse) {
-		Table table = new Table(this);
-		SelectQuery query = new SelectQuery(table);
-		query.addColumn(new Column(table, getIDColumnName()));
-		query.addCriteria(new MatchCriteria(
-				table.getColumn(PARENT_COURSE_ID), 
-				MatchCriteria.EQUALS, 
-				parentCourse.getPrimaryKey()));
+	/**
+	 * 
+	 * @param parentCourse is {@link Course} which has {@link ChildCourse}s,
+	 * not <code>null</code>;
+	 * @param courseProviderId is {@link CourseProvider#getPrimaryKey()}, 
+	 * skipped if <code>null</code>;
+	 * @return {@link Collection} of {@link Course#getPrimaryKey()} or
+	 * {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Collection<String> ejbFindChildCourses(
+			Course parentCourse,
+			String courseProviderId) {
+		if (parentCourse == null) {
+			return Collections.emptyList();
+		}
+		
+		IDOQuery query = idoQuery();
+		query.appendSelectAllFrom(this).appendWhereEquals(
+				PARENT_COURSE_ID, parentCourse.getPrimaryKey().toString());
+		if (!StringUtil.isEmpty(courseProviderId)) {
+			query.appendAndEquals(COLUMN_PROVIDER, courseProviderId);
+		}
 
 		try {
 			return idoFindPKsByQuery(query);
@@ -58,137 +63,6 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 		}
 
 		return Collections.emptyList();
-	}
-
-	@Override
-	public int getCourseNumber() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getCourseNumber() : parentCourse.getCourseNumber();
-	}
-	@Override
-	public boolean isOpenForRegistration() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.isOpenForRegistration() : parentCourse.isOpenForRegistration();
-	}
-	@Override
-	public boolean hasPreCare() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.hasPreCare() : parentCourse.hasPreCare();
-	}
-	@Override
-	public boolean hasPostCare() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.hasPreCare() : parentCourse.hasPreCare();
-	}
-	@Override
-	public String getName() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getName() : parentCourse.getName();
-	}
-	@Override
-	public String getUser() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getUser() : parentCourse.getUser();
-	}
-	@Override
-	public String getDescription() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getDescription() : parentCourse.getDescription();
-	}
-	@Override
-	public String getProviderId() {
-		return super.getProviderId();
-	}
-	@Override
-	public CourseType getCourseType() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getCourseType() : parentCourse.getCourseType();
-	}
-	@Override
-	public CoursePrice getPrice() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getPrice() : parentCourse.getPrice();
-	}
-	@Override
-	public float getCoursePrice() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getCoursePrice() : parentCourse.getCoursePrice();
-	}
-	@Override
-	public float getCourseCost() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getCourseCost() : parentCourse.getCourseCost();
-	}
-	@Override
-	public String getAccountingKey() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getAccountingKey() : parentCourse.getAccountingKey();
-	}
-	@Override
-	public Timestamp getStartDate() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getStartDate() : parentCourse.getStartDate();
-	}
-	@Override
-	public Timestamp getEndDate() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getEndDate() : parentCourse.getEndDate();
-	}
-	@Override
-	public Timestamp getRegistrationEnd() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getRegistrationEnd() : parentCourse.getRegistrationEnd();
-	}
-	@Override
-	public int getBirthyearFrom() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getBirthyearFrom() : parentCourse.getBirthyearFrom();
-	}
-	@Override
-	public int getBirthyearTo() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getBirthyearTo() : parentCourse.getBirthyearTo();
-	}
-	@Override
-	public int getMax() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getMax() : parentCourse.getMax();
-	}
-	@Override
-	public int getFreePlaces(boolean countOffers) {
-		Course parentCourse = getParentCourse();
-		try {
-			CourseChoiceHome home = (CourseChoiceHome) getIDOHome(CourseChoice.class);
-			return getMax() - home.getCountByCourse(parentCourse == null ? this : parentCourse, countOffers);
-		}
-		catch (IDOLookupException e) {
-			e.printStackTrace();
-		}
-		catch (IDOException e) {
-			e.printStackTrace();
-		}
-
-		return getMax();
-	}
-	@Override
-	public Collection<Group> getGroupsWithAccess() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getGroupsWithAccess() : parentCourse.getGroupsWithAccess();
-	}
-	@Override
-	public boolean isPrivate() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.isPrivate() : parentCourse.isPrivate();
-	}
-	@Override
-	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getRentableItems(itemType) : parentCourse.getRentableItems(itemType);
-	}
-	@Override
-	public Collection<CoursePrice> getAllPrices() {
-		Course parentCourse = getParentCourse();
-		return parentCourse == null ? super.getAllPrices() : parentCourse.getAllPrices();
 	}
 
 	//	Setters
