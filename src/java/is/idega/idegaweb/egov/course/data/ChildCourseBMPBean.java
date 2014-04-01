@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import javax.ejb.FinderException;
 
 import com.idega.data.IDOQuery;
-import com.idega.util.StringUtil;
+import com.idega.util.ListUtil;
 
 public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 
@@ -34,7 +34,8 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 	 * 
 	 * @param parentCourse is {@link Course} which has {@link ChildCourse}s,
 	 * not <code>null</code>;
-	 * @param courseProviderId is {@link CourseProvider#getPrimaryKey()}, 
+	 * @param courseProviderIds is {@link Collection} of 
+	 * {@link CourseProvider#getPrimaryKey()}, 
 	 * skipped if <code>null</code>;
 	 * @return {@link Collection} of {@link Course#getPrimaryKey()} or
 	 * {@link Collections#emptyList()} on failure;
@@ -42,7 +43,7 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 	 */
 	public Collection<String> ejbFindChildCourses(
 			Course parentCourse,
-			String courseProviderId) {
+			Collection<String> courseProviderIds) {
 		if (parentCourse == null) {
 			return Collections.emptyList();
 		}
@@ -50,8 +51,9 @@ public class ChildCourseBMPBean extends CourseBMPBean implements ChildCourse {
 		IDOQuery query = idoQuery();
 		query.appendSelectAllFrom(this).appendWhereEquals(
 				PARENT_COURSE_ID, parentCourse.getPrimaryKey().toString());
-		if (!StringUtil.isEmpty(courseProviderId)) {
-			query.appendAndEquals(COLUMN_PROVIDER, courseProviderId);
+		if (!ListUtil.isEmpty(courseProviderIds)) {
+			query.appendAnd().append(COLUMN_PROVIDER)
+			.appendInForStringCollectionWithSingleQuotes(courseProviderIds);
 		}
 
 		try {

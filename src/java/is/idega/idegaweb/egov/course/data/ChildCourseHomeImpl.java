@@ -37,7 +37,7 @@ public class ChildCourseHomeImpl extends CourseHomeImpl implements ChildCourseHo
 	@Override
 	public Collection<ChildCourse> findChildCourses(
 			Course parentCourse,
-			String courseProviderId) {
+			Collection<String> courseProviderId) {
 		if (parentCourse == null) {
 			return Collections.emptyList();
 		}

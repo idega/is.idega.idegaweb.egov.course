@@ -30,14 +30,15 @@ public interface ChildCourseHome extends CourseHome {
 	 * 
 	 * @param parentCourse is {@link Course} which has {@link ChildCourse}s,
 	 * not <code>null</code>;
-	 * @param courseProviderId is {@link CourseProvider#getPrimaryKey()}, 
+	 * @param courseProviderId is {@link Collection} of 
+	 * {@link CourseProvider#getPrimaryKey()},
 	 * skipped if <code>null</code>;
 	 * @return {@link Collection} of entities or {@link Collections#emptyList()}
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Collection<ChildCourse> findChildCourses(
-			Course parentCourse, String courseProviderId);
+			Course parentCourse, Collection<String> courseProviderId);
 
 	/**
 	 * 
