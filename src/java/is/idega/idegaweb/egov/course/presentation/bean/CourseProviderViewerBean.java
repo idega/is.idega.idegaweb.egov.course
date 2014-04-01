@@ -112,6 +112,7 @@ import com.idega.core.location.data.Commune;
 import com.idega.core.location.data.CommuneHome;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.data.genericentity.Group;
 import com.idega.presentation.IWContext;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
@@ -233,6 +234,13 @@ public class CourseProviderViewerBean {
 		getCourseProviderHome().remove(getCourseProviderHome().findByPrimaryKeyRecursively(courseProviderId));		
 	}
 
+	/**
+	 * 
+	 * @return <code>true</code> if {@link User} is in {@link com.idega.user.data.Group}
+	 * with role {@link CourseConstants#SUPER_ADMINISTRATOR_ROLE_KEY}
+	 * or {@link User} is system administrator, <code>false</code> otherwise;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public boolean hasFullAccessRights() {
 		User user = getCurrentUser();
 		if (user != null) {
@@ -256,6 +264,28 @@ public class CourseProviderViewerBean {
 			}
 
 			if (user.equals(administrator)) {
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * 
+	 * @return <code>true</code> if current {@link User} is in {@link Group}
+	 * with role {@link CourseConstants#ADMINISTRATOR_ROLE_KEY}, <code>false</code>
+	 * otherwise;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public boolean hasHandlerAccess() {
+		User user = getCurrentUser();
+		if (user != null) {
+			/*
+			 * Courses administrator
+			 */
+			if (getAccessController().hasRole(
+					user, CourseConstants.ADMINISTRATOR_ROLE_KEY)) {
 				return Boolean.TRUE;
 			}
 		}
