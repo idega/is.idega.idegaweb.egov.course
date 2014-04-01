@@ -69,6 +69,8 @@ public interface CourseHome extends IDOHome {
 	 * skipped if <code>null</code>;
 	 * @param toDate is {@link Course#getStartDate()} to filter by,
 	 * skipped if <code>null</code>;
+	 * @param useChildCourses <code>true</code> if {@link ChildCourse}s 
+	 * should be used instead of {@link Course}s where possible;
 	 * @return entities by criteria or {@link Collections#emptyList()}
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
@@ -79,7 +81,8 @@ public interface CourseHome extends IDOHome {
 			String courseTypePK, 
 			int birthYear, 
 			Date fromDate, 
-			Date toDate);
+			Date toDate, 
+			boolean useChildCourses);
 
 	/**
 	 * 
@@ -141,6 +144,8 @@ public interface CourseHome extends IDOHome {
 	 * skipped if <code>null</code>;
 	 * @param toDate is ceiling for course start date, 
 	 * skipped if <code>null</code>;
+	 * @param useChildCourses <code>true</code> if {@link ChildCourse}s 
+	 * should be used instead of {@link Course}s where possible;
 	 * @return found entities or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -149,7 +154,8 @@ public interface CourseHome extends IDOHome {
 			CourseProviderType type, 
 			CourseType courseType, 
 			Date fromDate, 
-			Date toDate);
+			Date toDate, 
+			boolean useChildCourses);
 
 	public int getCountBySchoolTypeAndBirthYear(Object schoolTypePK, int birthYear, Date fromDate) throws IDOException;
 
@@ -235,8 +241,8 @@ public interface CourseHome extends IDOHome {
 	 * skipped if <code>null</code>;
 	 * @param groupsWithAccess is {@link Group}, which can view private 
 	 * {@link Course}s, skipped if <code>null</code>;
-	 * @param notChild <code>true</code> if {@link ChildCourse}s
-	 * should be excluded;
+	 * @param useChildCourse <code>true</code> if {@link ChildCourse}s
+	 * should be found instead of {@link Course}s where possible;
 	 * @return entities or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -245,7 +251,7 @@ public interface CourseHome extends IDOHome {
 			Collection<? extends CourseProviderType> couserProviderTypes,
 			Collection<String> courseTypes, Date birthDateFrom,
 			Date birthDateTo, Date fromDate, Date toDate, Boolean isPrivate,
-			Collection<Group> groupsWithAccess, boolean notChild);
+			Collection<Group> groupsWithAccess, boolean useChildCourse);
 
 	/**
 	 * 

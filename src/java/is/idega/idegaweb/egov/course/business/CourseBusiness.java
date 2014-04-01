@@ -5,6 +5,7 @@ import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
 import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
+import is.idega.idegaweb.egov.course.data.ChildCourse;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
@@ -810,10 +811,27 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			throws RemoteException;
 
 	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourses
+	 * 
+	 * <p>Finds all entities by following criteria:</p>
+	 * @param provider to filter by, skipped if <code>null</code>;
+	 * @param type to filter by, skipped if <code>null</code>;
+	 * @param schoolType to filter by, skipped if <code>null</code>;
+	 * @param fromDate is floor for course start date, 
+	 * skipped if <code>null</code>;
+	 * @param toDate is ceiling for course start date, 
+	 * skipped if <code>null</code>;
+	 * @param useChildCourses <code>true</code> if {@link ChildCourse}s
+	 * should be used instead of {@link Course}s where possible, 
+	 * <code>false</code> otherwise;
+	 * @return found entities or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Collection<Course> getCourses(CourseProvider provider, CourseProviderType schoolType,
-			Date fromDate, Date toDate) throws RemoteException;
+	public Collection<Course> getCourses(
+			CourseProvider provider, 
+			CourseProviderType schoolType,
+			Date fromDate, 
+			Date toDate, 
+			boolean useChildCourses);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getEndDate

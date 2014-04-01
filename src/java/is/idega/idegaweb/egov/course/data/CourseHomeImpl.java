@@ -71,7 +71,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAll() {
-		return findAll(null, null, null, null, null, null, null, null, null);
+		return findAll(null, null, null, null, null, null, null, null, null, false);
 	}
 
 	/*
@@ -81,8 +81,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	@Override
 	public Collection<Course> findAllByProvider(CourseProvider provider) {
 		if (provider != null) {
-			return findAll(Arrays.asList(provider), null, null, null, null,
-					null, null, null, null);
+			return findAll(Arrays.asList(provider.toString()), 
+					null, null, null, null,
+					null, null, null, null, false);
 		}
 
 		return Collections.emptyList();
@@ -94,7 +95,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAllByBirthYear(int birthYear) {
-		return findAll(null, null, null, birthYear, null, null);
+		return findAll(null, null, null, birthYear, null, null, false);
 	}
 
 	/*
@@ -130,8 +131,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		if (StringUtil.isEmpty(providerPK) || providerPK.equals("-1")) {
 			providerPK = null;
 		}
-		
-		// TODO needs parameter to exclude selection from child courses
+
 		return entity.ejbFindAll(
 				!StringUtil.isEmpty(providerPK) ? Arrays.asList(providerPK) : null,
 				providerType != null ? Arrays.asList(providerType) : null,
@@ -152,22 +152,45 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			String courseTypePK,
 			int birthYear,
 			Date fromDate,
-			Date toDate) {
-		Collection<Object> ids = findAllPrimaryKeys(providerPK, schoolTypePK,
-				courseTypePK, birthYear, fromDate, toDate);
-		if (ListUtil.isEmpty(ids)) {
-			return Collections.emptyList();
+			Date toDate, 
+			boolean useChildCourses) {
+
+		ArrayList<String> courseProviderIds = new ArrayList<String>(1);
+		if (!StringUtil.isEmpty(providerPK) && !providerPK.equals("-1")) {
+			courseProviderIds.add(providerPK);
 		}
 
-		try {
-			return this.getEntityCollectionForPrimaryKeys(ids);
-		} catch (FinderException e) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING,
-					"Failed to get " + Course.class.getSimpleName() +
-					" by ids: '" + ids + "'");
+		ArrayList<CourseProviderType> couserProviderTypes = new ArrayList<CourseProviderType>(1);
+		if (!StringUtil.isEmpty(schoolTypePK) && !schoolTypePK.equals("-1")) {
+			CourseProviderType providerType = getCourseProviderTypeHome().find(schoolTypePK);
+			if (providerType != null) {
+				couserProviderTypes.add(providerType);
+			}
 		}
 
-		return Collections.emptyList();
+		ArrayList<String> courseTypes = new ArrayList<String>(1);
+		if (!StringUtil.isEmpty(courseTypePK) && !courseTypePK.equals("-1")) {
+			courseTypes.add(courseTypePK);
+		}
+
+		Date birthDate = null;
+		if (birthYear > 0) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.YEAR, birthYear);
+			birthDate = new Date(calendar.getTimeInMillis());
+		}
+
+		return findAll(
+				courseProviderIds, 
+				couserProviderTypes, 
+				courseTypes, 
+				birthDate, 
+				birthDate, 
+				fromDate, 
+				toDate, 
+				null, 
+				null, 
+				useChildCourses);
 	}
 
 	/*
@@ -176,7 +199,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAll(String providerPK, String schoolTypePK, String courseTypePK, int birthYear) {
-		return findAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
+		return findAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null, false);
 	}
 
 	@Override
@@ -186,6 +209,10 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseHome#findAll(java.util.Collection, java.util.Collection, java.util.Collection, java.sql.Date, java.sql.Date, java.sql.Date, java.sql.Date, java.lang.Boolean, java.util.Collection)
+	 */
 	@Override
 	public Collection<Course> findAll(
 			Collection<? extends CourseProvider> courseProviders,
@@ -208,7 +235,6 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				isPrivate, 
 				groupsWithAccess, 
 				Boolean.FALSE);
-//		FIXME Do or do not exclude child courses?
 	}
 
 	/*
@@ -217,7 +243,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAll(
-			Collection<String> courseProviders,
+			Collection<String> courseProviderIds,
 			Collection<? extends CourseProviderType> couserProviderTypes,
 			Collection<String> courseTypes,
 			Date birthDateFrom,
@@ -226,10 +252,10 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			Date toDate,
 			Boolean isPrivate,
 			Collection<Group> groupsWithAccess,
-			boolean notChild) {
+			boolean useChildCourse) {
 		CourseBMPBean entity = (CourseBMPBean) idoCheckOutPooledEntity();
 		Collection<Object> ids = entity.ejbFindAll(
-				courseProviders,
+				courseProviderIds,
 				couserProviderTypes,
 				courseTypes,
 				birthDateFrom,
@@ -242,8 +268,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			return Collections.emptyList();
 		}
 
+		Collection<Course> courses = null;
 		try {
-			return getEntityCollectionForPrimaryKeys(ids);
+			courses = getEntityCollectionForPrimaryKeys(ids);
 		} catch (FinderException e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING,
@@ -251,7 +278,11 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 					"'s by id's: '" + ids + "' cause of: ", e);
 		}
 
-		return Collections.emptyList();
+		if (useChildCourse) {
+			return getChildAndParentCourses(courses, courseProviderIds);
+		}
+
+		return courses;
 	}
 
 	/*
@@ -260,18 +291,23 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	 */
 	@Override
 	public Collection<Course> findAllByProviderAndSchoolTypeAndCourseType(
-			CourseProvider provider, CourseProviderType type,
-			CourseType courseType, Date fromDate, Date toDate) {
+			CourseProvider provider, 
+			CourseProviderType type,
+			CourseType courseType, 
+			Date fromDate, 
+			Date toDate, 
+			boolean useChildCourses) {
 		return findAll(
-				provider != null ? Arrays.asList(provider) : null,
+				provider != null ? Arrays.asList(provider.getPrimaryKey().toString()) : null,
 				type != null ? Arrays.asList(type) : null,
-				courseType != null ? Arrays.asList(courseType) : null,
+				courseType != null ? Arrays.asList(courseType.getPrimaryKey().toString()) : null,
 				null,
 				null,
 				fromDate,
 				toDate,
 				null,
-				null);
+				null, 
+				useChildCourses);
 	}
 
 	@Override
@@ -314,7 +350,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			Date fromDate,
 			Date toDate) {
 		Collection<Course> courses = findAllByProviderAndSchoolTypeAndCourseType(
-				provider, type, courseType, fromDate, toDate);
+				provider, type, courseType, fromDate, toDate, false);
 		if (ListUtil.isEmpty(courses)) {
 			return 0;
 		}
@@ -600,6 +636,54 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 				null, null, true, accessGroups);
 	}
 
+	/**
+	 * 
+	 * <p>If {@link Course} has {@link ChildCourse}s, then {@link ChildCourse}s
+	 * will be returned.</p>
+	 * @param parentCourses to get {@link ChildCourse}s for, 
+	 * not <code>null</code>;
+	 * @param courseProviderId is {@link CourseProvider#getPrimaryKey()}
+	 * to filter by, skipped if <code>null</code>;
+	 * @return {@link Collection} of {@link Course}s and {@link ChildCourse}s
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected Collection<Course> getChildAndParentCourses(
+			Collection<Course> parentCourses, 
+			Collection<String> courseProviderId) {
+		ArrayList<Course> combinedCourses = new ArrayList<Course>();
+		if (!ListUtil.isEmpty(parentCourses)) {
+			for (Course parentCourse: parentCourses) {
+				Collection<ChildCourse> childCourses = getChildCourseHome()
+						.findChildCourses(parentCourse, courseProviderId);
+				if (!ListUtil.isEmpty(childCourses)) {
+					combinedCourses.addAll(childCourses);
+				} else {
+					combinedCourses.add(parentCourse);
+				}
+			}
+		}
+
+		return combinedCourses;
+	}
+
+	private ChildCourseHome childCourseHome = null;
+
+	protected ChildCourseHome getChildCourseHome() {
+		if (this.childCourseHome == null) {
+			try {
+				this.childCourseHome = (ChildCourseHome) IDOLookup
+						.getHome(ChildCourse.class);
+			} catch (IDOLookupException e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to get " + ChildCourseHome.class.getSimpleName() +
+						" cause of: ", e);
+			}
+		}
+
+		return this.childCourseHome;
+	}
+	
 	private GroupHome groupHome = null;
 
 	protected GroupHome getGroupHome() {
@@ -607,7 +691,7 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 			try {
 				this.groupHome = (GroupHome) IDOLookup.getHome(Group.class);
 			} catch (IDOLookupException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
+				Logger.getLogger(getClass().getName()).log(
 						Level.WARNING,
 						"Failed to get " + GroupHome.class +
 						" cause of: ", e);

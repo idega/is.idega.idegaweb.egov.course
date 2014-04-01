@@ -1466,7 +1466,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	public Collection<Course> getCourses(int birthYear, String providerPK,
 			String schoolTypePK, String courseTypePK, Date fromDate, Date toDate) {
 		return getCourseHome().findAll(providerPK, schoolTypePK,
-				courseTypePK, birthYear, fromDate, toDate);
+				courseTypePK, birthYear, fromDate, toDate, false);
 	}
 
 	/*
@@ -1483,7 +1483,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		
 		if (ListUtil.isEmpty(providers)) {
 			return getCourseHome().findAll(null, schoolTypePK,
-					courseTypePK, -1, fromDate, toDate);
+					courseTypePK, -1, fromDate, toDate, false);
 		}
 
 		Collection<Course> courses = new ArrayList<Course>();
@@ -1494,7 +1494,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					courseTypePK, 
 					-1, 
 					fromDate, 
-					toDate);
+					toDate, false);
 			if (!ListUtil.isEmpty(courseByProvider)) {
 				courses.addAll(courseByProvider);
 			}
@@ -1518,7 +1518,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					schoolTypePK,
 					courseTypePK, 
 					birthYear, 
-					null, null);
+					null, null, false);
 	}
 
 	@Override
@@ -2734,35 +2734,48 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getNumberOfChoices(is.idega.idegaweb.egov.course.data.CourseProvider, is.idega.idegaweb.egov.course.data.CourseProviderType, com.idega.user.data.Gender, java.sql.Date, java.sql.Date)
+	 */
 	@Override
-	public int getNumberOfChoices(CourseProvider provider, CourseProviderType schoolType,
-			Gender gender, Date fromDate, Date toDate) {
-		try {
-			return getCourseChoiceHome()
-					.getCountByProviderAndSchoolTypeAndGender(provider,
-							schoolType, gender, fromDate, toDate);
-		} catch (IDOException e) {
-			e.printStackTrace();
-			return 0;
+	public int getNumberOfChoices(
+			CourseProvider provider,
+			CourseProviderType schoolType,
+			Gender gender,
+			Date fromDate,
+			Date toDate) {
+		Collection<Course> courses = getCourseHome().findAllByProviderAndSchoolTypeAndCourseType(
+				provider, schoolType, null, fromDate, toDate, true);
+		if (!ListUtil.isEmpty(courses)) {
+			return getCourseChoiceHome().getCountByCourseAndGender(courses, gender);
 		}
+
+		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getNumberOfChoices(is.idega.idegaweb.egov.course.data.Course, com.idega.user.data.Gender)
+	 */
 	@Override
 	public int getNumberOfChoices(Course course, Gender gender) {
-		try {
-			return getCourseChoiceHome().getCountByCourseAndGender(course,
-					gender);
-		} catch (IDOException e) {
-			e.printStackTrace();
-			return 0;
-		}
+		return getCourseChoiceHome().getCountByCourseAndGender(course,	gender);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusiness#getCourses(is.idega.idegaweb.egov.course.data.CourseProvider, is.idega.idegaweb.egov.course.data.CourseProviderType, java.sql.Date, java.sql.Date, boolean)
+	 */
 	@Override
-	public Collection<Course> getCourses(CourseProvider provider, CourseProviderType schoolType,
-			Date fromDate, Date toDate) {
+	public Collection<Course> getCourses(
+			CourseProvider provider, 
+			CourseProviderType schoolType,
+			Date fromDate, 
+			Date toDate, 
+			boolean useChildCourses) {
 		return getCourseHome().findAllByProviderAndSchoolTypeAndCourseType(
-				provider, schoolType, null, fromDate, toDate);
+				provider, schoolType, null, fromDate, toDate, useChildCourses);
 	}
 
 	@Override
@@ -3396,7 +3409,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 		try {
 			Collection<Course> courses = getCourseHome().findAll(null, null,
-					null, -1, fromDate.getDate(), toDate.getDate());
+					null, -1, fromDate.getDate(), toDate.getDate(), false);
 			int count = 0;
 			for (Course course : courses) {
 				CourseType type = course.getCourseType();
