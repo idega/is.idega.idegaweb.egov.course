@@ -63,7 +63,15 @@ public class CourseChoiceComparator implements Comparator<CourseChoice> {
 
 	private int nameSort(CourseChoice choice1, CourseChoice choice2) {
 		User user1 = choice1.getUser();
+		if (user1 == null) {
+			return 1;
+		}
+
 		User user2 = choice2.getUser();
+		if (user2 == null) {
+			return -1;
+		}
+
 		return collator.compare(user1.getName(), user2.getName());
 	}
 

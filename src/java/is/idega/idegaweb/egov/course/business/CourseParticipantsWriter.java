@@ -85,7 +85,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 	public CourseParticipantsWriter() {
 	}
 
-	private Collection<CourseChoice> getChoices(Course course, IWContext iwc, 
+	private Collection<CourseChoice> getChoices(
+			Course course, 
+			IWContext iwc, 
 			boolean waitingList) {
 		if (iwc.isParameterSet(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)) {
 			User participant = null;
@@ -471,14 +473,18 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			owner = application.getOwner();
 			Child child = this.userBusiness.getMemberFamilyLogic().getChild(user);
 			if (showAll) {
+
 				/*
 				 * Growth deviation
 				 */
-				Boolean hasGrowthDeviation = child.hasGrowthDeviation(
-						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-				if (hasGrowthDeviation == null) {
+				Boolean hasGrowthDeviation = null;
+				if (child != null) {
 					hasGrowthDeviation = child.hasGrowthDeviation(
-							CourseConstants.COURSE_PREFIX);
+							CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+					if (hasGrowthDeviation == null) {
+						hasGrowthDeviation = child.hasGrowthDeviation(
+								CourseConstants.COURSE_PREFIX);
+					}
 				}
 
 				HSSFCell growthDeviationCell = row.createCell(5);
@@ -493,12 +499,15 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				/*
 				 * Allergies
 				 */
-				Boolean hasAllergies = child.hasAllergies(
-						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-				if (hasAllergies == null) {
-					hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
+				Boolean hasAllergies = null;
+				if (child != null) {
+					hasAllergies = child.hasAllergies(
+							CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+					if (hasAllergies == null) {
+						hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
+					}
 				}
-				
+
 				if (hasAllergies != null && hasAllergies.booleanValue()) {
 					row.createCell(6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 				} else {
@@ -509,10 +518,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				 * Other information
 				 */
 				HSSFCell otherInfo = row.createCell(7);
-				if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
+				if (child != null && child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
 					otherInfo.setCellValue(child.getOtherInformation(
 							CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-				} else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
+				} else if (child != null && child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
 					otherInfo.setCellValue(child.getOtherInformation(
 							CourseConstants.COURSE_PREFIX));
 				} else {
@@ -528,11 +537,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					custodians = child.getCustodians();
 				} catch(Exception e) {}
 
-				Custodian extraCustodian = child.getExtraCustodian();
-				if (extraCustodian != null) {
-					custodians.add(extraCustodian);
+				if (child != null) {
+					Custodian extraCustodian = child.getExtraCustodian();
+					if (extraCustodian != null) {
+						custodians.add(extraCustodian);
+					}
 				}
-	
+
 				Iterator<Custodian> iterator = custodians.iterator();
 				while (iterator.hasNext()) {
 					Custodian element = iterator.next();
@@ -700,23 +711,32 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				iCell = 38;
 	
 				List<Relative> relatives = new ArrayList<Relative>();
-				Relative mainRelative = child.getMainRelative(
-						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-				if (mainRelative == null) {
-					mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+				Relative mainRelative = null;
+				if (child != null) {
+					mainRelative = child.getMainRelative(
+							CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+					if (mainRelative == null) {
+						mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
+					}
 				}
 
 				if (mainRelative != null) {
 					relatives.add(mainRelative);
 				}
 
-				Collection<Relative> otherRelatives = child.getRelatives(
-						CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-				if (otherRelatives.isEmpty()) {
-					otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
+				Collection<Relative> otherRelatives = null;
+				if (child != null) {
+					otherRelatives = child.getRelatives(
+							CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+					if (otherRelatives.isEmpty()) {
+						otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
+					}
 				}
 
-				relatives.addAll(otherRelatives);
+				if (otherRelatives != null) {
+					relatives.addAll(otherRelatives);
+				}
+
 				for (Relative element : relatives) {
 					
 					/*
