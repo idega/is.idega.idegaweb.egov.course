@@ -16,6 +16,8 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.business.CourseProviderBusiness;
 import is.idega.idegaweb.egov.course.business.CourseSession;
+import is.idega.idegaweb.egov.course.data.ChildCourse;
+import is.idega.idegaweb.egov.course.data.ChildCourseHome;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
 
@@ -36,6 +38,8 @@ import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.event.IWPageEventListener;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
@@ -884,5 +888,22 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 
 	protected <P extends CourseProvider> Collection<P> getHandledCourseProviders(User user) {
 		return getCourseProviderBusiness().getHandledCourseProviders(user);
+	}
+
+	private ChildCourseHome childCourseHome = null;
+
+	protected ChildCourseHome getChildCourseHome() {
+		if (this.childCourseHome == null) {
+			try {
+				this.childCourseHome = (ChildCourseHome) IDOLookup
+						.getHome(ChildCourse.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + ChildCourseHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.childCourseHome;
 	}
 }

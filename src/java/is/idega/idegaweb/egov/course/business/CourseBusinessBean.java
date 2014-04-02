@@ -1064,18 +1064,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			map.put(new Integer(-1), getLocalizedString("select_course",
 					"Select course", locale));
 
-			for (Iterator<Course> iter = coll.iterator(); iter.hasNext();) {
-				Course course = iter.next();
+			for (Course course: coll) {
 				String name = "";
 				if (showIDInName) {
 					name += course.getCourseNumber() + " - ";
 
 					CourseType type = course.getCourseType();
-					if (type.getAbbreviation() != null
+					if (type != null 
+							&& type.getAbbreviation() != null
 							&& type.showAbbreviation()) {
 						name += type.getAbbreviation() + " ";
 					}
 				}
+
 				name += course.getName();
 
 				map.put(course.getPrimaryKey(), name);
@@ -1494,7 +1495,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					courseTypePK, 
 					-1, 
 					fromDate, 
-					toDate, false);
+					toDate, true);
 			if (!ListUtil.isEmpty(courseByProvider)) {
 				courses.addAll(courseByProvider);
 			}

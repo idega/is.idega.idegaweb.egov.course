@@ -29,10 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.logging.Level;
 
 import org.hsqldb.lib.StringUtil;
 
@@ -65,6 +65,7 @@ import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
@@ -258,7 +259,6 @@ public class CourseParticipantsList extends CourseBlock {
 
 		CourseProvider provider = getSession().getProvider();
 		if ((provider != null && typePK != null) || showAllCourses) {
-			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 			List<Course> courses = new ArrayList<Course>(getBusiness().getCourses(
 					Arrays.asList(provider),
 					String.valueOf(typePK),
@@ -269,19 +269,21 @@ public class CourseParticipantsList extends CourseBlock {
 				Collections.reverse(courses);
 			}
 			
-			Iterator<Course> iter = courses.iterator();
-			while (iter.hasNext()) {
-				Course element = iter.next();
+			boolean showIDInName = getIWApplicationContext().getApplicationSettings()
+					.getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+			for (Course element: courses) {
 				String name = "";
 				if (showIDInName) {
 					CourseType type = element.getCourseType();
+					if (type != null) {
+						name += element.getCourseNumber() + " - ";
 
-					name += element.getCourseNumber() + " - ";
-
-					if (type.getAbbreviation() != null && type.showAbbreviation()) {
-						name += type.getAbbreviation() + " ";
+						if (type.getAbbreviation() != null && type.showAbbreviation()) {
+							name += type.getAbbreviation() + " ";
+						}
 					}
 				}
+
 				name += element.getName();
 				course.addMenuElement(element.getPrimaryKey().toString(), name);
 			}
@@ -366,6 +368,55 @@ public class CourseParticipantsList extends CourseBlock {
 		link.setMediaWriterClass(CourseParticipantsWriter.class);
 
 		return link;
+	}
+
+	/**
+	 * 
+	 * <p>TODO</p>
+	 * @param iwc
+	 * @param course
+	 * @param sortBy
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected ArrayList<CourseChoice> getCourseChoices(
+			IWContext iwc, Course course, String sortBy) {
+		/*
+		 * Determine type of sorting
+		 */
+		int sortType = CourseChoiceComparator.DATE_SORT;
+		if (!StringUtil.isEmpty(sortBy)) {
+			sortType = Integer.parseInt(iwc.getParameter(PARAMETER_SORTING));
+		}
+
+		/*
+		 * Creating comparator
+		 */
+		CourseChoiceComparator comparator = new CourseChoiceComparator(
+				iwc.getCurrentLocale(), sortType);
+
+		/*
+		 * Searching for choices
+		 */
+		ArrayList<CourseChoice> choices = new ArrayList<CourseChoice>();
+		if (course != null) {
+			Collection<CourseChoice> foundChoices = null;
+			try {
+				foundChoices = getBusiness()
+						.getCourseChoices(course, Boolean.FALSE);
+			} catch (RemoteException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get course choices by course " + course.getName() + 
+						" cause of: ", e);
+			}
+
+			if (!ListUtil.isEmpty(foundChoices)) {
+				choices.addAll(foundChoices);
+				Collections.sort(choices, comparator);
+			}
+		}
+
+		return choices;
 	}
 
 	protected Table2 getParticipants(IWContext iwc, 
@@ -507,39 +558,44 @@ public class CourseParticipantsList extends CourseBlock {
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 
+		/*
+		 * Getting course
+		 */
 		Course course = null;
-		CourseType type = null;
-		List<CourseChoice> choices = new ArrayList<CourseChoice>();
 		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
-			choices = new ArrayList<CourseChoice>(getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), false));
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
-			type = course.getCourseType();
+
+			CourseType type = course.getCourseType();
 			if (type != null && type.getAbbreviation() != null) {
 				table.setStyleClass("abbr_" + type.getAbbreviation());
 			}
-
-			Collections.sort(choices, 
-					new CourseChoiceComparator(
-							iwc.getCurrentLocale(), 
-							iwc.isParameterSet(PARAMETER_SORTING) ? 
-									Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : 
-										CourseChoiceComparator.DATE_SORT));
 		}
 
-		String courseId = course == null ? null : course.getPrimaryKey().toString();
+		/*
+		 * Getting provider id
+		 */
 		String schoolId = null;
 		if (course != null) {
 			CourseProvider school = course.getProvider();
-			schoolId = school == null ? null : school.getPrimaryKey().toString();
+			if (school != null) {
+				schoolId = school.getPrimaryKey().toString();
+			}
 		}
 
 		String schoolTypeId = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
 		String courseTypeId = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
 		String loadingMessage = getResourceBundle().getLocalizedString("loading", "Loading");
+
+		List<CourseChoice> choices = getCourseChoices(iwc, course, 
+				iwc.getParameter(PARAMETER_SORTING));
 		for (CourseChoice choice : choices) {
 			row = group.createRow();
 
 			User user = choice.getUser();
+			if (user == null) {
+				continue;
+			}
+			
 			Address address = getUserBusiness().getUsersMainAddress(user);
 			PostalCode postalCode = null;
 			if (address != null) {
@@ -578,8 +634,8 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 			else if (addViewParticipantLink) {
 				Link view = new Link(name.getName(iwc.getCurrentLocale()));
-				if (courseId != null) {
-					view.addParameter(PARAMETER_COURSE_PK, courseId);
+				if (course != null) {
+					view.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
 				}
 				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
 				if (schoolId != null) {
@@ -799,8 +855,8 @@ public class CourseParticipantsList extends CourseBlock {
 			if (addViewParticipantLink) {
 				cell = row.createCell();
 				Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
-				if (courseId != null) {
-					view.addParameter(PARAMETER_COURSE_PK, courseId);
+				if (course != null) {
+					view.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
 				}
 				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
 				if (schoolId != null) {

@@ -9,6 +9,7 @@ package is.idega.idegaweb.egov.course.data;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -419,11 +420,16 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		 */
 		sql.appendJoinOn(Arrays.asList(user));
 
+		ArrayList<String> providerIds = new ArrayList<String>();
+		for (CourseProvider provider : providers) {
+			providerIds.add(provider.getPrimaryKey().toString());
+		}
+		
 		/*
 		 * Courses
 		 */
-		Collection<Course> courses = getCourseHome().findAll(providers, null, 
-				null, null, null, null, null, null, null);
+		Collection<Course> courses = getCourseHome().findAll(providerIds, null, 
+				null, null, null, null, null, null, null, Boolean.TRUE);
 		if (ListUtil.isEmpty(courses)) {
 			return -1;
 		}

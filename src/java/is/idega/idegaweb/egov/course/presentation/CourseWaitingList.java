@@ -9,6 +9,7 @@ package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
+import is.idega.idegaweb.egov.course.data.ChildCourse;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseProviderType;
@@ -17,8 +18,11 @@ import is.idega.idegaweb.egov.course.data.CourseType;
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
@@ -44,6 +48,7 @@ import com.idega.user.data.User;
 import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
@@ -186,7 +191,8 @@ public class CourseWaitingList extends CourseBlock {
 
 		boolean showTypes = true;
 		if (getSession().getProvider() != null) {
-			Collection<CourseProviderType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			Collection<CourseProviderType> schoolTypes = getBusiness()
+					.getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
 				type = (CourseProviderType) schoolTypes.iterator().next();
@@ -324,16 +330,66 @@ public class CourseWaitingList extends CourseBlock {
 		DownloadLink link = new DownloadLink(getBundle().getImage("xls.gif"));
 		link.setStyleClass("xls");
 		link.setTarget(Link.TARGET_NEW_WINDOW);
-		link.maintainParameter(PARAMETER_COURSE_PK, iwc);
+		Course course = getCourse(
+				iwc.getParameter(PARAMETER_COURSE_PK), 
+				iwc.getParameter(PARAMETER_PROVIDER_PK));
+		if (course != null) {
+			link.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
+		}
+		
 		if (iwc.isParameterSet(PARAMETER_COURSE_PARTICIPANT_PK)) {
 			link.maintainParameter(PARAMETER_COURSE_PARTICIPANT_PK, iwc);
 		}
-		link.addParameter(CourseParticipantsWriter.PARAMETER_WAITING_LIST, Boolean.TRUE.toString());
+		link.addParameter(CourseParticipantsWriter.PARAMETER_WAITING_LIST, Boolean.FALSE.toString());
 		link.setMediaWriterClass(CourseParticipantsWriter.class);
 
 		return link;
 	}
+	
+	protected Course getCourse(String primaryKey, String courseProviderId) {
+		if (!StringUtil.isEmpty(primaryKey)) {
+			Course course;
+			try {
+				course = getBusiness().getCourse(primaryKey);
+			} catch (RemoteException e) {
+				return null;
+			}
 
+			if (course != null) {
+				Collection<String> privoderIds = null;
+				if (!StringUtil.isEmpty(courseProviderId)) {
+					privoderIds = Arrays.asList(courseProviderId);
+				}
+
+				Collection<ChildCourse> childCourses = getChildCourseHome()
+						.findChildCourses(course, privoderIds);
+				if (!ListUtil.isEmpty(childCourses)) {
+					return childCourses.iterator().next();
+				} else {
+					return course;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	protected Collection<CourseChoice> getCourseChoices(
+			Course course) {
+		if (course != null) {
+			try {
+				return getBusiness().getCourseChoices(course, true);
+			} catch (RemoteException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + CourseChoice.class.getSimpleName() +
+						"'s for course:" + course.getName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return Collections.emptyList();
+	}
+	
 	protected Table2 getParticipants(IWContext iwc) throws RemoteException {
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
@@ -377,13 +433,11 @@ public class CourseWaitingList extends CourseBlock {
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 
-		Course course = null;
-		Collection<CourseChoice> choices = new ArrayList<CourseChoice>();
-		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
-			choices = getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), true);
-			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
-		}
+		Course course = getCourse(
+				iwc.getParameter(PARAMETER_COURSE_PK),
+				iwc.getParameter(PARAMETER_PROVIDER_PK));
 
+		Collection<CourseChoice> choices = getCourseChoices(course);
 		for (CourseChoice choice : choices) {
 			row = group.createRow();
 
@@ -419,7 +473,16 @@ public class CourseWaitingList extends CourseBlock {
 			cell.setStyleClass("number");
 			cell.add(new Text(String.valueOf(iRow)));
 
-			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
+			Name name = null;
+			if (user != null) {
+				name = new Name(
+						user.getFirstName(), 
+						user.getMiddleName(), 
+						user.getLastName());
+			} else {
+				name = new Name();
+				name.setFirstName(CoreConstants.MINUS);
+			}
 
 			cell = row.createCell();
 			cell.setStyleClass("name");
@@ -436,7 +499,12 @@ public class CourseWaitingList extends CourseBlock {
 
 			cell = row.createCell();
 			cell.setStyleClass("personalID");
-			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
+			if (user != null) {
+				cell.add(new Text(PersonalIDFormatter.format(
+						user.getPersonalID(), iwc.getCurrentLocale())));
+			} else {
+				cell.add(new Text(CoreConstants.MINUS));
+			}
 
 			cell = row.createCell();
 			cell.setStyleClass("address");
