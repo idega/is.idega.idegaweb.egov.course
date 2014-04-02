@@ -29,6 +29,7 @@ import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.IDOUtil;
+import com.idega.data.SimpleQuerier;
 import com.idega.data.query.AND;
 import com.idega.data.query.Column;
 import com.idega.data.query.CountColumn;
@@ -40,6 +41,7 @@ import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.Group;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 
@@ -137,7 +139,28 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public Course getParentCourse() {
-		return (Course) getColumnValue(ChildCourseBMPBean.PARENT_COURSE_ID);
+		Course parentCourse = (Course) getColumnValue(ChildCourseBMPBean.PARENT_COURSE_ID);
+		if (parentCourse == null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT cc.PARENT_COURSE_ID ");
+			sb.append("FROM cou_course cc ");
+			sb.append("WHERE cc.COU_COURSE_ID = ").append(getPrimaryKey().toString()).append(";");
+			
+			String[] parentIds = null;
+			try {
+				parentIds = SimpleQuerier.executeStringQuery(sb.toString());
+			} catch (Exception e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get parent course id by query: '" + sb.toString() + 
+						"' cause of: ", e);
+			}
+
+			if (!ArrayUtil.isEmpty(parentIds)) {
+				parentCourse = getChildCourseHome().findByPrimaryKey(parentIds[0]);
+			}
+		}
+
+		return parentCourse;
 	}
 
 	// Getters
