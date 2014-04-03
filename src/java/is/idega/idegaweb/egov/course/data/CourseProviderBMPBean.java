@@ -576,8 +576,23 @@ public class CourseProviderBMPBean extends GenericEntity implements CourseProvid
 		IDOQuery sql = idoQuery();
 		sql.useDefaultAlias = Boolean.TRUE;
 		sql.appendSelectAllFrom(this);
-		sql.appendJoinOn(types);
-		sql.appendJoinOn(areas);
+		
+		if (!ListUtil.isEmpty(types)) {
+			String previuos = sql.toString();
+			sql.appendJoinOn(types);
+			if (previuos.equals(sql.toString())) {
+				return Collections.emptyList();
+			}
+		}
+
+		if (!ListUtil.isEmpty(areas)) {
+			String previuos = sql.toString();
+			sql.appendJoinOn(areas);
+			if (previuos.equals(sql.toString())) {
+				return Collections.emptyList();
+			}
+		}
+		
 		try {
 			return idoFindPKsByQuery(sql);
 		} catch (FinderException e) {
