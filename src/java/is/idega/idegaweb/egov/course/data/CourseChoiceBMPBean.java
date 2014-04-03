@@ -420,6 +420,9 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 		 */
 		sql.appendJoinOn(Arrays.asList(user));
 
+		/*
+		 * Providers
+		 */
 		ArrayList<String> providerIds = new ArrayList<String>();
 		for (CourseProvider provider : providers) {
 			providerIds.add(provider.getPrimaryKey().toString());

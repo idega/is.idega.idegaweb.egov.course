@@ -239,7 +239,7 @@ public class CourseWaitingList extends CourseBlock {
 			yearMenu.setOnChange("changeCourseValues();");
 			yearMenu.setSelectedElement(year);
 			
-			for (int i = inceptionYear; i <= currentYear; i++) {
+			for (int i = inceptionYear; i <= currentYear + 4; i++) {
 				yearMenu.addMenuElement(i, String.valueOf(i));
 			}
 		}

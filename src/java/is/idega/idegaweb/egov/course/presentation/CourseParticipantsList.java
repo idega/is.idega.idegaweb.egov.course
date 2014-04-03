@@ -246,7 +246,7 @@ public class CourseParticipantsList extends CourseBlock {
 			yearMenu.setOnChange("changeCourseValues();");
 			yearMenu.setSelectedElement(year);
 			
-			for (int i = inceptionYear; i <= currentYear + 1; i++) {
+			for (int i = inceptionYear; i <= currentYear + 4; i++) {
 				yearMenu.addMenuElement(i, String.valueOf(i));
 			}
 		}
@@ -564,10 +564,11 @@ public class CourseParticipantsList extends CourseBlock {
 		Course course = null;
 		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
-
-			CourseType type = course.getCourseType();
-			if (type != null && type.getAbbreviation() != null) {
-				table.setStyleClass("abbr_" + type.getAbbreviation());
+			if (course != null) {
+				CourseType type = course.getCourseType();
+				if (type != null && type.getAbbreviation() != null) {
+					table.setStyleClass("abbr_" + type.getAbbreviation());
+				}
 			}
 		}
 
