@@ -144,7 +144,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT cc.PARENT_COURSE_ID ");
 			sb.append("FROM cou_course cc ");
-			sb.append("WHERE cc.COU_COURSE_ID = ").append(getPrimaryKey().toString()).append(";");
+			sb.append("WHERE cc.COU_COURSE_ID = ").append(getPrimaryKey().toString());
 			
 			String[] parentIds = null;
 			try {
