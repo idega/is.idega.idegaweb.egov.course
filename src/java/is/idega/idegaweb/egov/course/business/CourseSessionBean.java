@@ -9,8 +9,10 @@ package is.idega.idegaweb.egov.course.business;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.CourseProvider;
+import is.idega.idegaweb.egov.course.data.CourseProviderType;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
 
@@ -103,12 +105,21 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 	 * @see is.idega.idegaweb.egov.course.business.CourseSession#getSchoolsForUser()
 	 */
 	public Collection<CourseProvider> getSchoolsForUser() {
+		return getSchoolsForUser(null);
+	}
+
+	@Override
+	public Collection<CourseProvider> getSchoolsForUser(CourseProviderType type) {
 		/*
 		 * For school logic only...
 		 */
 		if (getAccessController().hasRole(
 				CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY, 
 				getUserContext())) {
+			if (type != null) {
+				return getSchoolBusiness().findAllSchoolsByType(Arrays.asList(type));
+			}
+
 			return getCourseBusiness().getProviders();
 		}
 
@@ -121,11 +132,11 @@ public class CourseSessionBean extends IBOSessionBean implements CourseSession {
 	public boolean getIsAllProvidersSelected() {
 		return this.allProvidersSelected;
 	}
-	
+
 	public void setIsAllProvidersSelected(boolean selected) {
 		this.allProvidersSelected = selected;
 	}
-	
+
 	private CourseBusiness courseBusiness = null;
 
 	protected CourseBusiness getCourseBusiness() {
