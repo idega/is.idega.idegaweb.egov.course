@@ -185,6 +185,24 @@ public class CourseProviderTypeHomeImpl extends IDOFactory implements
 
 	/*
 	 * (non-Javadoc)
+	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#findByPrimaryKeyRecursively(java.lang.String)
+	 */
+	@Override
+	public CourseProviderType findByPrimaryKeyRecursively(String primaryKey) {
+		if (StringUtil.isEmpty(primaryKey) || primaryKey.equals("-1")) {
+			return null;
+		}
+
+		CourseProviderType result = findSubTypeByPrimaryKeyIDO(primaryKey);
+		if (result == null) {
+			result = find(primaryKey);
+		}
+
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.course.data.CourseProviderTypeHome#findAll()
 	 */
 	@Override

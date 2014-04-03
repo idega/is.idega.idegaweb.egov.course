@@ -154,6 +154,16 @@ public interface CourseProviderTypeHome extends IDOHome {
 	public CourseProviderType find(String primaryKey);
 
 	/**
+	 * 
+	 * <p>Checks in sub-types also</p>
+	 * @param primaryKey is {@link CourseProviderType#getPrimaryKey()},
+	 * not <code>null</code>;
+	 * @return entity by primary key, <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	CourseProviderType findByPrimaryKeyRecursively(String primaryKey);
+
+	/**
 	 *
 	 * @param primaryKeys is {@link Collection} of {@link CourseProviderType#getPrimaryKey()}s
 	 * @return entities by criteria or {@link Collections#emptyList()} on
@@ -178,4 +188,5 @@ public interface CourseProviderTypeHome extends IDOHome {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public <T extends CourseProviderType> Collection<T> findAll();
+
 }
