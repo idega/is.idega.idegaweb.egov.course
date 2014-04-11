@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.FinderException;
+import javax.faces.component.UIComponent;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -192,7 +193,7 @@ public class CourseEditor extends CourseBlock {
 		String registrationEnd = iwc.isParameterSet(PARAMETER_REGISTRATION_END) ? iwc.getParameter(PARAMETER_REGISTRATION_END) : null;
 
 		try {
-			IWTimestamp startDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(sStartDate));
+			IWTimestamp startDate = sStartDate == null ? null : new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(sStartDate));
 			IWTimestamp endDate = sEndDate != null ? new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(sEndDate)) : null;
 			IWTimestamp regEnd = registrationEnd != null ? new IWTimestamp(IWDatePickerHandler.getParsedTimestampByCurrentLocale(registrationEnd)) : null;
 			int courseNumber = iwc.isParameterSet(PARAMETER_COURSE_NUMBER) ? Integer.parseInt(iwc.getParameter(PARAMETER_COURSE_NUMBER)) : -1;
@@ -693,6 +694,10 @@ public class CourseEditor extends CourseBlock {
 		return null;
 	}
 
+	protected UIComponent getSeasonsSelection(IWContext iwc, Course course) {
+		return null;
+	}
+
 	protected Form getEditorForm(IWContext iwc, Object coursePK) throws RemoteException {
 		boolean useFixedPrices = isUseFixedPrices();
 		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
@@ -1023,52 +1028,57 @@ public class CourseEditor extends CourseBlock {
 		section.setStyleClass("formSection");
 		form.add(section);
 
-		helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		if (useFixedPrices) {
-			helpLayer.add(new Text(localize("course.length_and_max", "Select a start date and end date as well as maximum number of participants in the course.")));
-		} else {
-			helpLayer.add(new Text(localize("course.length_search_explanation", "Select a start date and click \"Search for length\" to populate" + " the length dropdown. If nothing is found you will be prompted to search again. If a length is found you can select one and" + " proceed with the form.")));
-		}
-		section.add(helpLayer);
+		UIComponent seasonsSelection = getSeasonsSelection(iwc, course);
+		if (seasonsSelection == null) {
+			helpLayer = new Layer(Layer.DIV);
+			helpLayer.setStyleClass("helperText");
+			if (useFixedPrices) {
+				helpLayer.add(new Text(localize("course.length_and_max", "Select a start date and end date as well as maximum number of participants in the course.")));
+			} else {
+				helpLayer.add(new Text(localize("course.length_search_explanation", "Select a start date and click \"Search for length\" to populate" + " the length dropdown. If nothing is found you will be prompted to search again. If a length is found you can select one and" + " proceed with the form.")));
+			}
+			section.add(helpLayer);
 
-		layer = new Layer(Layer.DIV);
-		layer.setID("start_date");
-		layer.setStyleClass("formItem");
-		label = new Label();
-		label.setLabel(localize("start_date", "Start date"));
-		inputFrom.setID(PARAMETER_VALID_FROM_ID);
-		layer.add(label);
-		layer.add(inputFrom);
-		section.add(layer);
-
-		if (useFixedPrices) {
 			layer = new Layer(Layer.DIV);
-			layer.setID("end_date");
+			layer.setID("start_date");
 			layer.setStyleClass("formItem");
 			label = new Label();
-			label.setLabel(localize("end_date", "End date"));
+			label.setLabel(localize("start_date", "Start date"));
+			inputFrom.setID(PARAMETER_VALID_FROM_ID);
 			layer.add(label);
-			layer.add(inputTo);
-			section.add(layer);
-		} else {
-			layer = new Layer();
-			layer.setID("search");
-			layer.setStyleClass("formItem");
-			GenericButton search = new GenericButton(localize("search_for_length", "Search for length"));
-			search.setOnClick("changeValuesPrice();");
-			label = new Label(Text.getNonBrakingSpace(), search);
-			layer.add(label);
-			layer.add(search);
+			layer.add(inputFrom);
 			section.add(layer);
 
-			layer = new Layer(Layer.DIV);
-			layer.setID("length");
-			layer.setStyleClass("formItem");
-			label = new Label(localize("length", "Length"), priceDrop);
-			layer.add(label);
-			layer.add(priceDrop);
-			section.add(layer);
+			if (useFixedPrices) {
+				layer = new Layer(Layer.DIV);
+				layer.setID("end_date");
+				layer.setStyleClass("formItem");
+				label = new Label();
+				label.setLabel(localize("end_date", "End date"));
+				layer.add(label);
+				layer.add(inputTo);
+				section.add(layer);
+			} else {
+				layer = new Layer();
+				layer.setID("search");
+				layer.setStyleClass("formItem");
+				GenericButton search = new GenericButton(localize("search_for_length", "Search for length"));
+				search.setOnClick("changeValuesPrice();");
+				label = new Label(Text.getNonBrakingSpace(), search);
+				layer.add(label);
+				layer.add(search);
+				section.add(layer);
+
+				layer = new Layer(Layer.DIV);
+				layer.setID("length");
+				layer.setStyleClass("formItem");
+				label = new Label(localize("length", "Length"), priceDrop);
+				layer.add(label);
+				layer.add(priceDrop);
+				section.add(layer);
+			}
+		} else {
+			section.add(seasonsSelection);
 		}
 
 		if (useBirthYears) {

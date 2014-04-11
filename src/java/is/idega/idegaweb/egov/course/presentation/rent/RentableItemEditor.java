@@ -3,20 +3,29 @@ package is.idega.idegaweb.egov.course.presentation.rent;
 import is.idega.idegaweb.egov.application.IWBundleStarter;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.rent.RentableItemServices;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.idega.block.school.data.SchoolCategory;
+import com.idega.block.school.data.SchoolCategoryHome;
+import com.idega.block.school.data.SchoolSeason;
+import com.idega.block.school.data.SchoolSeasonHome;
+import com.idega.data.IDOLookup;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.Block;
+import com.idega.presentation.CSSSpacer;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
 import com.idega.presentation.Layer;
@@ -27,6 +36,7 @@ import com.idega.presentation.TableHeaderCell;
 import com.idega.presentation.TableHeaderRowGroup;
 import com.idega.presentation.TableRow;
 import com.idega.presentation.text.Heading2;
+import com.idega.presentation.text.Heading3;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.BackButton;
@@ -152,8 +162,19 @@ public abstract class RentableItemEditor extends Block {
 		}
 	}
 
+	protected Collection<SchoolSeason> getSeasons() throws Exception {
+		SchoolCategoryHome categoryHome = (SchoolCategoryHome) IDOLookup.getHome(SchoolCategory.class);
+		SchoolSeasonHome seasonHome = (SchoolSeasonHome) IDOLookup.getHome(SchoolSeason.class);
+		return seasonHome.findAllSchoolSeasons(categoryHome.findByPrimaryKey(getCategoryKey()));
+	}
+
 	private boolean doSave(IWContext iwc) throws Exception {
 		String type = getRentableItemType();
+
+		Collection<SchoolSeason> seasons = getSeasons();
+		if (ListUtil.isEmpty(seasons)) {
+			return false;
+		}
 
 		String name = iwc.getParameter(PARAMETER_NAME);
 		if (StringUtil.isEmpty(name)) {
@@ -161,11 +182,11 @@ public abstract class RentableItemEditor extends Block {
 			return false;
 		}
 
-		Double rentPrice = null;
-		try {
-			rentPrice = iwc.isParameterSet(PARAMETER_RENT_PRICE) ? Double.valueOf(iwc.getParameter(PARAMETER_RENT_PRICE)) : null;
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
+		Map<SchoolSeason, Double> prices = new HashMap<SchoolSeason, Double>();
+		for (SchoolSeason season: seasons) {
+			String param = PARAMETER_RENT_PRICE.concat(CoreConstants.HASH).concat(season.getPrimaryKey().toString());
+			Double price = iwc.isParameterSet(param) ? Double.valueOf(iwc.getParameter(param)) : Double.valueOf(0);
+			prices.put(season, price);
 		}
 
 		Integer quantity = null;
@@ -183,14 +204,14 @@ public abstract class RentableItemEditor extends Block {
 		}
 
 		if (iwc.isParameterSet(PARAMETER_ITEM_ID)) {
-			if (rentableItemServices.editItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID), name, rentPrice, quantity, rented)) {
+			if (rentableItemServices.editItem(getItemClass(), iwc.getParameter(PARAMETER_ITEM_ID), name, prices, quantity, rented)) {
 				addSuccessMessage(iwrb.getLocalizedString("rentable_item.success_editing_item", "Item was successfully modified"));
 			} else {
 				addErrorMessage(iwrb.getLocalizedString("rentable_item.error_editing_item", "Some error occured while editing item"));
 				return false;
 			}
 		} else {
-			if (rentableItemServices.createItem(getItemClass(), type, name, rentPrice, quantity, rented) == null) {
+			if (rentableItemServices.createItem(getItemClass(), type, name, prices, quantity, rented) == null) {
 				addErrorMessage(iwrb.getLocalizedString("rentable_item.error_creating_item", "Some error occurred while creating item"));
 				return false;
 			} else {
@@ -215,6 +236,8 @@ public abstract class RentableItemEditor extends Block {
 		successMessages.add(message);
 	}
 
+	protected abstract String getCategoryKey();
+
 	protected RentableItem editOrCreateItem(IWContext iwc) throws Exception {
 		RentableItem item = null;
 		if (iwc.isParameterSet(PARAMETER_ITEM_ID)) {
@@ -229,6 +252,11 @@ public abstract class RentableItemEditor extends Block {
 		form.add(inputs);
 		inputs.setStyleClass("formSection");
 
+		Collection<SchoolSeason> seasons = getSeasons();
+		if (ListUtil.isEmpty(seasons)) {
+			return item;
+		}
+
 		Layer formItem = new Layer();
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
@@ -237,21 +265,35 @@ public abstract class RentableItemEditor extends Block {
 		Label nameLabel = new Label(iwrb.getLocalizedString("rentable_item.name", "Name"), name);
 		formItem.add(nameLabel);
 		formItem.add(name);
+		inputs.add(new CSSSpacer());
 
-		formItem = new Layer();
-		formItem.setStyleClass("formItem");
-		inputs.add(formItem);
-		Double rentPrice = item == null ? null : item.getRentPrice();
-		DoubleInput rentPriceInput = new DoubleInput(PARAMETER_RENT_PRICE, rentPrice == null ? 0 : rentPrice);
-		rentPriceInput.setAsDouble(iwrb.getLocalizedString("rentable_item.please_use_numbers_only", "Please, use correct value for rent price"),
-				currency == null ? -1 : currency.getDefaultFractionDigits());
-		StringBuilder rentPriceTitle = new StringBuilder(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price"));
-		if (currency != null) {
-			rentPriceTitle.append(" (").append(currency.getCurrencyCode()).append(")");
+		String seasonLabel = iwrb.getLocalizedString("season", "Season");
+		for (SchoolSeason season: seasons) {
+			Layer seasonContainer = new Layer();
+			inputs.add(seasonContainer);
+			seasonContainer.add(new Heading3(seasonLabel.concat(CoreConstants.SPACE).concat(season.getName()).concat(CoreConstants.COLON)));
+			seasonContainer.add(new CSSSpacer());
+
+			formItem = new Layer();
+			formItem.setStyleClass("formItem");
+			seasonContainer.add(formItem);
+			Double rentPrice = item == null ? null : item.getRentPrice(season);
+			DoubleInput rentPriceInput = new DoubleInput(
+					PARAMETER_RENT_PRICE.concat(CoreConstants.HASH).concat(season.getPrimaryKey().toString()),
+					rentPrice == null ? 0 : rentPrice
+			);
+			rentPriceInput.setAsDouble(
+					iwrb.getLocalizedString("rentable_item.please_use_numbers_only", "Please, use correct value for rent price"),
+					currency == null ? -1 : currency.getDefaultFractionDigits()
+			);
+			StringBuilder rentPriceTitle = new StringBuilder(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price"));
+			if (currency != null) {
+				rentPriceTitle.append(" (").append(currency.getCurrencyCode()).append(")");
+			}
+			Label rentPriceLabel = new Label(rentPriceTitle.toString(), rentPriceInput);
+			formItem.add(rentPriceLabel);
+			formItem.add(rentPriceInput);
 		}
-		Label rentPriceLabel = new Label(rentPriceTitle.toString(), rentPriceInput);
-		formItem.add(rentPriceLabel);
-		formItem.add(rentPriceInput);
 
 		if (isShowQuantity()) {
 			formItem = new Layer();
@@ -298,10 +340,10 @@ public abstract class RentableItemEditor extends Block {
 
 	public abstract String getRentableItemType();
 
-	public abstract Class<? extends RentableItem> getItemClass();
+	public abstract <I extends RentableItem> Class<I> getItemClass();
 
 	private void listItems(IWContext iwc) throws Exception {
-		Collection<? extends RentableItem> allItems = rentableItemServices.getItemsByType(getItemClass(), getRentableItemType());
+		Collection<RentableItem> allItems = rentableItemServices.getItemsByType(getItemClass(), getRentableItemType());
 		if (ListUtil.isEmpty(allItems)) {
 			form.add(new Heading2(iwrb.getLocalizedString("rentable_item.there_are_no_items_yet", "There are no items yet")));
 		} else {
@@ -320,11 +362,15 @@ public abstract class RentableItemEditor extends Block {
 			//	Name
 			headerCell = headerRow.createHeaderCell();
 			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.name", "Name")));
-
-			//	Price
-			headerCell = headerRow.createHeaderCell();
-			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price")));
-
+//
+//			//	Season
+//			headerCell = headerRow.createHeaderCell();
+//			headerCell.add(new Text(iwrb.getLocalizedString("season", "Season")));
+//
+//			//	Price
+//			headerCell = headerRow.createHeaderCell();
+//			headerCell.add(new Text(iwrb.getLocalizedString("rentable_item.rent_price", "Rent price")));
+//
 			//	Quantity
 			if (isShowQuantity()) {
 				headerCell = headerRow.createHeaderCell();
@@ -352,30 +398,37 @@ public abstract class RentableItemEditor extends Block {
 			TableBodyRowGroup body = table.createBodyRowGroup();
 			boolean hideBackButton = Boolean.TRUE.toString().equals(iwc.getParameter("hide_back_button"));
 			boolean checkHTML = Boolean.TRUE.toString().equals(iwc.getParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY));
+
+			int columnSpan = 4;
+			if (isShowQuantity()) {
+				columnSpan++;
+			}
+			if (isShowRented()) {
+				columnSpan++;
+			}
 			for (RentableItem item: allItems) {
 				itemId = item.getPrimaryKey().toString();
-
 				TableRow row = body.createRow();
-
 				TableCell2 cell = row.createCell();
-				cell.add(new Text(String.valueOf(index + 1)));
+				cell.add(new Text(String.valueOf(index + 1).concat(CoreConstants.DOT)));
+				cell.setStyleAttribute("text-align", "center");
 
 				cell = row.createCell();
 				cell.add(new Text(item.getName()));
-
-				cell = row.createCell();
-				cell.add(new Text(currencyFormatter.format(item.getRentPrice())));
+				cell.setStyleAttribute("text-align", "center");
 
 				if (isShowQuantity()) {
 					cell = row.createCell();
 					Integer quantity = item.getQuantity();
 					cell.add(new Text(quantity == null ? CoreConstants.EMPTY : quantity.toString()));
+					cell.setStyleAttribute("text-align", "center");
 				}
 
 				if (isShowRented()) {
 					cell = row.createCell();
 					Integer rented = item.getRentedAmount();
 					cell.add(new Text(rented == null ? CoreConstants.EMPTY : rented.toString()));
+					cell.setStyleAttribute("text-align", "center");
 				}
 
 				Link edit = new Link(new Image(editImageUri));
@@ -388,6 +441,7 @@ public abstract class RentableItemEditor extends Block {
 				edit.setTitle(editTitle);
 				cell = row.createCell();
 				cell.add(edit);
+				cell.setStyleAttribute("text-align", "center");
 
 				Link delete = new Link(new Image(deleteImageUri));
 				delete.setParameter(PARAMETER_ACTION_DELETE, Boolean.TRUE.toString());
@@ -400,9 +454,106 @@ public abstract class RentableItemEditor extends Block {
 				delete.setOnClick("if (!window.confirm('" + iwrb.getLocalizedString("are_you_sure", "Are you sure?") + "')) return false;");
 				cell = row.createCell();
 				cell.add(delete);
+				cell.setStyleAttribute("text-align", "center");
+
+				Collection<CoursePrice> prices = item.getAllPrices();
+				if (ListUtil.isEmpty(prices)) {
+					row = body.createRow();
+					cell = row.createCell();
+					cell.setColumnSpan(columnSpan);
+					cell.add(
+						new Text(
+							iwrb.getLocalizedString("price_for_all_seasons", "Price for all seasons").concat(CoreConstants.COLON)
+							.concat(CoreConstants.SPACE).concat(currencyFormatter.format(item.getRentPrice(null))).concat(CoreConstants.SPACE)
+							.concat(currencyFormatter.getCurrency().getCurrencyCode())
+						)
+					);
+				} else {
+					row = body.createRow();
+					cell = row.createCell();
+					cell.setColumnSpan(columnSpan);
+					cell.add(new Text(iwrb.getLocalizedString("prices", "Prices").concat(CoreConstants.COLON)));
+					for (CoursePrice price: prices) {
+						row = body.createRow();
+						cell = row.createCell();
+						cell.setColumnSpan(columnSpan);
+						SchoolSeason priceSeason = price.getSchoolSeason();
+						cell.add(
+							new Text(priceSeason.getName()
+								.concat(CoreConstants.COLON).concat(CoreConstants.SPACE).concat(currencyFormatter.format(item.getRentPrice(priceSeason)))
+								.concat(CoreConstants.SPACE).concat(currencyFormatter.getCurrency().getCurrencyCode())
+							)
+						);
+					}
+				}
 
 				index++;
 			}
+
+//			SchoolSeasonHome seasonHome = (SchoolSeasonHome) IDOLookup.getHome(SchoolSeason.class);
+//			Map<String, List<RentableItem>> groupedItems = rentableItemServices.getGroupedRentableItems(allItems);
+//			for (String seasonId: groupedItems.keySet()) {
+//				List<RentableItem> items = groupedItems.get(seasonId);
+//				if (ListUtil.isEmpty(items)) {
+//					continue;
+//				}
+//
+//				SchoolSeason season = seasonHome.findByPrimaryKey(seasonId);
+//				for (RentableItem item: items) {
+//					itemId = item.getPrimaryKey().toString();
+//
+//					TableRow row = body.createRow();
+//
+//					TableCell2 cell = row.createCell();
+//					cell.add(new Text(String.valueOf(index + 1)));
+//
+//					cell = row.createCell();
+//					cell.add(new Text(item.getName()));
+//
+//					cell = row.createCell();
+//					cell.add(new Text(season.getName()));
+//
+//					cell = row.createCell();
+//					cell.add(new Text(currencyFormatter.format(item.getRentPrice(season))));
+//
+//					if (isShowQuantity()) {
+//						cell = row.createCell();
+//						Integer quantity = item.getQuantity();
+//						cell.add(new Text(quantity == null ? CoreConstants.EMPTY : quantity.toString()));
+//					}
+//
+//					if (isShowRented()) {
+//						cell = row.createCell();
+//						Integer rented = item.getRentedAmount();
+//						cell.add(new Text(rented == null ? CoreConstants.EMPTY : rented.toString()));
+//					}
+//
+//					Link edit = new Link(new Image(editImageUri));
+//					edit.setParameter(PARAMETER_ACTION, String.valueOf(1));
+//					edit.setParameter(PARAMETER_ITEM_ID, itemId);
+//					if (hideBackButton)
+//						edit.setParameter("hide_back_button", Boolean.TRUE.toString());
+//					if (checkHTML)
+//						edit.setParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY, Boolean.TRUE.toString());
+//					edit.setTitle(editTitle);
+//					cell = row.createCell();
+//					cell.add(edit);
+//
+//					Link delete = new Link(new Image(deleteImageUri));
+//					delete.setParameter(PARAMETER_ACTION_DELETE, Boolean.TRUE.toString());
+//					delete.setParameter(PARAMETER_ITEM_ID, itemId);
+//					if (hideBackButton)
+//						delete.setParameter("hide_back_button", Boolean.TRUE.toString());
+//					if (checkHTML)
+//						delete.setParameter(CoreConstants.PARAMETER_CHECK_HTML_HEAD_AND_BODY, Boolean.TRUE.toString());
+//					delete.setTitle(deleteTitle);
+//					delete.setOnClick("if (!window.confirm('" + iwrb.getLocalizedString("are_you_sure", "Are you sure?") + "')) return false;");
+//					cell = row.createCell();
+//					cell.add(delete);
+//
+//					index++;
+//				}
+//			}
 		}
 
 		Layer buttons = new Layer();

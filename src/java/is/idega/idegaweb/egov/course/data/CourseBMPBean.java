@@ -12,6 +12,7 @@ import javax.ejb.FinderException;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolSeason;
 import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
@@ -58,7 +59,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
 	private static final String COLUMN_MAX_PARTICIPANTS = "MAX_PER";
 	private static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION",
-								COLUMN_COURSE_PRICES = "COURSE_PRICES";
+								COLUMN_COURSE_PRICES = "COURSE_PRICES",
+								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
 
 	@Override
 	public String getEntityName() {
@@ -90,6 +92,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
 		addManyToOneRelationship(COLUMN_PROVIDER, School.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
+		addManyToManyRelationShip(SchoolSeason.class, COLUMN_COURSE_SEASONS);
 
 		Map<String, ? extends RentableItem> entities = null;
 		try {
@@ -378,7 +381,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return this.idoFindPKsByQuery(query);
 	}
-	
+
 
 	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear) throws FinderException,
 		IDORelationshipException {
@@ -671,7 +674,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Collection<CoursePrice> getAllPrices() {
 		try {
 			return super.idoGetRelatedEntities(CoursePrice.class);
@@ -684,7 +686,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
 		this.idoRemoveFrom(price);
-
 	}
 
 	@Override
@@ -695,6 +696,39 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		for (CoursePrice price: prices) {
 			removePrice(price);
+		}
+
+		store();
+	}
+
+	@Override
+	public void addSeason(SchoolSeason season) throws IDOAddRelationshipException {
+		this.idoAddTo(season);
+	}
+
+	@Override
+	public Collection<SchoolSeason> getSeasons() {
+		try {
+			return super.idoGetRelatedEntities(SchoolSeason.class);
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void removeSeason(SchoolSeason season) throws IDORemoveRelationshipException {
+		this.idoRemoveFrom(season);
+	}
+
+	@Override
+	public void removeAllSeasons() throws IDORemoveRelationshipException {
+		Collection<SchoolSeason> seasons = getSeasons();
+		if (ListUtil.isEmpty(seasons))
+			return;
+
+		for (SchoolSeason season: seasons) {
+			removeSeason(season);
 		}
 
 		store();
