@@ -104,4 +104,7 @@ public interface CoursePrice extends IDOEntity {
 	
 	public CourseProviderType getSchoolType();
 	public void setSchoolType(CourseProviderType schoolType);
+
+//	public SchoolSeason getSchoolSeason();
+//	public void setSchoolSeason(SchoolSeason season);
 }

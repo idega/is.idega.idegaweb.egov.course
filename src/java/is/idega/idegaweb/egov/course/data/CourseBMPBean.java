@@ -74,7 +74,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION",
 								COLUMN_COURSE_PRICES = "COURSE_PRICES";
 	public static final String COLUMN_VISIBILITY = "IS_VISIBLE";
-	public static final String PARENT_COURSE_ID = "parent_course_id";
+	public static final String PARENT_COURSE_ID = "parent_course_id",
+								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
 
 	@Override
 	public String getEntityName() {
@@ -108,6 +109,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		/* TODO What exactly I should do with this, I mean here should be schools */
 		addManyToOneRelationship(COLUMN_PROVIDER, CourseProvider.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
+//		addManyToManyRelationShip(SchoolSeason.class, COLUMN_COURSE_SEASONS);
 
 		/* Tells that course should be not visible to all users */
 		addAttribute(COLUMN_VISIBILITY, "Is private", Boolean.class);
@@ -1181,7 +1183,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
 		this.idoRemoveFrom(price);
-
 	}
 
 	@Override
@@ -1309,4 +1310,37 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return this.courseProviderHome;
 	}
+
+//	@Override
+//	public void addSeason(SchoolSeason season) throws IDOAddRelationshipException {
+//		this.idoAddTo(season);
+//	}
+//
+//	@Override
+//	public Collection<SchoolSeason> getSeasons() {
+//		try {
+//			return super.idoGetRelatedEntities(SchoolSeason.class);
+//		} catch (IDORelationshipException e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
+//
+//	@Override
+//	public void removeSeason(SchoolSeason season) throws IDORemoveRelationshipException {
+//		this.idoRemoveFrom(season);
+//	}
+//
+//	@Override
+//	public void removeAllSeasons() throws IDORemoveRelationshipException {
+//		Collection<SchoolSeason> seasons = getSeasons();
+//		if (ListUtil.isEmpty(seasons))
+//			return;
+//
+//		for (SchoolSeason season: seasons) {
+//			removeSeason(season);
+//		}
+//
+//		store();
+//	}
 }
