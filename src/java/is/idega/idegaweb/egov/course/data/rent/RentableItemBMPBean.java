@@ -1,16 +1,13 @@
 package is.idega.idegaweb.egov.course.data.rent;
 
 import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CoursePriceHome;
 
 import java.util.Collection;
 
 import javax.ejb.FinderException;
 
-import com.idega.block.school.data.SchoolSeason;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
-import com.idega.data.IDOLookup;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.query.Column;
@@ -65,62 +62,61 @@ public abstract class RentableItemBMPBean extends GenericEntity implements Renta
 	}
 
 	@Override
-	public Double getRentPrice(SchoolSeason season) {
-		if (season == null) {
-			return getRealValue(COLUMN_RENT_PRICE, 0.0);
-		}
+//	public Double getRentPrice(SchoolSeason season) {
+//		if (season == null) {
+//			return getRealValue(COLUMN_RENT_PRICE, 0.0);
+//		}
+//
+//		CoursePrice price = getPrice(season);
+//		return price == null ? 0.0 : Double.valueOf(price.getPrice());
+//	}
+//
+//	private CoursePrice getPrice(SchoolSeason season) {
+//		Collection<CoursePrice> allPrices = getAllPrices();
+//		if (ListUtil.isEmpty(allPrices)) {
+//			return null;
+//		}
+//
+//		for (CoursePrice price: allPrices) {
+//			SchoolSeason priceSeason = price.getSchoolSeason();
+//			if (priceSeason != null && priceSeason.getPrimaryKey().toString().equals(season.getPrimaryKey().toString())) {
+//				return price;
+//			}
+//		}
+//
+//		return null;
+//	}
 
-		CoursePrice price = getPrice(season);
-		return price == null ? 0.0 : Double.valueOf(price.getPrice());
-	}
+//	@Override
+//	public void setRentPrice(SchoolSeason season, Double rentPrice) {
+//		if (season == null) {
+//			setColumn(COLUMN_RENT_PRICE, rentPrice);
+//			return;
+//		}
+//
+//		CoursePrice price = getPrice(season);
+//		if (price == null) {
+//			try {
+//				CoursePriceHome priceHome = (CoursePriceHome) IDOLookup.getHome(CoursePrice.class);
+//				price = priceHome.create();
+//				price.setSchoolSeason(season);
+//				price.store();
+//				addPrice(price);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
+//		if (price == null) {
+//			getLogger().warning("Unable to set price " + rentPrice + " for season " + season);
+//			return;
+//		}
+//
+//		price.setPrice(rentPrice.intValue());
+//		price.store();
+//		store();
+//	}
 
-	private CoursePrice getPrice(SchoolSeason season) {
-		Collection<CoursePrice> allPrices = getAllPrices();
-		if (ListUtil.isEmpty(allPrices)) {
-			return null;
-		}
-
-		for (CoursePrice price: allPrices) {
-			SchoolSeason priceSeason = price.getSchoolSeason();
-			if (priceSeason != null && priceSeason.getPrimaryKey().toString().equals(season.getPrimaryKey().toString())) {
-				return price;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public void setRentPrice(SchoolSeason season, Double rentPrice) {
-		if (season == null) {
-			setColumn(COLUMN_RENT_PRICE, rentPrice);
-			return;
-		}
-
-		CoursePrice price = getPrice(season);
-		if (price == null) {
-			try {
-				CoursePriceHome priceHome = (CoursePriceHome) IDOLookup.getHome(CoursePrice.class);
-				price = priceHome.create();
-				price.setSchoolSeason(season);
-				price.store();
-				addPrice(price);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (price == null) {
-			getLogger().warning("Unable to set price " + rentPrice + " for season " + season);
-			return;
-		}
-
-		price.setPrice(rentPrice.intValue());
-		price.store();
-		store();
-	}
-
-	@Override
 	public Integer getQuantity() {
 		return getRealValue(COLUMN_QUANTITY, 0);
 	}
