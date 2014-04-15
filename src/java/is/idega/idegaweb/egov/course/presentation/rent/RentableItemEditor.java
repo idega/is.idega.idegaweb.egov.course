@@ -353,6 +353,7 @@ public abstract class RentableItemEditor extends Block {
 			Layer tableContainer = new Layer();
 			form.add(tableContainer);
 			Table2 table = new Table2();
+			table.setStyleClass("adminTable ruler");
 			tableContainer.add(table);
 			TableHeaderRowGroup header = table.createHeaderRowGroup();
 			TableRow headerRow = header.createRow();

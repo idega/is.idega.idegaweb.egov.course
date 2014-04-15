@@ -71,7 +71,8 @@ public abstract class RentableItemBMPBean extends GenericEntity implements Renta
 		}
 
 		CoursePrice price = getPrice(season);
-		return price == null ? 0.0 : Double.valueOf(price.getPrice());
+		int priceInt = price == null ? -1 : price.getPrice();
+		return priceInt <= 0 ? getRealValue(COLUMN_RENT_PRICE, 0.0) : Double.valueOf(priceInt);
 	}
 
 	private CoursePrice getPrice(SchoolSeason season) {
