@@ -806,12 +806,12 @@ public class CourseApplication extends ApplicationForm {
 
 		Integer applicantPK = (Integer) applicant.getPrimaryKey();
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
-		
+
 		boolean isCourseAdmin = iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY);
 
 		StringBuffer script2 = new StringBuffer();
@@ -969,7 +969,7 @@ public class CourseApplication extends ApplicationForm {
 			type = getCourseBusiness(iwc).getCourseType(iwc.getParameter(PARAMETER_COURSE_TYPE));
 		}
 		Collection filtered = new ArrayList();
-		
+
 		iter = providers.iterator();
 		while (iter.hasNext()) {
 			School provider = (School) iter.next();
@@ -996,7 +996,7 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(label);
 		formItem.add(providerMenu);
 		section.add(formItem);
-		
+
 		Integer courseTypePK = null;
 		if (iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
 			courseTypePK = new Integer(iwc.getParameter(PARAMETER_COURSE_TYPE));
@@ -1150,7 +1150,7 @@ public class CourseApplication extends ApplicationForm {
 			else {
 				isFull = false;
 			}
-			
+
 			IWTimestamp start = new IWTimestamp(course.getStartDate());
 			if (course.getRegistrationEnd() != null) {
 				start = new IWTimestamp(course.getRegistrationEnd());
@@ -1167,7 +1167,7 @@ public class CourseApplication extends ApplicationForm {
 					start.setMinute(0);
 				}
 			}
-			
+
 			if (!iUseSessionUser ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true) && getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				h.setUser(applicant);
 				h.setCourse(course);
@@ -1302,7 +1302,7 @@ public class CourseApplication extends ApplicationForm {
 			cell = row.createCell();
 			cell.setStyleClass("column0");
 			cell.add(new Text(holder.getProvider().getName()));
-			
+
 			cell = row.createCell();
 			cell.setStyleClass("column1");
 			cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
@@ -1342,7 +1342,7 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		section.setStyleClass("formSectionBig");
 		form.add(section);
-		
+
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_daycare_and_trip_home_options_nocare", "Select daycare and trip home options.")));
@@ -1492,7 +1492,7 @@ public class CourseApplication extends ApplicationForm {
 		if (editable && custodian != null) {
 			HiddenInput hidden = new HiddenInput(PARAMETER_REMOVE_CUSTODIAN, "");
 			formItem.add(hidden);
-			
+
 			SubmitButton remove = new SubmitButton(this.iwrb.getLocalizedString("remove_custodian", "Remove custodian"));
 			remove.setValueOnClick(PARAMETER_REMOVE_CUSTODIAN, Boolean.TRUE.toString());
 			remove.setStyleClass("button");
@@ -1879,14 +1879,14 @@ public class CourseApplication extends ApplicationForm {
 			else {
 				row.setStyleClass("odd");
 			}
-			
+
 			Collection<ApplicationHolder> holders = (Collection<ApplicationHolder>) applications.get(user);
 			for (ApplicationHolder applicationHolder : holders) {
 				row = group.createRow();
 				row.setStyleClass("subRow");
-				
+
 				Course course = applicationHolder.getCourse();
-				
+
 				cell = row.createCell();
 				cell.setStyleClass("name");
 				cell.add(new Text(course.getName()));
@@ -2080,7 +2080,7 @@ public class CourseApplication extends ApplicationForm {
 			formItem.add(label);
 			section.add(formItem);
 		}
-		
+
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
@@ -2097,16 +2097,16 @@ public class CourseApplication extends ApplicationForm {
 			heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
 			heading.setStyleClass("subHeader");
 			form.add(heading);
-	
+
 			section = new Layer(Layer.DIV);
 			section.setStyleClass("formSection");
 			form.add(section);
-	
+
 			helpLayer = new Layer(Layer.DIV);
 			helpLayer.setStyleClass("helperText");
 			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.creditcard_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
 			section.add(helpLayer);
-	
+
 			Collection images = getCourseBusiness(iwc).getCreditCardImages();
 			Iterator iterator = images.iterator();
 			while (iterator.hasNext()) {
@@ -2114,27 +2114,27 @@ public class CourseApplication extends ApplicationForm {
 				image.setStyleClass("creditCardImage");
 				helpLayer.add(image);
 			}
-	
+
 			DropdownMenu cardType = getCardTypeDropdown(iwc.getCurrentLocale(), PARAMETER_CARD_TYPE);
 			cardType.keepStatusOnAction(true);
 			cardType.setDisabled(!showCreditCardPayment);
-	
+
 			TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
 			cardOwner.keepStatusOnAction(true);
 			cardOwner.setDisabled(!showCreditCardPayment);
-	
+
 			TextInput cardNumber = new TextInput(PARAMETER_CARD_NUMBER, null);
 			cardNumber.setLength(16);
 			cardNumber.setMaxlength(16);
 			cardNumber.keepStatusOnAction(true);
 			cardNumber.setDisabled(!showCreditCardPayment);
-	
+
 			TextInput ccNumber = new TextInput(PARAMETER_CCV, null);
 			ccNumber.setLength(3);
 			ccNumber.setMaxlength(3);
 			ccNumber.keepStatusOnAction(true);
 			ccNumber.setDisabled(!showCreditCardPayment);
-	
+
 			DropdownMenu validMonth = new DropdownMenu(PARAMETER_VALID_MONTH);
 			validMonth.setWidth("45px");
 			validMonth.keepStatusOnAction(true);
@@ -2142,7 +2142,7 @@ public class CourseApplication extends ApplicationForm {
 				validMonth.addMenuElement(TextSoap.addZero(a), TextSoap.addZero(a));
 			}
 			validMonth.setDisabled(!showCreditCardPayment);
-	
+
 			IWTimestamp stamp = new IWTimestamp();
 			DropdownMenu validYear = new DropdownMenu(PARAMETER_VALID_YEAR);
 			validYear.setWidth("60px");
@@ -2153,9 +2153,9 @@ public class CourseApplication extends ApplicationForm {
 				stamp.addYears(1);
 			}
 			validYear.setDisabled(!showCreditCardPayment);
-	
+
 			boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
-	
+
 			if (useDirectPayment) {
 				formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
@@ -2165,7 +2165,7 @@ public class CourseApplication extends ApplicationForm {
 				formItem.add(cardOwner);
 				section.add(formItem);
 			}
-			
+
 			if (!useDirectPayment) {
 				formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
@@ -2175,7 +2175,7 @@ public class CourseApplication extends ApplicationForm {
 				formItem.add(cardType);
 				section.add(formItem);
 			}
-	
+
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("required");
@@ -2186,7 +2186,7 @@ public class CourseApplication extends ApplicationForm {
 			formItem.add(label);
 			formItem.add(cardNumber);
 			section.add(formItem);
-	
+
 			if (useDirectPayment) {
 				formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
@@ -2196,7 +2196,7 @@ public class CourseApplication extends ApplicationForm {
 				formItem.add(ccNumber);
 				section.add(formItem);
 			}
-			
+
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("required");
@@ -2205,12 +2205,12 @@ public class CourseApplication extends ApplicationForm {
 			formItem.add(validMonth);
 			formItem.add(validYear);
 			section.add(formItem);
-	
+
 			clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 		}
-		
+
 		heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
@@ -2281,16 +2281,16 @@ public class CourseApplication extends ApplicationForm {
 				if (age.getYears() < 18) {
 					setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_be_at_least_18_years_old", "The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older."));
 				}
-				else { 
+				else {
 					try {
 						User currentUser = getUser(iwc);
 						User paymentUser = getUserBusiness(iwc).getUser(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
-						
+
 						Address address1 = currentUser.getUsersMainAddress();
 						Address address2 = paymentUser.getUsersMainAddress();
-						
+
 						if (!address1.getStreetName().equals(address2.getStreetName()) || !address1.getStreetNumber().equals(address2.getStreetNumber()) || address1.getPostalCodeID() != address2.getPostalCodeID()) {
-							setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));								
+							setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));
 						}
 					} catch(FinderException fe) {
 						setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
@@ -2319,7 +2319,7 @@ public class CourseApplication extends ApplicationForm {
 		String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
 		String expiresMonth = iwc.getParameter(PARAMETER_VALID_MONTH);
 		String expiresYear = iwc.getParameter(PARAMETER_VALID_YEAR);
-		
+
 		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 		boolean creditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		IWTimestamp paymentStamp = new IWTimestamp();
@@ -2329,7 +2329,7 @@ public class CourseApplication extends ApplicationForm {
 				String nameOnCard = iwc.getParameter(PARAMETER_NAME_ON_CARD);
 				String ccVerifyNumber = iwc.getParameter(PARAMETER_CCV);
 				String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
-	
+
 				try {
 					properties = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
 				}
@@ -2716,10 +2716,18 @@ public class CourseApplication extends ApplicationForm {
 							return false;
 						}
 						if ((iUseSessionUser || hasRelation) && homePhones != null) {
-							custodian.setHomePhone(homePhones[index]);
-							custodian.setWorkPhone(workPhones[index]);
-							custodian.setMobilePhone(mobilePhones[index]);
-							custodian.setEmail(emails[index]);
+							if (homePhones != null && homePhones.length > index) {
+								custodian.setHomePhone(homePhones[index]);
+							}
+							if (workPhones != null && workPhones.length > index) {
+								custodian.setWorkPhone(workPhones[index]);
+							}
+							if (mobilePhones != null && mobilePhones.length > index) {
+								custodian.setMobilePhone(mobilePhones[index]);
+							}
+							if (emails != null && emails.length > index) {
+								custodian.setEmail(emails[index]);
+							}
 						}
 						if (storeMaritalStatus) {
 							custodian.setMaritalStatus(maritalStatus);
@@ -2777,7 +2785,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private UserSession getUserSession(IWUserContext iwuc) {
 		try {
-			return (UserSession) IBOLookup.getSessionInstance(iwuc, UserSession.class);
+			return IBOLookup.getSessionInstance(iwuc, UserSession.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -2786,7 +2794,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private FamilyLogic getMemberFamilyLogic(IWApplicationContext iwac) {
 		try {
-			return (FamilyLogic) IBOLookup.getServiceInstance(iwac, FamilyLogic.class);
+			return IBOLookup.getServiceInstance(iwac, FamilyLogic.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -2795,7 +2803,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private CourseBusiness getCourseBusiness(IWContext iwc) {
 		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
+			return IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
@@ -2804,7 +2812,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private CourseSession getCourseSession(IWContext iwc) {
 		try {
-			return (CourseSession) IBOLookup.getSessionInstance(iwc, CourseSession.class);
+			return IBOLookup.getSessionInstance(iwc, CourseSession.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
@@ -2813,7 +2821,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private CourseApplicationSession getCourseApplicationSession(IWContext iwc) {
 		try {
-			return (CourseApplicationSession) IBOLookup.getSessionInstance(iwc, CourseApplicationSession.class);
+			return IBOLookup.getSessionInstance(iwc, CourseApplicationSession.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
