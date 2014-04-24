@@ -2820,7 +2820,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 
 		IWTimestamp stamp = new IWTimestamp(startDate);
-		int days = price.getNumberOfDays() - 1;
+		int days = price == null ? 0 : price.getNumberOfDays() - 1;
 		while (days > 0) {
 			if (stamp.getDayOfWeek() != Calendar.SUNDAY && stamp.getDayOfWeek() != Calendar.SATURDAY) {
 				//	Course take place only during week days, not during weekends
