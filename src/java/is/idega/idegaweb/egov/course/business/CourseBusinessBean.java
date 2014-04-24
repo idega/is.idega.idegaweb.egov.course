@@ -2815,9 +2815,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	@Override
 	public Date getEndDate(CoursePrice price, Date startDate) {
 		Collection<IWTimestamp> holidays = getPublicHolidays(CoreUtil.getCurrentLocale());
-		if (!ListUtil.isEmpty(holidays)) {
-			getLogger().info("Found public holidays: " + holidays);
-		}
 
 		IWTimestamp stamp = new IWTimestamp(startDate);
 		int days = price == null ? 0 : price.getNumberOfDays() - 1;
