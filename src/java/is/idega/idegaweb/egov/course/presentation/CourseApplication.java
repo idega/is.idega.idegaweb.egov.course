@@ -1906,10 +1906,6 @@ public class CourseApplication extends ApplicationForm {
 		cell.setStyleClass("personalID");
 		cell.add(new Text(iwrb.getLocalizedString("personal_id", "Personal ID")));
 
-		cell = row.createCell();
-		cell.setStyleClass("registered_at");
-		cell.add(new Text(iwrb.getLocalizedString("registered_at", "Registered at")));
-
 		cell = row.createHeaderCell();
 		cell.setStyleClass("amount");
 		cell.add(new Text(iwrb.getLocalizedString("amount", "Amount")));
@@ -1945,10 +1941,6 @@ public class CourseApplication extends ApplicationForm {
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
 			cell = row.createCell();
-			cell.setStyleClass("registered_at");
-			cell.add(new Text(holder.getCourseName()));
-
-			cell = row.createCell();
 			cell.setStyleClass("amount");
 			cell.add(new Text(format.format(price)));
 
@@ -1968,7 +1960,7 @@ public class CourseApplication extends ApplicationForm {
 
 				cell = row.createCell();
 				cell.setStyleClass("name");
-				cell.add(new Text(course.getName()));
+				cell.add(new Text(course.getProvider().getName() + CoreConstants.COMMA + CoreConstants.SPACE + course.getName()));
 
 				cell = row.createCell();
 				cell.setStyleClass("startDate");
@@ -2337,7 +2329,7 @@ public class CourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		Link next = getButtonLink(this.iwrb.getLocalizedString("verify", "Verify"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
 		next.setOnClick("this.style.display='none';");
 		next.setToFormSubmit(form);

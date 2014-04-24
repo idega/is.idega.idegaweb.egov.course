@@ -11,7 +11,7 @@ import com.idega.user.data.User;
 
 public class PriceHolder implements Comparable<PriceHolder> {
 
-	private String courseName;
+	private String name;
 	private User user = null;
 	private float price = 0;
 	private float discount = 0;
@@ -21,17 +21,17 @@ public class PriceHolder implements Comparable<PriceHolder> {
 		super();
 	}
 
-	public PriceHolder(String courseName) {
+	public PriceHolder(String name) {
 		this();
-		this.courseName = courseName;
+		this.name = name;
 	}
 
-	public String getCourseName() {
-		return courseName;
+	public String getName() {
+		return name;
 	}
 
-	public void setCourseName(String courseName) {
-		this.courseName = courseName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public User getUser() {

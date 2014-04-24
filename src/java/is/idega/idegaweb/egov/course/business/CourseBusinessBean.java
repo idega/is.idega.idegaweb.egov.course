@@ -2027,7 +2027,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			String name = null;
 			while (iter.hasNext()) {
 				ApplicationHolder holder = (ApplicationHolder) iter.next();
-				name = holder.getCourse() == null ? null : holder.getCourse().getName();
+				name = holder.getCourse() == null ? null : holder.getCourse().getProvider().getName();
 				if (!holder.isOnWaitingList()) {
 					totalPrice += holder.getPrice();
 					totalCost += holder.getCourse().getCourseCost() > -1 ? holder
@@ -2102,14 +2102,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					for (ApplicationHolder applicationHolder : userApplications) {
 						if (!applicationHolder.isOnWaitingList() && !firstOnWaitingList) {
 							getsDiscount = true;
-							name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getName();
+							name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getProvider().getName();
 						}
 					}
 
 					if (getsDiscount) {
 						discountHolder.setPrice(price * 0.2f);
 						discountHolder.setDiscount(0.2f);
-						discountHolder.setCourseName(name);
+						discountHolder.setName(name);
 					}
 				}
 			} else {
@@ -2119,11 +2119,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				for (ApplicationHolder applicationHolder : userApplications) {
 					if (!applicationHolder.isOnWaitingList()) {
 						firstOnWaitingList = false;
-						name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getName();
+						name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getProvider().getName();
 					}
 				}
 				if (name != null) {
-					discountHolder.setCourseName(name);
+					discountHolder.setName(name);
 				}
 			}
 
