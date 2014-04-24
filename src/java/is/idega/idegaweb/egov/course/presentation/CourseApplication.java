@@ -915,9 +915,17 @@ public class CourseApplication extends ApplicationForm {
 		Form form = getForm(ACTION_PHASE_5);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
+
+		if (iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+			form.maintainParameter(PARAMETER_GROWTH_DEVIATION);
+		}
+		if (iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+			form.maintainParameter(PARAMETER_ALLERGIES);
+		}
+
 		form.add(formScript);
 
-		addErrors(iwc, form);
+		addErrors(5, iwc, form);
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 5, getNumberOfPhases(iwc)));
 
