@@ -1232,6 +1232,12 @@ public class CourseApplication extends ApplicationForm {
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_6)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
 		form.add(new HiddenInput(SUB_ACTION, SUB_ACTION_ADD));
+		if (iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+			form.maintainParameter(PARAMETER_GROWTH_DEVIATION);
+		}
+		if (iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+			form.maintainParameter(PARAMETER_ALLERGIES);
+		}
 		add(form);
 		addErrors(iwc, form);
 
