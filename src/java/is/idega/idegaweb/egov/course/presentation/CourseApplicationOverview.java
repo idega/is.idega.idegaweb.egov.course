@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Mar 30, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation;
@@ -44,6 +44,7 @@ import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
@@ -72,13 +73,14 @@ public class CourseApplicationOverview extends CourseBlock {
 		this.useInWindow = useInWindow;
 	}
 
+	@Override
 	public void present(IWContext iwc) {
 		try {
 			is.idega.idegaweb.egov.course.data.CourseApplication application = null;
 			if (iwc.isParameterSet(getBusiness().getSelectedCaseParameter())) {
 				application = getBusiness().getCourseApplication(iwc.getParameter(getBusiness().getSelectedCaseParameter()));
 			}
-			
+
 			if (application != null) {
 				switch (parseAction(iwc)) {
 					case ACTION_VIEW:
@@ -117,7 +119,7 @@ public class CourseApplicationOverview extends CourseBlock {
 
 	private void getViewerForm(IWContext iwc, is.idega.idegaweb.egov.course.data.CourseApplication application) throws RemoteException {
 		boolean showCertificates = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CERTIFICATES, false);
-		
+
 		Form form = new Form();
 		form.maintainParameter(getBusiness().getSelectedCaseParameter());
 		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
@@ -130,11 +132,11 @@ public class CourseApplicationOverview extends CourseBlock {
 		else if (showPersonInfo) {
 			form.add(getHeader(getResourceBundle().getLocalizedString("application.course_application_overview", "Course application overview")));
 		}
-		
+
 		if (showPersonInfo) {
 			form.add(getPersonInfo(iwc, null, false));
 		}
-		
+
 		Heading1 heading = new Heading1(getResourceBundle().getLocalizedString("application.application_information", "Application information"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
@@ -171,7 +173,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			Name name = new Name(owner.getFirstName(), owner.getMiddleName(), owner.getLastName());
 			payerName = name.getName(iwc.getCurrentLocale());
 		}
-		
+
 		boolean useFixedPrices = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_FIXED_PRICES, false);
 
 		formItem = new Layer(Layer.DIV);
@@ -268,13 +270,13 @@ public class CourseApplicationOverview extends CourseBlock {
 				cell.setStyleClass("days");
 				cell.add(new Text(getResourceBundle().getLocalizedString("days", "Days")));
 			}
-			
+
 			if (showCertificates) {
 				cell = row.createHeaderCell();
 				cell.setStyleClass("certificateFee");
 				cell.add(new Text(getResourceBundle().getLocalizedString("certificate_fee", "Certificate fee")));
 			}
-			
+
 			cell = row.createHeaderCell();
 			cell.setStyleClass("amount");
 			cell.add(new Text(getResourceBundle().getLocalizedString("amount", "Amount")));
@@ -292,14 +294,18 @@ public class CourseApplicationOverview extends CourseBlock {
 				CourseType type = course.getCourseType();
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
-				IWTimestamp endDate = coursePrice != null ? new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate())) : new IWTimestamp(course.getEndDate());
+				IWTimestamp endDate = coursePrice != null ?
+						new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate())) :
+							course.getEndDate() == null ?
+									new IWTimestamp() :
+									new IWTimestamp(course.getEndDate());
 
 				float certificateFee = course.getCourseCost();
 				if (certificateFee > 0) {
 					totalPrice += certificateFee;
 					totalParticipantPrice += certificateFee;
 				}
-				
+
 				cell = row.createCell();
 				cell.setStyleClass("course");
 				if (getChoicePage() != null && !useInWindow) {
@@ -319,7 +325,7 @@ public class CourseApplicationOverview extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("courseType");
-				cell.add(new Text(type.getName()));
+				cell.add(new Text(type == null ? CoreConstants.MINUS : type.getName()));
 
 				cell = row.createCell();
 				cell.setStyleClass("timeframe");
@@ -335,13 +341,13 @@ public class CourseApplicationOverview extends CourseBlock {
 						cell.add(new Text(String.valueOf(coursePrice.getNumberOfDays())));
 					}
 				}
-				
+
 				if (showCertificates) {
 					cell = row.createCell();
 					cell.setStyleClass("certificateFee");
 					cell.add(new Text(format.format(certificateFee)));
 				}
-				
+
 				cell = row.createCell();
 				cell.setStyleClass("amount");
 				if (appHolder.isOnWaitingList()) {
@@ -359,29 +365,29 @@ public class CourseApplicationOverview extends CourseBlock {
 				else {
 					row.setStyleClass("odd");
 				}
-				
+
 				if (showPersonInfo && appHolder.getDaycare() != CourseConstants.DAY_CARE_NONE) {
 					int colSpan = row.getCells().size();
-					
+
 					row = group.createRow();
 					row.setStyleClass("dayCare");
-					
+
 					cell = row.createCell();
 					cell.add(Text.getNonBrakingSpace());
-					
+
 					cell = row.createCell();
 					cell.setColumnSpan(colSpan - 1);
 					cell.add(new Text(getResourceBundle().getLocalizedString("daycare", "Day care") + ": "));
-					
+
 					switch (appHolder.getDaycare()) {
 						case CourseConstants.DAY_CARE_PRE:
 							cell.add(new Text(getResourceBundle().getLocalizedString("day_care.pre", "Morning")));
 							break;
-	
+
 						case CourseConstants.DAY_CARE_POST:
 							cell.add(new Text(getResourceBundle().getLocalizedString("day_care.post", "Afternoon")));
 							break;
-							
+
 						case CourseConstants.DAY_CARE_PRE_AND_POST:
 							cell.add(new Text(getResourceBundle().getLocalizedString("day_care.pre_and_post", "Morning and afternoon")));
 							break;
@@ -458,7 +464,7 @@ public class CourseApplicationOverview extends CourseBlock {
 		clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
-		
+
 		if (useInWindow && showProviderInformation) {
 			heading = new Heading1(getResourceBundle().getLocalizedString("application.provider_information", "Provider information"));
 			heading.setStyleClass("subHeader");
@@ -487,7 +493,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			formItem.add(label);
 			formItem.add(span);
 			section.add(formItem);
-			
+
 			Paragraph paragraph = new Paragraph();
 			paragraph.add(getResourceBundle().getLocalizedString("application.provider_general_info", "General info..."));
 			section.add(paragraph);
@@ -515,7 +521,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			bottom.add(receipt);
 
 			boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
-			
+
 			if (isSchoolAdministrator(iwc) /*&& getBusiness().canInvalidate(application)*/) {
 				Link invalidate = getButtonLink(getResourceBundle().getLocalizedString("invalidate", "Invalidate"));
 				if (useDirectPayment && application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
