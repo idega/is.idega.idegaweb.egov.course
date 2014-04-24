@@ -1780,7 +1780,12 @@ public class CourseApplication extends ApplicationForm {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
+		if (requiredRelation) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_RELATIVE)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("name", "Name"))), name);
 		formItem.add(label);
 		formItem.add(name);
@@ -2535,9 +2540,18 @@ public class CourseApplication extends ApplicationForm {
 		Child child = getMemberFamilyLogic(iwc).getChild(user);
 		User owner = getUser(iwc);
 
+		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
+		boolean requiredYesNo = isRequiredToSelectYesOrNoAboutChild(settings);
+
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("child.has_growth_deviation", "Has growth deviation"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
+		if (requiredYesNo) {
+			heading.setStyleClass("required");
+			if (hasError(PARAMETER_GROWTH_DEVIATION)) {
+				heading.setStyleClass("hasError");
+			}
+		}
 		form.add(heading);
 
 		Layer section = new Layer(Layer.DIV);
@@ -2548,9 +2562,6 @@ public class CourseApplication extends ApplicationForm {
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("child.growth_deviation_help", "If the child has any growth deviations...")));
 		section.add(helpLayer);
-
-		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
-		boolean requiredYesNo = isRequiredToSelectYesOrNoAboutChild(settings);
 
 		RadioButton yes = new RadioButton(PARAMETER_GROWTH_DEVIATION, Boolean.TRUE.toString());
 		yes.setStyleClass("radiobutton");
@@ -2629,6 +2640,12 @@ public class CourseApplication extends ApplicationForm {
 
 		heading = new Heading1(this.iwrb.getLocalizedString("child.has_allergies", "Has allergies"));
 		heading.setStyleClass("subHeader");
+		if (requiredYesNo) {
+			heading.setStyleClass("required");
+			if (hasError(PARAMETER_ALLERGIES)) {
+				heading.setStyleClass("hasError");
+			}
+		}
 		form.add(heading);
 
 		section = new Layer(Layer.DIV);
