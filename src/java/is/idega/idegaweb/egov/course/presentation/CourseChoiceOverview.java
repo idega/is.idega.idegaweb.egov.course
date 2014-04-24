@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Mar 30, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation;
@@ -50,7 +50,7 @@ import com.idega.util.text.TextSoap;
 public class CourseChoiceOverview extends CourseBlock {
 
 	private static final String PARAMETER_UNIQUE_ID = "prm_uuid";
-	
+
 	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
 	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
 	private static final String PARAMETER_VALID_YEAR = "prm_valid_year";
@@ -67,6 +67,7 @@ public class CourseChoiceOverview extends CourseBlock {
 	protected List parametersToMaintainBackButton = null;
 	private boolean useBackPage = true;
 
+	@Override
 	public void present(IWContext iwc) {
 		try {
 			CourseChoice choice = null;
@@ -103,12 +104,12 @@ public class CourseChoiceOverview extends CourseBlock {
 							getRefundForm(iwc, choice);
 						}
 						break;
-					
+
 					case ACTION_ACCEPT:
 						acceptChoice(iwc, choice);
 						getViewerForm(iwc, choice);
 						break;
-						
+
 					case ACTION_PARENT_ACCEPT_FORM:
 						if (iwc.isParameterSet(PARAMETER_UNIQUE_ID) && iwc.getParameter(PARAMETER_UNIQUE_ID).equals(choice.getUniqueID())) {
 							getParentAcceptForm(iwc, choice);
@@ -147,7 +148,7 @@ public class CourseChoiceOverview extends CourseBlock {
 
 		return action;
 	}
-	
+
 	private void acceptChoice(IWContext iwc, CourseChoice choice) throws RemoteException {
 		getBusiness().acceptChoice(choice.getPrimaryKey(), iwc.getCurrentLocale());
 	}
@@ -330,7 +331,7 @@ public class CourseChoiceOverview extends CourseBlock {
 				form.add(getCustodians(iwc, getResourceBundle(), application.getOwner(), child, custodians));
 			}
 
-			List relatives = new ArrayList();
+			List<Relative> relatives = new ArrayList<Relative>();
 			Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 			if (mainRelative == null && isSchoolUser()) {
 				mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
@@ -339,7 +340,7 @@ public class CourseChoiceOverview extends CourseBlock {
 				relatives.add(mainRelative);
 			}
 
-			Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			Collection<Relative> otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 			if (otherRelatives.isEmpty() && isSchoolUser()) {
 				otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
 			}
@@ -367,7 +368,7 @@ public class CourseChoiceOverview extends CourseBlock {
 			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 		}
-		
+
 		if (iwc.isParameterSet(PARAMETER_ACTION) && Integer.parseInt(iwc.getParameter(PARAMETER_ACTION)) == ACTION_ACCEPT) {
 			Layer layer = new Layer(Layer.DIV);
 			layer.setStyleClass("attention");
@@ -427,7 +428,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
 		receipt.addParameter(getBusiness().getSelectedCaseParameter(), application.getPrimaryKey().toString());
 		bottom.add(receipt);
-		
+
 		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 
 		if (isSchoolAdministrator(iwc) /*&& getBusiness().canInvalidate(choice)*/) {
@@ -636,7 +637,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		if (useBackPage()) {
 			link.setPage(backPage);
 		}
-		
+
 		if (parametersToMaintainBackButton != null) {
 			AdvancedProperty parameter = null;
 			for (int i = 0; i < parametersToMaintainBackButton.size(); i++) {
@@ -649,7 +650,7 @@ public class CourseChoiceOverview extends CourseBlock {
 
 		return true;
 	}
-	
+
 	private void getParentAcceptForm(IWContext iwc, CourseChoice choice) throws RemoteException {
 		Form form = new Form();
 		form.maintainParameter(PARAMETER_UNIQUE_ID);
@@ -787,7 +788,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
-		
+
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("attention");
 		section.add(layer);
@@ -828,15 +829,15 @@ public class CourseChoiceOverview extends CourseBlock {
 
 		add(form);
 	}
-	
+
 	public void setParametersToMaintainBackButton(List parametersToMaintainBackButton) {
 		this.parametersToMaintainBackButton = parametersToMaintainBackButton;
 	}
-	
+
 	public void setUseBackPage(boolean useBackPage) {
 		this.useBackPage = useBackPage;
 	}
-	
+
 	protected boolean useBackPage() {
 		return this.useBackPage;
 	}
