@@ -80,6 +80,8 @@ import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 import com.idega.util.text.TextSoap;
@@ -635,7 +637,7 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
@@ -656,19 +658,19 @@ public class CourseApplication extends ApplicationForm {
 
 		form.add(getPersonInfo(iwc, applicant));
 
-		Collection custodians = null;
+		Collection<Custodian> custodians = null;
 		try {
 			custodians = child.getCustodians();
 		}
 		catch (NoCustodianFound ncf) {
-			custodians = new ArrayList();
+			custodians = new ArrayList<Custodian>();
 		}
 
 		User currentUser = getUser(iwc);
 		int number = 1;
-		Iterator iter = custodians.iterator();
+		Iterator<Custodian> iter = custodians.iterator();
 		while (iter.hasNext()) {
-			Custodian element = (Custodian) iter.next();
+			Custodian element = iter.next();
 			boolean hasRelation = isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(element, currentUser) || currentUser.getPrimaryKey().equals(element.getPrimaryKey());
 
 			addParentToForm(form, iwc, child, element, false, number++, false, false, hasRelation);
@@ -719,16 +721,16 @@ public class CourseApplication extends ApplicationForm {
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
 
-		List relatives = new ArrayList();
+		List<Relative> relatives = new ArrayList<Relative>();
 		relatives.add(child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		relatives.addAll(child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		for (int a = 1; a <= 3; a++) {
 			Relative relative = null;
 			if (relatives.size() >= a) {
-				relative = (Relative) relatives.get(a - 1);
+				relative = relatives.get(a - 1);
 			}
 
-			addRelativeToForm(form, relative, a);
+			addRelativeToForm(form, relative, a, a == 1);
 		}
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -1266,20 +1268,22 @@ public class CourseApplication extends ApplicationForm {
 			daycare.setOnFocus("this.style.width='225px';");
 			daycare.setOnBlur("this.style.width='';");
 			daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
-			if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
-				Object[] arguments = { format.format(price.getPreCarePrice()) };
-				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
-				showAlert = true;
-			}
-			if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
-				Object[] arguments = { format.format(price.getPostCarePrice()) };
-				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
-				showAlert = true;
-			}
-			if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
-				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
-				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
-				showAlert = true;
+			if (provider != null && price != null) {
+				if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
+					Object[] arguments = { format.format(price.getPreCarePrice()) };
+					daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
+					showAlert = true;
+				}
+				if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
+					Object[] arguments = { format.format(price.getPostCarePrice()) };
+					daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
+					showAlert = true;
+				}
+				if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
+					Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
+					daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
+					showAlert = true;
+				}
 			}
 			daycare.keepStatusOnAction(true);
 
@@ -1306,7 +1310,7 @@ public class CourseApplication extends ApplicationForm {
 			cell = row.createCell();
 			cell.setStyleClass("column1");
 			cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
-			cell.add(new Text(type.getLocalizationKey() != null ? iwrb.getLocalizedString(type.getLocalizationKey(), course.getCourseType().getName()) : type.getName()));
+			cell.add(new Text(type == null ? CoreConstants.MINUS : type.getLocalizationKey() != null ? iwrb.getLocalizedString(type.getLocalizationKey(), course.getCourseType().getName()) : type.getName()));
 
 			cell = row.createCell();
 			cell.setStyleClass("column2");
@@ -1390,7 +1394,17 @@ public class CourseApplication extends ApplicationForm {
 		bottom.add(back);
 	}
 
-	private void addParentToForm(Form form, IWContext iwc, Child child, Custodian custodian, boolean isExtraCustodian, int number, boolean editable, boolean showMaritalStatus, boolean hasRelation) throws RemoteException {
+	private void addParentToForm(
+			Form form,
+			IWContext iwc,
+			Child child,
+			Custodian custodian,
+			boolean isExtraCustodian,
+			int number,
+			boolean editable,
+			boolean showMaritalStatus,
+			boolean hasRelation
+	) throws RemoteException {
 		Address address = null;
 		Phone phone = null;
 		Phone work = null;
@@ -1469,9 +1483,11 @@ public class CourseApplication extends ApplicationForm {
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_RELATION)) {
-			formItem.setStyleClass("hasError");
+		if (!isExtraCustodian) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_RELATION)) {
+				formItem.setStyleClass("hasError");
+			}
 		}
 		Label label = new Label(new Span(new Text(this.iwrb.getLocalizedString("relation", "Relation"))), relationMenu);
 		formItem.add(label);
@@ -1525,7 +1541,7 @@ public class CourseApplication extends ApplicationForm {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		if (editable) {
+		if (editable && !isExtraCustodian) {
 			formItem.setStyleClass("required");
 			if (hasError(PARAMETER_PERSONAL_ID)) {
 				formItem.setStyleClass("hasError");
@@ -1664,7 +1680,7 @@ public class CourseApplication extends ApplicationForm {
 		section.add(clearLayer);
 	}
 
-	private void addRelativeToForm(Form form, Relative relative, int number) {
+	private void addRelativeToForm(Form form, Relative relative, int number, boolean requiredRelation) {
 		Heading1 heading = new Heading1(number == 1 ? this.iwrb.getLocalizedString("first_contact", "First contact") : this.iwrb.getLocalizedString("contact", "Contact"));
 		heading.setStyleClass("subHeader");
 		if (number == 1) {
@@ -1724,9 +1740,11 @@ public class CourseApplication extends ApplicationForm {
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_RELATIVE_RELATION)) {
-			formItem.setStyleClass("hasError");
+		if (requiredRelation) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_RELATIVE_RELATION)) {
+				formItem.setStyleClass("hasError");
+			}
 		}
 		Label label = new Label(new Span(new Text(this.iwrb.getLocalizedString("relation", "Relation"))), relationMenu);
 		formItem.add(label);
@@ -2225,7 +2243,17 @@ public class CourseApplication extends ApplicationForm {
 
 		Paragraph paragraph = new Paragraph();
 		paragraph.setStyleClass("agreement");
-		paragraph.add(new Text(this.iwrb.getLocalizedString(getPrefix() + "application.agreement", "Agreement text")));
+		String agreementText = this.iwrb.getLocalizedString(getPrefix() + "application.agreement", "Agreement text");
+		String href = "href=\"";
+		if (agreementText.indexOf(href) != -1) {
+			String customLink = iwc.getIWMainApplication().getSettings().getProperty("cou_app_agree_link_" + iApplicationPK + "_" + iSchoolTypePK);
+			if (!StringUtil.isEmpty(customLink)) {
+				String pattern = agreementText.substring(agreementText.indexOf(href) + href.length());
+				pattern = pattern.substring(0, pattern.indexOf("\""));
+				agreementText = StringHandler.replace(agreementText, pattern, customLink);
+			}
+		}
+		paragraph.add(new Text(agreementText));
 		section.add(paragraph);
 
 		formItem = new Layer(Layer.DIV);
