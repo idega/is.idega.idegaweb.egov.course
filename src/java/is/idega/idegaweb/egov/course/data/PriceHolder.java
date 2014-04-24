@@ -1,20 +1,38 @@
 /*
  * $Id$ Created on Apr 10, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.data;
 
 import com.idega.user.data.User;
 
-public class PriceHolder implements Comparable {
+public class PriceHolder implements Comparable<PriceHolder> {
 
+	private String courseName;
 	private User user = null;
 	private float price = 0;
 	private float discount = 0;
 	private float cost = 0;
+
+	public PriceHolder() {
+		super();
+	}
+
+	public PriceHolder(String courseName) {
+		this();
+		this.courseName = courseName;
+	}
+
+	public String getCourseName() {
+		return courseName;
+	}
+
+	public void setCourseName(String courseName) {
+		this.courseName = courseName;
+	}
 
 	public User getUser() {
 		return user;
@@ -48,8 +66,8 @@ public class PriceHolder implements Comparable {
 		this.discount = discount;
 	}
 
-	public int compareTo(Object arg0) {
-		PriceHolder obj = (PriceHolder) arg0;
+	@Override
+	public int compareTo(PriceHolder obj) {
 		int compare = (int) -(obj.getPrice() - getPrice());
 		if (compare == 0) {
 			compare = ((Integer) obj.getUser().getPrimaryKey()).intValue() - ((Integer) getUser().getPrimaryKey()).intValue();
@@ -58,11 +76,13 @@ public class PriceHolder implements Comparable {
 		return compare;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		PriceHolder holder = (PriceHolder) obj;
 		return holder.getUser().equals(getUser()) && holder.getPrice() == getPrice();
 	}
 
+	@Override
 	public String toString() {
 		return getUser().getName() + " - " + getPrice();
 	}
