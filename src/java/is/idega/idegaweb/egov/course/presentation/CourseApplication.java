@@ -46,6 +46,7 @@ import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
@@ -804,6 +805,32 @@ public class CourseApplication extends ApplicationForm {
 		if (!saveChildInfo(iwc, applicant)) {
 			showPhaseFour(iwc);
 			return;
+		}
+
+		if (isRequiredToSelectYesOrNoAboutChild(iwc.getApplicationSettings())) {
+			if (!iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+				setError(
+						ACTION_PHASE_4,
+						PARAMETER_GROWTH_DEVIATION,
+						iwrb.getLocalizedString(
+								"application_error.answer_must_be_provided_about_child_growth_deviation",
+								"You must provide answer about child's growth deviation")
+				);
+			}
+			if (!iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+				setError(
+						ACTION_PHASE_4,
+						PARAMETER_ALLERGIES,
+						iwrb.getLocalizedString(
+								"application_error.answer_must_be_provided_about_child_allergies",
+								"You must provide answer about child's allergies")
+				);
+			}
+
+			if (hasErrors(ACTION_PHASE_4)) {
+				showPhaseFour(iwc);
+				return;
+			}
 		}
 
 		Integer applicantPK = (Integer) applicant.getPrimaryKey();
@@ -2500,6 +2527,10 @@ public class CourseApplication extends ApplicationForm {
 		getCourseApplicationSession(iwc).removeApplication(getApplicant(iwc), holder);
 	}
 
+	private boolean isRequiredToSelectYesOrNoAboutChild(IWMainApplicationSettings settings) {
+		return settings.getBoolean("cou_gd_yes_no_required_" + iApplicationPK + "_" + iSchoolTypePK, Boolean.FALSE);
+	}
+
 	private void addChildInformation(IWContext iwc, User user, Form form) throws RemoteException {
 		Child child = getMemberFamilyLogic(iwc).getChild(user);
 		User owner = getUser(iwc);
@@ -2518,15 +2549,21 @@ public class CourseApplication extends ApplicationForm {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("child.growth_deviation_help", "If the child has any growth deviations...")));
 		section.add(helpLayer);
 
+		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
+		boolean requiredYesNo = isRequiredToSelectYesOrNoAboutChild(settings);
+
 		RadioButton yes = new RadioButton(PARAMETER_GROWTH_DEVIATION, Boolean.TRUE.toString());
 		yes.setStyleClass("radiobutton");
 		yes.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, false);
 		RadioButton no = new RadioButton(PARAMETER_GROWTH_DEVIATION, Boolean.FALSE.toString());
 		no.setStyleClass("radiobutton");
 		no.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
-		RadioButton noAnswer = new RadioButton(PARAMETER_GROWTH_DEVIATION, "");
-		noAnswer.setStyleClass("radiobutton");
-		noAnswer.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
+		RadioButton noAnswer = null;
+		if (settings.getBoolean("cou_growh_dev_no_ans_" + iApplicationPK + "_" + iSchoolTypePK, Boolean.TRUE)) {
+			noAnswer = new RadioButton(PARAMETER_GROWTH_DEVIATION, "");
+			noAnswer.setStyleClass("radiobutton");
+			noAnswer.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
+		}
 		Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (hasGrowthDeviation != null) {
 			if (hasGrowthDeviation.booleanValue()) {
@@ -2542,6 +2579,12 @@ public class CourseApplication extends ApplicationForm {
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_GROWTH_DEVIATION)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		Label label = new Label(this.iwrb.getLocalizedString("yes", "Yes"), yes);
 		formItem.add(yes);
 		formItem.add(label);
@@ -2550,18 +2593,26 @@ public class CourseApplication extends ApplicationForm {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_GROWTH_DEVIATION)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(this.iwrb.getLocalizedString("no", "No"), no);
 		formItem.add(no);
 		formItem.add(label);
 		section.add(formItem);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
-		formItem.add(noAnswer);
-		formItem.add(label);
-		section.add(formItem);
+		if (noAnswer != null) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
+			formItem.add(noAnswer);
+			formItem.add(label);
+			section.add(formItem);
+		}
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -2595,9 +2646,13 @@ public class CourseApplication extends ApplicationForm {
 		no = new RadioButton(PARAMETER_ALLERGIES, Boolean.FALSE.toString());
 		no.setStyleClass("radiobutton");
 		no.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
-		noAnswer = new RadioButton(PARAMETER_ALLERGIES, "");
-		noAnswer.setStyleClass("radiobutton");
-		noAnswer.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
+
+		noAnswer = null;
+		if (settings.getBoolean("cou_aller_no_ans_" + iApplicationPK + "_" + iSchoolTypePK, Boolean.TRUE)) {
+			noAnswer = new RadioButton(PARAMETER_ALLERGIES, "");
+			noAnswer.setStyleClass("radiobutton");
+			noAnswer.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
+		}
 		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (hasAllergies != null) {
 			if (hasAllergies.booleanValue()) {
@@ -2613,6 +2668,12 @@ public class CourseApplication extends ApplicationForm {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_ALLERGIES)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(this.iwrb.getLocalizedString("yes", "Yes"), yes);
 		formItem.add(yes);
 		formItem.add(label);
@@ -2621,18 +2682,26 @@ public class CourseApplication extends ApplicationForm {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_ALLERGIES)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(this.iwrb.getLocalizedString("no", "No"), no);
 		formItem.add(no);
 		formItem.add(label);
 		section.add(formItem);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
-		formItem.add(noAnswer);
-		formItem.add(label);
-		section.add(formItem);
+		if (noAnswer != null) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
+			formItem.add(noAnswer);
+			formItem.add(label);
+			section.add(formItem);
+		}
 
 		clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
