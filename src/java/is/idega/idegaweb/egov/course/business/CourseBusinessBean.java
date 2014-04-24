@@ -2024,8 +2024,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			Iterator iter = userApplications.iterator();
 			int totalPrice = 0;
 			int totalCost = 0;
+			String name = null;
 			while (iter.hasNext()) {
 				ApplicationHolder holder = (ApplicationHolder) iter.next();
+				name = holder.getCourse() == null ? null : holder.getCourse().getName();
 				if (!holder.isOnWaitingList()) {
 					totalPrice += holder.getPrice();
 					totalCost += holder.getCourse().getCourseCost() > -1 ? holder
@@ -2033,7 +2035,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				}
 			}
 
-			PriceHolder priceHolder = new PriceHolder();
+			PriceHolder priceHolder = new PriceHolder(name);
 			priceHolder.setUser(user);
 			priceHolder.setPrice(totalPrice);
 			priceHolder.setCost(totalCost);
@@ -2095,26 +2097,33 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			if (!first) {
 				if (hasSiblingInSet(applications.keySet(), applicant)) {
 					boolean getsDiscount = false;
+					String name = null;
 					Collection<ApplicationHolder> userApplications = applications.get(applicant);
 					for (ApplicationHolder applicationHolder : userApplications) {
 						if (!applicationHolder.isOnWaitingList() && !firstOnWaitingList) {
 							getsDiscount = true;
+							name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getName();
 						}
 					}
 
 					if (getsDiscount) {
 						discountHolder.setPrice(price * 0.2f);
 						discountHolder.setDiscount(0.2f);
+						discountHolder.setCourseName(name);
 					}
 				}
 			} else {
 				first = false;
-
+				String name = null;
 				Collection<ApplicationHolder> userApplications = applications.get(applicant);
 				for (ApplicationHolder applicationHolder : userApplications) {
 					if (!applicationHolder.isOnWaitingList()) {
 						firstOnWaitingList = false;
+						name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getName();
 					}
+				}
+				if (name != null) {
+					discountHolder.setCourseName(name);
 				}
 			}
 
