@@ -1843,9 +1843,16 @@ public class CourseApplication extends ApplicationForm {
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_SAVE)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
 
+		if (iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+			form.maintainParameter(PARAMETER_GROWTH_DEVIATION);
+		}
+		if (iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+			form.maintainParameter(PARAMETER_ALLERGIES);
+		}
+
 		addErrors(iwc, form);
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
@@ -1899,6 +1906,10 @@ public class CourseApplication extends ApplicationForm {
 		cell.setStyleClass("personalID");
 		cell.add(new Text(iwrb.getLocalizedString("personal_id", "Personal ID")));
 
+		cell = row.createCell();
+		cell.setStyleClass("registered_at");
+		cell.add(new Text(iwrb.getLocalizedString("registered_at", "Registered at")));
+
 		cell = row.createHeaderCell();
 		cell.setStyleClass("amount");
 		cell.add(new Text(iwrb.getLocalizedString("amount", "Amount")));
@@ -1932,6 +1943,10 @@ public class CourseApplication extends ApplicationForm {
 			cell = row.createCell();
 			cell.setStyleClass("personalID");
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
+
+			cell = row.createCell();
+			cell.setStyleClass("registered_at");
+			cell.add(new Text(holder.getCourseName()));
 
 			cell = row.createCell();
 			cell.setStyleClass("amount");
