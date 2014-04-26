@@ -1231,6 +1231,12 @@ public class CourseApplication extends ApplicationForm {
 			return;
 		}
 
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, Arrays.asList(
+				CoreConstants.DWR_ENGINE_SCRIPT,
+				CoreConstants.DWR_UTIL_SCRIPT,
+				"/dwr/interface/WebUtil.js"
+		));
+
 		Form form = getForm(ACTION_PHASE_6);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_6)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
@@ -1330,6 +1336,16 @@ public class CourseApplication extends ApplicationForm {
 				}
 			}
 			daycare.keepStatusOnAction(true);
+			String dayCareParamName = "cou_day_care_" + course.getPrimaryKey().toString();
+			User user = holder.getUser();
+			if (user != null) {
+				dayCareParamName += "_" + user.getId();
+			}
+			daycare.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + dayCareParamName + "', dwr.util.getValue('" + daycare.getId() + "'));");
+			Object selectedDayCare = iwc.getSessionAttribute(dayCareParamName);
+			if (selectedDayCare instanceof String) {
+				daycare.setSelectedElement((String) selectedDayCare);
+			}
 
 			DropdownMenu trip = new DropdownMenu(PARAMETER_TRIPHOME);
 			trip.addMenuElement("", "");
@@ -1339,6 +1355,15 @@ public class CourseApplication extends ApplicationForm {
 				trip.setSelectedElement(holder.getPickedUp().toString());
 			}
 			trip.keepStatusOnAction(true);
+			String tripParamName = "cou_trip_" + course.getPrimaryKey().toString();
+			if (user != null) {
+				tripParamName += "_" + user.getId();
+			}
+			trip.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + tripParamName + "', dwr.util.getValue('" + trip.getId() + "'));");
+			Object selectedTrip = iwc.getSessionAttribute(tripParamName);
+			if (selectedTrip instanceof String) {
+				trip.setSelectedElement((String) selectedTrip);
+			}
 
 			Link link = new Link(iwb.getImage("delete.png", iwrb.getLocalizedString("remove_course", "Remove course")));
 			link.addParameter(SUB_ACTION, SUB_ACTION_REMOVE);
