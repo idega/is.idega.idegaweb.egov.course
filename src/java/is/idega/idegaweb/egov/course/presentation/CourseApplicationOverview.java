@@ -8,6 +8,7 @@
 package is.idega.idegaweb.egov.course.presentation;
 
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
@@ -25,6 +26,7 @@ import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
 import com.idega.block.school.data.School;
+import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
 import com.idega.presentation.IWContext;
@@ -218,6 +220,8 @@ public class CourseApplicationOverview extends CourseBlock {
 		float totalPrice = 0;
 		float discount = 0;
 
+		CourseBusiness courseBusiness = IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
+
 		Iterator iterator = prices.iterator();
 		while (iterator.hasNext()) {
 			PriceHolder holder = (PriceHolder) iterator.next();
@@ -350,6 +354,9 @@ public class CourseApplicationOverview extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("amount");
+				if (!appHolder.isOnWaitingList()) {
+					appHolder.setOnWaitingList(courseBusiness.isFull(course));
+				}
 				if (appHolder.isOnWaitingList()) {
 					cell.setStyleClass("waitingList");
 					cell.add(new Text(getResourceBundle().getLocalizedString("application_status.waiting_list", "Waiting list")));
