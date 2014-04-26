@@ -1135,7 +1135,7 @@ public class CourseApplication extends ApplicationForm {
 
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString(getPrefix() + (hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare"), "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString(getPrefixSafe() + (hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare"), "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
 		section.add(helpLayer);
 
 		formItem = new Layer(Layer.DIV);
@@ -2299,7 +2299,7 @@ public class CourseApplication extends ApplicationForm {
 
 		Paragraph paragraph = new Paragraph();
 		paragraph.setStyleClass("agreement");
-		String agreementText = this.iwrb.getLocalizedString(getPrefix() + "application.agreement", "Agreement text");
+		String agreementText = this.iwrb.getLocalizedString(getPrefixSafe() + "application.agreement", "Agreement text");
 		String href = "href=\"";
 		if (agreementText.indexOf(href) != -1) {
 			String customLink = iwc.getIWMainApplication().getSettings().getProperty("cou_app_agree_link_" + iApplicationPK + "_" + iSchoolTypePK);
@@ -2450,7 +2450,20 @@ public class CourseApplication extends ApplicationForm {
 
 		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
 		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, prefix, getUser(iwc), iwc.isLoggedOn() ? iwc.getCurrentUser() : null, iwc.getCurrentLocale());
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(
+				getCourseApplicationSession(iwc).getApplications(),
+				merchantPK,
+				(float) amount,
+				merchantType,
+				creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO,
+				null,
+				payerName,
+				payerPersonalID,
+				prefix,
+				getUser(iwc),
+				iwc.isLoggedOn() ? iwc.getCurrentUser() : null,
+				iwc.getCurrentLocale()
+		);
 		if (application != null && creditCardPayment) {
 			if (useDirectPayment) {
 				try {
@@ -2473,7 +2486,7 @@ public class CourseApplication extends ApplicationForm {
 
 		if (application != null) {
 			getCourseApplicationSession(iwc).clear(iwc);
-			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString(getPrefix() + "application.application_send_confirmation" + (hasCare ? "" : "_nocare"), "Your course application has been received and will be processed."), 8, getNumberOfPhases(iwc));
+			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString(getPrefixSafe() + "application.application_send_confirmation" + (hasCare ? "" : "_nocare"), "Your course application has been received and will be processed."), 8, getNumberOfPhases(iwc));
 
 			Layer clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
@@ -2750,7 +2763,7 @@ public class CourseApplication extends ApplicationForm {
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
 
-		heading = new Heading1(this.iwrb.getLocalizedString(getPrefix() + "child.other_information", "Other information"));
+		heading = new Heading1(this.iwrb.getLocalizedString(getPrefixSafe() + "child.other_information", "Other information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
 
@@ -3001,10 +3014,14 @@ public class CourseApplication extends ApplicationForm {
 		this.phaseOneHelpPrefix = phaseOneHelpPrefix;
 	}
 
-	private String getPrefix() {
+	private String getPrefixSafe() {
 		if (prefix.length() > 0) {
 			return prefix + ".";
 		}
+		return prefix;
+	}
+
+	public String getPrefix() {
 		return prefix;
 	}
 
