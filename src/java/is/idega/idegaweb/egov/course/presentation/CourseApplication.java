@@ -1225,8 +1225,12 @@ public class CourseApplication extends ApplicationForm {
 			if (!getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
 			}
+
+			if (hasErrors(ACTION_PHASE_5)) {
+				getCourseApplicationSession(iwc).removeApplication(applicant, h);
+			}
 		}
-		Collection applications = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
+		Collection<ApplicationHolder> applications = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (applications == null || applications.isEmpty() || hasErrors(ACTION_PHASE_5)) {
 			showPhaseFive(iwc);
 			return;
