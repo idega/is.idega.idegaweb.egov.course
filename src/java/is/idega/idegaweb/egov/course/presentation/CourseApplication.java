@@ -84,6 +84,7 @@ import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 import com.idega.util.text.TextSoap;
@@ -1167,6 +1168,15 @@ public class CourseApplication extends ApplicationForm {
 		add(form);
 	}
 
+	private boolean isRegisteredMultipleApplicants(IWContext iwc) throws RemoteException {
+		Map<User, Collection<ApplicationHolder>> applications = getCourseApplicationSession(iwc).getApplications();
+		if (MapUtil.isEmpty(applications)) {
+			return false;
+		}
+
+		return applications.keySet().size() > 1;
+	}
+
 	private void showPhaseSix(IWContext iwc) throws RemoteException {
 		User applicant = getApplicant(iwc);
 
@@ -1223,7 +1233,13 @@ public class CourseApplication extends ApplicationForm {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.already_registered_course_selected", "You have selected a course that the participant is already registered to: ") + course.getName());
 			}
 			if (!getCourseBusiness(iwc).isOfAge(applicant, course)) {
-				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
+				if (isRegisteredMultipleApplicants(iwc)) {
+					getCourseApplicationSession(iwc).removeApplication(applicant, h);
+					showPhaseSix(iwc);
+					return;
+				} else {
+					setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
+				}
 			}
 
 			if (hasErrors(ACTION_PHASE_5)) {
