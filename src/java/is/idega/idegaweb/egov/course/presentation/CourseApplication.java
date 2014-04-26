@@ -2655,7 +2655,7 @@ public class CourseApplication extends ApplicationForm {
 		section.add(paragraph);
 
 		TextArea details = new TextArea(PARAMETER_GROWTH_DEVIATION_DETAILS, child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-		details.setStyleClass("details");
+		details.setStyleClass("details growth-deviation-details");
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
 
@@ -2746,7 +2746,7 @@ public class CourseApplication extends ApplicationForm {
 		section.add(paragraph);
 
 		details = new TextArea(PARAMETER_ALLERGIES_DETAILS, child.getAllergiesDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-		details.setStyleClass("details");
+		details.setStyleClass("details allergies-details");
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
 
@@ -2764,7 +2764,7 @@ public class CourseApplication extends ApplicationForm {
 		section.add(helpLayer);
 
 		details = new TextArea(PARAMETER_OTHER_INFORMATION, child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-		details.setStyleClass("details");
+		details.setStyleClass("details other-information-about-child");
 		section.add(details);
 	}
 
