@@ -103,6 +103,7 @@ import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 
@@ -3461,34 +3462,43 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		IWTimestamp toDate = new IWTimestamp(fromDate);
 		toDate.addDays(6);
 
-		Locale locale = getIWApplicationContext().getApplicationSettings()
-				.getDefaultLocale();
+		Locale locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
 
 		try {
-			Collection<Course> courses = getCourseHome().findAll(null, null,
-					null, -1, fromDate.getDate(), toDate.getDate());
+			Collection<Course> courses = getCourseHome().findAll(null, null, null, -1, fromDate.getDate(), toDate.getDate());
 			int count = 0;
+
+			IWResourceBundle iwrb = getIWMainApplication().getBundle(getBundleIdentifier()).getResourceBundle(locale);
 			for (Course course : courses) {
 				CourseType type = course.getCourseType();
+				String typePrKey = type == null ? null : type.getPrimaryKey().toString();
 				CourseCategory category = type.getCourseCategory();
 
 				if (category.sendReminderEmail()) {
-					Collection<CourseChoice> choices = getCourseChoiceHome()
-							.findAllByCourse(course, false);
-					for (CourseChoice choice : choices) {
+					Collection<CourseChoice> choices = getCourseChoiceHome().findAllByCourse(course, false);
+					for (CourseChoice choice: choices) {
 						if (!choice.hasReceivedReminder()) {
 							CourseApplication application = choice.getApplication();
 
-							String subject = getLocalizedString((application.getPrefix() != null ? application.getPrefix() + "." : "") + "course_choice.reminder_subject",
-									"A reminder for course choice", locale);
-							String body = getLocalizedString(
-									(application.getPrefix() != null ? application.getPrefix() + "." : "") +
-									"course_choice.reminder_body",
-									"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
-									locale);
+							String subject = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + ".course_choice.reminder_subject");
+							if (StringUtil.isEmpty(subject)) {
+								subject = getLocalizedString(
+										(application.getPrefix() != null ? application.getPrefix() + "." : "") + "course_choice.reminder_subject",
+										"A reminder for course choice",
+										locale
+								);
+							}
+							String body = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + ".course_choice.reminder_body");
+							if (StringUtil.isEmpty(body)) {
+								body = getLocalizedString(
+										(application.getPrefix() != null ? application.getPrefix() + "." : "") +
+										"course_choice.reminder_body",
+										"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
+										locale
+								);
+							}
 
-							sendMessageToParents(application, choice, subject,
-									body, locale);
+							sendMessageToParents(application, choice, subject, body, locale);
 
 							choice.setReceivedReminder(true);
 							choice.store();
