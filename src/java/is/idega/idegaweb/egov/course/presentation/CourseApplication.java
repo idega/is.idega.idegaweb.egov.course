@@ -393,7 +393,10 @@ public class CourseApplication extends ApplicationForm {
 			lists.add(iwrb.getLocalizedString("help.when_a_registration_is_complete_you_can_then_register_another_child", "When registration is complete you can go back and register another."));
 			lists.add(iwrb.getLocalizedString("help.when_all_applicants_have_been_registered_you_pay_for_them_all_at_the_same_time", "When all applicants have been registered you pay for them all at the same time."));
 			//lists.add(iwrb.getLocalizedString("help.only_three_weeks_possible", "It is only possible to register each participant to max three courses at a time."));
-			lists.add(iwrb.getLocalizedString("help.joined_courses", "Courses can be joined to maximize usage."));
+			lists.add(iwrb.getLocalizedString(
+					getPhaseOneHelpPrefix() == null ? "help.joined_courses" : getPhaseOneHelpPrefix() + "help.joined_courses",
+					"Courses can be joined to maximize usage.")
+			);
 			info.add(lists);
 
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_child", "Select child"));
@@ -2605,9 +2608,6 @@ public class CourseApplication extends ApplicationForm {
 				no.setSelected(true);
 			}
 		}
-		else {
-			no.setSelected(true);
-		}
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
@@ -2695,13 +2695,9 @@ public class CourseApplication extends ApplicationForm {
 		if (hasAllergies != null) {
 			if (hasAllergies.booleanValue()) {
 				yes.setSelected(true);
-			}
-			else {
+			} else {
 				no.setSelected(true);
 			}
-		}
-		else {
-			no.setSelected(true);
 		}
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -2994,6 +2990,15 @@ public class CourseApplication extends ApplicationForm {
 
 	public void setApplicationPK(String applicationPK) {
 		this.iApplicationPK = applicationPK;
+	}
+
+	private String phaseOneHelpPrefix = null;
+	public String getPhaseOneHelpPrefix() {
+		return phaseOneHelpPrefix;
+	}
+
+	public void setPhaseOneHelpPrefix(String phaseOneHelpPrefix) {
+		this.phaseOneHelpPrefix = phaseOneHelpPrefix;
 	}
 
 	private String getPrefix() {
