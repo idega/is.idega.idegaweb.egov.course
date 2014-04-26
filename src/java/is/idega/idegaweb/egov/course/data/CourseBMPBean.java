@@ -4,8 +4,10 @@ import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
@@ -17,6 +19,7 @@ import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
+import com.idega.data.IDOFinderException;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
@@ -340,7 +343,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return ejbFindAll(null, null, null, birthYear, null, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAll(Object providerPK, Object schoolTypePK, Object courseTypePK, int birthYear, Date fromDate, Date toDate)
 		throws FinderException, IDORelationshipException {
 
@@ -379,7 +381,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		query.addOrder(table, COLUMN_START_DATE, true);
 		query.addOrder(table, COLUMN_NAME, true);
 
-		return this.idoFindPKsByQuery(query);
+		try {
+			return this.idoFindPKsByQuery(query);
+		} catch (IDOFinderException e) {
+			getLogger().log(Level.WARNING, "Error executing query: '" + query + "'", e);
+		}
+		return new ArrayList<Integer>();
 	}
 
 
