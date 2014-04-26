@@ -320,20 +320,32 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		if (hasGrowthDeviation == null && isSchoolUser()) {
 			hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
 		}
+		if (hasGrowthDeviation == null) {
+			hasGrowthDeviation = child.hasGrowthDeviation();
+		}
 
 		String growthDeviation = child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (growthDeviation == null && isSchoolUser()) {
 			growthDeviation = child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX);
+		}
+		if (growthDeviation == null) {
+			growthDeviation = child.getGrowthDeviationDetails();
 		}
 
 		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (hasAllergies == null && isSchoolUser()) {
 			hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
 		}
+		if (hasAllergies == null) {
+			hasAllergies = child.hasAllergies();
+		}
 
 		String allergies = child.getAllergiesDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (allergies == null && isSchoolUser()) {
 			allergies = child.getAllergiesDetails(CourseConstants.COURSE_PREFIX);
+		}
+		if (allergies == null) {
+			allergies = child.getAllergiesDetails();
 		}
 
 		String otherInformation = child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
