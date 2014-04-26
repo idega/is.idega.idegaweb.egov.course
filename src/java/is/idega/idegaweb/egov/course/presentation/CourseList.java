@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Mar 27, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation;
@@ -207,7 +207,7 @@ public class CourseList extends CourseBlock {
 			stamp.addYears(-1);
 			fromDate.setDate(stamp.getDate());
 		}
-		
+
 		if (showTypes) {
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -397,7 +397,7 @@ public class CourseList extends CourseBlock {
 			}
 			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : (useBirthYears ? CourseComparator.DATE_SORT : CourseComparator.ID_SORT)));
 		}
-		
+
 		boolean showID = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 
 		Iterator iter = courses.iterator();
@@ -425,8 +425,12 @@ public class CourseList extends CourseBlock {
 				Link link = new Link(new Text(course.getName()));
 				link.setPage(getResponsePage());
 				link.addParameter(PARAMETER_COURSE_PK, course.getPrimaryKey().toString());
-				link.addParameter(PARAMETER_COURSE_TYPE_PK, type.getPrimaryKey().toString());
-				link.addParameter(PARAMETER_SCHOOL_TYPE_PK, courseCategory.getPrimaryKey().toString());
+				if (type != null) {
+					link.addParameter(PARAMETER_COURSE_TYPE_PK, type.getPrimaryKey().toString());
+				}
+				if (courseCategory != null) {
+					link.addParameter(PARAMETER_SCHOOL_TYPE_PK, courseCategory.getPrimaryKey().toString());
+				}
 				cell.add(link);
 			}
 			else {
