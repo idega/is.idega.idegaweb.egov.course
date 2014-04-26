@@ -2691,18 +2691,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			School provider = course.getProvider();
 			IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 			Object[] arguments = {
-					applicant.getName(),
-					PersonalIDFormatter.format(applicant.getPersonalID(),
-							locale),
-					course.getName(),
-					provider.getName(),
-					startDate.getLocaleDate(locale, IWTimestamp.SHORT),
-					new IWTimestamp(course.getEndDate() != null ? course
+					applicant.getName(),											//	0: name
+					PersonalIDFormatter.format(applicant.getPersonalID(), locale),	//	1: personal id
+					course.getName(),												//	2: course name
+					provider.getName(),												//	3: provider name
+					startDate.getLocaleDate(locale, IWTimestamp.SHORT),				//	4: start date
+					new IWTimestamp(course.getEndDate() != null ? course			//	5: end date
 							.getEndDate() : getEndDate(course.getPrice(),
 							startDate.getDate())).getLocaleDate(locale,
 							IWTimestamp.SHORT),
-					acceptURL,
-					choice.getUniqueID()};
+					acceptURL,														//	6: URL
+					choice.getUniqueID()};											//	7: unique id
 
 			User appParent = application.getOwner();
 			if (appParent != null) {
@@ -2831,8 +2830,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			if (stamp.getDayOfWeek() != Calendar.SUNDAY && stamp.getDayOfWeek() != Calendar.SATURDAY) {
 				//	Course take place only during week days, not during weekends
 				days--;
-			} else {
-				getLogger().info(stamp + " is weekend, course is not taking place on this day");
 			}
 
 			stamp.addDays(1);
