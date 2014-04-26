@@ -2047,7 +2047,15 @@ public class CourseApplication extends ApplicationForm {
 					cell = row.createCell();
 					cell.setStyleClass("status registered");
 					if (coursePrice != null) {
-						int priceTmp = coursePrice.getPostCarePrice();
+						int priceTmp = 0;
+						if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_POST) {
+							priceTmp = coursePrice.getPostCarePrice();
+						} else if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_PRE) {
+							priceTmp = coursePrice.getPreCarePrice();
+						} else if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+							priceTmp = (coursePrice.getPreCarePrice() + coursePrice.getPostCarePrice());
+						}
+
 						if (priceTmp > 0) {
 							totalForApplicantExtraCare += priceTmp;
 						}
