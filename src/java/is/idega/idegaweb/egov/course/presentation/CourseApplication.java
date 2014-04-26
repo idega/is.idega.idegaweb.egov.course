@@ -2091,7 +2091,7 @@ public class CourseApplication extends ApplicationForm {
 			amountDue = totalPrice - discount;
 
 			cell = row.createCell();
-			cell.setColumnSpan(2);
+			cell.setColumnSpan(4);
 			cell.setStyleClass("discount");
 			cell.add(new Text(iwrb.getLocalizedString("discount", "Discount")));
 
@@ -2103,7 +2103,7 @@ public class CourseApplication extends ApplicationForm {
 			row = group.createRow();
 
 			cell = row.createCell();
-			cell.setColumnSpan(2);
+			cell.setColumnSpan(4);
 			cell.setStyleClass("amountDue");
 			cell.add(new Text(iwrb.getLocalizedString("amount_due", "Amount due")));
 
