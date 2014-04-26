@@ -1235,8 +1235,6 @@ public class CourseApplication extends ApplicationForm {
 			if (!getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				if (isRegisteredMultipleApplicants(iwc)) {
 					getCourseApplicationSession(iwc).removeApplication(applicant, h);
-					showPhaseSix(iwc);
-					return;
 				} else {
 					setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
 				}
