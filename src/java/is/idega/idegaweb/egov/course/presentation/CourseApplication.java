@@ -1955,6 +1955,14 @@ public class CourseApplication extends ApplicationForm {
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("amount");
+		cell.add(new Text(iwrb.getLocalizedString("course_price", "Course price")));
+
+		cell = row.createHeaderCell();
+		cell.setStyleClass("amount");
+		cell.add(new Text(iwrb.getLocalizedString("price_for_extra_care", "Price for extra care")));
+
+		cell = row.createHeaderCell();
+		cell.setStyleClass("amount");
 		cell.add(new Text(iwrb.getLocalizedString("amount", "Amount")));
 
 		group = table.createBodyRowGroup();
@@ -1974,8 +1982,8 @@ public class CourseApplication extends ApplicationForm {
 			User user = holder.getUser();
 			PriceHolder discountHolder = (PriceHolder) discounts.get(user);
 
-			float price = holder.getPrice();
-			totalPrice += price;
+			float totalPricePerApplication = holder.getPrice();
+			totalPrice += totalPricePerApplication;
 			discount += discountHolder.getPrice();
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
@@ -1987,9 +1995,14 @@ public class CourseApplication extends ApplicationForm {
 			cell.setStyleClass("personalID");
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
+			TableCell2 cellForPricesOfApplicantCourses = row.createCell();
+			cellForPricesOfApplicantCourses.setStyleClass("amount");
+			TableCell2 cellForPricesOfApplicantExtraCare = row.createCell();
+			cellForPricesOfApplicantExtraCare.setStyleClass("amount");
+
 			cell = row.createCell();
 			cell.setStyleClass("amount");
-			cell.add(new Text(format.format(price)));
+			cell.add(new Text(format.format(totalPricePerApplication)));
 
 			if (counter++ % 2 == 0) {
 				row.setStyleClass("even");
@@ -1998,6 +2011,7 @@ public class CourseApplication extends ApplicationForm {
 				row.setStyleClass("odd");
 			}
 
+			int totalForAplicantCourses = 0, totalForApplicantExtraCare = 0;
 			Collection<ApplicationHolder> holders = applications.get(user);
 			for (ApplicationHolder applicationHolder : holders) {
 				row = group.createRow();
@@ -2018,19 +2032,43 @@ public class CourseApplication extends ApplicationForm {
 				if (applicationHolder.isOnWaitingList()) {
 					cell.setStyleClass("waitingList");
 					cell.add(new Text(iwrb.getLocalizedString("application_status.waiting_list", "Waiting list")));
-				}
-				else {
+					cell.setColumnSpan(2);
+				} else {
+					CoursePrice coursePrice = applicationHolder.getCourse().getPrice();
 					cell.setStyleClass("registered");
+					if (coursePrice != null) {
+						int priceTmp = coursePrice.getPrice();
+						if (priceTmp > 0) {
+							totalForAplicantCourses += priceTmp;
+						}
+						cell.add(new Text(format.format(priceTmp)));
+					}
+
+					cell = row.createCell();
+					cell.setStyleClass("status registered");
+					if (coursePrice != null) {
+						int priceTmp = coursePrice.getPostCarePrice();
+						if (priceTmp > 0) {
+							totalForApplicantExtraCare += priceTmp;
+						}
+						cell.add(new Text(format.format(priceTmp)));
+					}
+
+					cell = row.createCell();
+					cell.setStyleClass("status registered");
 					cell.add(new Text(format.format(applicationHolder.getPrice())));
 				}
 			}
+
+			cellForPricesOfApplicantCourses.add(new Text(format.format(totalForAplicantCourses)));
+			cellForPricesOfApplicantExtraCare.add(new Text(format.format(totalForApplicantExtraCare)));
 		}
 
 		group = table.createFooterRowGroup();
 		row = group.createRow();
 
 		cell = row.createCell();
-		cell.setColumnSpan(2);
+		cell.setColumnSpan(4);
 		cell.setStyleClass("totalPrice");
 		cell.add(new Text(iwrb.getLocalizedString("total_amount", "Total amount")));
 
