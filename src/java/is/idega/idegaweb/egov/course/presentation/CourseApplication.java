@@ -876,16 +876,16 @@ public class CourseApplication extends ApplicationForm {
 
 		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
-		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
+		Collection<ApplicationHolder> inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
 			script4.append("\t\t\t\t if (");
-			Iterator iter = inrepps.iterator();
+			Iterator<ApplicationHolder> iter = inrepps.iterator();
 			boolean first = true;
 			while (iter.hasNext()) {
 				if (!first) {
 					script4.append(" || ");
 				}
-				script4.append("obj.id == " + ((ApplicationHolder) iter.next()).getCourse().getPrimaryKey().toString());
+				script4.append("obj.id == " + iter.next().getCourse().getPrimaryKey().toString());
 				first = false;
 			}
 			script4.append(") {obj.disabled=true;obj.checked=true}\n");
@@ -1941,7 +1941,7 @@ public class CourseApplication extends ApplicationForm {
 
 		group = table.createBodyRowGroup();
 
-		Map applications = getCourseApplicationSession(iwc).getApplications();
+		Map<User, Collection<ApplicationHolder>> applications = getCourseApplicationSession(iwc).getApplications();
 		SortedSet prices = getCourseBusiness(iwc).calculatePrices(applications);
 		Map discounts = getCourseBusiness(iwc).getDiscounts(prices, applications);
 
@@ -1980,7 +1980,7 @@ public class CourseApplication extends ApplicationForm {
 				row.setStyleClass("odd");
 			}
 
-			Collection<ApplicationHolder> holders = (Collection<ApplicationHolder>) applications.get(user);
+			Collection<ApplicationHolder> holders = applications.get(user);
 			for (ApplicationHolder applicationHolder : holders) {
 				row = group.createRow();
 				row.setStyleClass("subRow");
