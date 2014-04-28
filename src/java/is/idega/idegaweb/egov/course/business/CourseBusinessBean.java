@@ -2623,7 +2623,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setCourse(holder.getCourse());
 						choice.setDayCare(holder.getDaycare());
 						if (useWaitingList) {
-							choice.setWaitingList(holder.getCourse().getFreePlaces() <= 0);
+							choice.setWaitingList(isFull(holder.getCourse()));
 						}
 						if (holder.getPickedUp() != null) {
 							choice.setPickedUp(holder.getPickedUp()

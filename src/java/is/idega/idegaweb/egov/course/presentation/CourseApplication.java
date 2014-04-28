@@ -2669,6 +2669,8 @@ public class CourseApplication extends ApplicationForm {
 
 		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
 		boolean requiredYesNo = isRequiredToSelectYesOrNoAboutChild(settings);
+		boolean childGrowthDeviationDefaultNo = settings.getBoolean("cou_app_ch_gr_dev_def_no", Boolean.TRUE);
+		boolean childAllergiesDefaultNo = settings.getBoolean("cou_app_ch_aller_def_no", Boolean.TRUE);
 
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("child.has_growth_deviation", "Has growth deviation"));
 		heading.setStyleClass("subHeader");
@@ -2702,15 +2704,20 @@ public class CourseApplication extends ApplicationForm {
 			noAnswer.setStyleClass("radiobutton");
 			noAnswer.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
 		}
-		Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-		if (hasGrowthDeviation != null) {
-			if (hasGrowthDeviation.booleanValue()) {
-				yes.setSelected(true);
-			}
-			else {
-				no.setSelected(true);
+		if (childGrowthDeviationDefaultNo) {
+			no.setSelected(true);
+		} else {
+			Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasGrowthDeviation != null) {
+				if (hasGrowthDeviation.booleanValue()) {
+					yes.setSelected(true);
+				}
+				else {
+					no.setSelected(true);
+				}
 			}
 		}
+
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
@@ -2794,14 +2801,19 @@ public class CourseApplication extends ApplicationForm {
 			noAnswer.setStyleClass("radiobutton");
 			noAnswer.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
 		}
-		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-		if (hasAllergies != null) {
-			if (hasAllergies.booleanValue()) {
-				yes.setSelected(true);
-			} else {
-				no.setSelected(true);
+		if (childAllergiesDefaultNo) {
+			no.setSelected(true);
+		} else {
+			Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasAllergies != null) {
+				if (hasAllergies.booleanValue()) {
+					yes.setSelected(true);
+				} else {
+					no.setSelected(true);
+				}
 			}
 		}
+
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
