@@ -37,6 +37,7 @@ import javax.ejb.FinderException;
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolType;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -1274,6 +1275,8 @@ public class CourseApplication extends ApplicationForm {
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
 
+		boolean showAllApps = iwc.getIWMainApplication().getSettings().getBoolean("cou_app_show_all_apps", Boolean.TRUE);
+
 		Table2 table = new Table2();
 		table.setStyleClass("courses");
 		table.setStyleClass("coursesPhaseSix");
@@ -1285,6 +1288,16 @@ public class CourseApplication extends ApplicationForm {
 		TableRow row = group.createRow();
 		row.setStyleClass("header");
 		TableCell2 cell = row.createHeaderCell();
+
+		Map<User, Collection<ApplicationHolder>> allApplications = getCourseApplicationSession(iwc).getApplications();
+		if (showAllApps) {
+			if (allApplications.size() > 1) {
+				cell.setStyleClass("column0");
+				cell.add(new Text(iwrb.getLocalizedString("applicant", "Applicant")));
+				cell = row.createHeaderCell();
+			}
+		}
+
 		cell.setStyleClass("column0");
 		cell.add(new Text(iwrb.getLocalizedString("provider", "Provider")));
 		cell = row.createHeaderCell();
@@ -1314,116 +1327,21 @@ public class CourseApplication extends ApplicationForm {
 		group.setId(PARAMETER_COURSE_TABLE_ID);
 
 		NumberFormat format = NumberFormat.getCurrencyInstance(iwc.getCurrentLocale());
-		int counter = 0;
-		Iterator iter = applications.iterator();
 		boolean showAlert = false;
-		while (iter.hasNext()) {
-			row = group.createRow();
-			if (counter++ % 2 == 0) {
-				row.setStyleClass("even");
-			}
-			else {
-				row.setStyleClass("odd");
-			}
-			ApplicationHolder holder = (ApplicationHolder) iter.next();
-			Course course = holder.getCourse();
-			CoursePrice price = course.getPrice();
-			CourseType type = course.getCourseType();
-			School provider = course.getProvider();
-			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course, false);
-
-			DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
-			daycare.setStyleClass("dayCare");
-			daycare.setOnFocus("this.style.width='225px';");
-			daycare.setOnBlur("this.style.width='';");
-			daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
-			if (provider != null && price != null) {
-				if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
-					Object[] arguments = { format.format(price.getPreCarePrice()) };
-					daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
-					showAlert = true;
-				}
-				if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
-					Object[] arguments = { format.format(price.getPostCarePrice()) };
-					daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
-					showAlert = true;
-				}
-				if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
-					Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
-					daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
-					showAlert = true;
+		AdvancedProperty props = new AdvancedProperty(String.valueOf(0), String.valueOf(showAlert));
+		if (showAllApps) {
+			for (User user: allApplications.keySet()) {
+				Collection<ApplicationHolder> userApps = allApplications.get(user);
+				for (ApplicationHolder app: userApps) {
+					props = addCourseRow(iwc, locale, format, group, app, allApplications.size() == 1 ? null : user, props);
 				}
 			}
-			daycare.keepStatusOnAction(true);
-			String dayCareParamName = "cou_day_care_" + course.getPrimaryKey().toString();
-			User user = holder.getUser();
-			if (user != null) {
-				dayCareParamName += "_" + user.getId();
+		} else {
+			for (ApplicationHolder app: applications) {
+				props = addCourseRow(iwc, locale, format, group, app, null, props);
 			}
-			daycare.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + dayCareParamName + "', dwr.util.getValue('" + daycare.getId() + "'));");
-			Object selectedDayCare = iwc.getSessionAttribute(dayCareParamName);
-			if (selectedDayCare instanceof String) {
-				daycare.setSelectedElement((String) selectedDayCare);
-			}
-
-			DropdownMenu trip = new DropdownMenu(PARAMETER_TRIPHOME);
-			trip.addMenuElement("", "");
-			trip.addMenuElement(Boolean.TRUE.toString(), iwrb.getLocalizedString("picked_up", "Picked up"));
-			trip.addMenuElement(Boolean.FALSE.toString(), iwrb.getLocalizedString("walks_home", "Walks home"));
-			if (holder.getPickedUp() != null) {
-				trip.setSelectedElement(holder.getPickedUp().toString());
-			}
-			trip.keepStatusOnAction(true);
-			String tripParamName = "cou_trip_" + course.getPrimaryKey().toString();
-			if (user != null) {
-				tripParamName += "_" + user.getId();
-			}
-			trip.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + tripParamName + "', dwr.util.getValue('" + trip.getId() + "'));");
-			Object selectedTrip = iwc.getSessionAttribute(tripParamName);
-			if (selectedTrip instanceof String) {
-				trip.setSelectedElement((String) selectedTrip);
-			}
-
-			Link link = new Link(iwb.getImage("delete.png", iwrb.getLocalizedString("remove_course", "Remove course")));
-			link.addParameter(SUB_ACTION, SUB_ACTION_REMOVE);
-			link.addParameter(PARAMETER_ACTION, ACTION_PHASE_6);
-			link.maintainParameter(PARAMETER_CHILD_PK, iwc);
-			link.maintainParameter(PARAMETER_CHILD_PERSONAL_ID, iwc);
-			link.addParameter(PARAMETER_REMOVE_COURSE, course.getPrimaryKey().toString());
-
-			cell = row.createCell();
-			cell.setStyleClass("column0");
-			cell.add(new Text(holder.getProvider().getName()));
-
-			cell = row.createCell();
-			cell.setStyleClass("column1");
-			cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
-			cell.add(new Text(type == null ? CoreConstants.MINUS : type.getLocalizationKey() != null ? iwrb.getLocalizedString(type.getLocalizationKey(), course.getCourseType().getName()) : type.getName()));
-
-			cell = row.createCell();
-			cell.setStyleClass("column2");
-			cell.add(new Text(courseDWR.getName()));
-			cell = row.createCell();
-			cell.setStyleClass("column3");
-			cell.add(new Text(courseDWR.getTimeframe()));
-			cell = row.createCell();
-
-			if (hasCare) {
-				cell.setStyleClass("column4");
-				if (holder.getDaycare() > 0) {
-					daycare.setSelectedElement(holder.getDaycare());
-				}
-				cell.add(daycare);
-
-				cell = row.createCell();
-				cell.setStyleClass("column5");
-				cell.add(trip);
-			}
-
-			cell = row.createCell();
-			cell.setStyleClass("column6");
-			cell.add(link);
 		}
+		showAlert = Boolean.valueOf(props.getValue());
 
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("selected_courses", "Selected courses"));
 		heading.setStyleClass("subHeader");
@@ -1766,6 +1684,133 @@ public class CourseApplication extends ApplicationForm {
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
+	}
+
+	private AdvancedProperty addCourseRow(
+			IWContext iwc,
+			Locale locale,
+			NumberFormat format,
+			TableRowGroup group,
+			ApplicationHolder holder,
+			User applicant,
+			AdvancedProperty props
+	) throws RemoteException {
+		int counter = Integer.valueOf(props.getId());
+
+		TableRow row = group.createRow();
+		if (counter++ % 2 == 0) {
+			row.setStyleClass("even");
+		}
+		else {
+			row.setStyleClass("odd");
+		}
+
+		boolean showAlert = Boolean.valueOf(props.getValue());
+		Course course = holder.getCourse();
+		CoursePrice price = course.getPrice();
+		CourseType type = course.getCourseType();
+		School provider = course.getProvider();
+		CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course, false);
+
+		DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
+		daycare.setStyleClass("dayCare");
+		daycare.setOnFocus("this.style.width='225px';");
+		daycare.setOnBlur("this.style.width='';");
+		daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
+		if (provider != null && price != null) {
+			if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
+				Object[] arguments = { format.format(price.getPreCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
+				showAlert = true;
+			}
+			if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
+				Object[] arguments = { format.format(price.getPostCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
+				showAlert = true;
+			}
+			if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
+				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
+				showAlert = true;
+			}
+		}
+		daycare.keepStatusOnAction(true);
+		String dayCareParamName = "cou_day_care_" + course.getPrimaryKey().toString();
+		User user = holder.getUser();
+		if (user != null) {
+			dayCareParamName += "_" + user.getId();
+		}
+		daycare.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + dayCareParamName + "', dwr.util.getValue('" + daycare.getId() + "'));");
+		Object selectedDayCare = iwc.getSessionAttribute(dayCareParamName);
+		if (selectedDayCare instanceof String) {
+			daycare.setSelectedElement((String) selectedDayCare);
+		}
+
+		DropdownMenu trip = new DropdownMenu(PARAMETER_TRIPHOME);
+		trip.addMenuElement("", "");
+		trip.addMenuElement(Boolean.TRUE.toString(), iwrb.getLocalizedString("picked_up", "Picked up"));
+		trip.addMenuElement(Boolean.FALSE.toString(), iwrb.getLocalizedString("walks_home", "Walks home"));
+		if (holder.getPickedUp() != null) {
+			trip.setSelectedElement(holder.getPickedUp().toString());
+		}
+		trip.keepStatusOnAction(true);
+		String tripParamName = "cou_trip_" + course.getPrimaryKey().toString();
+		if (user != null) {
+			tripParamName += "_" + user.getId();
+		}
+		trip.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + tripParamName + "', dwr.util.getValue('" + trip.getId() + "'));");
+		Object selectedTrip = iwc.getSessionAttribute(tripParamName);
+		if (selectedTrip instanceof String) {
+			trip.setSelectedElement((String) selectedTrip);
+		}
+
+		Link link = new Link(iwb.getImage("delete.png", iwrb.getLocalizedString("remove_course", "Remove course")));
+		link.addParameter(SUB_ACTION, SUB_ACTION_REMOVE);
+		link.addParameter(PARAMETER_ACTION, ACTION_PHASE_6);
+		link.maintainParameter(PARAMETER_CHILD_PK, iwc);
+		link.maintainParameter(PARAMETER_CHILD_PERSONAL_ID, iwc);
+		link.addParameter(PARAMETER_REMOVE_COURSE, course.getPrimaryKey().toString());
+
+		TableCell2 cell = row.createCell();
+		if (applicant != null) {
+			cell.setStyleClass("column0");
+			cell.add(new Text(applicant.getName()));
+			cell = row.createCell();
+		}
+
+		cell.setStyleClass("column0");
+		cell.add(new Text(holder.getProvider().getName()));
+
+		cell = row.createCell();
+		cell.setStyleClass("column1");
+		cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
+		cell.add(new Text(type == null ? CoreConstants.MINUS : type.getLocalizationKey() != null ? iwrb.getLocalizedString(type.getLocalizationKey(), course.getCourseType().getName()) : type.getName()));
+
+		cell = row.createCell();
+		cell.setStyleClass("column2");
+		cell.add(new Text(courseDWR.getName()));
+		cell = row.createCell();
+		cell.setStyleClass("column3");
+		cell.add(new Text(courseDWR.getTimeframe()));
+		cell = row.createCell();
+
+		if (hasCare) {
+			cell.setStyleClass("column4");
+			if (holder.getDaycare() > 0) {
+				daycare.setSelectedElement(holder.getDaycare());
+			}
+			cell.add(daycare);
+
+			cell = row.createCell();
+			cell.setStyleClass("column5");
+			cell.add(trip);
+		}
+
+		cell = row.createCell();
+		cell.setStyleClass("column6");
+		cell.add(link);
+
+		return new AdvancedProperty(String.valueOf(counter), String.valueOf(showAlert));
 	}
 
 	private void addRelativeToForm(Form form, Relative relative, int number, boolean requiredRelation) {
