@@ -283,6 +283,14 @@ public class CourseApplicationOverview extends CourseBlock {
 
 			cell = row.createHeaderCell();
 			cell.setStyleClass("amount");
+			cell.add(new Text(getResourceBundle().getLocalizedString("course_price", "Course price")));
+
+			cell = row.createHeaderCell();
+			cell.setStyleClass("amount");
+			cell.add(new Text(getResourceBundle().getLocalizedString("price_for_extra_care", "Price for extra care")));
+
+			cell = row.createHeaderCell();
+			cell.setStyleClass("amount");
 			cell.add(new Text(getResourceBundle().getLocalizedString("amount", "Amount")));
 
 			group = table.createBodyRowGroup();
@@ -360,9 +368,30 @@ public class CourseApplicationOverview extends CourseBlock {
 				if (appHolder.isOnWaitingList()) {
 					cell.setStyleClass("waitingList");
 					cell.add(new Text(getResourceBundle().getLocalizedString("application_status.waiting_list", "Waiting list")));
-				}
-				else {
+				} else {
 					cell.setStyleClass("registered");
+					if (coursePrice != null) {
+						int priceTmp = coursePrice.getPrice();
+						cell.add(new Text(format.format(priceTmp)));
+					}
+
+					cell = row.createCell();
+					cell.setStyleClass("status registered");
+					if (coursePrice != null) {
+						int priceTmp = 0;
+						if (appHolder.getDaycare() == CourseConstants.DAY_CARE_POST) {
+							priceTmp = coursePrice.getPostCarePrice();
+						} else if (appHolder.getDaycare() == CourseConstants.DAY_CARE_PRE) {
+							priceTmp = coursePrice.getPreCarePrice();
+						} else if (appHolder.getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+							priceTmp = (coursePrice.getPreCarePrice() + coursePrice.getPostCarePrice());
+						}
+
+						cell.add(new Text(format.format(priceTmp)));
+					}
+
+					cell = row.createCell();
+					cell.setStyleClass("amount registered");
 					cell.add(new Text(format.format(appHolder.getPrice())));
 				}
 
@@ -406,7 +435,7 @@ public class CourseApplicationOverview extends CourseBlock {
 			row = group.createRow();
 
 			cell = row.createCell();
-			cell.setColumnSpan(5);
+			cell.setColumnSpan(6);
 			cell.setStyleClass("totalPrice");
 			cell.add(new Text(getResourceBundle().getLocalizedString("total_amount", "Total amount")));
 
