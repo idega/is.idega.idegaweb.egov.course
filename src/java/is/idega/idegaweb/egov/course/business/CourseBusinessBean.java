@@ -1385,8 +1385,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public boolean isFull(Course course) {
-		int freePlaces = course.getFreePlaces()
-				- getNumberOfReservations(course);
+		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
 		return freePlaces <= 0;
 	}
 
@@ -2615,19 +2614,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					Collection collection = (Collection) it.next();
 					Iterator iterator = collection.iterator();
 					while (iterator.hasNext()) {
-						ApplicationHolder holder = (ApplicationHolder) iterator
-								.next();
+						ApplicationHolder holder = (ApplicationHolder) iterator.next();
 
 						CourseChoice choice = getCourseChoiceHome().create();
 						choice.setApplication(application);
 						choice.setCourse(holder.getCourse());
 						choice.setDayCare(holder.getDaycare());
 						if (useWaitingList) {
-							choice.setWaitingList(isFull(holder.getCourse()));
+							choice.setWaitingList(holder.isOnWaitingList());
 						}
 						if (holder.getPickedUp() != null) {
-							choice.setPickedUp(holder.getPickedUp()
-									.booleanValue());
+							choice.setPickedUp(holder.getPickedUp().booleanValue());
 						}
 						choice.setUser(holder.getUser());
 						choice.setHasDyslexia(holder.hasDyslexia());

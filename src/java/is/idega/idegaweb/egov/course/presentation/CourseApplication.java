@@ -1333,12 +1333,12 @@ public class CourseApplication extends ApplicationForm {
 			for (User user: allApplications.keySet()) {
 				Collection<ApplicationHolder> userApps = allApplications.get(user);
 				for (ApplicationHolder app: userApps) {
-					props = addCourseRow(iwc, locale, format, group, app, allApplications.size() == 1 ? null : user, props);
+					props = addCourseRow(iwc, locale, format, group, app, allApplications.size() == 1 ? null : user, props, isFull);
 				}
 			}
 		} else {
 			for (ApplicationHolder app: applications) {
-				props = addCourseRow(iwc, locale, format, group, app, null, props);
+				props = addCourseRow(iwc, locale, format, group, app, null, props, isFull);
 			}
 		}
 		showAlert = Boolean.valueOf(props.getValue());
@@ -1693,7 +1693,8 @@ public class CourseApplication extends ApplicationForm {
 			TableRowGroup group,
 			ApplicationHolder holder,
 			User applicant,
-			AdvancedProperty props
+			AdvancedProperty props,
+			boolean isFull
 	) throws RemoteException {
 		int counter = Integer.valueOf(props.getId());
 
@@ -1711,6 +1712,7 @@ public class CourseApplication extends ApplicationForm {
 		CourseType type = course.getCourseType();
 		School provider = course.getProvider();
 		CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course, false);
+		courseDWR.setFull(isFull);
 
 		DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
 		daycare.setStyleClass("dayCare");
