@@ -98,6 +98,7 @@ import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
@@ -2526,15 +2527,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 	}
 
+	private boolean isWaitingListTurnedOn() {
+		return getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_WAITING_LIST, false);
+	}
+
 	@Override
 	public CourseApplication saveApplication(Map applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
 			String prefix, User owner, User performer, Locale locale, float certificateFee) {
 		try {
-			boolean useWaitingList = getIWApplicationContext()
-					.getApplicationSettings().getBoolean(
-							CourseConstants.PROPERTY_USE_WAITING_LIST, false);
+			boolean useWaitingList = isWaitingListTurnedOn();
 			boolean useDirectPayment = getIWApplicationContext()
 					.getApplicationSettings().getBoolean(
 							CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
@@ -2682,7 +2685,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						.getDefaultLocale();
 			}
 
-			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, "");
+			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, CoreConstants.EMPTY);
 
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
@@ -2699,7 +2702,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 							startDate.getDate())).getLocaleDate(locale,
 							IWTimestamp.SHORT),
 					acceptURL,														//	6: URL
-					choice.getUniqueID()};											//	7: unique id
+					choice.getUniqueID()											//	7: unique id
+			};
 
 			User appParent = application.getOwner();
 			if (appParent != null) {
@@ -3373,29 +3377,68 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	@Override
 	public boolean acceptChoice(Object courseChoicePK, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
-		choice.setWaitingList(false);
-		choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
-		choice.store();
+		if (choice == null) {
+			return false;
+		}
 
-		CourseApplication application = choice.getApplication();
-		String subject = getLocalizedString(
-				"course_choice.accepted_subject", "Course choice accepted",
-				locale);
+		if (StringUtil.isEmpty(choice.getUniqueID())) {
+			choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
+			choice.store();
+		}
+		if (choice.isOnWaitingList() && isWaitingListTurnedOn()) {
+			//	Will send email to parents to accept offer
+			if (locale == null) {
+				locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
+			}
 
-		String prefix = application.getPrefix();
-		prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+			String subject = getLocalizedString(
+					"course_choice.offered_to_parent_subject", "Course choice now available",
+					locale
+			);
 
-		String body = getLocalizedString(prefix +
-				"course_choice.accepted_body",
-				"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
-				locale);
+			CourseApplication application = choice.getApplication();
+			String prefix = application.getPrefix();
+			prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
 
-		String bcc = getIWApplicationContext()
-				.getApplicationSettings().getProperty(
+			String body = getLocalizedString(prefix +
+					"course_choice.course_offered_to_parent_body",
+					"Your registration to course {2} at {3} for {0}, {1} now is available and needs to be confirmed at {6}.",
+					locale
+			);
+
+			String bcc = getIWApplicationContext().getApplicationSettings().getProperty(
 						CourseConstants.PROPERTY_BCC_EMAIL + (application.getPrefix() != null ? "." + application.getPrefix() : ""),
-						"");
+						CoreConstants.EMPTY
+			);
 
-		sendMessageToParents(application, choice, subject, body, locale, bcc);
+			sendMessageToParents(application, choice, subject, body, locale, bcc);
+		} else {
+			//	Choice was not on a waiting list, can be accepted without parent's confirmation
+			choice.setWaitingList(false);
+			choice.store();
+
+			CourseApplication application = choice.getApplication();
+			String subject = getLocalizedString(
+					"course_choice.accepted_subject", "Course choice accepted",
+					locale
+			);
+
+			String prefix = application.getPrefix();
+			prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+
+			String body = getLocalizedString(prefix +
+					"course_choice.accepted_body",
+					"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
+					locale
+			);
+
+			String bcc = getIWApplicationContext().getApplicationSettings().getProperty(
+						CourseConstants.PROPERTY_BCC_EMAIL + (application.getPrefix() != null ? "." + application.getPrefix() : ""),
+						CoreConstants.EMPTY
+			);
+
+			sendMessageToParents(application, choice, subject, body, locale, bcc);
+		}
 
 		return true;
 	}
@@ -3413,7 +3456,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		CourseApplication application = choice.getApplication();
 		String subject = getLocalizedString(
 				"course_choice.parent_accepted_subject", "Course choice accepted",
-				locale);
+				locale
+		);
 
 		String prefix = application.getPrefix();
 		prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
@@ -3421,7 +3465,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		String body = getLocalizedString(prefix +
 				"course_choice.parent_accepted_body",
 				"Registration to course {2} at for {0}, {1} has been accepted by parents.",
-				locale);
+				locale
+		);
 
 		sendMessageToProvider(choice, subject, body, performer, locale);
 

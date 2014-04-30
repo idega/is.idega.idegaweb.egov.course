@@ -42,6 +42,7 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
@@ -49,7 +50,7 @@ import com.idega.util.text.TextSoap;
 
 public class CourseChoiceOverview extends CourseBlock {
 
-	private static final String PARAMETER_UNIQUE_ID = "prm_uuid";
+	public static final String PARAMETER_UNIQUE_ID = "prm_uuid";
 
 	private static final String PARAMETER_CARD_NUMBER = "prm_card_number";
 	private static final String PARAMETER_VALID_MONTH = "prm_valid_month";
@@ -61,10 +62,10 @@ public class CourseChoiceOverview extends CourseBlock {
 	protected static final int ACTION_REFUND_FORM = 2;
 	public static final int ACTION_REFUND = 3;
 	protected static final int ACTION_ACCEPT = 4;
-	protected static final int ACTION_PARENT_ACCEPT_FORM = 5;
+	public static final int ACTION_PARENT_ACCEPT_FORM = 5;
 	protected static final int ACTION_PARENT_ACCEPT = 6;
 
-	protected List parametersToMaintainBackButton = null;
+	protected List<AdvancedProperty> parametersToMaintainBackButton = null;
 	private boolean useBackPage = true;
 
 	@Override
@@ -203,7 +204,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		label = new Label();
 		label.add(new Text(getResourceBundle().getLocalizedString("application.course_type", "Course type")));
 		span = new Layer(Layer.SPAN);
-		span.add(new Text(type.getName()));
+		span.add(new Text(type == null ? CoreConstants.MINUS : type.getName()));
 		formItem.add(label);
 		formItem.add(span);
 		section.add(formItem);
@@ -309,14 +310,14 @@ public class CourseChoiceOverview extends CourseBlock {
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
-		Age age = new Age(child.getDateOfBirth());
-		if (age.getYears() < 18) {
-			Collection custodians = null;
+		Age age = child.getDateOfBirth() == null ? null : new Age(child.getDateOfBirth());
+		if (age != null && age.getYears() < 18) {
+			Collection<Custodian> custodians = null;
 			try {
 				custodians = child.getCustodians();
 			}
 			catch (NoCustodianFound ncf) {
-				custodians = new ArrayList();
+				custodians = new ArrayList<Custodian>();
 			}
 			Custodian custodian = child.getExtraCustodian();
 			if (custodian != null) {
@@ -641,7 +642,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		if (parametersToMaintainBackButton != null) {
 			AdvancedProperty parameter = null;
 			for (int i = 0; i < parametersToMaintainBackButton.size(); i++) {
-				parameter = (AdvancedProperty) parametersToMaintainBackButton.get(i);
+				parameter = parametersToMaintainBackButton.get(i);
 				link.addParameter(parameter.getId(), parameter.getValue());
 			}
 		}
@@ -830,7 +831,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		add(form);
 	}
 
-	public void setParametersToMaintainBackButton(List parametersToMaintainBackButton) {
+	public void setParametersToMaintainBackButton(List<AdvancedProperty> parametersToMaintainBackButton) {
 		this.parametersToMaintainBackButton = parametersToMaintainBackButton;
 	}
 
