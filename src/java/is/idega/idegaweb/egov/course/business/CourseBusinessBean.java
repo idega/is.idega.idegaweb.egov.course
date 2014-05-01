@@ -122,34 +122,33 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public void reserveCourse(Course course) {
-		Map courseMap = (Map) getIWApplicationContext()
-				.getApplicationAttribute(
-						CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+	public void reserveCourse(Course course, User user) {
+		getLogger().info("Reserving course " + course.getName() + ", ID: " + course.getPrimaryKey() + " for " + user.getName());
+
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
+				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 		if (courseMap == null) {
-			courseMap = new HashMap();
+			courseMap = new HashMap<Course, Integer>();
 		}
 
 		if (courseMap.containsKey(course)) {
-			Integer numberOfChoices = (Integer) courseMap.get(course);
+			Integer numberOfChoices = courseMap.get(course);
 			numberOfChoices = new Integer(numberOfChoices.intValue() + 1);
 			courseMap.put(course, numberOfChoices);
 		} else {
 			courseMap.put(course, new Integer(1));
 		}
 
-		getIWApplicationContext().setApplicationAttribute(
-				CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
+		getIWApplicationContext().setApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
 	}
 
 	@Override
 	public void removeReservation(Course course) {
-		Map courseMap = (Map) getIWApplicationContext()
-				.getApplicationAttribute(
-						CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
+				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 
 		if (courseMap != null && courseMap.containsKey(course)) {
-			Integer numberOfChoices = (Integer) courseMap.get(course);
+			Integer numberOfChoices = courseMap.get(course);
 			numberOfChoices = new Integer(numberOfChoices.intValue() - 1);
 			if (numberOfChoices.intValue() > 0) {
 				courseMap.put(course, numberOfChoices);
@@ -163,18 +162,16 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			}
 		}
 
-		getIWApplicationContext().setApplicationAttribute(
-				CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
+		getIWApplicationContext().setApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP, courseMap);
 	}
 
 	@Override
 	public int getNumberOfReservations(Course course) {
-		Map courseMap = (Map) getIWApplicationContext()
-				.getApplicationAttribute(
-						CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
+				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 
 		if (courseMap != null && courseMap.containsKey(course)) {
-			Integer numberOfChoices = (Integer) courseMap.get(course);
+			Integer numberOfChoices = courseMap.get(course);
 			// System.out.println("Number of reservations for course " +
 			// course.getName() + " (" + course.getPrimaryKey() + "): " +
 			// numberOfChoices);
@@ -186,11 +183,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public void printReservations() {
-		Map courseMap = (Map) getIWApplicationContext()
-				.getApplicationAttribute(
-						CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
+				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 		if (courseMap != null) {
-			System.out.println(courseMap);
+			getLogger().info("Reservations of courses: " + courseMap);
 		}
 	}
 
@@ -1386,8 +1382,20 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public boolean isFull(Course course) {
-		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
-		return freePlaces <= 0;
+//		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
+//		return freePlaces <= 0;
+
+		int courseFreePlaces = course.getFreePlaces();
+		Collection<?> applications = getCourseChoices(course, false);
+		int applicationsForTheCourse = ListUtil.isEmpty(applications) ? 0 : applications.size();
+		int freePlaces = courseFreePlaces - applicationsForTheCourse;
+		int numberOfReservations = getNumberOfReservations(course);
+		int totalFreeCapacity = freePlaces - numberOfReservations;
+		boolean full = totalFreeCapacity <= 0;
+		getLogger().info("Course (" + course.getName() + ", ID: " + course.getPrimaryKey() + ") can have " + courseFreePlaces +
+				" students. Currently there are " + applicationsForTheCourse + " applications and " + numberOfReservations +
+				" reservations to this course. Free places: " + totalFreeCapacity);
+		return full;
 	}
 
 	@Override

@@ -59,7 +59,7 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 		if (getMap().containsKey(user)) {
 			Collection<ApplicationHolder> applications = getMap().get(user);
 			if (applications.contains(holder)) {
-				for (ApplicationHolder object : applications) {
+				for (ApplicationHolder object: applications) {
 					if (object.equals(holder)) {
 						holder.setOnWaitingList(object.isOnWaitingList());
 					}
@@ -68,24 +68,21 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 
 				try {
 					getCourseBusiness(getIWApplicationContext()).removeReservation(holder.getCourse());
-				}
-				catch (RemoteException e) {
+				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
 			}
 			applications.add(holder);
 			getMap().put(user, applications);
-		}
-		else {
+		} else {
 			Collection<ApplicationHolder> applications = new ArrayList<ApplicationHolder>();
 			applications.add(holder);
 			getMap().put(user, applications);
 		}
 
 		try {
-			getCourseBusiness(getIWApplicationContext()).reserveCourse(holder.getCourse());
-		}
-		catch (RemoteException e) {
+			getCourseBusiness(getIWApplicationContext()).reserveCourse(holder.getCourse(), user);
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 	}
