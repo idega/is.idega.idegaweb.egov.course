@@ -1385,7 +1385,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 //		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
 //		return freePlaces <= 0;
 
-		int courseFreePlaces = course.getFreePlaces();
+		int courseFreePlaces = course.getMax();
 		Collection<?> applications = getCourseChoices(course, false);
 		int applicationsForTheCourse = ListUtil.isEmpty(applications) ? 0 : applications.size();
 		int freePlaces = courseFreePlaces - applicationsForTheCourse;
