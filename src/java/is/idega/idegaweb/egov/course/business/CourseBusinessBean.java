@@ -90,6 +90,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
+import com.idega.data.SimpleQuerier;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.repository.data.ImplementorRepository;
@@ -1385,7 +1386,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 //		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
 //		return freePlaces <= 0;
 
-		int courseFreePlaces = course.getMax();
+		int courseFreePlaces = 0;
+		try {
+			courseFreePlaces = SimpleQuerier.executeIntQuery("select max_per from cou_course where cou_course_id = " + course.getPrimaryKey());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		Collection<?> applications = getCourseChoices(course, false);
 		int applicationsForTheCourse = ListUtil.isEmpty(applications) ? 0 : applications.size();
 		int freePlaces = courseFreePlaces - applicationsForTheCourse;
