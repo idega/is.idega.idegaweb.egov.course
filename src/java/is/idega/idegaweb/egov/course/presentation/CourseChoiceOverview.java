@@ -155,7 +155,11 @@ public class CourseChoiceOverview extends CourseBlock {
 	}
 
 	private void parentAcceptChoice(IWContext iwc, CourseChoice choice) throws RemoteException {
-		getBusiness().parentsAcceptChoice(choice.getPrimaryKey(), iwc.getCurrentUser(), iwc.getCurrentLocale());
+		getBusiness().parentsAcceptChoice(
+				choice.getPrimaryKey(),
+				iwc.isLoggedOn() ? iwc.getCurrentUser() : choice.getApplication().getOwner(),
+				iwc.getCurrentLocale()
+		);
 	}
 
 	protected void getViewerForm(IWContext iwc, CourseChoice choice) throws RemoteException {
@@ -170,7 +174,6 @@ public class CourseChoiceOverview extends CourseBlock {
 		is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
 		School provider = course.getProvider();
 
-		// User user = iwc.getCurrentUser();
 		User applicant = choice.getUser();
 		User owner = application.getOwner();
 		Child child = getUserBusiness().getMemberFamilyLogic().getChild(applicant);
@@ -458,7 +461,6 @@ public class CourseChoiceOverview extends CourseBlock {
 
 		form.add(getHeader(getResourceBundle().getLocalizedString("application.course_choice_overview", "Course choice overview")));
 
-		// User user = iwc.getCurrentUser();
 		User applicant = choice.getUser();
 		form.add(getPersonInfo(iwc, applicant, true/* isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isChildInCustodyOf(applicant, user) */));
 
@@ -626,7 +628,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		}
 		else {
 			try {
-				backPage = getUserBusiness(iwc).getHomePageForUser(iwc.getCurrentUser());
+				backPage = getUserBusiness(iwc).getHomePageForUser(iwc.isLoggedOn() ? iwc.getCurrentUser() : choice.getApplication().getOwner());
 			}
 			catch (FinderException fe) {
 				fe.printStackTrace();
