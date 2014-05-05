@@ -23,71 +23,74 @@ import com.idega.user.data.User;
 
 public class CourseApplicationSessionBean extends IBOSessionBean implements CourseApplicationSession {
 
-	private Map applications;
+	private Map<User, Collection<ApplicationHolder>> applications;
 
+	@Override
 	public void valueBound(HttpSessionBindingEvent arg0) {
 	}
 
+	@Override
 	public void valueUnbound(HttpSessionBindingEvent arg0) {
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(arg0.getSession().getServletContext());
 		IWApplicationContext iwac = iwma.getIWApplicationContext();
 		clear(iwac);
 	}
 
-	private Map getMap() {
+	private Map<User, Collection<ApplicationHolder>> getMap() {
 		if (applications == null) {
-			applications = new HashMap();
+			applications = new HashMap<User, Collection<ApplicationHolder>>();
 		}
 
 		return applications;
 	}
 
-	public Map getApplications() {
+	@Override
+	public Map<User, Collection<ApplicationHolder>> getApplications() {
 		return getMap();
 	}
 
-	public Collection getUserApplications(User user) {
-		return (Collection) getMap().get(user);
+	@Override
+	public Collection<ApplicationHolder> getUserApplications(User user) {
+		return getMap().get(user);
 	}
 
+	@Override
 	public void addApplication(User user, ApplicationHolder holder) {
 		if (getMap().containsKey(user)) {
-			Collection<ApplicationHolder> applications = (Collection) getMap().get(user);
+			Collection<ApplicationHolder> applications = getMap().get(user);
 			if (applications.contains(holder)) {
-				for (ApplicationHolder object : applications) {
+				for (ApplicationHolder object: applications) {
 					if (object.equals(holder)) {
 						holder.setOnWaitingList(object.isOnWaitingList());
 					}
 				}
 				applications.remove(holder);
-				
+
 				try {
 					getCourseBusiness(getIWApplicationContext()).removeReservation(holder.getCourse());
-				}
-				catch (RemoteException e) {
+				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
 			}
 			applications.add(holder);
 			getMap().put(user, applications);
-		}
-		else {
-			Collection applications = new ArrayList();
+		} else {
+			Collection<ApplicationHolder> applications = new ArrayList<ApplicationHolder>();
 			applications.add(holder);
 			getMap().put(user, applications);
 		}
 
 		try {
-			getCourseBusiness(getIWApplicationContext()).reserveCourse(holder.getCourse());
-		}
-		catch (RemoteException e) {
+			getCourseBusiness(getIWApplicationContext()).reserveCourse(holder.getCourse(), user);
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 	}
 
+	@Override
 	public void removeApplication(User user, ApplicationHolder holder) {
 		if (getMap().containsKey(user)) {
-			Collection applications = (Collection) getMap().get(user);
+			Collection<ApplicationHolder> applications = getMap().get(user);
 			applications.remove(holder);
 			getMap().put(user, applications);
 		}
@@ -100,9 +103,10 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 		}
 	}
 
+	@Override
 	public boolean contains(User user, Course course) {
 		if (getMap().containsKey(user)) {
-			Collection applications = (Collection) getMap().get(user);
+			Collection<ApplicationHolder> applications = getMap().get(user);
 
 			ApplicationHolder holder = new ApplicationHolder();
 			holder.setUser(user);
@@ -113,25 +117,28 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 		return false;
 	}
 
+	@Override
 	public void ejbRemove() {
 		clear(getIWApplicationContext());
 		super.ejbRemove();
 	}
 
+	@Override
 	public void ejbPassivate() throws EJBException, RemoteException {
 		clear(getIWApplicationContext());
 		super.ejbPassivate();
 	}
 
+	@Override
 	public void clear(IWApplicationContext iwac) {
 		if (applications != null) {
 			// System.out.println("Removing reserved courses...");
-			Iterator iter = applications.values().iterator();
+			Iterator<Collection<ApplicationHolder>> iter = applications.values().iterator();
 			while (iter.hasNext()) {
-				Collection holders = (Collection) iter.next();
-				Iterator iterator = holders.iterator();
+				Collection<ApplicationHolder> holders = iter.next();
+				Iterator<ApplicationHolder> iterator = holders.iterator();
 				while (iterator.hasNext()) {
-					ApplicationHolder holder = (ApplicationHolder) iterator.next();
+					ApplicationHolder holder = iterator.next();
 					try {
 						// System.out.println("Removing course: " + holder.getCourse().getName());
 						getCourseBusiness(iwac).removeReservation(holder.getCourse());
@@ -156,7 +163,7 @@ public class CourseApplicationSessionBean extends IBOSessionBean implements Cour
 
 	private CourseBusiness getCourseBusiness(IWApplicationContext iwac) {
 		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwac, CourseBusiness.class);
+			return IBOLookup.getServiceInstance(iwac, CourseBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);

@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.SortedSet;
 import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -46,6 +48,7 @@ import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
@@ -80,6 +83,9 @@ import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 import com.idega.util.text.TextSoap;
@@ -390,7 +396,10 @@ public class CourseApplication extends ApplicationForm {
 			lists.add(iwrb.getLocalizedString("help.when_a_registration_is_complete_you_can_then_register_another_child", "When registration is complete you can go back and register another."));
 			lists.add(iwrb.getLocalizedString("help.when_all_applicants_have_been_registered_you_pay_for_them_all_at_the_same_time", "When all applicants have been registered you pay for them all at the same time."));
 			//lists.add(iwrb.getLocalizedString("help.only_three_weeks_possible", "It is only possible to register each participant to max three courses at a time."));
-			lists.add(iwrb.getLocalizedString("help.joined_courses", "Courses can be joined to maximize usage."));
+			lists.add(iwrb.getLocalizedString(
+					getPhaseOneHelpPrefix() == null ? "help.joined_courses" : getPhaseOneHelpPrefix() + "help.joined_courses",
+					"Courses can be joined to maximize usage.")
+			);
 			info.add(lists);
 
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("application.select_child", "Select child"));
@@ -635,7 +644,7 @@ public class CourseApplication extends ApplicationForm {
 
 		addErrors(iwc, form);
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
@@ -656,19 +665,19 @@ public class CourseApplication extends ApplicationForm {
 
 		form.add(getPersonInfo(iwc, applicant));
 
-		Collection custodians = null;
+		Collection<Custodian> custodians = null;
 		try {
 			custodians = child.getCustodians();
 		}
 		catch (NoCustodianFound ncf) {
-			custodians = new ArrayList();
+			custodians = new ArrayList<Custodian>();
 		}
 
 		User currentUser = getUser(iwc);
 		int number = 1;
-		Iterator iter = custodians.iterator();
+		Iterator<Custodian> iter = custodians.iterator();
 		while (iter.hasNext()) {
-			Custodian element = (Custodian) iter.next();
+			Custodian element = iter.next();
 			boolean hasRelation = isSchoolAdministrator(iwc) || getMemberFamilyLogic(iwc).isRelatedTo(element, currentUser) || currentUser.getPrimaryKey().equals(element.getPrimaryKey());
 
 			addParentToForm(form, iwc, child, element, false, number++, false, false, hasRelation);
@@ -719,16 +728,16 @@ public class CourseApplication extends ApplicationForm {
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
 
-		List relatives = new ArrayList();
+		List<Relative> relatives = new ArrayList<Relative>();
 		relatives.add(child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		relatives.addAll(child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 		for (int a = 1; a <= 3; a++) {
 			Relative relative = null;
 			if (relatives.size() >= a) {
-				relative = (Relative) relatives.get(a - 1);
+				relative = relatives.get(a - 1);
 			}
 
-			addRelativeToForm(form, relative, a);
+			addRelativeToForm(form, relative, a, a == 1);
 		}
 
 		Layer bottom = new Layer(Layer.DIV);
@@ -804,14 +813,40 @@ public class CourseApplication extends ApplicationForm {
 			return;
 		}
 
+		if (isRequiredToSelectYesOrNoAboutChild(iwc.getApplicationSettings())) {
+			if (!iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+				setError(
+						ACTION_PHASE_4,
+						PARAMETER_GROWTH_DEVIATION,
+						iwrb.getLocalizedString(
+								"application_error.answer_must_be_provided_about_child_growth_deviation",
+								"You must provide answer about child's growth deviation")
+				);
+			}
+			if (!iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+				setError(
+						ACTION_PHASE_4,
+						PARAMETER_ALLERGIES,
+						iwrb.getLocalizedString(
+								"application_error.answer_must_be_provided_about_child_allergies",
+								"You must provide answer about child's allergies")
+				);
+			}
+
+			if (hasErrors(ACTION_PHASE_4)) {
+				showPhaseFour(iwc);
+				return;
+			}
+		}
+
 		Integer applicantPK = (Integer) applicant.getPrimaryKey();
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
-		
+
 		boolean isCourseAdmin = iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY);
 
 		StringBuffer script2 = new StringBuffer();
@@ -843,16 +878,16 @@ public class CourseApplication extends ApplicationForm {
 
 		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
-		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
+		Collection<ApplicationHolder> inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
 			script4.append("\t\t\t\t if (");
-			Iterator iter = inrepps.iterator();
+			Iterator<ApplicationHolder> iter = inrepps.iterator();
 			boolean first = true;
 			while (iter.hasNext()) {
 				if (!first) {
 					script4.append(" || ");
 				}
-				script4.append("obj.id == " + ((ApplicationHolder) iter.next()).getCourse().getPrimaryKey().toString());
+				script4.append("obj.id == " + iter.next().getCourse().getPrimaryKey().toString());
 				first = false;
 			}
 			script4.append(") {obj.disabled=true;obj.checked=true}\n");
@@ -886,9 +921,17 @@ public class CourseApplication extends ApplicationForm {
 		Form form = getForm(ACTION_PHASE_5);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
+
+		if (iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+			form.maintainParameter(PARAMETER_GROWTH_DEVIATION);
+		}
+		if (iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+			form.maintainParameter(PARAMETER_ALLERGIES);
+		}
+
 		form.add(formScript);
 
-		addErrors(iwc, form);
+		addErrors(5, iwc, form);
 
 		form.add(getPhasesHeader(this.iwrb.getLocalizedString("course", "Course"), 5, getNumberOfPhases(iwc)));
 
@@ -969,7 +1012,7 @@ public class CourseApplication extends ApplicationForm {
 			type = getCourseBusiness(iwc).getCourseType(iwc.getParameter(PARAMETER_COURSE_TYPE));
 		}
 		Collection filtered = new ArrayList();
-		
+
 		iter = providers.iterator();
 		while (iter.hasNext()) {
 			CourseProvider provider = (CourseProvider) iter.next();
@@ -996,7 +1039,7 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(label);
 		formItem.add(providerMenu);
 		section.add(formItem);
-		
+
 		Integer courseTypePK = null;
 		if (iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
 			courseTypePK = new Integer(iwc.getParameter(PARAMETER_COURSE_TYPE));
@@ -1095,7 +1138,7 @@ public class CourseApplication extends ApplicationForm {
 
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString(getPrefix() + (hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare"), "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString(getPrefixSafe() + (hasCare ? "application.available_courses_help" : "application.available_courses_help_nocare"), "If you have successfully selected from the navigation above you should see a list of courses to the right.  To select a course/s you check the checkbox for each course you want to select.")));
 		section.add(helpLayer);
 
 		formItem = new Layer(Layer.DIV);
@@ -1126,6 +1169,15 @@ public class CourseApplication extends ApplicationForm {
 		add(form);
 	}
 
+	private boolean isRegisteredMultipleApplicants(IWContext iwc) throws RemoteException {
+		Map<User, Collection<ApplicationHolder>> applications = getCourseApplicationSession(iwc).getApplications();
+		if (MapUtil.isEmpty(applications)) {
+			return false;
+		}
+
+		return applications.keySet().size() > 1;
+	}
+
 	private void showPhaseSix(IWContext iwc) throws RemoteException {
 		User applicant = getApplicant(iwc);
 
@@ -1150,7 +1202,7 @@ public class CourseApplication extends ApplicationForm {
 			else {
 				isFull = false;
 			}
-			
+
 			IWTimestamp start = new IWTimestamp(course.getStartDate());
 			if (course.getRegistrationEnd() != null) {
 				start = new IWTimestamp(course.getRegistrationEnd());
@@ -1167,7 +1219,7 @@ public class CourseApplication extends ApplicationForm {
 					start.setMinute(0);
 				}
 			}
-			
+
 			if (!iUseSessionUser ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true) && getCourseBusiness(iwc).hasNotStarted(course, this.iUseSessionUser) && !getCourseBusiness(iwc).isRegistered(applicant, course) && getCourseBusiness(iwc).isOfAge(applicant, course)) {
 				h.setUser(applicant);
 				h.setCourse(course);
@@ -1182,19 +1234,39 @@ public class CourseApplication extends ApplicationForm {
 				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.already_registered_course_selected", "You have selected a course that the participant is already registered to: ") + course.getName());
 			}
 			if (!getCourseBusiness(iwc).isOfAge(applicant, course)) {
-				setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
+				if (isRegisteredMultipleApplicants(iwc)) {
+					getCourseApplicationSession(iwc).removeApplication(applicant, h);
+				} else {
+					setError(ACTION_PHASE_5, PARAMETER_COURSE, iwrb.getLocalizedString("application_error.incorrect_age_course_selected", "You have selected a course that is not available for the participant: ") + course.getName());
+				}
+			}
+
+			if (hasErrors(ACTION_PHASE_5)) {
+				getCourseApplicationSession(iwc).removeApplication(applicant, h);
 			}
 		}
-		Collection applications = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
+		Collection<ApplicationHolder> applications = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (applications == null || applications.isEmpty() || hasErrors(ACTION_PHASE_5)) {
 			showPhaseFive(iwc);
 			return;
 		}
 
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, Arrays.asList(
+				CoreConstants.DWR_ENGINE_SCRIPT,
+				CoreConstants.DWR_UTIL_SCRIPT,
+				"/dwr/interface/WebUtil.js"
+		));
+
 		Form form = getForm(ACTION_PHASE_6);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_6)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
 		form.add(new HiddenInput(SUB_ACTION, SUB_ACTION_ADD));
+		if (iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+			form.maintainParameter(PARAMETER_GROWTH_DEVIATION);
+		}
+		if (iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+			form.maintainParameter(PARAMETER_ALLERGIES);
+		}
 		add(form);
 		addErrors(iwc, form);
 
@@ -1202,6 +1274,8 @@ public class CourseApplication extends ApplicationForm {
 
 		// User user = iwc.getCurrentUser();
 		form.add(getPersonInfo(iwc, applicant));
+
+		boolean showAllApps = iwc.getIWMainApplication().getSettings().getBoolean("cou_app_show_all_apps", Boolean.TRUE);
 
 		Table2 table = new Table2();
 		table.setStyleClass("courses");
@@ -1214,6 +1288,16 @@ public class CourseApplication extends ApplicationForm {
 		TableRow row = group.createRow();
 		row.setStyleClass("header");
 		TableCell2 cell = row.createHeaderCell();
+
+		Map<User, Collection<ApplicationHolder>> allApplications = getCourseApplicationSession(iwc).getApplications();
+		if (showAllApps) {
+			if (allApplications.size() > 1) {
+				cell.setStyleClass("column0");
+				cell.add(new Text(iwrb.getLocalizedString("applicant", "Applicant")));
+				cell = row.createHeaderCell();
+			}
+		}
+
 		cell.setStyleClass("column0");
 		cell.add(new Text(iwrb.getLocalizedString("provider", "Provider")));
 		cell = row.createHeaderCell();
@@ -1243,95 +1327,21 @@ public class CourseApplication extends ApplicationForm {
 		group.setId(PARAMETER_COURSE_TABLE_ID);
 
 		NumberFormat format = NumberFormat.getCurrencyInstance(iwc.getCurrentLocale());
-		int counter = 0;
-		Iterator iter = applications.iterator();
 		boolean showAlert = false;
-		while (iter.hasNext()) {
-			row = group.createRow();
-			if (counter++ % 2 == 0) {
-				row.setStyleClass("even");
-			}
-			else {
-				row.setStyleClass("odd");
-			}
-			ApplicationHolder holder = (ApplicationHolder) iter.next();
-			Course course = holder.getCourse();
-			CoursePrice price = course.getPrice();
-			CourseType type = course.getCourseType();
-			CourseProvider provider = course.getProvider();
-			CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course, false);
-
-			DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
-			daycare.setStyleClass("dayCare");
-			daycare.setOnFocus("this.style.width='225px';");
-			daycare.setOnBlur("this.style.width='';");
-			daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
-			if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
-				Object[] arguments = { format.format(price.getPreCarePrice()) };
-				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
-				showAlert = true;
-			}
-			if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
-				Object[] arguments = { format.format(price.getPostCarePrice()) };
-				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
-				showAlert = true;
-			}
-			if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
-				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
-				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
-				showAlert = true;
-			}
-			daycare.keepStatusOnAction(true);
-
-			DropdownMenu trip = new DropdownMenu(PARAMETER_TRIPHOME);
-			trip.addMenuElement("", "");
-			trip.addMenuElement(Boolean.TRUE.toString(), iwrb.getLocalizedString("picked_up", "Picked up"));
-			trip.addMenuElement(Boolean.FALSE.toString(), iwrb.getLocalizedString("walks_home", "Walks home"));
-			if (holder.getPickedUp() != null) {
-				trip.setSelectedElement(holder.getPickedUp().toString());
-			}
-			trip.keepStatusOnAction(true);
-
-			Link link = new Link(iwb.getImage("delete.png", iwrb.getLocalizedString("remove_course", "Remove course")));
-			link.addParameter(SUB_ACTION, SUB_ACTION_REMOVE);
-			link.addParameter(PARAMETER_ACTION, ACTION_PHASE_6);
-			link.maintainParameter(PARAMETER_CHILD_PK, iwc);
-			link.maintainParameter(PARAMETER_CHILD_PERSONAL_ID, iwc);
-			link.addParameter(PARAMETER_REMOVE_COURSE, course.getPrimaryKey().toString());
-
-			cell = row.createCell();
-			cell.setStyleClass("column0");
-			cell.add(new Text(holder.getProvider().getName()));
-			
-			cell = row.createCell();
-			cell.setStyleClass("column1");
-			cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
-			cell.add(new Text(type.getLocalizationKey() != null ? iwrb.getLocalizedString(type.getLocalizationKey(), course.getCourseType().getName()) : type.getName()));
-
-			cell = row.createCell();
-			cell.setStyleClass("column2");
-			cell.add(new Text(courseDWR.getName()));
-			cell = row.createCell();
-			cell.setStyleClass("column3");
-			cell.add(new Text(courseDWR.getTimeframe()));
-			cell = row.createCell();
-
-			if (hasCare) {
-				cell.setStyleClass("column4");
-				if (holder.getDaycare() > 0) {
-					daycare.setSelectedElement(holder.getDaycare());
+		AdvancedProperty props = new AdvancedProperty(String.valueOf(0), String.valueOf(showAlert));
+		if (showAllApps) {
+			for (User user: allApplications.keySet()) {
+				Collection<ApplicationHolder> userApps = allApplications.get(user);
+				for (ApplicationHolder app: userApps) {
+					props = addCourseRow(iwc, locale, format, group, app, allApplications.size() == 1 ? null : user, props, isFull);
 				}
-				cell.add(daycare);
-
-				cell = row.createCell();
-				cell.setStyleClass("column5");
-				cell.add(trip);
 			}
-
-			cell = row.createCell();
-			cell.setStyleClass("column6");
-			cell.add(link);
+		} else {
+			for (ApplicationHolder app: applications) {
+				props = addCourseRow(iwc, locale, format, group, app, null, props, isFull);
+			}
 		}
+		showAlert = Boolean.valueOf(props.getValue());
 
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("selected_courses", "Selected courses"));
 		heading.setStyleClass("subHeader");
@@ -1342,7 +1352,7 @@ public class CourseApplication extends ApplicationForm {
 		section.setStyleClass("formSection");
 		section.setStyleClass("formSectionBig");
 		form.add(section);
-		
+
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("select_daycare_and_trip_home_options_nocare", "Select daycare and trip home options.")));
@@ -1390,7 +1400,17 @@ public class CourseApplication extends ApplicationForm {
 		bottom.add(back);
 	}
 
-	private void addParentToForm(Form form, IWContext iwc, Child child, Custodian custodian, boolean isExtraCustodian, int number, boolean editable, boolean showMaritalStatus, boolean hasRelation) throws RemoteException {
+	private void addParentToForm(
+			Form form,
+			IWContext iwc,
+			Child child,
+			Custodian custodian,
+			boolean isExtraCustodian,
+			int number,
+			boolean editable,
+			boolean showMaritalStatus,
+			boolean hasRelation
+	) throws RemoteException {
 		Address address = null;
 		Phone phone = null;
 		Phone work = null;
@@ -1469,9 +1489,11 @@ public class CourseApplication extends ApplicationForm {
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_RELATION)) {
-			formItem.setStyleClass("hasError");
+		if (!isExtraCustodian) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_RELATION)) {
+				formItem.setStyleClass("hasError");
+			}
 		}
 		Label label = new Label(new Span(new Text(this.iwrb.getLocalizedString("relation", "Relation"))), relationMenu);
 		formItem.add(label);
@@ -1492,7 +1514,7 @@ public class CourseApplication extends ApplicationForm {
 		if (editable && custodian != null) {
 			HiddenInput hidden = new HiddenInput(PARAMETER_REMOVE_CUSTODIAN, "");
 			formItem.add(hidden);
-			
+
 			SubmitButton remove = new SubmitButton(this.iwrb.getLocalizedString("remove_custodian", "Remove custodian"));
 			remove.setValueOnClick(PARAMETER_REMOVE_CUSTODIAN, Boolean.TRUE.toString());
 			remove.setStyleClass("button");
@@ -1525,7 +1547,7 @@ public class CourseApplication extends ApplicationForm {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		if (editable) {
+		if (editable && !isExtraCustodian) {
 			formItem.setStyleClass("required");
 			if (hasError(PARAMETER_PERSONAL_ID)) {
 				formItem.setStyleClass("hasError");
@@ -1664,7 +1686,136 @@ public class CourseApplication extends ApplicationForm {
 		section.add(clearLayer);
 	}
 
-	private void addRelativeToForm(Form form, Relative relative, int number) {
+	private AdvancedProperty addCourseRow(
+			IWContext iwc,
+			Locale locale,
+			NumberFormat format,
+			TableRowGroup group,
+			ApplicationHolder holder,
+			User applicant,
+			AdvancedProperty props,
+			boolean isFull
+	) throws RemoteException {
+		int counter = Integer.valueOf(props.getId());
+
+		TableRow row = group.createRow();
+		if (counter++ % 2 == 0) {
+			row.setStyleClass("even");
+		}
+		else {
+			row.setStyleClass("odd");
+		}
+
+		boolean showAlert = Boolean.valueOf(props.getValue());
+		Course course = holder.getCourse();
+		CoursePrice price = course.getPrice();
+		CourseType type = course.getCourseType();
+		CourseProvider provider = course.getProvider();
+		CourseDWR courseDWR = getCourseBusiness(iwc).getCourseDWR(locale, course, false);
+		courseDWR.setFull(isFull);
+
+		DropdownMenu daycare = new DropdownMenu(PARAMETER_DAYCARE);
+		daycare.setStyleClass("dayCare");
+//		daycare.setOnFocus("this.style.width='225px';");
+//		daycare.setOnBlur("this.style.width='';");
+		daycare.addMenuElement(CourseConstants.DAY_CARE_NONE, iwrb.getLocalizedString("none", "None"));
+		if (provider != null && price != null) {
+			if (provider.hasPreCare() && price.getPreCarePrice() > 0) {
+				Object[] arguments = { format.format(price.getPreCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE, MessageFormat.format(iwrb.getLocalizedString("morning", "Morning"), arguments));
+				showAlert = true;
+			}
+			if (provider.hasPostCare() && price.getPostCarePrice() > 0) {
+				Object[] arguments = { format.format(price.getPostCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_POST, MessageFormat.format(iwrb.getLocalizedString("afternoon", "Afternoon"), arguments));
+				showAlert = true;
+			}
+			if (provider.hasPreCare() && provider.hasPostCare() && price.getPreCarePrice() > 0 && price.getPostCarePrice() > 0) {
+				Object[] arguments = { format.format(price.getPreCarePrice() + price.getPostCarePrice()) };
+				daycare.addMenuElement(CourseConstants.DAY_CARE_PRE_AND_POST, MessageFormat.format(iwrb.getLocalizedString("whole_day", "Whole day"), arguments));
+				showAlert = true;
+			}
+		}
+		daycare.keepStatusOnAction(true);
+		String dayCareParamName = "cou_day_care_" + course.getPrimaryKey().toString();
+		User user = holder.getUser();
+		if (user != null) {
+			dayCareParamName += "_" + user.getId();
+		}
+		daycare.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + dayCareParamName + "', dwr.util.getValue('" + daycare.getId() + "'));");
+		Object selectedDayCare = iwc.getSessionAttribute(dayCareParamName);
+		if (selectedDayCare instanceof String) {
+			daycare.setSelectedElement((String) selectedDayCare);
+		}
+
+		DropdownMenu trip = new DropdownMenu(PARAMETER_TRIPHOME);
+		trip.addMenuElement("", "");
+		trip.addMenuElement(Boolean.TRUE.toString(), iwrb.getLocalizedString("picked_up", "Picked up"));
+		trip.addMenuElement(Boolean.FALSE.toString(), iwrb.getLocalizedString("walks_home", "Walks home"));
+		if (holder.getPickedUp() != null) {
+			trip.setSelectedElement(holder.getPickedUp().toString());
+		}
+		trip.keepStatusOnAction(true);
+		String tripParamName = "cou_trip_" + course.getPrimaryKey().toString();
+		if (user != null) {
+			tripParamName += "_" + user.getId();
+		}
+		trip.setOnChange("WebUtil.setSessionProperty('" + iwc.getSessionId() + "', '" + tripParamName + "', dwr.util.getValue('" + trip.getId() + "'));");
+		Object selectedTrip = iwc.getSessionAttribute(tripParamName);
+		if (selectedTrip instanceof String) {
+			trip.setSelectedElement((String) selectedTrip);
+		}
+
+		Link link = new Link(iwb.getImage("delete.png", iwrb.getLocalizedString("remove_course", "Remove course")));
+		link.addParameter(SUB_ACTION, SUB_ACTION_REMOVE);
+		link.addParameter(PARAMETER_ACTION, ACTION_PHASE_6);
+		link.maintainParameter(PARAMETER_CHILD_PK, iwc);
+		link.maintainParameter(PARAMETER_CHILD_PERSONAL_ID, iwc);
+		link.addParameter(PARAMETER_REMOVE_COURSE, course.getPrimaryKey().toString());
+
+		TableCell2 cell = row.createCell();
+		if (applicant != null) {
+			cell.setStyleClass("column0");
+			cell.add(new Text(applicant.getName()));
+			cell = row.createCell();
+		}
+
+		cell.setStyleClass("column0");
+		cell.add(new Text(holder.getProvider().getName()));
+
+		cell = row.createCell();
+		cell.setStyleClass("column1");
+		cell.add(new HiddenInput(PARAMETER_COURSE, courseDWR.getPk()));
+		cell.add(new Text(type == null ? CoreConstants.MINUS : type.getLocalizationKey() != null ? iwrb.getLocalizedString(type.getLocalizationKey(), course.getCourseType().getName()) : type.getName()));
+
+		cell = row.createCell();
+		cell.setStyleClass("column2");
+		cell.add(new Text(courseDWR.getName()));
+		cell = row.createCell();
+		cell.setStyleClass("column3");
+		cell.add(new Text(courseDWR.getTimeframe()));
+		cell = row.createCell();
+
+		if (hasCare) {
+			cell.setStyleClass("column4");
+			if (holder.getDaycare() > 0) {
+				daycare.setSelectedElement(holder.getDaycare());
+			}
+			cell.add(daycare);
+
+			cell = row.createCell();
+			cell.setStyleClass("column5");
+			cell.add(trip);
+		}
+
+		cell = row.createCell();
+		cell.setStyleClass("column6");
+		cell.add(link);
+
+		return new AdvancedProperty(String.valueOf(counter), String.valueOf(showAlert));
+	}
+
+	private void addRelativeToForm(Form form, Relative relative, int number, boolean requiredRelation) {
 		Heading1 heading = new Heading1(number == 1 ? this.iwrb.getLocalizedString("first_contact", "First contact") : this.iwrb.getLocalizedString("contact", "Contact"));
 		heading.setStyleClass("subHeader");
 		if (number == 1) {
@@ -1724,9 +1875,11 @@ public class CourseApplication extends ApplicationForm {
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		if (hasError(PARAMETER_RELATIVE_RELATION)) {
-			formItem.setStyleClass("hasError");
+		if (requiredRelation) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_RELATIVE_RELATION)) {
+				formItem.setStyleClass("hasError");
+			}
 		}
 		Label label = new Label(new Span(new Text(this.iwrb.getLocalizedString("relation", "Relation"))), relationMenu);
 		formItem.add(label);
@@ -1735,7 +1888,12 @@ public class CourseApplication extends ApplicationForm {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
+		if (requiredRelation) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_RELATIVE)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(new Span(new Text(this.iwrb.getLocalizedString("name", "Name"))), name);
 		formItem.add(label);
 		formItem.add(name);
@@ -1779,9 +1937,16 @@ public class CourseApplication extends ApplicationForm {
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_SAVE)));
 		form.add(new HiddenInput(PARAMETER_BACK, ""));
 
+		if (iwc.isParameterSet(PARAMETER_GROWTH_DEVIATION)) {
+			form.maintainParameter(PARAMETER_GROWTH_DEVIATION);
+		}
+		if (iwc.isParameterSet(PARAMETER_ALLERGIES)) {
+			form.maintainParameter(PARAMETER_ALLERGIES);
+		}
+
 		addErrors(iwc, form);
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
@@ -1837,11 +2002,19 @@ public class CourseApplication extends ApplicationForm {
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("amount");
+		cell.add(new Text(iwrb.getLocalizedString("course_price", "Course price")));
+
+		cell = row.createHeaderCell();
+		cell.setStyleClass("amount");
+		cell.add(new Text(iwrb.getLocalizedString("price_for_extra_care", "Price for extra care")));
+
+		cell = row.createHeaderCell();
+		cell.setStyleClass("amount");
 		cell.add(new Text(iwrb.getLocalizedString("amount", "Amount")));
 
 		group = table.createBodyRowGroup();
 
-		Map applications = getCourseApplicationSession(iwc).getApplications();
+		Map<User, Collection<ApplicationHolder>> applications = getCourseApplicationSession(iwc).getApplications();
 		SortedSet prices = getCourseBusiness(iwc).calculatePrices(applications);
 		Map discounts = getCourseBusiness(iwc).getDiscounts(prices, applications);
 
@@ -1856,8 +2029,8 @@ public class CourseApplication extends ApplicationForm {
 			User user = holder.getUser();
 			PriceHolder discountHolder = (PriceHolder) discounts.get(user);
 
-			float price = holder.getPrice();
-			totalPrice += price;
+			float totalPricePerApplication = holder.getPrice();
+			totalPrice += totalPricePerApplication;
 			discount += discountHolder.getPrice();
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
@@ -1869,9 +2042,14 @@ public class CourseApplication extends ApplicationForm {
 			cell.setStyleClass("personalID");
 			cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 
+			TableCell2 cellForPricesOfApplicantCourses = row.createCell();
+			cellForPricesOfApplicantCourses.setStyleClass("amount");
+			TableCell2 cellForPricesOfApplicantExtraCare = row.createCell();
+			cellForPricesOfApplicantExtraCare.setStyleClass("amount");
+
 			cell = row.createCell();
 			cell.setStyleClass("amount");
-			cell.add(new Text(format.format(price)));
+			cell.add(new Text(format.format(totalPricePerApplication)));
 
 			if (counter++ % 2 == 0) {
 				row.setStyleClass("even");
@@ -1879,17 +2057,18 @@ public class CourseApplication extends ApplicationForm {
 			else {
 				row.setStyleClass("odd");
 			}
-			
-			Collection<ApplicationHolder> holders = (Collection<ApplicationHolder>) applications.get(user);
+
+			int totalForAplicantCourses = 0, totalForApplicantExtraCare = 0;
+			Collection<ApplicationHolder> holders = applications.get(user);
 			for (ApplicationHolder applicationHolder : holders) {
 				row = group.createRow();
 				row.setStyleClass("subRow");
-				
+
 				Course course = applicationHolder.getCourse();
-				
+
 				cell = row.createCell();
 				cell.setStyleClass("name");
-				cell.add(new Text(course.getName()));
+				cell.add(new Text(course.getProvider().getName() + CoreConstants.COMMA + CoreConstants.SPACE + course.getName()));
 
 				cell = row.createCell();
 				cell.setStyleClass("startDate");
@@ -1900,19 +2079,51 @@ public class CourseApplication extends ApplicationForm {
 				if (applicationHolder.isOnWaitingList()) {
 					cell.setStyleClass("waitingList");
 					cell.add(new Text(iwrb.getLocalizedString("application_status.waiting_list", "Waiting list")));
-				}
-				else {
+					cell.setColumnSpan(2);
+				} else {
+					CoursePrice coursePrice = applicationHolder.getCourse().getPrice();
 					cell.setStyleClass("registered");
+					if (coursePrice != null) {
+						int priceTmp = coursePrice.getPrice();
+						if (priceTmp > 0) {
+							totalForAplicantCourses += priceTmp;
+						}
+						cell.add(new Text(format.format(priceTmp)));
+					}
+
+					cell = row.createCell();
+					cell.setStyleClass("status registered");
+					if (coursePrice != null) {
+						int priceTmp = 0;
+						if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_POST) {
+							priceTmp = coursePrice.getPostCarePrice();
+						} else if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_PRE) {
+							priceTmp = coursePrice.getPreCarePrice();
+						} else if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+							priceTmp = (coursePrice.getPreCarePrice() + coursePrice.getPostCarePrice());
+						}
+
+						if (priceTmp > 0) {
+							totalForApplicantExtraCare += priceTmp;
+						}
+						cell.add(new Text(format.format(priceTmp)));
+					}
+
+					cell = row.createCell();
+					cell.setStyleClass("status registered");
 					cell.add(new Text(format.format(applicationHolder.getPrice())));
 				}
 			}
+
+			cellForPricesOfApplicantCourses.add(new Text(format.format(totalForAplicantCourses)));
+			cellForPricesOfApplicantExtraCare.add(new Text(format.format(totalForApplicantExtraCare)));
 		}
 
 		group = table.createFooterRowGroup();
 		row = group.createRow();
 
 		cell = row.createCell();
-		cell.setColumnSpan(2);
+		cell.setColumnSpan(4);
 		cell.setStyleClass("totalPrice");
 		cell.add(new Text(iwrb.getLocalizedString("total_amount", "Total amount")));
 
@@ -1927,7 +2138,7 @@ public class CourseApplication extends ApplicationForm {
 			amountDue = totalPrice - discount;
 
 			cell = row.createCell();
-			cell.setColumnSpan(2);
+			cell.setColumnSpan(4);
 			cell.setStyleClass("discount");
 			cell.add(new Text(iwrb.getLocalizedString("discount", "Discount")));
 
@@ -1939,7 +2150,7 @@ public class CourseApplication extends ApplicationForm {
 			row = group.createRow();
 
 			cell = row.createCell();
-			cell.setColumnSpan(2);
+			cell.setColumnSpan(4);
 			cell.setStyleClass("amountDue");
 			cell.add(new Text(iwrb.getLocalizedString("amount_due", "Amount due")));
 
@@ -2080,7 +2291,7 @@ public class CourseApplication extends ApplicationForm {
 			formItem.add(label);
 			section.add(formItem);
 		}
-		
+
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
@@ -2097,16 +2308,16 @@ public class CourseApplication extends ApplicationForm {
 			heading = new Heading1(this.iwrb.getLocalizedString("application.creditcard_information", "Creditcard information"));
 			heading.setStyleClass("subHeader");
 			form.add(heading);
-	
+
 			section = new Layer(Layer.DIV);
 			section.setStyleClass("formSection");
 			form.add(section);
-	
+
 			helpLayer = new Layer(Layer.DIV);
 			helpLayer.setStyleClass("helperText");
 			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.creditcard_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
 			section.add(helpLayer);
-	
+
 			Collection images = getCourseBusiness(iwc).getCreditCardImages();
 			Iterator iterator = images.iterator();
 			while (iterator.hasNext()) {
@@ -2114,27 +2325,27 @@ public class CourseApplication extends ApplicationForm {
 				image.setStyleClass("creditCardImage");
 				helpLayer.add(image);
 			}
-	
+
 			DropdownMenu cardType = getCardTypeDropdown(iwc.getCurrentLocale(), PARAMETER_CARD_TYPE);
 			cardType.keepStatusOnAction(true);
 			cardType.setDisabled(!showCreditCardPayment);
-	
+
 			TextInput cardOwner = new TextInput(PARAMETER_NAME_ON_CARD, null);
 			cardOwner.keepStatusOnAction(true);
 			cardOwner.setDisabled(!showCreditCardPayment);
-	
+
 			TextInput cardNumber = new TextInput(PARAMETER_CARD_NUMBER, null);
 			cardNumber.setLength(16);
 			cardNumber.setMaxlength(16);
 			cardNumber.keepStatusOnAction(true);
 			cardNumber.setDisabled(!showCreditCardPayment);
-	
+
 			TextInput ccNumber = new TextInput(PARAMETER_CCV, null);
 			ccNumber.setLength(3);
 			ccNumber.setMaxlength(3);
 			ccNumber.keepStatusOnAction(true);
 			ccNumber.setDisabled(!showCreditCardPayment);
-	
+
 			DropdownMenu validMonth = new DropdownMenu(PARAMETER_VALID_MONTH);
 			validMonth.setWidth("45px");
 			validMonth.keepStatusOnAction(true);
@@ -2142,7 +2353,7 @@ public class CourseApplication extends ApplicationForm {
 				validMonth.addMenuElement(TextSoap.addZero(a), TextSoap.addZero(a));
 			}
 			validMonth.setDisabled(!showCreditCardPayment);
-	
+
 			IWTimestamp stamp = new IWTimestamp();
 			DropdownMenu validYear = new DropdownMenu(PARAMETER_VALID_YEAR);
 			validYear.setWidth("60px");
@@ -2153,9 +2364,9 @@ public class CourseApplication extends ApplicationForm {
 				stamp.addYears(1);
 			}
 			validYear.setDisabled(!showCreditCardPayment);
-	
+
 			boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
-	
+
 			if (useDirectPayment) {
 				formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
@@ -2165,7 +2376,7 @@ public class CourseApplication extends ApplicationForm {
 				formItem.add(cardOwner);
 				section.add(formItem);
 			}
-			
+
 			if (!useDirectPayment) {
 				formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
@@ -2175,7 +2386,7 @@ public class CourseApplication extends ApplicationForm {
 				formItem.add(cardType);
 				section.add(formItem);
 			}
-	
+
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("required");
@@ -2186,7 +2397,7 @@ public class CourseApplication extends ApplicationForm {
 			formItem.add(label);
 			formItem.add(cardNumber);
 			section.add(formItem);
-	
+
 			if (useDirectPayment) {
 				formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
@@ -2196,7 +2407,7 @@ public class CourseApplication extends ApplicationForm {
 				formItem.add(ccNumber);
 				section.add(formItem);
 			}
-			
+
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("required");
@@ -2205,12 +2416,12 @@ public class CourseApplication extends ApplicationForm {
 			formItem.add(validMonth);
 			formItem.add(validYear);
 			section.add(formItem);
-	
+
 			clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 		}
-		
+
 		heading = new Heading1(this.iwrb.getLocalizedString("application.agreement_info", "Agreement information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
@@ -2225,7 +2436,17 @@ public class CourseApplication extends ApplicationForm {
 
 		Paragraph paragraph = new Paragraph();
 		paragraph.setStyleClass("agreement");
-		paragraph.add(new Text(this.iwrb.getLocalizedString(getPrefix() + "application.agreement", "Agreement text")));
+		String agreementText = this.iwrb.getLocalizedString(getPrefixSafe() + "application.agreement", "Agreement text");
+		String href = "href=\"";
+		if (agreementText.indexOf(href) != -1) {
+			String customLink = iwc.getIWMainApplication().getSettings().getProperty("cou_app_agree_link_" + iApplicationPK + "_" + iSchoolTypePK);
+			if (!StringUtil.isEmpty(customLink)) {
+				String pattern = agreementText.substring(agreementText.indexOf(href) + href.length());
+				pattern = pattern.substring(0, pattern.indexOf("\""));
+				agreementText = StringHandler.replace(agreementText, pattern, customLink);
+			}
+		}
+		paragraph.add(new Text(agreementText));
 		section.add(paragraph);
 
 		formItem = new Layer(Layer.DIV);
@@ -2248,7 +2469,7 @@ public class CourseApplication extends ApplicationForm {
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
 
-		Link next = getButtonLink(this.iwrb.getLocalizedString("next", "Next"));
+		Link next = getButtonLink(this.iwrb.getLocalizedString("verify", "Verify"));
 		next.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_SAVE));
 		next.setOnClick("this.style.display='none';");
 		next.setToFormSubmit(form);
@@ -2281,16 +2502,16 @@ public class CourseApplication extends ApplicationForm {
 				if (age.getYears() < 18) {
 					setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_be_at_least_18_years_old", "The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older."));
 				}
-				else { 
+				else {
 					try {
 						User currentUser = getUser(iwc);
 						User paymentUser = getUserBusiness(iwc).getUser(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
-						
+
 						Address address1 = currentUser.getUsersMainAddress();
 						Address address2 = paymentUser.getUsersMainAddress();
-						
+
 						if (!address1.getStreetName().equals(address2.getStreetName()) || !address1.getStreetNumber().equals(address2.getStreetNumber()) || address1.getPostalCodeID() != address2.getPostalCodeID()) {
-							setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));								
+							setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));
 						}
 					} catch(FinderException fe) {
 						setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
@@ -2319,7 +2540,7 @@ public class CourseApplication extends ApplicationForm {
 		String cardNumber = iwc.getParameter(PARAMETER_CARD_NUMBER);
 		String expiresMonth = iwc.getParameter(PARAMETER_VALID_MONTH);
 		String expiresYear = iwc.getParameter(PARAMETER_VALID_YEAR);
-		
+
 		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 		boolean creditCardPayment = new Boolean(iwc.getParameter(PARAMETER_CREDITCARD_PAYMENT)).booleanValue();
 		IWTimestamp paymentStamp = new IWTimestamp();
@@ -2329,7 +2550,7 @@ public class CourseApplication extends ApplicationForm {
 				String nameOnCard = iwc.getParameter(PARAMETER_NAME_ON_CARD);
 				String ccVerifyNumber = iwc.getParameter(PARAMETER_CCV);
 				String referenceNumber = paymentStamp.getDateString("yyyyMMddHHmmssSSSS");
-	
+
 				try {
 					properties = getCourseBusiness(iwc).authorizePayment(nameOnCard, cardNumber, expiresMonth, expiresYear, ccVerifyNumber, amount, "ISK", referenceNumber);
 				}
@@ -2366,7 +2587,20 @@ public class CourseApplication extends ApplicationForm {
 
 		int merchantPK = Integer.parseInt(getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "-1"));
 		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE);
-		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(getCourseApplicationSession(iwc).getApplications(), merchantPK, (float) amount, merchantType, creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO, null, payerName, payerPersonalID, prefix, getUser(iwc), iwc.isLoggedOn() ? iwc.getCurrentUser() : null, iwc.getCurrentLocale());
+		is.idega.idegaweb.egov.course.data.CourseApplication application = getCourseBusiness(iwc).saveApplication(
+				getCourseApplicationSession(iwc).getApplications(),
+				merchantPK,
+				(float) amount,
+				merchantType,
+				creditCardPayment ? CourseConstants.PAYMENT_TYPE_CARD : CourseConstants.PAYMENT_TYPE_GIRO,
+				null,
+				payerName,
+				payerPersonalID,
+				prefix,
+				getUser(iwc),
+				iwc.isLoggedOn() ? iwc.getCurrentUser() : null,
+				iwc.getCurrentLocale()
+		);
 		if (application != null && creditCardPayment) {
 			if (useDirectPayment) {
 				try {
@@ -2389,7 +2623,7 @@ public class CourseApplication extends ApplicationForm {
 
 		if (application != null) {
 			getCourseApplicationSession(iwc).clear(iwc);
-			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString(getPrefix() + "application.application_send_confirmation" + (hasCare ? "" : "_nocare"), "Your course application has been received and will be processed."), 8, getNumberOfPhases(iwc));
+			addPhasesReceipt(iwc, this.iwrb.getLocalizedString("application.receipt", "Application receipt"), this.iwrb.getLocalizedString("application.application_save_completed", "Application sent"), this.iwrb.getLocalizedString(getPrefixSafe() + "application.application_send_confirmation" + (hasCare ? "" : "_nocare"), "Your course application has been received and will be processed."), 8, getNumberOfPhases(iwc));
 
 			Layer clearLayer = new Layer(Layer.DIV);
 			clearLayer.setStyleClass("Clear");
@@ -2472,13 +2706,28 @@ public class CourseApplication extends ApplicationForm {
 		getCourseApplicationSession(iwc).removeApplication(getApplicant(iwc), holder);
 	}
 
+	private boolean isRequiredToSelectYesOrNoAboutChild(IWMainApplicationSettings settings) {
+		return settings.getBoolean("cou_gd_yes_no_required_" + iApplicationPK + "_" + iSchoolTypePK, Boolean.FALSE);
+	}
+
 	private void addChildInformation(IWContext iwc, User user, Form form) throws RemoteException {
 		Child child = getMemberFamilyLogic(iwc).getChild(user);
 		User owner = getUser(iwc);
 
+		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
+		boolean requiredYesNo = isRequiredToSelectYesOrNoAboutChild(settings);
+		boolean childGrowthDeviationDefaultNo = settings.getBoolean("cou_app_ch_gr_dev_def_no", Boolean.TRUE);
+		boolean childAllergiesDefaultNo = settings.getBoolean("cou_app_ch_aller_def_no", Boolean.TRUE);
+
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("child.has_growth_deviation", "Has growth deviation"));
 		heading.setStyleClass("subHeader");
 		heading.setStyleClass("topSubHeader");
+		if (requiredYesNo) {
+			heading.setStyleClass("required");
+			if (hasError(PARAMETER_GROWTH_DEVIATION)) {
+				heading.setStyleClass("hasError");
+			}
+		}
 		form.add(heading);
 
 		Layer section = new Layer(Layer.DIV);
@@ -2496,24 +2745,35 @@ public class CourseApplication extends ApplicationForm {
 		RadioButton no = new RadioButton(PARAMETER_GROWTH_DEVIATION, Boolean.FALSE.toString());
 		no.setStyleClass("radiobutton");
 		no.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
-		RadioButton noAnswer = new RadioButton(PARAMETER_GROWTH_DEVIATION, "");
-		noAnswer.setStyleClass("radiobutton");
-		noAnswer.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
-		Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-		if (hasGrowthDeviation != null) {
-			if (hasGrowthDeviation.booleanValue()) {
-				yes.setSelected(true);
-			}
-			else {
-				no.setSelected(true);
-			}
+		RadioButton noAnswer = null;
+		if (settings.getBoolean("cou_growh_dev_no_ans_" + iApplicationPK + "_" + iSchoolTypePK, Boolean.TRUE)) {
+			noAnswer = new RadioButton(PARAMETER_GROWTH_DEVIATION, "");
+			noAnswer.setStyleClass("radiobutton");
+			noAnswer.setToDisableOnClick(PARAMETER_GROWTH_DEVIATION_DETAILS, true);
 		}
-		else {
+		if (childGrowthDeviationDefaultNo) {
 			no.setSelected(true);
+		} else {
+			Boolean hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasGrowthDeviation != null) {
+				if (hasGrowthDeviation.booleanValue()) {
+					yes.setSelected(true);
+				}
+				else {
+					no.setSelected(true);
+				}
+			}
 		}
+
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_GROWTH_DEVIATION)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		Label label = new Label(this.iwrb.getLocalizedString("yes", "Yes"), yes);
 		formItem.add(yes);
 		formItem.add(label);
@@ -2522,18 +2782,26 @@ public class CourseApplication extends ApplicationForm {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_GROWTH_DEVIATION)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(this.iwrb.getLocalizedString("no", "No"), no);
 		formItem.add(no);
 		formItem.add(label);
 		section.add(formItem);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
-		formItem.add(noAnswer);
-		formItem.add(label);
-		section.add(formItem);
+		if (noAnswer != null) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
+			formItem.add(noAnswer);
+			formItem.add(label);
+			section.add(formItem);
+		}
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -2544,12 +2812,18 @@ public class CourseApplication extends ApplicationForm {
 		section.add(paragraph);
 
 		TextArea details = new TextArea(PARAMETER_GROWTH_DEVIATION_DETAILS, child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-		details.setStyleClass("details");
+		details.setStyleClass("details growth-deviation-details");
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
 
 		heading = new Heading1(this.iwrb.getLocalizedString("child.has_allergies", "Has allergies"));
 		heading.setStyleClass("subHeader");
+		if (requiredYesNo) {
+			heading.setStyleClass("required");
+			if (hasError(PARAMETER_ALLERGIES)) {
+				heading.setStyleClass("hasError");
+			}
+		}
 		form.add(heading);
 
 		section = new Layer(Layer.DIV);
@@ -2567,24 +2841,35 @@ public class CourseApplication extends ApplicationForm {
 		no = new RadioButton(PARAMETER_ALLERGIES, Boolean.FALSE.toString());
 		no.setStyleClass("radiobutton");
 		no.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
-		noAnswer = new RadioButton(PARAMETER_ALLERGIES, "");
-		noAnswer.setStyleClass("radiobutton");
-		noAnswer.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
-		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-		if (hasAllergies != null) {
-			if (hasAllergies.booleanValue()) {
-				yes.setSelected(true);
-			}
-			else {
-				no.setSelected(true);
-			}
+
+		noAnswer = null;
+		if (settings.getBoolean("cou_aller_no_ans_" + iApplicationPK + "_" + iSchoolTypePK, Boolean.TRUE)) {
+			noAnswer = new RadioButton(PARAMETER_ALLERGIES, "");
+			noAnswer.setStyleClass("radiobutton");
+			noAnswer.setToDisableOnClick(PARAMETER_ALLERGIES_DETAILS, true);
 		}
-		else {
+		if (childAllergiesDefaultNo) {
 			no.setSelected(true);
+		} else {
+			Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+			if (hasAllergies != null) {
+				if (hasAllergies.booleanValue()) {
+					yes.setSelected(true);
+				} else {
+					no.setSelected(true);
+				}
+			}
 		}
+
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_ALLERGIES)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(this.iwrb.getLocalizedString("yes", "Yes"), yes);
 		formItem.add(yes);
 		formItem.add(label);
@@ -2593,18 +2878,26 @@ public class CourseApplication extends ApplicationForm {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("radioButtonItem");
+		if (requiredYesNo) {
+			formItem.setStyleClass("required");
+			if (hasError(PARAMETER_ALLERGIES)) {
+				formItem.setStyleClass("hasError");
+			}
+		}
 		label = new Label(this.iwrb.getLocalizedString("no", "No"), no);
 		formItem.add(no);
 		formItem.add(label);
 		section.add(formItem);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("radioButtonItem");
-		label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
-		formItem.add(noAnswer);
-		formItem.add(label);
-		section.add(formItem);
+		if (noAnswer != null) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			label = new Label(this.iwrb.getLocalizedString("no_answer", "Won't answer"), noAnswer);
+			formItem.add(noAnswer);
+			formItem.add(label);
+			section.add(formItem);
+		}
 
 		clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -2615,11 +2908,11 @@ public class CourseApplication extends ApplicationForm {
 		section.add(paragraph);
 
 		details = new TextArea(PARAMETER_ALLERGIES_DETAILS, child.getAllergiesDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-		details.setStyleClass("details");
+		details.setStyleClass("details allergies-details");
 		details.setDisabled(!yes.getSelected());
 		section.add(details);
 
-		heading = new Heading1(this.iwrb.getLocalizedString(getPrefix() + "child.other_information", "Other information"));
+		heading = new Heading1(this.iwrb.getLocalizedString(getPrefixSafe() + "child.other_information", "Other information"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
 
@@ -2633,7 +2926,7 @@ public class CourseApplication extends ApplicationForm {
 		section.add(helpLayer);
 
 		details = new TextArea(PARAMETER_OTHER_INFORMATION, child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
-		details.setStyleClass("details");
+		details.setStyleClass("details other-information-about-child");
 		section.add(details);
 	}
 
@@ -2716,10 +3009,18 @@ public class CourseApplication extends ApplicationForm {
 							return false;
 						}
 						if ((iUseSessionUser || hasRelation) && homePhones != null) {
-							custodian.setHomePhone(homePhones[index]);
-							custodian.setWorkPhone(workPhones[index]);
-							custodian.setMobilePhone(mobilePhones[index]);
-							custodian.setEmail(emails[index]);
+							if (homePhones != null && homePhones.length > index) {
+								custodian.setHomePhone(homePhones[index]);
+							}
+							if (workPhones != null && workPhones.length > index) {
+								custodian.setWorkPhone(workPhones[index]);
+							}
+							if (mobilePhones != null && mobilePhones.length > index) {
+								custodian.setMobilePhone(mobilePhones[index]);
+							}
+							if (emails != null && emails.length > index) {
+								custodian.setEmail(emails[index]);
+							}
 						}
 						if (storeMaritalStatus) {
 							custodian.setMaritalStatus(maritalStatus);
@@ -2777,7 +3078,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private UserSession getUserSession(IWUserContext iwuc) {
 		try {
-			return (UserSession) IBOLookup.getSessionInstance(iwuc, UserSession.class);
+			return IBOLookup.getSessionInstance(iwuc, UserSession.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -2786,7 +3087,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private FamilyLogic getMemberFamilyLogic(IWApplicationContext iwac) {
 		try {
-			return (FamilyLogic) IBOLookup.getServiceInstance(iwac, FamilyLogic.class);
+			return IBOLookup.getServiceInstance(iwac, FamilyLogic.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -2795,7 +3096,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private CourseBusiness getCourseBusiness(IWContext iwc) {
 		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
+			return IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
@@ -2804,7 +3105,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private CourseSession getCourseSession(IWContext iwc) {
 		try {
-			return (CourseSession) IBOLookup.getSessionInstance(iwc, CourseSession.class);
+			return IBOLookup.getSessionInstance(iwc, CourseSession.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
@@ -2813,7 +3114,7 @@ public class CourseApplication extends ApplicationForm {
 
 	private CourseApplicationSession getCourseApplicationSession(IWContext iwc) {
 		try {
-			return (CourseApplicationSession) IBOLookup.getSessionInstance(iwc, CourseApplicationSession.class);
+			return IBOLookup.getSessionInstance(iwc, CourseApplicationSession.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
@@ -2853,10 +3154,23 @@ public class CourseApplication extends ApplicationForm {
 		this.iApplicationPK = applicationPK;
 	}
 
-	private String getPrefix() {
+	private String phaseOneHelpPrefix = null;
+	public String getPhaseOneHelpPrefix() {
+		return phaseOneHelpPrefix;
+	}
+
+	public void setPhaseOneHelpPrefix(String phaseOneHelpPrefix) {
+		this.phaseOneHelpPrefix = phaseOneHelpPrefix;
+	}
+
+	private String getPrefixSafe() {
 		if (prefix.length() > 0) {
 			return prefix + ".";
 		}
+		return prefix;
+	}
+
+	public String getPrefix() {
 		return prefix;
 	}
 

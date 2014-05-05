@@ -95,6 +95,7 @@ import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
 import com.idega.data.IDOStoreException;
+import com.idega.data.SimpleQuerier;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
@@ -105,6 +106,7 @@ import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
@@ -127,7 +129,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public void reserveCourse(Course course) {
+	public void reserveCourse(Course course, User user) {
+		getLogger().info("Reserving course " + course.getName() + ", ID: " + course.getPrimaryKey() + " for " + user.getName());
 		@SuppressWarnings("unchecked")
 		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
 				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
@@ -194,7 +197,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
 				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 		if (courseMap != null) {
-			System.out.println(courseMap);
+			getLogger().info("Reservations of courses: " + courseMap);
 		}
 	}
 
@@ -1339,9 +1342,25 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public boolean isFull(Course course) {
-		int freePlaces = course.getFreePlaces()
-				- getNumberOfReservations(course);
-		return freePlaces <= 0;
+//		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
+//		return freePlaces <= 0;
+
+		int courseFreePlaces = 0;
+		try {
+			courseFreePlaces = SimpleQuerier.executeIntQuery("select max_per from cou_course where cou_course_id = " + course.getPrimaryKey());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Collection<?> applications = getCourseChoices(course, false);
+		int applicationsForTheCourse = ListUtil.isEmpty(applications) ? 0 : applications.size();
+		int freePlaces = courseFreePlaces - applicationsForTheCourse;
+		int numberOfReservations = getNumberOfReservations(course);
+		int totalFreeCapacity = freePlaces - numberOfReservations;
+		boolean full = totalFreeCapacity <= 0;
+		getLogger().info("Course (" + course.getName() + ", ID: " + course.getPrimaryKey() + ") can have " + courseFreePlaces +
+				" students. Currently there are " + applicationsForTheCourse + " applications and " + numberOfReservations +
+				" reservations to this course. Free places: " + totalFreeCapacity);
+		return full;
 	}
 
 	@Override
@@ -1766,21 +1785,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return getCourseProviderAreaHome().findAllSchoolAreas(getSchoolBusiness().getCategoryAfterSchoolCare());
 	}
 
-	private CourseProviderAreaHome courseProviderAreaHome = null;
-
-	protected CourseProviderAreaHome getCourseProviderAreaHome() {
-		if (courseProviderAreaHome == null) {
-			try {
-				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup.getHome(CourseProviderArea.class);
-			} catch (IDOLookupException e) {
-				getLogger().log(Level.WARNING,
-						"Failed to get " + CourseProviderAreaHome.class + " cause of: ", e);
-			}
-		}
-
-		return this.courseProviderAreaHome;
-	}
-
 	@Override
 	public <T extends CourseProviderType> Collection<T> getSchoolTypes(CourseProvider provider) {
 		Collection<T> schoolTypes = provider.getCourseProviderTypes();
@@ -1981,8 +1985,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 			int totalPrice = 0;
 			int totalCost = 0;
+			String name = null;
 			for (Iterator<ApplicationHolder> iter = userApplications.iterator(); iter.hasNext();) {
 				ApplicationHolder holder = iter.next();
+				name = holder.getCourse() == null ? null : holder.getCourse().getProvider().getName();
 				if (!holder.isOnWaitingList()) {
 					totalPrice += holder.getPrice();
 					totalCost += holder.getCourse().getCourseCost() > -1 ? holder
@@ -1990,7 +1996,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				}
 			}
 
-			PriceHolder priceHolder = new PriceHolder();
+			PriceHolder priceHolder = new PriceHolder(name);
 			priceHolder.setUser(user);
 			priceHolder.setPrice(totalPrice);
 			priceHolder.setCost(totalCost);
@@ -2050,26 +2056,34 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			if (!first) {
 				if (hasSiblingInSet(applications.keySet(), applicant)) {
 					boolean getsDiscount = false;
+					String name = null;
 					Collection<ApplicationHolder> userApplications = applications.get(applicant);
 					for (ApplicationHolder applicationHolder : userApplications) {
 						if (!applicationHolder.isOnWaitingList() && !firstOnWaitingList) {
 							getsDiscount = true;
+							name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getProvider().getName();
 						}
 					}
 
 					if (getsDiscount) {
 						discountHolder.setPrice(price * 0.2f);
 						discountHolder.setDiscount(0.2f);
+						discountHolder.setName(name);
 					}
 				}
 			} else {
 				first = false;
-
+				String name = null;
 				Collection<ApplicationHolder> userApplications = applications.get(applicant);
 				for (ApplicationHolder applicationHolder : userApplications) {
 					if (!applicationHolder.isOnWaitingList()) {
 						firstOnWaitingList = false;
+						name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getProvider().getName();
 					}
+				}
+
+				if (name != null) {
+					discountHolder.setName(name);
 				}
 			}
 
@@ -2473,9 +2487,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			String referenceNumber, String payerName, String payerPersonalID,
 			String prefix, User owner, User performer, Locale locale, float certificateFee) {
 		try {
-			boolean useWaitingList = getIWApplicationContext()
-					.getApplicationSettings().getBoolean(
-							CourseConstants.PROPERTY_USE_WAITING_LIST, false);
+			boolean useWaitingList = isWaitingListTurnedOn();
 			boolean useDirectPayment = getIWApplicationContext()
 					.getApplicationSettings().getBoolean(
 							CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
@@ -2562,7 +2574,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setCourse(holder.getCourse());
 						choice.setDayCare(holder.getDaycare());
 						if (useWaitingList) {
-							choice.setWaitingList(holder.getCourse().getFreePlaces() <= 0);
+							choice.setWaitingList(holder.isOnWaitingList());
 						}
 						if (holder.getPickedUp() != null) {
 							choice.setPickedUp(holder.getPickedUp()
@@ -2629,25 +2641,25 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						.getDefaultLocale();
 			}
 
-			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, "");
+			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, CoreConstants.EMPTY);
 
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
 			CourseProvider provider = course.getProvider();
 			IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 			Object[] arguments = {
-					applicant.getName(),
-					PersonalIDFormatter.format(applicant.getPersonalID(),
-							locale),
-					course.getName(),
-					provider.getName(),
-					startDate.getLocaleDate(locale, IWTimestamp.SHORT),
-					new IWTimestamp(course.getEndDate() != null ? course
+					applicant.getName(),											//	0: name
+					PersonalIDFormatter.format(applicant.getPersonalID(), locale),	//	1: personal id
+					course.getName(),												//	2: course name
+					provider.getName(),												//	3: provider name
+					startDate.getLocaleDate(locale, IWTimestamp.SHORT),				//	4: start date
+					new IWTimestamp(course.getEndDate() != null ? course			//	5: end date
 							.getEndDate() : getEndDate(course.getPrice(),
 							startDate.getDate())).getLocaleDate(locale,
 							IWTimestamp.SHORT),
-					acceptURL,
-					choice.getUniqueID()};
+					acceptURL,														//	6: URL
+					choice.getUniqueID()											//	7: unique id
+			};
 
 			User appParent = application.getOwner();
 			if (appParent != null) {
@@ -2781,7 +2793,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public Date getEndDate(CoursePrice price, Date startDate) {
-		Collection<IWTimestamp> holidays = getPublicHolidays();
+		Collection<IWTimestamp> holidays = getPublicHolidays(CoreUtil.getCurrentLocale());
 		IWTimestamp stamp = new IWTimestamp(startDate);
 		
 		int days = 0;
@@ -2792,6 +2804,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		while (days > 0) {
 			if (stamp.getDayOfWeek() != Calendar.SUNDAY
 					&& stamp.getDayOfWeek() != Calendar.SATURDAY) {
+				//	Course take place only during week days, not during weekends
 				days--;
 			}
 			stamp.addDays(1);
@@ -2809,7 +2822,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return stamp.getDate();
 	}
 
-	private Collection<IWTimestamp> getPublicHolidays() {
+	private Collection<IWTimestamp> getPublicHolidays(Locale locale) {
 		Collection<IWTimestamp> collection = new ArrayList<IWTimestamp>();
 
 		String holidays = getIWApplicationContext().getApplicationSettings()
@@ -2826,6 +2839,25 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				stamp.setMonth(Integer.parseInt(holiday.substring(holiday
 						.indexOf(".") + 1)));
 				collection.add(stamp);
+			}
+		}
+
+		if (locale  != null && locale.toString().equals("is_IS")) {
+			IWTimestamp august = IWTimestamp.RightNow();
+			august.setMonth(8);
+			august.setDay(1);
+			IWTimestamp commerceDay = null;
+			while (commerceDay == null && august.getMonth() == 8) {
+				commerceDay = august;
+				if (commerceDay.getDayOfWeek() != Calendar.MONDAY) {
+					august.addDays(1);
+					commerceDay = null;
+				} else {
+					break;
+				}
+			}
+			if (commerceDay != null) {
+				collection.add(commerceDay);
 			}
 		}
 
@@ -2922,15 +2954,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			throw new IBORuntimeException(e);
 		}
 	}
-
-//	private SchoolUserBusiness getSchoolUserBusiness() {
-//		try {
-//			return (SchoolUserBusiness) IBOLookup.getServiceInstance(
-//					getIWApplicationContext(), SchoolUserBusiness.class);
-//		} catch (IBOLookupException ile) {
-//			throw new IBORuntimeException(ile);
-//		}
-//	}
 
 	private CommuneMessageBusiness getMessageBusiness() {
 		try {
@@ -3319,29 +3342,69 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	@Override
 	public boolean acceptChoice(Object courseChoicePK, Locale locale) {
 		CourseChoice choice = getCourseChoice(courseChoicePK);
-		choice.setWaitingList(false);
-		choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
-		choice.store();
+		if (choice == null) {
+			return false;
+		}
 
-		CourseApplication application = choice.getApplication();
-		String subject = getLocalizedString(
-				"course_choice.accepted_subject", "Course choice accepted",
-				locale);
+		if (StringUtil.isEmpty(choice.getUniqueID())) {
+			choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
+			choice.store();
+		}
 
-		String prefix = application.getPrefix();
-		prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+		if (choice.isOnWaitingList() && isWaitingListTurnedOn()) {
+			//	Will send email to parents to accept offer
+			if (locale == null) {
+				locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
+			}
 
-		String body = getLocalizedString(prefix +
-				"course_choice.accepted_body",
-				"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
-				locale);
+			String subject = getLocalizedString(
+					"course_choice.offered_to_parent_subject", "Course choice now available",
+					locale
+			);
 
-		String bcc = getIWApplicationContext()
-				.getApplicationSettings().getProperty(
+			CourseApplication application = choice.getApplication();
+			String prefix = application.getPrefix();
+			prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+
+			String body = getLocalizedString(prefix +
+					"course_choice.course_offered_to_parent_body",
+					"Your registration to course {2} at {3} for {0}, {1} now is available and needs to be confirmed at {6}.",
+					locale
+			);
+
+			String bcc = getIWApplicationContext().getApplicationSettings().getProperty(
 						CourseConstants.PROPERTY_BCC_EMAIL + (application.getPrefix() != null ? "." + application.getPrefix() : ""),
-						"");
+						CoreConstants.EMPTY
+			);
 
-		sendMessageToParents(application, choice, subject, body, locale, bcc);
+			sendMessageToParents(application, choice, subject, body, locale, bcc);
+		} else {
+			//	Choice was not on a waiting list, can be accepted without parent's confirmation
+			choice.setWaitingList(false);
+			choice.store();
+
+			CourseApplication application = choice.getApplication();
+			String subject = getLocalizedString(
+					"course_choice.accepted_subject", "Course choice accepted",
+					locale
+			);
+
+			String prefix = application.getPrefix();
+			prefix = prefix != null && prefix.length() > 0 ? prefix + "." : "";
+
+			String body = getLocalizedString(prefix +
+					"course_choice.accepted_body",
+					"Your registration to course {2} at {3} for {0}, {1} has been accepted.",
+					locale
+			);
+
+			String bcc = getIWApplicationContext().getApplicationSettings().getProperty(
+						CourseConstants.PROPERTY_BCC_EMAIL + (application.getPrefix() != null ? "." + application.getPrefix() : ""),
+						CoreConstants.EMPTY
+			);
+
+			sendMessageToParents(application, choice, subject, body, locale, bcc);
+		}
 
 		return true;
 	}
@@ -3525,5 +3588,24 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		}
 
 		return this.courseProviderTypeHome;
+	}
+
+	private CourseProviderAreaHome courseProviderAreaHome = null;
+
+	protected CourseProviderAreaHome getCourseProviderAreaHome() {
+		if (courseProviderAreaHome == null) {
+			try {
+				this.courseProviderAreaHome = (CourseProviderAreaHome) IDOLookup.getHome(CourseProviderArea.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING,
+						"Failed to get " + CourseProviderAreaHome.class + " cause of: ", e);
+			}
+		}
+
+		return this.courseProviderAreaHome;
+	}
+
+	private boolean isWaitingListTurnedOn() {
+		return getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_WAITING_LIST, false);
 	}
 }

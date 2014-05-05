@@ -117,6 +117,32 @@ public abstract class RentableItemBMPBean extends GenericEntity implements Renta
 //		store();
 //	}
 
+//	public Double getRentPrice(SchoolSeason season) {
+//		if (season == null) {
+//			return getRealValue(COLUMN_RENT_PRICE, 0.0);
+//		}
+//
+//		CoursePrice price = getPrice(season);
+//		int priceInt = price == null ? -1 : price.getPrice();
+//		return priceInt <= 0 ? getRealValue(COLUMN_RENT_PRICE, 0.0) : Double.valueOf(priceInt);
+//	}
+//
+//	private CoursePrice getPrice(SchoolSeason season) {
+//		Collection<CoursePrice> allPrices = getAllPrices();
+//		if (ListUtil.isEmpty(allPrices)) {
+//			return null;
+//		}
+//
+//		for (CoursePrice price: allPrices) {
+//			SchoolSeason priceSeason = price.getSchoolSeason();
+//			if (priceSeason != null && priceSeason.getPrimaryKey().toString().equals(season.getPrimaryKey().toString())) {
+//				return price;
+//			}
+//		}
+//
+//		return null;
+//	}
+
 	public Integer getQuantity() {
 		return getRealValue(COLUMN_QUANTITY, 0);
 	}

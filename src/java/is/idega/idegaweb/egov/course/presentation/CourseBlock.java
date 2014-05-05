@@ -61,6 +61,7 @@ import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 
 /**
@@ -358,24 +359,36 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		if (hasGrowthDeviation == null && isSchoolUser()) {
 			hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
 		}
+		if (hasGrowthDeviation == null) {
+			hasGrowthDeviation = child.hasGrowthDeviation();
+		}
 
 		String growthDeviation = child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (growthDeviation == null && isSchoolUser()) {
 			growthDeviation = child.getGrowthDeviationDetails(CourseConstants.COURSE_PREFIX);
+		}
+		if (growthDeviation == null) {
+			growthDeviation = child.getGrowthDeviationDetails();
 		}
 
 		Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (hasAllergies == null && isSchoolUser()) {
 			hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
 		}
+		if (hasAllergies == null) {
+			hasAllergies = child.hasAllergies();
+		}
 
 		String allergies = child.getAllergiesDetails(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 		if (allergies == null && isSchoolUser()) {
 			allergies = child.getAllergiesDetails(CourseConstants.COURSE_PREFIX);
 		}
+		if (allergies == null) {
+			allergies = child.getAllergiesDetails();
+		}
 
 		String otherInformation = child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
-		if (otherInformation == null && isSchoolUser()) {
+		if (StringUtil.isEmpty(otherInformation) && isSchoolUser()) {
 			otherInformation = child.getOtherInformation(CourseConstants.COURSE_PREFIX);
 		}
 
@@ -623,7 +636,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		return layer;
 	}
 
-	protected Layer getRelatives(IWContext iwc, IWResourceBundle iwrb, Collection<Relative> custodians) {
+	protected Layer getRelatives(IWContext iwc, IWResourceBundle iwrb, Collection<Relative> relatives) {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
@@ -675,7 +688,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 		email.add(label);
 		layer.add(email);
 
-		for (Iterator<Relative> iter = custodians.iterator(); iter.hasNext();) {
+		for (Iterator<Relative> iter = relatives.iterator(); iter.hasNext();) {
 			Relative relative = iter.next();
 
 			Layer span = new Layer(Layer.SPAN);

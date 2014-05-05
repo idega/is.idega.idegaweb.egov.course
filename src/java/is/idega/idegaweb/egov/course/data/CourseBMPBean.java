@@ -632,23 +632,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		super.remove();
 	}
 
-	private ChildCourseHome childCourseHome = null;
-
-	protected ChildCourseHome getChildCourseHome() {
-		if (this.childCourseHome == null) {
-			try {
-				this.childCourseHome = (ChildCourseHome) IDOLookup
-						.getHome(ChildCourse.class);
-			} catch (IDOLookupException e) {
-				getLogger().log(Level.WARNING, 
-						"Failed to get " + ChildCourseHome.class.getSimpleName() + 
-						" cause of: ", e);
-			}
-		}
-
-		return this.childCourseHome;
-	}
-
 	/**
 	 *
 	 * <p>Constructs SQL query</p>
@@ -1343,4 +1326,21 @@ public class CourseBMPBean extends GenericEntity implements Course {
 //
 //		store();
 //	}
+
+	private ChildCourseHome childCourseHome = null;
+
+	protected ChildCourseHome getChildCourseHome() {
+		if (this.childCourseHome == null) {
+			try {
+				this.childCourseHome = (ChildCourseHome) IDOLookup
+						.getHome(ChildCourse.class);
+			} catch (IDOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + ChildCourseHome.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.childCourseHome;
+	}
 }
