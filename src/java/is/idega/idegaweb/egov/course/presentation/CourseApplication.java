@@ -2060,7 +2060,7 @@ public class CourseApplication extends ApplicationForm {
 
 			int totalForAplicantCourses = 0, totalForApplicantExtraCare = 0;
 			Collection<ApplicationHolder> holders = applications.get(user);
-			for (ApplicationHolder applicationHolder : holders) {
+			for (ApplicationHolder applicationHolder: holders) {
 				row = group.createRow();
 				row.setStyleClass("subRow");
 
@@ -2081,37 +2081,47 @@ public class CourseApplication extends ApplicationForm {
 					cell.add(new Text(iwrb.getLocalizedString("application_status.waiting_list", "Waiting list")));
 					cell.setColumnSpan(2);
 				} else {
-					CoursePrice coursePrice = applicationHolder.getCourse().getPrice();
+					CoursePrice price = applicationHolder.getCourse().getPrice();
+
+					//	Price
+					int coursePrice = 0;
 					cell.setStyleClass("registered");
-					if (coursePrice != null) {
-						int priceTmp = coursePrice.getPrice();
-						if (priceTmp > 0) {
-							totalForAplicantCourses += priceTmp;
+					if (price != null) {
+						coursePrice = price.getPrice();
+						if (coursePrice > 0) {
+							totalForAplicantCourses += coursePrice;
 						}
-						cell.add(new Text(format.format(priceTmp)));
+						cell.add(new Text(format.format(coursePrice)));
 					}
 
+					//	Extra services
+					int extraServices = 0;
 					cell = row.createCell();
 					cell.setStyleClass("status registered");
-					if (coursePrice != null) {
-						int priceTmp = 0;
+					if (price != null) {
 						if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_POST) {
-							priceTmp = coursePrice.getPostCarePrice();
+							extraServices = price.getPostCarePrice();
 						} else if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_PRE) {
-							priceTmp = coursePrice.getPreCarePrice();
+							extraServices = price.getPreCarePrice();
 						} else if (applicationHolder.getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
-							priceTmp = (coursePrice.getPreCarePrice() + coursePrice.getPostCarePrice());
+							extraServices = (price.getPreCarePrice() + price.getPostCarePrice());
 						}
 
-						if (priceTmp > 0) {
-							totalForApplicantExtraCare += priceTmp;
+						if (extraServices > 0) {
+							totalForApplicantExtraCare += extraServices;
 						}
-						cell.add(new Text(format.format(priceTmp)));
+						cell.add(new Text(format.format(extraServices)));
 					}
 
+					//	Total (price + extra services)
 					cell = row.createCell();
 					cell.setStyleClass("status registered");
-					cell.add(new Text(format.format(applicationHolder.getPrice())));
+					int totalPricePerCourse = applicationHolder.getPrice();
+					if (totalForAplicantCourses <= 0) {
+						totalPricePerCourse = coursePrice + extraServices;
+						applicationHolder.setCalculatedPrice(totalPricePerCourse);
+					}
+					cell.add(new Text(format.format(totalPricePerCourse)));
 				}
 			}
 
