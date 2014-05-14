@@ -41,8 +41,12 @@ public class ApplicationHolder {
 	}
 
 	public int getPrice() {
-		if (course.getCoursePrice() > 0) {
-			return (int) course.getCoursePrice();
+		float coursePrice = course.getCoursePrice();
+		if (coursePrice > 0) {
+			int tmpCoursePrice = Float.valueOf(coursePrice).intValue();
+			if (tmpCoursePrice > 0) {
+				return tmpCoursePrice;
+			}
 		}
 
 		CoursePrice price = course.getPrice();
