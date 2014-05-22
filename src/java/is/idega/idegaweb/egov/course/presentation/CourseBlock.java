@@ -94,7 +94,7 @@ public abstract class CourseBlock extends Block implements IWPageEventListener {
 	private CitizenBusiness uBusiness;
 	private CourseProviderBusiness courseProviderBusiness = null;
 
-	private IWResourceBundle iwrb;
+	protected IWResourceBundle iwrb;
 	private IWBundle iwb;
 
 	private ICPage iResponsePage;
