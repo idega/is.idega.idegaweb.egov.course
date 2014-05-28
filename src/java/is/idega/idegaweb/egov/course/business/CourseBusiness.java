@@ -1,62 +1,63 @@
 package is.idega.idegaweb.egov.course.business;
 
 
-import java.util.Map;
-import java.rmi.RemoteException;
-import java.sql.Timestamp;
-
+import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
+import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
-import is.idega.idegaweb.egov.course.data.CourseHome;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
+import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import is.idega.idegaweb.egov.course.data.CourseCertificateType;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
 import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
+import is.idega.idegaweb.egov.course.data.CourseDiscount;
+import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
+import is.idega.idegaweb.egov.course.data.CourseHome;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CoursePriceHome;
+import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.CourseTypeHome;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 
-import com.idega.block.process.data.Case;
-import is.idega.idegaweb.egov.course.data.CourseCertificate;
-import com.idega.util.IWTimestamp;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import java.util.Locale;
-import java.util.SortedSet;
-import com.idega.block.process.business.CaseBusiness;
-import java.util.Collection;
-import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
-import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
-import com.idega.block.school.data.School;
-import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
-import com.idega.block.school.data.SchoolArea;
-import java.util.List;
-import is.idega.idegaweb.egov.course.data.Course;
-import com.idega.block.creditcard.business.CreditCardAuthorizationException;
-import com.idega.business.IBOService;
-import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
-import com.idega.user.data.Gender;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CoursePriceHome;
+import java.rmi.RemoteException;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SortedSet;
+
 import javax.ejb.CreateException;
-import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import com.idega.user.data.User;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CourseApplication;
 import javax.ejb.FinderException;
-import com.idega.idegaweb.IWResourceBundle;
+
+import com.idega.block.creditcard.business.CreditCardAuthorizationException;
+import com.idega.block.process.business.CaseBusiness;
+import com.idega.block.process.data.Case;
+import com.idega.block.school.data.School;
+import com.idega.block.school.data.SchoolArea;
 import com.idega.block.school.data.SchoolType;
-import is.idega.idegaweb.egov.course.data.CourseDiscount;
+import com.idega.business.IBOService;
+import com.idega.idegaweb.IWResourceBundle;
+import com.idega.user.data.Gender;
+import com.idega.user.data.User;
+import com.idega.util.IWTimestamp;
 
 public interface CourseBusiness extends IBOService, CaseBusiness,
 		AccountingBusiness {
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#reserveCourse
 	 */
-	public void reserveCourse(Course course) throws RemoteException;
+	public void reserveCourse(Course course, User user) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#setNoPayment
 	 */
 	public void setNoPayment(Object courseChoicePK, boolean noPayment);
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#removeReservation
 	 */
@@ -75,12 +76,14 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getAccountingEntries
 	 */
+	@Override
 	public AccountingEntry[] getAccountingEntries(String productCode,
 			String providerCode, Date fromDate, Date toDate);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getLocalizedCaseDescription
 	 */
+	@Override
 	public String getLocalizedCaseDescription(Case theCase, Locale locale)
 			throws RemoteException;
 
@@ -158,7 +161,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			String accountingKey, int birthYearFrom, int birthYearTo,
 			int maxPer, float price, float cost, boolean openForRegistration, IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare)
 			throws FinderException, CreateException;
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
 	 */
@@ -188,7 +191,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			String accountingKey, int birthYearFrom, int birthYearTo,
 			int maxPer, float price, float cost, boolean openForRegistration)
 			throws FinderException, CreateException, RemoteException;
-			
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#storeCourse
 	 */
@@ -198,7 +201,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 			String accountingKey, int birthYearFrom, int birthYearTo,
 			int maxPer, float price, float cost, boolean openForRegistration, boolean hasPreCare, boolean hasPostCare)
 			throws FinderException, CreateException, RemoteException;
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#deleteCoursePrice
 	 */
@@ -510,7 +513,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersDWR
 	 */
 	public Map getProvidersDWR(int userPK, int typePK, String country) throws RemoteException;
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersForUser
 	 */
@@ -572,12 +575,12 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasAvailableCourses
 	 */
 	public boolean hasAvailableCourses(User user, School school) throws RemoteException;
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasAvailableCourses
 	 */
 	public boolean hasAvailableCourses(User user, School school, CourseType type) throws RemoteException;
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getTimeoutDay
 	 */

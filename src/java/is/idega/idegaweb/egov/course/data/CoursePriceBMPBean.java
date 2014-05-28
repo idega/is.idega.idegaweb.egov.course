@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.ejb.FinderException;
 
 import com.idega.block.school.data.SchoolArea;
+import com.idega.block.school.data.SchoolSeason;
 import com.idega.block.school.data.SchoolType;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOCompositePrimaryKeyException;
@@ -21,19 +22,20 @@ import com.idega.data.query.Table;
 public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 
 	private static final long serialVersionUID = 71798577475166280L;
-	
-	public static final String ENTITY_NAME = "COU_COURSE_PRICE";
-	public static final String COLUMN_NAME = "NAME";
-	public static final String COLUMN_SCHOOL_AREA = "SCHOOL_AREA";
-	public static final String COLUMN_COURSE_TYPE = "COU_COURSE_TYPE_ID";
-	public static final String COLUMN_VALID_FROM = "VALID_FROM";
-	public static final String COLUMN_VALID_TO = "VALID_TO";
-	public static final String COLUMN_VALID = "IS_VALID";
-	public static final String COLUMN_NUMBER_OF_DAYS = "NUMBER_OF_DAYS";
-	public static final String COLUMN_PRICE = "PRICE";
-	public static final String COLUMN_PRE_CARE_PRICE = "PRE_CARE_PRICE";
-	public static final String COLUMN_POST_CARE_PRICE = "POST_CARE_PRICE",
-								COLUMN_SCHOOL_TYPE = "SCHOOL_TYPE";
+
+	public static final String	ENTITY_NAME = "COU_COURSE_PRICE",
+								COLUMN_NAME = "NAME",
+								COLUMN_SCHOOL_AREA = "SCHOOL_AREA",
+								COLUMN_COURSE_TYPE = "COU_COURSE_TYPE_ID",
+								COLUMN_VALID_FROM = "VALID_FROM",
+								COLUMN_VALID_TO = "VALID_TO",
+								COLUMN_VALID = "IS_VALID",
+								COLUMN_NUMBER_OF_DAYS = "NUMBER_OF_DAYS",
+								COLUMN_PRICE = "PRICE",
+								COLUMN_PRE_CARE_PRICE = "PRE_CARE_PRICE",
+								COLUMN_POST_CARE_PRICE = "POST_CARE_PRICE",
+								COLUMN_SCHOOL_TYPE = "SCHOOL_TYPE",
+								COLUMN_SCHOOL_SEASON = "SCHOOL_SEASON";
 
 	@Override
 	public String getEntityName() {
@@ -55,6 +57,7 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		addOneToOneRelationship(COLUMN_SCHOOL_TYPE, SchoolType.class);
 		addManyToOneRelationship(COLUMN_SCHOOL_AREA, SchoolArea.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
+		addManyToOneRelationship(COLUMN_SCHOOL_SEASON, SchoolSeason.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
 	}
 
@@ -64,34 +67,42 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return getStringColumnValue(COLUMN_NAME);
 	}
 
+	@Override
 	public SchoolArea getSchoolArea() {
 		return (SchoolArea) getColumnValue(COLUMN_SCHOOL_AREA);
 	}
 
+	@Override
 	public CourseType getCourseType() {
 		return (CourseType) getColumnValue(COLUMN_COURSE_TYPE);
 	}
 
+	@Override
 	public Timestamp getValidFrom() {
 		return getTimestampColumnValue(COLUMN_VALID_FROM);
 	}
 
+	@Override
 	public Timestamp getValidTo() {
 		return getTimestampColumnValue(COLUMN_VALID_TO);
 	}
 
+	@Override
 	public int getNumberOfDays() {
 		return getIntColumnValue(COLUMN_NUMBER_OF_DAYS);
 	}
 
+	@Override
 	public int getPrice() {
 		return getIntColumnValue(COLUMN_PRICE);
 	}
 
+	@Override
 	public int getPreCarePrice() {
 		return getIntColumnValue(COLUMN_PRE_CARE_PRICE);
 	}
 
+	@Override
 	public int getPostCarePrice() {
 		return getIntColumnValue(COLUMN_POST_CARE_PRICE);
 	}
@@ -102,56 +113,65 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		setColumn(COLUMN_NAME, name);
 	}
 
+	@Override
 	public void setSchoolArea(SchoolArea area) {
 		setColumn(COLUMN_SCHOOL_AREA, area);
 	}
 
+	@Override
 	public void setCourseType(CourseType type) {
 		setColumn(COLUMN_COURSE_TYPE, type);
 	}
 
+	@Override
 	public void setValidFrom(Timestamp stamp) {
 		setColumn(COLUMN_VALID_FROM, stamp);
 	}
 
+	@Override
 	public void setValidTo(Timestamp stamp) {
 		setColumn(COLUMN_VALID_TO, stamp);
 	}
 
+	@Override
 	public void setValid(boolean valid) {
 		setColumn(COLUMN_VALID, valid);
 	}
 
+	@Override
 	public void setNumberOfDays(int noDays) {
 		setColumn(COLUMN_NUMBER_OF_DAYS, noDays);
 	}
 
+	@Override
 	public void setPrice(int price) {
 		setColumn(COLUMN_PRICE, price);
 	}
 
+	@Override
 	public void setPreCarePrice(int price) {
 		setColumn(COLUMN_PRE_CARE_PRICE, price);
 	}
 
+	@Override
 	public void setPostCarePrice(int price) {
 		setColumn(COLUMN_POST_CARE_PRICE, price);
 	}
 
 	// Finders
-	public Collection ejbFindAll() throws FinderException, IDORelationshipException {
+	public Collection<?> ejbFindAll() throws FinderException, IDORelationshipException {
 		return ejbFindAll(null, null, null, null);
 	}
 
-	public Collection ejbFindAll(Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
+	public Collection<?> ejbFindAll(Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		return ejbFindAll(null, null, fromDate, toDate);
 	}
 
-	public Collection ejbFindAll(SchoolArea area, CourseType cType) throws FinderException, IDORelationshipException {
+	public Collection<?> ejbFindAll(SchoolArea area, CourseType cType) throws FinderException, IDORelationshipException {
 		return ejbFindAll(area, cType, null, null);
 	}
 
-	public Collection ejbFindAll(SchoolArea area, CourseType cType, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
+	public Collection<?> ejbFindAll(SchoolArea area, CourseType cType, Date fromDate, Date toDate) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
 
@@ -188,6 +208,7 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return this.idoFindPKsByQuery(query);
 	}
 
+	@Override
 	public SchoolType getSchoolType() {
 		Object type = getColumnValue(COLUMN_SCHOOL_TYPE);
 		if (type instanceof SchoolType)
@@ -195,7 +216,20 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 		return null;
 	}
 
+	@Override
 	public void setSchoolType(SchoolType schoolType) {
 		setColumn(COLUMN_SCHOOL_TYPE, schoolType);
+	}
+
+	@Override
+	public SchoolSeason getSchoolSeason() {
+		Object season = getColumnValue(COLUMN_SCHOOL_SEASON);
+		if (season instanceof SchoolSeason)
+			return (SchoolSeason) season;
+		return null;
+	}
+	@Override
+	public void setSchoolSeason(SchoolSeason season) {
+		setColumn(COLUMN_SCHOOL_SEASON, season);
 	}
 }

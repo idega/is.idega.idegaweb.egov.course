@@ -41,8 +41,12 @@ public class ApplicationHolder {
 	}
 
 	public int getPrice() {
-		if (course.getCoursePrice() >= 0) {
-			return (int) course.getCoursePrice();
+		float coursePrice = course.getCoursePrice();
+		if (coursePrice > 0) {
+			int tmpCoursePrice = Float.valueOf(coursePrice).intValue();
+			if (tmpCoursePrice > 0) {
+				return tmpCoursePrice;
+			}
 		}
 
 		CoursePrice price = course.getPrice();
@@ -103,6 +107,7 @@ public class ApplicationHolder {
 		this.isOnWaitingList = isOnWaitingList;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ApplicationHolder) {
 			ApplicationHolder hol = (ApplicationHolder) obj;
@@ -111,6 +116,7 @@ public class ApplicationHolder {
 		return false;
 	}
 
+	@Override
 	public String toString() {
 		return user + " : " + course + " : " + daycare + " : " + pickedUp;
 	}
