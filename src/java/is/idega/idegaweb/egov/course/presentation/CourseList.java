@@ -377,7 +377,15 @@ public class CourseList extends CourseBlock {
 
 		Date fromDate = stamp.getDate();
 		if (iwc.isParameterSet(PARAMETER_FROM_DATE)) {
-			fromDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_FROM_DATE))).getDate();
+			String tmpFromDate = iwc.getParameter(PARAMETER_FROM_DATE);
+			if (tmpFromDate != null) {
+				java.util.Date tmp = IWDatePickerHandler.getParsedDateByCurrentLocale(tmpFromDate);
+				if (tmp == null) {
+					getLogger().warning("Failed to parse '" + tmpFromDate + "' into date object using " + IWDatePickerHandler.class.getName());
+				} else {
+					fromDate = new IWTimestamp(tmp).getDate();
+				}
+			}
 		}
 
 		stamp.addMonths(1);
