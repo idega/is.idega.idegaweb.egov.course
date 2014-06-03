@@ -20,6 +20,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
@@ -72,20 +73,20 @@ public class CourseChoiceOverview extends CourseBlock {
 	public void present(IWContext iwc) {
 		try {
 			CourseChoice choice = null;
+			String identifier = null;
 			if (iwc.isParameterSet(PARAMETER_CHOICE_PK)) {
 				try {
-					choice = getBusiness().getCourseChoiceHome().findByPrimaryKey(iwc.getParameter(PARAMETER_CHOICE_PK));
+					identifier = iwc.getParameter(PARAMETER_CHOICE_PK);
+					choice = getBusiness().getCourseChoiceHome().findByPrimaryKey(identifier);
+				} catch (FinderException fe) {
+					getLogger().log(Level.WARNING, "Course choice was not find by primary key: " + identifier, fe);
 				}
-				catch (FinderException fe) {
-					fe.printStackTrace();
-				}
-			}
-			else if (iwc.isParameterSet(PARAMETER_UNIQUE_ID)) {
+			} else if (iwc.isParameterSet(PARAMETER_UNIQUE_ID)) {
 				try {
-					choice = getBusiness().getCourseChoiceHome().findByUniqueID(iwc.getParameter(PARAMETER_UNIQUE_ID));
-				}
-				catch (FinderException fe) {
-					fe.printStackTrace();
+					identifier = iwc.getParameter(PARAMETER_UNIQUE_ID);
+					choice = getBusiness().getCourseChoiceHome().findByUniqueID(identifier);
+				} catch (FinderException fe) {
+					getLogger().log(Level.WARNING, "Course choice was not find by unique ID: " + identifier, fe);
 				}
 			}
 
@@ -127,9 +128,8 @@ public class CourseChoiceOverview extends CourseBlock {
 						getViewerForm(iwc, choice);
 						break;
 				}
-			}
-			else {
-				add(new Text("No choice found..."));
+			} else {
+				add(new Text(identifier == null ? "Choice can not be found because identifier was not provided!" : "No choice found by provided identifier '" + identifier + "'"));
 			}
 		}
 		catch (RemoteException re) {
