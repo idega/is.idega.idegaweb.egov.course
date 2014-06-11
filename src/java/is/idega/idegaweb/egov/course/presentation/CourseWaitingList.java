@@ -1,8 +1,8 @@
 /*
  * $Id: CourseWaitingList.java,v 1.6 2009/05/25 14:58:07 laddi Exp $ Created on Mar 28, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation;
@@ -52,7 +52,7 @@ public class CourseWaitingList extends CourseBlock {
 
 	private static final int ACTION_VIEW = 1;
 	private static final int ACTION_ACCEPT = 2;
-	
+
 	private SchoolType type = null;
 
 	@Override
@@ -68,7 +68,7 @@ public class CourseWaitingList extends CourseBlock {
 			if (!success) {
 				PresentationUtil.addJavascriptAlertOnLoad(iwc, localize("accept_choices.max_reached", "You can not accept beyond max for course."));
 			}
-			
+
 			form.add(getNavigation(iwc));
 			if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 				form.add(getPrintouts(iwc));
@@ -85,7 +85,7 @@ public class CourseWaitingList extends CourseBlock {
 				accept.setSubmitConfirm(localize("accept_choices.confirm", "Are you sure you want to accept the selected choices?"));
 				buttonLayer.add(accept);
 			}
-			
+
 			if (getBackPage() != null) {
 				GenericButton back = new GenericButton(localize("back", "Back"));
 				back.setPageToOpen(getBackPage());
@@ -98,13 +98,13 @@ public class CourseWaitingList extends CourseBlock {
 			throw new IBORuntimeException(re);
 		}
 	}
-	
+
 	private boolean parseAction(IWContext iwc) throws RemoteException {
 		int action = ACTION_VIEW;
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
-		
+
 		if (action == ACTION_ACCEPT) {
 			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
 			Course course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
@@ -116,7 +116,7 @@ public class CourseWaitingList extends CourseBlock {
 			}
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -126,7 +126,7 @@ public class CourseWaitingList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
@@ -166,7 +166,7 @@ public class CourseWaitingList extends CourseBlock {
 		else {
 			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCoursesMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_YEAR + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
 		}
-		List functions = new ArrayList();
+		List<String> functions = new ArrayList<String>();
 		functions.add(script2.toString());
 		functions.add(script.toString());
 		functions.add(script3.toString());
@@ -220,14 +220,14 @@ public class CourseWaitingList extends CourseBlock {
 			fromDate = new IWTimestamp(1, 1, year).getDate();
 			toDate = new IWTimestamp(31, 12, year).getDate();
 		}
-		
+
 		DropdownMenu yearMenu = new DropdownMenu(PARAMETER_YEAR);
 		if (inceptionYear > 0) {
 			yearMenu.keepStatusOnAction(true);
 			yearMenu.setID(PARAMETER_YEAR);
 			yearMenu.setOnChange("changeCourseValues();");
 			yearMenu.setSelectedElement(year);
-			
+
 			for (int i = inceptionYear; i <= currentYear; i++) {
 				yearMenu.addMenuElement(i, String.valueOf(i));
 			}
@@ -388,7 +388,7 @@ public class CourseWaitingList extends CourseBlock {
 				postalCode = address.getPostalCode();
 			}
 			Phone phone = getUserBusiness().getChildHomePhone(user);
-			
+
 			CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString());
 			box.setDisabled(choice.getUniqueID() != null);
 

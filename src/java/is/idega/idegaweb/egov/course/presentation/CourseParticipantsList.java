@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Mar 28, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation;
@@ -49,6 +49,7 @@ import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Abbreviation;
 import com.idega.presentation.text.DownloadLink;
+import com.idega.presentation.text.Heading3;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
@@ -73,7 +74,7 @@ public class CourseParticipantsList extends CourseBlock {
 	public static final String PARAMETER_SHOW_COURSE_PARTICIPANT_INFO = "prm_show_course_participant_info";
 
 	protected SchoolType type = null;
-	
+
 	protected ICPage changeEmailResponsePage = null;
 
 	protected static final String PARAMETER_USER_PK = "cf_user_pk";
@@ -85,7 +86,7 @@ public class CourseParticipantsList extends CourseBlock {
 	public void present(IWContext iwc) {
 		try {
 			parseAction(iwc);
-			
+
 			Form form = new Form();
 			form.setID("courseList");
 			form.setStyleClass("adminForm");
@@ -113,20 +114,20 @@ public class CourseParticipantsList extends CourseBlock {
 				store.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_STORE));
 				buttonLayer.add(store);
 			}
-			
+
 			add(form);
 		}
 		catch (RemoteException re) {
 			throw new IBORuntimeException(re);
 		}
 	}
-	
+
 	private void parseAction(IWContext iwc) throws RemoteException {
 		int action = ACTION_VIEW;
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
-		
+
 		if (action == ACTION_STORE) {
 			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
 			for (String choice : choices) {
@@ -170,11 +171,11 @@ public class CourseParticipantsList extends CourseBlock {
 		}
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\n").append("\tcloseAllLoadingMessages();\ndwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE_PK + "\", data);\n").append("}");
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append("\tvar val = +$(\"" + PARAMETER_SCHOOL_TYPE_PK + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("}");
 		StringBuffer script3 = new StringBuffer();
-		script3.append("function setCourseOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
+		script3.append("function setCourseOptions(data) {\n").append("\tcloseAllLoadingMessages();\ndwr.util.removeAllOptions(\"" + PARAMETER_COURSE_PK + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_PK + "\", data);\n").append("}");
 		StringBuffer script4 = new StringBuffer();
 		if (showAllCourses) {
 			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCourseMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
@@ -191,7 +192,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		DropdownMenu schoolType = new DropdownMenu(PARAMETER_SCHOOL_TYPE_PK);
 		schoolType.setId(PARAMETER_SCHOOL_TYPE_PK);
-		schoolType.setOnChange("changeValues();");
+		schoolType.setOnChange("showLoadingMessage('" + getResourceBundle().getLocalizedString("loading", "Loading...") + "');changeValues();");
 		schoolType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_school_type", "Select school type"));
 		schoolType.keepStatusOnAction(true);
 
@@ -208,7 +209,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		DropdownMenu courseType = new DropdownMenu(PARAMETER_COURSE_TYPE_PK);
 		courseType.setId(PARAMETER_COURSE_TYPE_PK);
-		courseType.setOnChange("changeCourseValues();");
+		courseType.setOnChange("showLoadingMessage('" + getResourceBundle().getLocalizedString("loading", "Loading...") + "');changeCourseValues();");
 		courseType.addMenuElementFirst("", getResourceBundle().getLocalizedString("select_course_type", "Select course type"));
 		courseType.keepStatusOnAction(true);
 
@@ -223,7 +224,7 @@ public class CourseParticipantsList extends CourseBlock {
 			Collection courseTypes = getBusiness().getCourseTypes(typePK, true);
 			courseType.addMenuElements(courseTypes);
 		}
-		
+
 		int inceptionYear = Integer.parseInt(iwc.getApplicationSettings().getProperty(CourseConstants.PROPERTY_INCEPTION_YEAR, "-1"));
 		int currentYear = new IWTimestamp().getYear();
 		int year = showAllCourses ? -1 : currentYear;
@@ -236,14 +237,14 @@ public class CourseParticipantsList extends CourseBlock {
 			fromDate = new IWTimestamp(1, 1, year).getDate();
 			toDate = new IWTimestamp(31, 12, year).getDate();
 		}
-		
+
 		DropdownMenu yearMenu = new DropdownMenu(PARAMETER_YEAR);
 		if (inceptionYear > 0) {
 			yearMenu.keepStatusOnAction(true);
 			yearMenu.setID(PARAMETER_YEAR);
-			yearMenu.setOnChange("changeCourseValues();");
+			yearMenu.setOnChange("showLoadingMessage('" + getResourceBundle().getLocalizedString("loading", "Loading...") + "');changeCourseValues();");
 			yearMenu.setSelectedElement(year);
-			
+
 			for (int i = inceptionYear; i <= currentYear + 1; i++) {
 				yearMenu.addMenuElement(i, String.valueOf(i));
 			}
@@ -262,7 +263,7 @@ public class CourseParticipantsList extends CourseBlock {
 			if (showAllCourses) {
 				Collections.reverse(courses);
 			}
-			
+
 			Iterator iter = courses.iterator();
 			while (iter.hasNext()) {
 				Course element = (Course) iter.next();
@@ -285,7 +286,7 @@ public class CourseParticipantsList extends CourseBlock {
 		sorting.addMenuElement(CourseChoiceComparator.NAME_SORT, getResourceBundle().getLocalizedString("sort.name", "Name (A-Z)"));
 		sorting.addMenuElement(CourseChoiceComparator.DATE_SORT, getResourceBundle().getLocalizedString("sort.date", "Date"));
 		sorting.keepStatusOnAction(true);
-		
+
 		if (showTypes) {
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -304,7 +305,7 @@ public class CourseParticipantsList extends CourseBlock {
 		formItem.add(label);
 		formItem.add(courseType);
 		layer.add(formItem);
-		
+
 		if (!showAllCourses && inceptionYear > 0) {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -418,7 +419,7 @@ public class CourseParticipantsList extends CourseBlock {
 			cell.setStyleClass("homePhone");
 			cell.add(new Text(getResourceBundle().getLocalizedString("home_phone", "Phone")));
 			columns++;
-			
+
 			if (showNoPayment) {
 				cell = row.createHeaderCell();
 				if (!addViewParticipantLink && !showCertificates) {
@@ -443,7 +444,7 @@ public class CourseParticipantsList extends CourseBlock {
 				cell.add(new Text(getResourceBundle().getLocalizedString("pdf", "PDF")));
 				columns++;
 			}
-			
+
 			if (showPrice) {
 				cell = row.createHeaderCell();
 				cell.setStyleClass("lastColumn");
@@ -503,8 +504,19 @@ public class CourseParticipantsList extends CourseBlock {
 		CourseType type = null;
 		List choices = new ArrayList();
 		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
-			choices = new ArrayList(getBusiness().getCourseChoices(iwc.getParameter(PARAMETER_COURSE_PK), false));
-			course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
+			String courseId = iwc.getParameter(PARAMETER_COURSE_PK);
+			choices = new ArrayList(getBusiness().getCourseChoices(courseId, false));
+			course = getBusiness().getCourse(courseId);
+			if (course == null) {
+				add(new Heading3(getLocalizedString("course_not_found", "Course not found", iwc)));
+				try {
+					throw new RuntimeException("Course was not found by provided ID: " + courseId);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return table;
+			}
+
 			type = course.getCourseType();
 			if (type.getAbbreviation() != null) {
 				table.setStyleClass("abbr_" + type.getAbbreviation());
@@ -598,7 +610,7 @@ public class CourseParticipantsList extends CourseBlock {
 					link.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
 				}
 				link.setPage(getChangeEmailResponsePage());
-				
+
 				cell.add(link);
 			} else {
 				cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
@@ -641,7 +653,7 @@ public class CourseParticipantsList extends CourseBlock {
 						cell.setStyleClass("lastColumn");
 					}
 					cell.setStyleClass("noPayment");
-					
+
 					CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PAYMENT + choice.getPrimaryKey().toString());
 					box.setChecked(choice.isNoPayment());
 					cell.add(box);
@@ -738,7 +750,7 @@ public class CourseParticipantsList extends CourseBlock {
 					}
 				}
 			}
-			
+
 			if (showPrice) {
 				is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
 				float userPrice = 0;
@@ -750,9 +762,9 @@ public class CourseParticipantsList extends CourseBlock {
 					SortedSet prices = getBusiness().calculatePrices(applicationMap);
 					Map discounts = getBusiness().getDiscounts(prices, applicationMap);
 					CoursePrice price = course.getPrice();
-					
-					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());			
-					
+
+					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+
 					float carePrice = 0;
 					if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
 						carePrice = price.getPreCarePrice();
@@ -764,15 +776,15 @@ public class CourseParticipantsList extends CourseBlock {
 						carePrice = price.getPreCarePrice() + price.getPostCarePrice();
 					}
 					carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
-					
+
 					userPrice = carePrice + coursePrice;
 				}
-				
+
 				cell = row.createCell();
 				cell.setStyleClass("price");
 				cell.setStyleClass("lastColumn");
 				cell.add(new Text(format.format(userPrice)));
-				
+
 				totalPrice += userPrice;
 			}
 
@@ -814,7 +826,7 @@ public class CourseParticipantsList extends CourseBlock {
 		cell.setStyleClass("numberOfParticipants");
 		cell.setColumnSpan(showPrice ? columns - 1 : columns);
 		cell.add(new Text(getResourceBundle().getLocalizedString("number_of_participants", "Number of participants") + ": " + (iRow - 1)));
-		
+
 		if (showPrice) {
 			cell = row.createCell();
 			cell.setStyleClass("price");
@@ -853,7 +865,7 @@ public class CourseParticipantsList extends CourseBlock {
 
 		return home;
 	}
-	
+
 	protected ICPage getChangeEmailResponsePage() {
 		return this.changeEmailResponsePage;
 	}
