@@ -401,14 +401,14 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					row.createCell(7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
 				}
 
-				/* XXX Picked up */
+				/* Picked up */
 				if (choice.isPickedUp()) {
 					row.createCell(8).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 				} else {
 					row.createCell(8).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
 
-				/* XXX Pre-care and post-care*/
+				/* Pre-care and post-care*/
 				int dayCare = choice.getDayCare();
 				if (dayCare > 0) {
 					row.createCell(9).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
@@ -416,7 +416,6 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					row.createCell(9).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
 
-				/*XXX*/
 				iCell = 10;
 	
 				Collection custodians = new ArrayList();
@@ -514,7 +513,6 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					}
 				}
 	
-				/*XXX*/
 				iCell = 40;
 	
 				List relatives = new ArrayList();
