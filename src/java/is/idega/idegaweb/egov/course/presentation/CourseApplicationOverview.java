@@ -11,6 +11,8 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CoursePrice;
 import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
@@ -29,6 +31,7 @@ import com.idega.block.school.data.School;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
+import com.idega.data.IDOLookup;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Span;
@@ -362,10 +365,17 @@ public class CourseApplicationOverview extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("amount");
-				if (!appHolder.isOnWaitingList()) {
-					appHolder.setOnWaitingList(courseBusiness.isFull(course));
+
+				boolean waitingList = false;
+				try {
+					CourseChoiceHome courseChoiceHome = (CourseChoiceHome) IDOLookup.getHome(CourseChoice.class);
+					CourseChoice choice = courseChoiceHome.findByPrimaryKey(appHolder.getChoice().getPrimaryKey());
+					waitingList = choice.isOnWaitingList();
+				} catch (Exception e) {
+					waitingList = appHolder.isOnWaitingList();
 				}
-				if (appHolder.isOnWaitingList()) {
+
+				if (waitingList) {
 					cell.setStyleClass("waitingList");
 					cell.add(new Text(getResourceBundle().getLocalizedString("application_status.waiting_list", "Waiting list")));
 				} else {
