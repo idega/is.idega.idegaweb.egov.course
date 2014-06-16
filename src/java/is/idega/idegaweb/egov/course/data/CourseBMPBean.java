@@ -70,7 +70,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return ENTITY_NAME;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
@@ -402,7 +401,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return ejbFindAll(providerPK, schoolTypePK, courseTypePK, birthYear, null, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAll(Collection<?> providers, Object schoolTypePK, Object courseTypePK) throws FinderException, IDORelationshipException {
 		Table table = new Table(this);
 		Table courseTypeTable = new Table(CourseType.class);
@@ -429,7 +427,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoFindPKsByQuery(query);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAllByProviderAndSchoolTypeAndCourseType(School provider, SchoolType type, CourseType courseType, Date fromDate,
 			Date toDate) throws FinderException {
 
@@ -593,7 +590,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return this.idoGetNumberOfRecords(query);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAllWithNoCourseNumber() throws FinderException {
 		Table table = new Table(this);
 
@@ -604,7 +600,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return idoFindPKsByQuery(query);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindAllByTypes(Collection<String> typesIds) throws FinderException {
 		Table table = new Table(this);
 
@@ -626,7 +621,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemType) {
 		try {
 			return super.idoGetRelatedEntities(itemType);

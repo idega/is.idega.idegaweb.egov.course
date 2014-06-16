@@ -850,7 +850,7 @@ public class CourseApplication extends ApplicationForm {
 		boolean isCourseAdmin = iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY);
 
 		StringBuffer script2 = new StringBuffer();
-		script2.append("function setOptions(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
+		script2.append("function setOptions(data) {\ncloseAllLoadingMessages();\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_COURSE_TYPE + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_COURSE_TYPE + "\", data);\n").append("}");
 
 		StringBuffer script = new StringBuffer();
 		script.append("function changeValues() {\n").append(getSchoolTypePK() != null ? "\tvar val = '" + getSchoolTypePK() + "';\n" : "\tvar val = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("\tgetCourses();\n").append("}");
@@ -862,7 +862,7 @@ public class CourseApplication extends ApplicationForm {
 		script6.append("function getProviders() {\n").append("\tvar val = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getProvidersDWR(" + applicantPK.intValue() + ", val, '" + iwc.getCurrentLocale().getCountry() + "', setProviders);\n").append("}");
 
 		StringBuffer script7 = new StringBuffer();
-		script7.append("function setProviders(data) {\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_PROVIDER + "\", data);\n").append("}");
+		script7.append("function setProviders(data) {\ncloseAllLoadingMessages();\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_PROVIDER + "\", data);\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
 		script4.append("var getName = function(course) { return course.name };\n");
@@ -876,7 +876,7 @@ public class CourseApplication extends ApplicationForm {
 		script4.append("var getProvider = function(course) { return course.provider };\n");
 		script4.append("var getRadioButton = function(course) { return getRadio(course); };\n");
 
-		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
+		script4.append("function setCourses(data) {\ncloseAllLoadingMessages();\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getProvider, getName, getTimeframe, getDays], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
 		Collection<ApplicationHolder> inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {

@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Mar 28, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.business;
@@ -46,6 +46,7 @@ import com.idega.io.MemoryOutputStream;
 import com.idega.presentation.IWContext;
 import com.idega.util.IWTimestamp;
 import com.idega.util.StringHandler;
+import com.idega.util.text.TextSoap;
 
 public class CourseWriter extends DownloadWriter implements MediaWritable {
 
@@ -117,7 +118,7 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 		if (!courses.isEmpty()) {
 			HSSFWorkbook wb = new HSSFWorkbook();
-			HSSFSheet sheet = wb.createSheet(StringHandler.shortenToLength(this.schoolTypeName, 30));
+			HSSFSheet sheet = wb.createSheet(TextSoap.encodeToValidExcelSheetName(StringHandler.shortenToLength(this.schoolTypeName, 30)));
 			sheet.setColumnWidth((short) 0, (short) (24 * 256));
 			sheet.setColumnWidth((short) 1, (short) (24 * 256));
 			sheet.setColumnWidth((short) 2, (short) (8 * 256));
@@ -207,14 +208,14 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 	}
 
 	private CourseBusiness getCourseBusiness(IWApplicationContext iwc) throws RemoteException {
-		return (CourseBusiness) IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
+		return IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
 	}
 
 	private CourseSession getCourseSession(IWUserContext iwc) throws RemoteException {
-		return (CourseSession) IBOLookup.getSessionInstance(iwc, CourseSession.class);
+		return IBOLookup.getSessionInstance(iwc, CourseSession.class);
 	}
 
 	private SchoolBusiness getSchoolBusiness(IWApplicationContext iwc) throws RemoteException {
-		return (SchoolBusiness) IBOLookup.getServiceInstance(iwc, SchoolBusiness.class);
+		return IBOLookup.getServiceInstance(iwc, SchoolBusiness.class);
 	}
 }

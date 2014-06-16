@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Mar 28, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.business;
@@ -63,6 +63,7 @@ import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
 import com.idega.util.text.Name;
+import com.idega.util.text.TextSoap;
 
 public class CourseParticipantsWriter extends DownloadWriter implements MediaWritable {
 
@@ -75,11 +76,11 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 	private String courseName;
 
 	public static final String PARAMETER_WAITING_LIST = "prm_waiting_list";
-	
+
 	public CourseParticipantsWriter() {
 	}
 
-	private Collection getChoices(Course course, IWContext iwc, boolean waitingList) {
+	private Collection<CourseChoice> getChoices(Course course, IWContext iwc, boolean waitingList) {
 		if (iwc.isParameterSet(CourseBlock.PARAMETER_COURSE_PARTICIPANT_PK)) {
 			User participant = null;
 			try {
@@ -88,9 +89,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				e.printStackTrace();
 			}
 			if (participant == null) {
-				return new ArrayList();
+				return new ArrayList<CourseChoice>();
 			}
-			
+
 			CourseChoice choise = null;
 			try {
 				choise = business.getCourseChoiceHome().findByUserAndCourse(participant, course);
@@ -100,7 +101,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				e.printStackTrace();
 			}
 			if (choise == null) {
-				return new ArrayList();
+				return new ArrayList<CourseChoice>();
 			}
 			return Arrays.asList(new CourseChoice[] {choise});
 		}
@@ -108,10 +109,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			return business.getCourseChoices(course, waitingList);
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			return new ArrayList();
+			return new ArrayList<CourseChoice>();
 		}
 	}
-	
+
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
 		try {
@@ -123,7 +124,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			if (req.getParameter(CourseBlock.PARAMETER_COURSE_PK) != null) {
 				Course course = business.getCourse(iwc.getParameter(CourseBlock.PARAMETER_COURSE_PK));
 				courseName = course.getName();
-				
+
 				boolean waitingList = iwc.isParameterSet(PARAMETER_WAITING_LIST);
 
 				Collection choices = getChoices(course, iwc, waitingList);
@@ -173,7 +174,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 
 		HSSFWorkbook wb = new HSSFWorkbook();
-		HSSFSheet sheet = wb.createSheet(StringHandler.shortenToLength(this.courseName, 30));
+		String sheetName = StringHandler.shortenToLength(this.courseName, 30);
+		sheetName = TextSoap.encodeToValidExcelSheetName(sheetName);
+		HSSFSheet sheet = wb.createSheet(sheetName);
 		sheet.setColumnWidth((short) 0, (short) (30 * 256));
 		sheet.setColumnWidth((short) 1, (short) (14 * 256));
 		sheet.setColumnWidth((short) 2, (short) (30 * 256));
@@ -196,7 +199,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		HSSFCell cell = row.createCell((short) 0);
 		cell.setCellValue(this.courseName);
 		cell.setCellStyle(bigStyle);
-		
+
 		row = sheet.createRow(cellRow++);
 
 		boolean showAll = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
@@ -212,7 +215,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell.setCellValue(this.iwrb.getLocalizedString("relatives", "Relatives"));
 			cell.setCellStyle(bigStyle);
 		}
-		
+
 		short iCell = 0;
 		row = sheet.createRow(cellRow++);
 		cell = row.createCell(iCell++);
@@ -241,7 +244,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("child.other_information", "Other information"));
 			cell.setCellStyle(style);
-	
+
 			for (int a = 1; a <= 3; a++) {
 				cell = row.createCell(iCell++);
 				cell.setCellValue(this.iwrb.getLocalizedString("relation", "Relation"));
@@ -298,7 +301,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell.setCellValue(this.iwrb.getLocalizedString("application.reference_number", "Reference number"));
 			cell.setCellStyle(style);
 		}
-		
+
 		if (showAll) {
 			for (int a = 1; a <= 2; a++) {
 				cell = row.createCell(iCell++);
@@ -321,7 +324,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				cell.setCellStyle(style);
 			}
 		}
-		
+
 		User user;
 		User owner;
 		Address address;
@@ -368,7 +371,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				else {
 					row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
-	
+
 				Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (hasAllergies == null) {
 					hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
@@ -379,16 +382,16 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				else {
 					row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
-	
+
 				if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
 					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 				}
 				else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
 					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
 				}
-	
+
 				iCell = 8;
-	
+
 				Collection custodians = new ArrayList();
 				try {
 					custodians = child.getCustodians();
@@ -397,7 +400,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				if (extraCustodian != null) {
 					custodians.add(extraCustodian);
 				}
-	
+
 				Iterator iterator = custodians.iterator();
 				while (iterator.hasNext()) {
 					Custodian element = (Custodian) iterator.next();
@@ -407,35 +410,35 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					Email email = null;
 					String relation = this.iwrb.getLocalizedString("relation." + child.getRelation(element), "relation." + child.getRelation(element));
 					String maritalStatus = this.iwrb.getLocalizedString("marital_status." + element.getMaritalStatus(), "marital_status." + element.getMaritalStatus());
-	
+
 					try {
 						phone = this.userBusiness.getUsersHomePhone(element);
 					}
 					catch (NoPhoneFoundException npfe) {
 						phone = null;
 					}
-	
+
 					try {
 						work = this.userBusiness.getUsersWorkPhone(element);
 					}
 					catch (NoPhoneFoundException npfe) {
 						work = null;
 					}
-	
+
 					try {
 						mobile = this.userBusiness.getUsersMobilePhone(element);
 					}
 					catch (NoPhoneFoundException npfe) {
 						mobile = null;
 					}
-	
+
 					try {
 						email = this.userBusiness.getUsersMainEmail(element);
 					}
 					catch (NoEmailFoundException nefe) {
 						email = null;
 					}
-	
+
 					name = new Name(element.getFirstName(), element.getMiddleName(), element.getLastName());
 					row.createCell(iCell++).setCellValue(relation);
 					row.createCell(iCell++).setCellValue(name.getName(this.locale, true));
@@ -483,9 +486,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 						iCell++;
 					}
 				}
-	
+
 				iCell = 38;
-	
+
 				List relatives = new ArrayList();
 				Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (mainRelative == null) {
@@ -503,7 +506,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				while (iterator.hasNext()) {
 					Relative element = (Relative) iterator.next();
 					String relation = this.iwrb.getLocalizedString("relation." + element.getRelation(), "relation." + element.getRelation());
-	
+
 					row.createCell(iCell++).setCellValue(relation);
 					row.createCell(iCell++).setCellValue(element.getName());
 					row.createCell(iCell++).setCellValue(element.getHomePhone());
@@ -517,7 +520,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				Phone work = null;
 				Phone mobile = null;
 				Email email = null;
-				
+
 				String payerName = null;
 				String payerPersonalID = null;
 				if (application.getPayerPersonalID() != null) {
@@ -590,7 +593,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 
 		HSSFWorkbook wb = new HSSFWorkbook();
-		HSSFSheet sheet = wb.createSheet(StringHandler.shortenToLength(this.courseName, 30));
+		HSSFSheet sheet = wb.createSheet(TextSoap.encodeToValidExcelSheetName(StringHandler.shortenToLength(this.courseName, 30)));
 		sheet.setColumnWidth(0, (short) (30 * 256));
 		sheet.setColumnWidth(1, (short) (14 * 256));
 		sheet.setColumnWidth(2, (short) (30 * 256));
@@ -614,7 +617,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		HSSFCell cell = row.createCell(0);
 		cell.setCellValue(this.courseName);
 		cell.setCellStyle(bigStyle);
-		
+
 		row = sheet.createRow(cellRow++);
 
 		int iCell = 0;
@@ -681,9 +684,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				SortedSet prices = getCourseBusiness(iwc).calculatePrices(applicationMap);
 				Map discounts = getCourseBusiness(iwc).getDiscounts(prices, applicationMap);
 				CoursePrice price = course.getPrice();
-				
-				float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());			
-				
+
+				float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+
 				float carePrice = 0;
 				if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
 					carePrice = price.getPreCarePrice();
@@ -695,10 +698,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					carePrice = price.getPreCarePrice() + price.getPostCarePrice();
 				}
 				carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
-				
+
 				userPrice = carePrice + coursePrice;
 			}
-			
+
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
 			row.createCell(0).setCellValue(name.getName(this.locale, true));
 			row.createCell(1).setCellValue(PersonalIDFormatter.format(user.getPersonalID(), this.locale));
@@ -712,7 +715,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				row.createCell(4).setCellValue(phone.getNumber());
 			}
 			row.createCell(5).setCellValue(userPrice);
-			
+
 			if (owner != null) {
 				row.createCell(6).setCellValue(owner.getPersonalID());
 				row.createCell(7).setCellValue(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(this.locale, true));
@@ -724,10 +727,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 	}
 
 	private CourseBusiness getCourseBusiness(IWApplicationContext iwc) throws RemoteException {
-		return (CourseBusiness) IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
+		return IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
 	}
 
 	private CitizenBusiness getUserBusiness(IWApplicationContext iwc) throws RemoteException {
-		return (CitizenBusiness) IBOLookup.getServiceInstance(iwc, CitizenBusiness.class);
+		return IBOLookup.getServiceInstance(iwc, CitizenBusiness.class);
 	}
 }

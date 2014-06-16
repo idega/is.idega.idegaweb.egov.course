@@ -46,6 +46,7 @@ import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 
 public class CourseWaitingList extends CourseBlock {
@@ -389,8 +390,12 @@ public class CourseWaitingList extends CourseBlock {
 			}
 			Phone phone = getUserBusiness().getChildHomePhone(user);
 
+			boolean invitationSent = !StringUtil.isEmpty(choice.getUniqueID());
 			CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString());
-			box.setDisabled(choice.getUniqueID() != null);
+			if (invitationSent) {
+				box.setOnClick("if (this.checked == null || this.checked == true) {if (window.confirm('" + getLocalizedString("invitation_is_already_sent_do_you_want_to_re-send_it", "It seems invitation is already sent. Do you want to re-send it?", iwc) +
+						"')) {return true;} else {return false;}}");
+			}
 
 			if (iRow == course.getMax()) {
 				row.setStyleClass("lastAvailable");
@@ -402,7 +407,7 @@ public class CourseWaitingList extends CourseBlock {
 			if (iRow > course.getMax()) {
 				row.setStyleClass("exceedingParticipant");
 			}
-			if (choice.getUniqueID() != null) {
+			if (invitationSent) {
 				row.setStyleClass("hasOffer");
 			}
 
