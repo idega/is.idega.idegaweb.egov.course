@@ -50,14 +50,12 @@ public class ApplicationHolder {
 		}
 
 		CoursePrice price = course.getPrice();
-		int totalPrice = price.getPrice();
-		if (getDaycare() == CourseConstants.DAY_CARE_POST) {
+		int totalPrice = price == null ? 0 : price.getPrice();
+		if (price != null && getDaycare() == CourseConstants.DAY_CARE_POST) {
 			totalPrice += price.getPostCarePrice();
-		}
-		else if (getDaycare() == CourseConstants.DAY_CARE_PRE) {
+		} else if (price != null && getDaycare() == CourseConstants.DAY_CARE_PRE) {
 			totalPrice += price.getPreCarePrice();
-		}
-		else if (getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+		} else if (price != null && getDaycare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
 			totalPrice += (price.getPreCarePrice() + price.getPostCarePrice());
 		}
 		return totalPrice;
