@@ -617,14 +617,12 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#invalidateApplication
 	 */
-	public void invalidateApplication(CourseApplication application,
-			User performer, Locale locale) throws RemoteException;
+	public void invalidateApplication(CourseApplication application, User performer, Locale locale) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#invalidateChoice
 	 */
-	public void invalidateChoice(CourseApplication application,
-			CourseChoice choice, Locale locale) throws RemoteException;
+	public void invalidateChoice(CourseApplication application, CourseChoice choice, Locale locale, User performer) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication

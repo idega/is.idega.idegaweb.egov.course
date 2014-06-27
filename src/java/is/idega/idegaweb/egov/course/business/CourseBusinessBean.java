@@ -2271,16 +2271,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public void sendRefundMessage(CourseApplication application,
-			CourseChoice choice, Locale locale) {
-		String subject = "";
-		String body = "";
+	public void sendRefundMessage(CourseApplication application, CourseChoice choice, Locale locale) {
+		String subject = CoreConstants.EMPTY;
+		String body = CoreConstants.EMPTY;
 
 		User payer = null;
 		if (application.getPayerPersonalID() != null) {
 			try {
-				payer = getUserBusiness().getUser(
-						application.getPayerPersonalID());
+				payer = getUserBusiness().getUser(application.getPayerPersonalID());
 			} catch (FinderException e) {
 				e.printStackTrace();
 				payer = application.getOwner();
@@ -2297,21 +2295,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			School provider = course.getProvider();
 			Object[] arguments = {
 					applicant.getName(),
-					PersonalIDFormatter.format(applicant.getPersonalID(),
-							getIWApplicationContext().getApplicationSettings()
-									.getDefaultLocale()),
+					PersonalIDFormatter.format(applicant.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale()),
 					course.getName(),
 					provider.getName(),
 					payer.getName(),
-					PersonalIDFormatter.format(payer.getPersonalID(),
-							getIWApplicationContext().getApplicationSettings()
-									.getDefaultLocale()) };
+					PersonalIDFormatter.format(payer.getPersonalID(), getIWApplicationContext().getApplicationSettings().getDefaultLocale())
+			};
 
-			subject = MessageFormat.format(getLocalizedString("course_choice.choice_refund_subject",
-					"Choice invalidated", locale), arguments);
-			body = MessageFormat
-					.format(
-							getLocalizedString(
+			subject = MessageFormat.format(getLocalizedString("course_choice.choice_refund_subject", "Choice invalidated", locale), arguments);
+			body = MessageFormat.format(getLocalizedString(
 									"course_choice.choice_refund_body",
 									"A choice for course {2} at {3} for {0}, {1} has been invalidated and needs to be refunded",
 									locale), arguments);
@@ -2400,31 +2392,40 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public void invalidateApplication(CourseApplication application,
-			User performer, Locale locale) {
+	public void invalidateApplication(CourseApplication application, User performer, Locale locale) {
 		Collection choices = getCourseChoices(application);
 		Iterator iterator = choices.iterator();
 		while (iterator.hasNext()) {
 			CourseChoice choice = (CourseChoice) iterator.next();
-			invalidateChoice(application, choice, locale);
+			invalidateChoice(application, choice, locale, performer);
 		}
 
 		changeCaseStatus(application, getCaseStatusCancelled(), performer);
 	}
 
 	@Override
-	public void invalidateChoice(CourseApplication application,
-			CourseChoice choice, Locale locale) {
+	public void invalidateChoice(CourseApplication application, CourseChoice choice, Locale locale, User performer) {
 		choice.setValid(false);
+		if (performer == null) {
+			CourseApplication app = choice.getApplication();
+			if (app != null) {
+				performer = app.getOwner();
+				if (performer == null) {
+					performer = app.getCreator();
+				}
+			}
+			getLogger().info("Need to invalidate (refund) course application (course choice ID: " + choice.getPrimaryKey() +
+					"). User is not logged in, selecting perfomer as owner of application (" + performer + ")");
+		}
+		choice.setInvalidatedBy(performer);
+		choice.setInvalidatedAt(IWTimestamp.RightNow().getTimestamp());
 		choice.store();
 
-		Collection certificates = getUserCertificatesByCourse(choice.getUser(),
-				choice.getCourse());
+		Collection certificates = getUserCertificatesByCourse(choice.getUser(), choice.getCourse());
 		if (certificates != null && !certificates.isEmpty()) {
 			Iterator iterator = certificates.iterator();
 			while (iterator.hasNext()) {
-				CourseCertificate certificate = (CourseCertificate) iterator
-						.next();
+				CourseCertificate certificate = (CourseCertificate) iterator.next();
 				try {
 					certificate.remove();
 				} catch (RemoveException re) {
@@ -2438,14 +2439,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				"Your registration for course has been invalidated", locale);
 		String body = "";
 		if (application.getPaymentType() != null) {
-			if (application.getPaymentType().equals(
-					CourseConstants.PAYMENT_TYPE_CARD)) {
+			if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
 				body = getLocalizedString(
 						"course_choice.card_registration_invalidated_body",
 						"Your registration for course {2} at {3} for {0}, {1} has been invalidated and you have been refunded to your credit card",
 						locale);
-			} else if (application.getPaymentType().equals(
-					CourseConstants.PAYMENT_TYPE_GIRO)) {
+			} else if (application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_GIRO)) {
 				body = getLocalizedString(
 						"course_choice.giro_registration_invalidated_body",
 						"Your registration for course {2} at {3} for {0}, {1} has been invalidated.  If you have already paid for the course you will receive repayment shortly.",
@@ -2697,7 +2696,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				locale = getIWApplicationContext().getApplicationSettings()
 						.getDefaultLocale();
 			}
-			
+
 			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, CoreConstants.EMPTY);
 
 			User applicant = choice.getUser();

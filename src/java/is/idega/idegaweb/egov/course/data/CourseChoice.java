@@ -1,9 +1,10 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.user.data.User;
 import java.sql.Timestamp;
+
 import com.idega.data.IDOEntity;
+import com.idega.user.data.User;
 
 public interface CourseChoice extends IDOEntity {
 	/**
@@ -55,7 +56,7 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#isNoPayment
 	 */
 	public boolean isNoPayment();
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#hasReceivedReminder
 	 */
@@ -115,7 +116,7 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setNoPayment
 	 */
 	public void setNoPayment(boolean noPayment);
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setReceivedReminder
 	 */
@@ -237,14 +238,21 @@ public interface CourseChoice extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#getUniqueID
 	 */
 	public String getUniqueID();
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setNotes
 	 */
 	public void setNotes(String notes);
-	
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean#setUniqueID
 	 */
 	public void setUniqueID(String uniqueID);
+
+	public void setInvalidatedBy(User performer);
+	public User getInvalidatedBy();
+
+	public void setInvalidatedAt(Timestamp timestamp);
+	public Timestamp getInvalidatedAt();
+
 }

@@ -101,7 +101,18 @@ public class CourseChoiceOverview extends CourseBlock {
 						break;
 
 					case ACTION_REFUND:
-						boolean refund = refund(iwc, choice);
+						User performer = null;
+						if (iwc.isLoggedOn()) {
+							performer = iwc.getCurrentUser();
+						} else {
+							performer = choice.getApplication().getOwner();
+							if (performer == null) {
+								performer = choice.getApplication().getCreator();
+							}
+							getLogger().info("Got action to refund (cancel) course application (course choice ID: " + choice.getPrimaryKey() +
+									"). User is not logged in, selecting perfomer as owner of application (" + performer + ")");
+						}
+						boolean refund = refund(iwc, choice, performer);
 						if (!refund) {
 							getRefundForm(iwc, choice);
 						}
@@ -566,7 +577,7 @@ public class CourseChoiceOverview extends CourseBlock {
 		add(form);
 	}
 
-	private boolean refund(IWContext iwc, CourseChoice choice) throws RemoteException {
+	private boolean refund(IWContext iwc, CourseChoice choice, User performer) throws RemoteException {
 		boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 		is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
 		if (useDirectPayment && application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
@@ -588,7 +599,7 @@ public class CourseChoiceOverview extends CourseBlock {
 			getBusiness().sendRefundMessage(application, choice, iwc.getCurrentLocale());
 		}
 
-		getBusiness().invalidateChoice(application, choice, iwc.getCurrentLocale());
+		getBusiness().invalidateChoice(application, choice, iwc.getCurrentLocale(), performer);
 
 		String subject = localize("course_choice.invalidated_receipt_subject", "Choice invalidated");
 		String body = "";
