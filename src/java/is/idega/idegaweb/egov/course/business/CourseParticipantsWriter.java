@@ -59,6 +59,7 @@ import com.idega.presentation.IWContext;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
@@ -177,11 +178,11 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		String sheetName = StringHandler.shortenToLength(this.courseName, 30);
 		sheetName = TextSoap.encodeToValidExcelSheetName(sheetName);
 		HSSFSheet sheet = wb.createSheet(sheetName);
-		sheet.setColumnWidth((short) 0, (short) (30 * 256));
-		sheet.setColumnWidth((short) 1, (short) (14 * 256));
-		sheet.setColumnWidth((short) 2, (short) (30 * 256));
-		sheet.setColumnWidth((short) 3, (short) (14 * 256));
-		sheet.setColumnWidth((short) 4, (short) (14 * 256));
+		sheet.setColumnWidth(0, (30 * 256));
+		sheet.setColumnWidth(1, (14 * 256));
+		sheet.setColumnWidth(2, (30 * 256));
+		sheet.setColumnWidth(3, (14 * 256));
+		sheet.setColumnWidth(4, (14 * 256));
 		HSSFFont font = wb.createFont();
 		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 		font.setFontHeightInPoints((short) 12);
@@ -196,7 +197,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 		int cellRow = 0;
 		HSSFRow row = sheet.createRow(cellRow++);
-		HSSFCell cell = row.createCell((short) 0);
+		HSSFCell cell = row.createCell(0);
 		cell.setCellValue(this.courseName);
 		cell.setCellStyle(bigStyle);
 
@@ -205,18 +206,18 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		boolean showAll = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
 		if (showAll) {
 			row = sheet.createRow(cellRow++);
-			cell = row.createCell((short) 0);
+			cell = row.createCell(0);
 			cell.setCellValue(this.iwrb.getLocalizedString("participant", "Participant"));
 			cell.setCellStyle(bigStyle);
-			cell = row.createCell((short) 13);
+			cell = row.createCell(13);
 			cell.setCellValue(this.iwrb.getLocalizedString("custodians", "Custodians"));
 			cell.setCellStyle(bigStyle);
-			cell = row.createCell((short) 43);
+			cell = row.createCell(43);
 			cell.setCellValue(this.iwrb.getLocalizedString("relatives", "Relatives"));
 			cell.setCellStyle(bigStyle);
 		}
 
-		short iCell = 0;
+		int iCell = 0;
 		row = sheet.createRow(cellRow++);
 		cell = row.createCell(iCell++);
 		cell.setCellValue(this.iwrb.getLocalizedString("name", "Name"));
@@ -243,6 +244,19 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell.setCellStyle(style);
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("child.other_information", "Other information"));
+			cell.setCellStyle(style);
+
+			/* XXX Picked up */
+			cell = row.createCell(iCell++);
+			cell.setCellValue(this.iwrb.getLocalizedString("picked_up", "Picked up"));
+			cell.setCellStyle(style);
+
+			/* XXX Pre-care and post-care*/
+			String cellValue = this.iwrb.getLocalizedString("pre_care", "Has pre care");
+			cellValue = cellValue + CoreConstants.SLASH;
+			cellValue = cellValue + this.iwrb.getLocalizedString("post_care", "Has post care");
+			cell = row.createCell(iCell++);
+			cell.setCellValue(cellValue);
 			cell.setCellStyle(style);
 
 			for (int a = 1; a <= 3; a++) {
@@ -348,16 +362,16 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			phone = this.userBusiness.getChildHomePhone(user);
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
-			row.createCell((short) 0).setCellValue(name.getName(this.locale, true));
-			row.createCell((short) 1).setCellValue(PersonalIDFormatter.format(user.getPersonalID(), this.locale));
+			row.createCell(0).setCellValue(name.getName(this.locale, true));
+			row.createCell(1).setCellValue(PersonalIDFormatter.format(user.getPersonalID(), this.locale));
 			if (address != null) {
-				row.createCell((short) 2).setCellValue(address.getStreetAddress());
+				row.createCell(2).setCellValue(address.getStreetAddress());
 				if (postalCode != null) {
-					row.createCell((short) 3).setCellValue(postalCode.getPostalAddress());
+					row.createCell(3).setCellValue(postalCode.getPostalAddress());
 				}
 			}
 			if (phone != null) {
-				row.createCell((short) 4).setCellValue(phone.getNumber());
+				row.createCell(4).setCellValue(phone.getNumber());
 			}
 
 			if (showAll) {
@@ -366,10 +380,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					hasGrowthDeviation = child.hasGrowthDeviation(CourseConstants.COURSE_PREFIX);
 				}
 				if (hasGrowthDeviation != null && hasGrowthDeviation.booleanValue()) {
-					row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+					row.createCell(5).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 				}
 				else {
-					row.createCell((short) 5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+					row.createCell(5).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
 
 				Boolean hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
@@ -377,20 +391,35 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					hasAllergies = child.hasAllergies(CourseConstants.COURSE_PREFIX);
 				}
 				if (hasAllergies != null && hasAllergies.booleanValue()) {
-					row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+					row.createCell(6).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
 				}
 				else {
-					row.createCell((short) 6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+					row.createCell(6).setCellValue(this.iwrb.getLocalizedString("no", "No"));
 				}
 
 				if (child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()) != null) {
-					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
+					row.createCell(7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey()));
 				}
 				else if (child.getOtherInformation(CourseConstants.COURSE_PREFIX) != null) {
-					row.createCell((short) 7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
+					row.createCell(7).setCellValue(child.getOtherInformation(CourseConstants.COURSE_PREFIX));
 				}
 
-				iCell = 8;
+				/* Picked up */
+				if (choice.isPickedUp()) {
+					row.createCell(8).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+				} else {
+					row.createCell(8).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+				}
+
+				/* Pre-care and post-care*/
+				int dayCare = choice.getDayCare();
+				if (dayCare > 0) {
+					row.createCell(9).setCellValue(this.iwrb.getLocalizedString("yes", "Yes"));
+				} else {
+					row.createCell(9).setCellValue(this.iwrb.getLocalizedString("no", "No"));
+				}
+
+				iCell = 10;
 
 				Collection custodians = new ArrayList();
 				try {
@@ -487,7 +516,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					}
 				}
 
-				iCell = 38;
+				iCell = 40;
 
 				List relatives = new ArrayList();
 				Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
@@ -594,12 +623,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 		HSSFWorkbook wb = new HSSFWorkbook();
 		HSSFSheet sheet = wb.createSheet(TextSoap.encodeToValidExcelSheetName(StringHandler.shortenToLength(this.courseName, 30)));
-		sheet.setColumnWidth(0, (short) (30 * 256));
-		sheet.setColumnWidth(1, (short) (14 * 256));
-		sheet.setColumnWidth(2, (short) (30 * 256));
-		sheet.setColumnWidth(3, (short) (14 * 256));
-		sheet.setColumnWidth(4, (short) (14 * 256));
-		sheet.setColumnWidth(4, (short) (10 * 256));
+		sheet.setColumnWidth(0,  (30 * 256));
+		sheet.setColumnWidth(1,  (14 * 256));
+		sheet.setColumnWidth(2,  (30 * 256));
+		sheet.setColumnWidth(3,  (14 * 256));
+		sheet.setColumnWidth(4,  (14 * 256));
+		sheet.setColumnWidth(4,  (10 * 256));
 		HSSFFont font = wb.createFont();
 		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 		font.setFontHeightInPoints((short) 12);
