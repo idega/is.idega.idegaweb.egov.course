@@ -3522,15 +3522,28 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			Collection<Course> courses = getCourseHome().findAll(null, null, null, -1, fromDate.getDate(), toDate.getDate());
 			int count = 0;
 
+			String locKey = "course_choice.reminder_body";
+
 			IWResourceBundle iwrb = getIWMainApplication().getBundle(getBundleIdentifier()).getResourceBundle(locale);
-			for (Course course : courses) {
+			for (Course course: courses) {
+				if (course == null) {
+					continue;
+				}
+
 				CourseType type = course.getCourseType();
 				String typePrKey = type == null ? null : type.getPrimaryKey().toString();
-				CourseCategory category = type.getCourseCategory();
+				CourseCategory category = type == null ? null : type.getCourseCategory();
+				if (category == null) {
+					continue;
+				}
 
 				if (category.sendReminderEmail()) {
 					Collection<CourseChoice> choices = getCourseChoiceHome().findAllByCourse(course, false);
 					for (CourseChoice choice: choices) {
+						if (choice == null || !choice.isValid()) {
+							continue;
+						}
+
 						if (!choice.hasReceivedReminder()) {
 							CourseApplication application = choice.getApplication();
 
@@ -3542,11 +3555,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 										locale
 								);
 							}
-							String body = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + ".course_choice.reminder_body");
+							String body = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + CoreConstants.DOT + locKey);
 							if (StringUtil.isEmpty(body)) {
 								body = getLocalizedString(
-										(application.getPrefix() != null ? application.getPrefix() + "." : "") +
-										"course_choice.reminder_body",
+										(application.getPrefix() != null ? application.getPrefix() + CoreConstants.DOT : CoreConstants.EMPTY) +	locKey,
 										"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
 										locale
 								);
