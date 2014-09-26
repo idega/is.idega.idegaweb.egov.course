@@ -2373,10 +2373,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 								.getDefaultLocale()) };
 
 		subject = getLocalizedString(
-				"course_choice.choice_registration_subject",
+				"course_choice.choice_registration_subject1",
 				"Choice registered", locale);
 		body = MessageFormat.format(getLocalizedString(
-				"course_choice.choice_registration_body",
+				"course_choice.choice_registration_body1",
 				"A choice for course {2} at {3} for {0}, {1} has been sent in",
 				locale), arguments);
 
