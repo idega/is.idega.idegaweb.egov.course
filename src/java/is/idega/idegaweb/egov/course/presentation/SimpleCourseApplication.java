@@ -1289,7 +1289,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private CourseBusiness getCourseBusiness(IWContext iwc) {
 		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
+			return IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
@@ -1298,7 +1298,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 	private CourseApplicationSession getCourseApplicationSession(IWContext iwc) {
 		try {
-			return (CourseApplicationSession) IBOLookup.getSessionInstance(iwc, CourseApplicationSession.class);
+			return IBOLookup.getSessionInstance(iwc, CourseApplicationSession.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);
