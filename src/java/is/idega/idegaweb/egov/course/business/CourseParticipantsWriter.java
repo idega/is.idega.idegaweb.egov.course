@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 import javax.servlet.http.HttpServletRequest;
@@ -617,6 +618,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		return buffer;
 	}
 
+	private Logger getLogger(){
+		return Logger.getLogger(CourseParticipantsWriter.class.getName());
+	}
 	public MemoryFileBuffer writeAccountingXLS(IWContext iwc, Collection choices) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
@@ -697,9 +701,14 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			Course course = choice.getCourse();
 			User owner = application.getOwner();
 			if (application.getPayerPersonalID() != null) {
-				User payer = getUserBusiness(iwc).getUser(application.getPayerPersonalID());
-				if (payer != null) {
-					owner = payer;
+				try{
+					User payer = getUserBusiness(iwc).getUser(application.getPayerPersonalID());
+					if (payer != null) {
+						owner = payer;
+					}
+				}catch (Exception e) {
+					getLogger().info("Failed getting payer by personal id: '"+application.getPayerPersonalID()+"'");
+					owner = null;
 				}
 			}
 
@@ -748,7 +757,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			if (owner != null) {
 				row.createCell(6).setCellValue(owner.getPersonalID());
 				row.createCell(7).setCellValue(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(this.locale, true));
+			}else{
+				row.createCell(6).setCellValue(application.getPayerPersonalID());
+				row.createCell(7).setCellValue(application.getPayerName());
 			}
+		}
+		for(int i = 0;i<8;i++){
+			sheet.autoSizeColumn(i);
 		}
 		wb.write(mos);
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
