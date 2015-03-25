@@ -2325,7 +2325,7 @@ public class CourseApplication extends ApplicationForm {
 
 			helpLayer = new Layer(Layer.DIV);
 			helpLayer.setStyleClass("helperText");
-			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.creditcard_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
+			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.credit_card_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
 			section.add(helpLayer);
 
 			Collection images = getCourseBusiness(iwc).getCreditCardImages();
