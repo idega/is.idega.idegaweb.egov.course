@@ -122,3 +122,7 @@ table.coursesPhaseSeven tr.subRow td.waitingList {
 table.coursesPhaseSeven tr.subRow td.registered {
 	color: #0a0;	
 }
+
+img.creditCardImage[src="/idegaweb/bundles/com.idega.block.creditcard.bundle/resources/logos/ae.gif"] {
+	display: none;
+}
