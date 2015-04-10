@@ -2328,10 +2328,10 @@ public class CourseApplication extends ApplicationForm {
 			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.credit_card_information_help", "If you have selected to pay by creditcard, please fill in the creditcard information.  All the fields are required.")));
 			section.add(helpLayer);
 
-			Collection images = getCourseBusiness(iwc).getCreditCardImages();
-			Iterator iterator = images.iterator();
+			Collection<Image> images = getCourseBusiness(iwc).getCreditCardImages();
+			Iterator<Image> iterator = images.iterator();
 			while (iterator.hasNext()) {
-				Image image = (Image) iterator.next();
+				Image image = iterator.next();
 				image.setStyleClass("creditCardImage");
 				helpLayer.add(image);
 			}

@@ -42,6 +42,7 @@ import com.idega.block.school.data.SchoolArea;
 import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOService;
 import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.Image;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
@@ -112,7 +113,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCreditCardImages
 	 */
-	public Collection getCreditCardImages() throws RemoteException;
+	public Collection<Image> getCreditCardImages() throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#deleteCourseType

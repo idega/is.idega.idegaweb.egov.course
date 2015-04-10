@@ -92,6 +92,7 @@ import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
 import com.idega.data.SimpleQuerier;
 import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.Image;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.repository.data.ImplementorRepository;
 import com.idega.user.business.NoEmailFoundException;
@@ -606,15 +607,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection getCreditCardImages() {
+	public Collection<Image> getCreditCardImages() {
 		try {
-			return getCreditCardBusiness().getCreditCardTypeImages(
-					getCreditCardBusiness().getCreditCardClient(
-							getCreditCardMerchant()));
+			return getCreditCardBusiness().getCreditCardTypeImages(getCreditCardBusiness().getCreditCardClient(getCreditCardMerchant()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return new ArrayList();
+		return new ArrayList<Image>();
 	}
 
 	private CreditCardBusiness getCreditCardBusiness() {
