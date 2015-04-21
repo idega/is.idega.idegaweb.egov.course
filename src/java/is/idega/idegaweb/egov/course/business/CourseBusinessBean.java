@@ -1023,13 +1023,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Map getProvidersDWR(int userPK, int typePK, String country) {
-		Collection coll = getProviders();
-		Map map = new LinkedHashMap();
+	public List<AdvancedProperty> getProvidersDWR(int userPK, int typePK, String country) {
+		Collection<School> coll = getProviders();
 
 		Locale locale = new Locale(country, country.toUpperCase());
-		map.put(new Integer(-1), getLocalizedString("all_providers",
-				"All providers", locale));
 
 		CourseType type = null;
 		if (typePK > 0) {
@@ -1047,15 +1044,19 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			e.printStackTrace();
 		}
 
+		List<AdvancedProperty> results = new ArrayList<AdvancedProperty>();
 		if (coll != null) {
-			Iterator iter = coll.iterator();
+			Iterator<School> iter = coll.iterator();
 			while (iter.hasNext()) {
-				School provider = (School) iter.next();
-				if (hasAvailableCourses(user, provider, type))
-				map.put(provider.getPrimaryKey(), provider.getSchoolName());
+				School provider = iter.next();
+				if (hasAvailableCourses(user, provider, type)) {
+					results.add(new AdvancedProperty(provider.getPrimaryKey().toString(), provider.getSchoolName()));
+				}
 			}
+			results.add(new AdvancedProperty(String.valueOf(-1), getLocalizedString("all_providers", "All providers", locale)));
+			results.add(0, new AdvancedProperty(String.valueOf(-2), getLocalizedString("select_provider", "Select provider", locale)));
 		}
-		return map;
+		return results;
 	}
 
 	@Override
@@ -1288,13 +1289,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection getCoursesDWR(int providerPK, int schoolTypePK,
-			int courseTypePK, int applicantPK, String country, boolean isAdmin) {
+	public Collection<CourseDWR> getCoursesDWR(int providerPK, int schoolTypePK, int courseTypePK, int applicantPK, String country, boolean isAdmin) {
 		try {
-			User applicant = applicantPK != -1 ? getUserBusiness().getUser(
-					applicantPK) : null;
-			IWTimestamp birth = applicant != null ? new IWTimestamp(applicant
-					.getDateOfBirth()) : null;
+			User applicant = applicantPK != -1 ? getUserBusiness().getUser(applicantPK) : null;
+			IWTimestamp birth = applicant != null ? new IWTimestamp(applicant.getDateOfBirth()) : null;
 
 			Integer iP = null;
 			if (providerPK > -1) {
@@ -1308,7 +1306,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			if (courseTypePK > -1) {
 				iCT = new Integer(courseTypePK);
 			} else {
-				return new ArrayList();
+				return new ArrayList<CourseDWR>();
 			}
 
 			Locale locale = new Locale(country, country.toUpperCase());
@@ -1322,19 +1320,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 			} else {
 				defaultStamp = null;
 			}
-			boolean useCourseOpen = getIWMainApplication().getSettings()
-					.getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES,
-							false);
+			boolean useCourseOpen = getIWMainApplication().getSettings().getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false);
 
 			IWTimestamp stamp = new IWTimestamp();
-			Map map = new LinkedHashMap();
-			Collection courses = getCourses(
+			Map<Object, CourseDWR> map = new LinkedHashMap<Object, CourseDWR>();
+			Collection<Course> courses = getCourses(
 					birth != null ? birth.getYear() : 0, iP, iST, iCT, null,
 					null);
 			if (courses != null) {
-				Iterator iter = courses.iterator();
+				Iterator<Course> iter = courses.iterator();
 				while (iter.hasNext()) {
-					Course course = (Course) iter.next();
+					Course course = iter.next();
 					IWTimestamp start = getRegistrationTimeoutForCourse(course);
 
 					if (useCourseOpen) {
@@ -1353,9 +1349,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					}
 				}
 			}
+
 			return map.values();
-		}
-		catch (RemoteException re) {
+		} catch (RemoteException re) {
 			throw new IBORuntimeException(re);
 		}
 	}
@@ -2713,7 +2709,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 							startDate.getDate())).getLocaleDate(locale,
 							IWTimestamp.SHORT),
 					acceptURL,														//	6: URL
-					choice.getUniqueID()											//	7: unique id
+					choice.getUniqueID(),											//	7: unique id
+					provider.getSchoolEmail(),										//	8: provider email
+					provider.getSchoolWebPage()										//	9: provider web page
 			};
 
 			User appParent = application.getOwner();
@@ -2726,13 +2724,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				}
 
 				try {
-					Collection parents = getFamilyLogic().getCustodiansFor(
-							applicant);
-					Iterator iter = parents.iterator();
+					Collection<User> parents = getFamilyLogic().getCustodiansFor(applicant);
+					Iterator<User> iter = parents.iterator();
 					while (iter.hasNext()) {
-						User parent = (User) iter.next();
-						if (!getUserBusiness().haveSameAddress(parent,
-								appParent)) {
+						User parent = iter.next();
+						if (!getUserBusiness().haveSameAddress(parent, appParent)) {
 							MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, parent, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
 							msgValue.setBcc(bcc);
 

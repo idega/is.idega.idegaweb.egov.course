@@ -107,9 +107,9 @@ public class ApplicationHolder {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof ApplicationHolder) {
+		if (user != null && course != null && obj instanceof ApplicationHolder) {
 			ApplicationHolder hol = (ApplicationHolder) obj;
-			return user.equals(hol.user) && course.equals(hol.course);
+			return (hol.user != null && user.equals(hol.user)) && (hol.course != null && course.equals(hol.course));
 		}
 		return false;
 	}

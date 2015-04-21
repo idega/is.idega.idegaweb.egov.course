@@ -40,6 +40,7 @@ import com.idega.block.process.data.Case;
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolArea;
 import com.idega.block.school.data.SchoolType;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOService;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.Image;
@@ -513,7 +514,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersDWR
 	 */
-	public Map getProvidersDWR(int userPK, int typePK, String country) throws RemoteException;
+	public List<AdvancedProperty> getProvidersDWR(int userPK, int typePK, String country) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getProvidersForUser

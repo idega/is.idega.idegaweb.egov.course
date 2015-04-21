@@ -34,9 +34,12 @@ import java.util.SortedSet;
 
 import javax.ejb.FinderException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
 import com.idega.block.school.data.School;
 import com.idega.block.school.data.SchoolType;
+import com.idega.block.web2.business.JQuery;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -86,6 +89,7 @@ import com.idega.util.PresentationUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.datastructures.map.MapUtil;
+import com.idega.util.expression.ELUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 import com.idega.util.text.TextSoap;
@@ -181,6 +185,16 @@ public class CourseApplication extends ApplicationForm {
 	@Override
 	public String getBundleIdentifier() {
 		return CourseConstants.IW_BUNDLE_IDENTIFIER;
+	}
+
+	@Autowired(required = false)
+	private JQuery jQuery = null;
+
+	private JQuery getJQuery() {
+		if (jQuery == null) {
+			ELUtil.getInstance().autowire(this);
+		}
+		return jQuery;
 	}
 
 	@Override
@@ -845,6 +859,8 @@ public class CourseApplication extends ApplicationForm {
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add(getJQuery().getBundleURIToJQueryLib());
+		scripts.add(getBundle(iwc).getVirtualPathWithFileNameString("javascript/CourseApplicationHelper.js"));
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		boolean isCourseAdmin = iwc.hasRole(CourseConstants.SUPER_ADMINISTRATOR_ROLE_KEY);
@@ -856,13 +872,13 @@ public class CourseApplication extends ApplicationForm {
 		script.append("function changeValues() {\n").append(getSchoolTypePK() != null ? "\tvar val = '" + getSchoolTypePK() + "';\n" : "\tvar val = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar TEST = CourseDWRUtil.getCourseTypesDWR(val, '" + iwc.getCurrentLocale().getCountry() + "', setOptions);\n").append("\tgetCourses();\n").append("}");
 
 		StringBuffer script3 = new StringBuffer();
-		script3.append("function getCourses() {\n").append("\tvar val = +$(\"" + PARAMETER_PROVIDER + "\") != null ? +$(\"" + PARAMETER_PROVIDER + "\").value : -1;\n").append(getSchoolTypePK() != null ? "\tvar val2 = '" + getSchoolTypePK() + "';\n" : "\tvar val2 = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar val3 = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getCoursesDWR(val, val2, val3, " + applicantPK.intValue() + ", '" + iwc.getCurrentLocale().getCountry() + "', " + String.valueOf(isCourseAdmin) + ", setCourses);\n").append("}");
+		script3.append("function getCourses() {\n").append("\tvar val = +$(\"" + PARAMETER_PROVIDER + "\") != null ? +$(\"" + PARAMETER_PROVIDER + "\").value : -1;\n").append(getSchoolTypePK() != null ? "\tvar val2 = '" + getSchoolTypePK() + "';\n" : "\tvar val2 = +$(\"" + PARAMETER_CATEGORY + "\").value;\n").append("\tvar val3 = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tif (val != -2) {var TEST = CourseDWRUtil.getCoursesDWR(val, val2, val3, " + applicantPK.intValue() + ", '" + iwc.getCurrentLocale().getCountry() + "', " + String.valueOf(isCourseAdmin) + ", setCourses);}\n").append("}");
 
 		StringBuffer script6 = new StringBuffer();
-		script6.append("function getProviders() {\n").append("\tvar val = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getProvidersDWR(" + applicantPK.intValue() + ", val, '" + iwc.getCurrentLocale().getCountry() + "', setProviders);\n").append("}");
+		script6.append("function getProviders(callbackAfterProviders) {\n").append("\tvar val = +$(\"" + PARAMETER_COURSE_TYPE + "\") != null ? +$(\"" + PARAMETER_COURSE_TYPE + "\").value : -1;\n").append("\tvar TEST = CourseDWRUtil.getProvidersDWR(" + applicantPK.intValue() + ", val, '" + iwc.getCurrentLocale().getCountry() + "', {callback: function(data) {setProviders(data, callbackAfterProviders);}});\n").append("}");
 
-		StringBuffer script7 = new StringBuffer();
-		script7.append("function setProviders(data) {\ncloseAllLoadingMessages();\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tdwr.util.addOptions(\"" + PARAMETER_PROVIDER + "\", data);\n").append("}");
+//		StringBuffer script7 = new StringBuffer();
+//		script7.append("function setProviders(data) {\ncloseAllLoadingMessages();\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tdwr.util.removeAllOptions(\"" + PARAMETER_PROVIDER + "\");\n").append("\tfor (var i = 0; i < data.length; i++) {\n\tjQuery('#" + PARAMETER_PROVIDER + "').append('<option value=\\\"' + data[i].id + \\\"'>' + data[i].value + '</option>');\n\t}\n").append("}");
 
 		StringBuffer script4 = new StringBuffer();
 		script4.append("var getName = function(course) { return course.name };\n");
@@ -916,7 +932,7 @@ public class CourseApplication extends ApplicationForm {
 		formScript.addFunction("setCourses", script4.toString());
 		formScript.addFunction("setCourseID", script5.toString());
 		formScript.addFunction("getProviders", script6.toString());
-		formScript.addFunction("setProviders", script7.toString());
+//		formScript.addFunction("setProviders", script7.toString());
 
 		Form form = getForm(ACTION_PHASE_5);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_PHASE_5)));
@@ -991,8 +1007,7 @@ public class CourseApplication extends ApplicationForm {
 		}
 		typeMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("select_course_type", "Select course type"));
 		if (useDWR) {
-			typeMenu.setOnChange("getProviders();");
-			typeMenu.setOnChange("getCourses();");
+			typeMenu.setOnChange("getProviders(function() {getCourses();});");
 		}
 		else {
 			typeMenu.setToSubmit();
