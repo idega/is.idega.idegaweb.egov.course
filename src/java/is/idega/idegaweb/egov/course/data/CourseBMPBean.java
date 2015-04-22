@@ -23,6 +23,7 @@ import com.idega.data.IDOFinderException;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.data.SimpleQuerier;
 import com.idega.data.query.AND;
 import com.idega.data.query.Column;
 import com.idega.data.query.CountColumn;
@@ -184,7 +185,14 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	@Override
 	public int getMax() {
-		return getIntColumnValue(COLUMN_MAX_PARTICIPANTS);
+//		return getIntColumnValue(COLUMN_MAX_PARTICIPANTS);
+		int courseFreePlaces = 0;
+		try {
+			courseFreePlaces = SimpleQuerier.executeIntQuery("select max_per from cou_course where cou_course_id = " + getPrimaryKey());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return courseFreePlaces;
 	}
 
 	@Override
