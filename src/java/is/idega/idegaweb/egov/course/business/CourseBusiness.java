@@ -629,13 +629,13 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
 	 */
-	public CourseApplication saveApplication(Map applications, String prefix, User performer,
+	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, String prefix, User performer,
 			Locale locale) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
 	 */
-	public CourseApplication saveApplication(Map applications, int merchantID,
+	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
 			String prefix, User owner, User performer, Locale locale, float certificateFee)
@@ -644,7 +644,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#saveApplication
 	 */
-	public CourseApplication saveApplication(Map applications, int merchantID,
+	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
 			String prefix, User owner, User performer, Locale locale) throws RemoteException;
