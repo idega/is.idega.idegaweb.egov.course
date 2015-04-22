@@ -90,7 +90,6 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
-import com.idega.data.SimpleQuerier;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.Image;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
@@ -1376,26 +1375,25 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		return start;
 	}
 
+	private int getNumberOfInvitations(Course course) {
+		Collection<?> applications = getCourseChoices(course, true);
+		return ListUtil.isEmpty(applications) ? 0 : applications.size();
+	}
+
 	@Override
 	public boolean isFull(Course course) {
-//		int freePlaces = course.getFreePlaces() - getNumberOfReservations(course);
-//		return freePlaces <= 0;
-
-		int courseFreePlaces = 0;
-		try {
-			courseFreePlaces = SimpleQuerier.executeIntQuery("select max_per from cou_course where cou_course_id = " + course.getPrimaryKey());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		int maxPlaces = course.getMax();
 		Collection<?> applications = getCourseChoices(course, false);
 		int applicationsForTheCourse = ListUtil.isEmpty(applications) ? 0 : applications.size();
-		int freePlaces = courseFreePlaces - applicationsForTheCourse;
+		int freePlaces = maxPlaces - applicationsForTheCourse;
 		int numberOfReservations = getNumberOfReservations(course);
-		int totalFreeCapacity = freePlaces - numberOfReservations;
+		int numberOfInvitations = getNumberOfInvitations(course);
+		int totalFreeCapacity = freePlaces - numberOfReservations - numberOfInvitations;
 		boolean full = totalFreeCapacity <= 0;
-		getLogger().info("Course (" + course.getName() + ", ID: " + course.getPrimaryKey() + ") can have " + courseFreePlaces +
-				" students. Currently there are " + applicationsForTheCourse + " applications and " + numberOfReservations +
-				" reservations to this course. Free places: " + totalFreeCapacity);
+		getLogger().info("Course (" + course.getName() + ", ID: " + course.getPrimaryKey() + ") can have " + maxPlaces +
+				" students. Currently there are " + applicationsForTheCourse + " applications, " + numberOfReservations +
+				" reservations to this course (the ones residents are currently filling in) and " + numberOfInvitations +
+				" invitation(s) sent to resident(s). Free places: " + totalFreeCapacity);
 		return full;
 	}
 
@@ -1963,14 +1961,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	@Override
 	public Map<User, Collection<ApplicationHolder>> getApplicationMap(CourseApplication application,
 			Boolean waitingList) {
-		Map<User, Collection<ApplicationHolder>> map = new HashMap();
+		Map<User, Collection<ApplicationHolder>> map = new HashMap<User, Collection<ApplicationHolder>>();
 
 		try {
-			Collection choices = getCourseChoiceHome().findAllByApplication(
-					application, waitingList);
-			Iterator iterator = choices.iterator();
+			Collection<CourseChoice> choices = getCourseChoiceHome().findAllByApplication(application, waitingList);
+			Iterator<CourseChoice> iterator = choices.iterator();
 			while (iterator.hasNext()) {
-				CourseChoice choice = (CourseChoice) iterator.next();
+				CourseChoice choice = iterator.next();
 				User user = choice.getUser();
 				Course course = choice.getCourse();
 
@@ -1982,11 +1979,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				holder.setChoice(choice);
 				holder.setOnWaitingList(choice.isOnWaitingList());
 
-				Collection holders = null;
+				Collection<ApplicationHolder> holders = null;
 				if (map.containsKey(user)) {
 					holders = map.get(user);
 				} else {
-					holders = new ArrayList();
+					holders = new ArrayList<ApplicationHolder>();
 				}
 
 				holders.add(holder);
@@ -2451,7 +2448,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public CourseApplication saveApplication(Map applications, String prefix, User performer,
+	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, String prefix, User performer,
 			Locale locale) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
@@ -2539,15 +2536,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public CourseApplication saveApplication(Map applications, int merchantID,
+	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
 			String prefix, User owner, User performer, Locale locale, float certificateFee) {
 		try {
 			boolean useWaitingList = isWaitingListTurnedOn();
-			boolean useDirectPayment = getIWApplicationContext()
-					.getApplicationSettings().getBoolean(
-							CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
+			boolean useDirectPayment = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 
 			CourseApplication application = getCourseApplicationHome().create();
 			if (merchantID > 0) {
@@ -2617,36 +2612,36 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 			IWTimestamp stamp = new IWTimestamp();
 
-			Iterator iter = applications == null ? null : applications.values()
+			Iterator<Collection<ApplicationHolder>> iter = applications == null ? null : applications.values()
 					.iterator();
 			if (iter != null) {
-				for (Iterator it = iter; it.hasNext();) {
-					Collection collection = (Collection) it.next();
-					Iterator iterator = collection.iterator();
+				for (Iterator<Collection<ApplicationHolder>> it = iter; it.hasNext();) {
+					Collection<ApplicationHolder> collection = it.next();
+					Iterator<ApplicationHolder> iterator = collection.iterator();
 					while (iterator.hasNext()) {
-						ApplicationHolder holder = (ApplicationHolder) iterator.next();
+						ApplicationHolder holder = iterator.next();
 
 						CourseChoice choice = getCourseChoiceHome().create();
 						choice.setApplication(application);
 						choice.setCourse(holder.getCourse());
 						choice.setDayCare(holder.getDaycare());
+
 						if (useWaitingList) {
 							choice.setWaitingList(holder.isOnWaitingList());
 						}
+
 						if (holder.getPickedUp() != null) {
 							choice.setPickedUp(holder.getPickedUp().booleanValue());
 						}
 						choice.setUser(holder.getUser());
 						choice.setHasDyslexia(holder.hasDyslexia());
 						if (application.isPaid()) {
-							choice.setPaymentTimestamp(IWTimestamp
-									.getTimestampRightNow());
+							choice.setPaymentTimestamp(IWTimestamp.getTimestampRightNow());
 						}
 						choice.setCourseCertificateFee(certificateFee);
 						choice.store();
 
-						sendMessageToParents(application, choice, subject,
-								choice.isOnWaitingList() ? waitingListBody : body, locale);
+						sendMessageToParents(application, choice, subject, choice.isOnWaitingList() ? waitingListBody : body, locale);
 
 						if (getRegistrationTimeoutForCourse(holder.getCourse()).isEarlierThan(stamp)) {
 							String timeoutSubject = getLocalizedString("course_choice.timeout_registration_subject", "A timeout registration has been received", locale);
@@ -2670,7 +2665,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public CourseApplication saveApplication(Map applications, int merchantID,
+	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, int merchantID,
 			float amount, String merchantType, String paymentType,
 			String referenceNumber, String payerName, String payerPersonalID,
 			String prefix, User owner, User performer, Locale locale) {
