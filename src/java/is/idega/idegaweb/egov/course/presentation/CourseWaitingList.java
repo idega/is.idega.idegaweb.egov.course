@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -19,12 +20,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.logging.Level;
+
+import javax.ejb.FinderException;
 
 import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
+import com.idega.data.IDOLookup;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
@@ -44,7 +50,9 @@ import com.idega.presentation.ui.SelectOption;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
@@ -107,19 +115,72 @@ public class CourseWaitingList extends CourseBlock {
 			action = Integer.parseInt(iwc.getParameter(PARAMETER_ACTION));
 		}
 
+		boolean success = true;
 		if (action == ACTION_ACCEPT) {
-			String[] choices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
+			CourseChoiceHome courseChoiceHome = (CourseChoiceHome) IDOLookup.getHome(CourseChoice.class);
+
+			String[] allChoices = iwc.getParameterValues(PARAMETER_COURSE_PARTICIPANT_PK);
 			Course course = getBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
-			if (course.getFreePlaces(false) >= choices.length) {
-				for (String choice : choices) {
-					getBusiness().acceptChoice(choice, iwc.getCurrentLocale());
+			List<String> nonWaitingList = new ArrayList<String>(), waitingList = new ArrayList<String>();
+			for (String choice: allChoices) {
+				CourseChoice courseChoice = null;
+				try {
+					courseChoice = courseChoiceHome.findByPrimaryKey(choice);
+				} catch (FinderException e) {}
+				if (courseChoice == null) {
+					getLogger().log(Level.WARNING, "Unable to find course choice by ID: " + choice);
+					continue;
 				}
-				return true;
+
+				if (courseChoice.isOnWaitingList()) {
+					waitingList.add(choice);
+				} else {
+					nonWaitingList.add(choice);
+				}
 			}
-			return false;
+
+			Locale locale = iwc.getCurrentLocale();
+
+			//	Accepting non-waiting list applications
+			if (!ListUtil.isEmpty(nonWaitingList)) {
+				int freePlaces = course.getFreePlaces(true);
+				int nonWaiting = nonWaitingList.size();
+				if (freePlaces >= nonWaiting) {
+					for (Iterator<String> nonWaitingListIter = nonWaitingList.iterator(); (success && nonWaitingListIter.hasNext());) {
+						success = getBusiness().acceptChoice(nonWaitingListIter.next(), locale);
+					}
+					if (!success) {
+						return false;
+					}
+				} else {
+					String message = "There are " + freePlaces + " for course " + course.getName() + "(ID: " + course.getPrimaryKey() +
+							"), but requested to approve " + nonWaiting + " applications (" + nonWaitingList +
+							") that were marked as not on a waiting list";
+					getLogger().warning(message);
+					CoreUtil.sendExceptionNotification(message, null);
+					return false;
+				}
+			}
+
+			if (!success) {
+				return false;
+			}
+
+			for (Iterator<String> waitingListIter = waitingList.iterator(); (success && waitingListIter.hasNext());) {
+				String choice = waitingListIter.next();
+				success = getBusiness().acceptChoice(choice, locale);
+				if (success) {
+					int oldMax = course.getMax();
+					int newMax = oldMax + 1;
+					getLogger().info("Increasing max places to " + newMax + " for course " + course.getName() + "(ID: " + course.getPrimaryKey() +
+							") because handler just sent invitation to parent to join course (choice ID: " + choice + ")");
+					course.setMax(newMax);
+					course.store();
+				}
+			}
 		}
 
-		return true;
+		return success;
 	}
 
 	protected Layer getNavigation(IWContext iwc) throws RemoteException {
