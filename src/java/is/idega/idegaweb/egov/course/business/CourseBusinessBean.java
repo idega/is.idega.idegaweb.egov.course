@@ -2448,15 +2448,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, String prefix, User performer,
-			Locale locale) {
+	public CourseApplication saveApplication(Map<User, Collection<ApplicationHolder>> applications, String prefix, User performer, Locale locale) {
 		try {
 			CourseApplication application = getCourseApplicationHome().create();
 			if (performer == null) {
 				try {
-					performer = getIWApplicationContext()
-							.getIWMainApplication().getAccessController()
-							.getAdministratorUserLegacy();
+					performer = getIWApplicationContext().getIWMainApplication().getAccessController().getAdministratorUserLegacy();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -2473,15 +2470,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					"Your registration for course {2} at {3} for {0}, {1} has been received and paid for with your credit card",
 					locale);
 
-			Iterator iter = applications == null ? null : applications.values()
-					.iterator();
+			Iterator<Collection<ApplicationHolder>> iter = applications == null ? null : applications.values().iterator();
 			if (iter != null) {
-				for (Iterator it = iter; it.hasNext();) {
-					Collection collection = (Collection) it.next();
-					Iterator iterator = collection.iterator();
+				for (Iterator<Collection<ApplicationHolder>> it = iter; it.hasNext();) {
+					Collection<ApplicationHolder> collection = it.next();
+					Iterator<ApplicationHolder> iterator = collection.iterator();
 					while (iterator.hasNext()) {
-						ApplicationHolder holder = (ApplicationHolder) iterator
-								.next();
+						ApplicationHolder holder = iterator.next();
 
 						CourseChoice choice = getCourseChoiceHome().create();
 						choice.setApplication(application);
@@ -2489,8 +2484,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setUser(holder.getUser());
 						choice.store();
 
-						sendMessageToApplicationOwner(application, choice,
-								subject, body, locale);
+						sendMessageToApplicationOwner(application, choice, subject, body, locale);
 					}
 				}
 			}
@@ -2605,6 +2599,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 				}
 			}
 
+			String waitingListSubject = getLocalizedString(
+					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.waitinglist_registration_subject",
+					"Registration for courses received - NOTE child is on the waiting list",
+					locale);
 			String waitingListBody = getLocalizedString(
 					(prefix.length() > 0 ? prefix + "." : "") + "course_choice.waitinglist_registration_body",
 					"Your registration for course {2} at {3} for {0}, {1} has been received and added to the waiting list",
@@ -2620,6 +2618,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 					Iterator<ApplicationHolder> iterator = collection.iterator();
 					while (iterator.hasNext()) {
 						ApplicationHolder holder = iterator.next();
+						boolean waitingList = false;
 
 						CourseChoice choice = getCourseChoiceHome().create();
 						choice.setApplication(application);
@@ -2627,7 +2626,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setDayCare(holder.getDaycare());
 
 						if (useWaitingList) {
-							choice.setWaitingList(holder.isOnWaitingList());
+							waitingList = holder.isOnWaitingList();
+							choice.setWaitingList(waitingList);
 						}
 
 						if (holder.getPickedUp() != null) {
@@ -2641,7 +2641,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 						choice.setCourseCertificateFee(certificateFee);
 						choice.store();
 
-						sendMessageToParents(application, choice, subject, choice.isOnWaitingList() ? waitingListBody : body, locale);
+						sendMessageToParents(
+								application,
+								choice,
+								waitingList ? waitingListSubject : subject,
+								waitingList ? waitingListBody : body,
+								locale
+						);
 
 						if (getRegistrationTimeoutForCourse(holder.getCourse()).isEarlierThan(stamp)) {
 							String timeoutSubject = getLocalizedString("course_choice.timeout_registration_subject", "A timeout registration has been received", locale);
