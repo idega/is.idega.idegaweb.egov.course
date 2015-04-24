@@ -1868,8 +1868,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	@Override
 	public int getNumberOfFreePlaces(Course course) {
 		try {
-			return course.getMax()
-					- getCourseChoiceHome().getCountByCourse(course);
+			int freePlaces = course.getMax() - getCourseChoiceHome().getCountByCourse(course);
+			freePlaces = freePlaces - getNumberOfInvitations(course);
+			return freePlaces;
 		} catch (IDOException e) {
 			e.printStackTrace();
 		}

@@ -88,7 +88,7 @@ public class CourseList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add("/dwr/engine.js");
 		scripts.add("/dwr/util.js");
@@ -110,9 +110,9 @@ public class CourseList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			Collection providersList = getBusiness().getProviders();
+			Collection<School> providersList = getBusiness().getProviders();
 			if (providersList.size() == 1) {
-				School school = (School) providersList.iterator().next();
+				School school = providersList.iterator().next();
 				getSession().setProvider(school);
 				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
 			}
@@ -135,19 +135,19 @@ public class CourseList extends CourseBlock {
 		schoolType.keepStatusOnAction(true);
 
 		if (getSession().getProvider() != null) {
-			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = (SchoolType) schoolTypes.iterator().next();
+				type = schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);
 		}
 		else {
-			Collection schoolTypes = getBusiness().getAllSchoolTypes();
+			Collection<SchoolType> schoolTypes = getBusiness().getAllSchoolTypes();
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = (SchoolType) schoolTypes.iterator().next();
+				type = schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);
@@ -159,11 +159,11 @@ public class CourseList extends CourseBlock {
 		courseType.keepStatusOnAction(true);
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
 			courseType.addMenuElements(courseTypes);
 		}
 		else if (type != null) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -395,24 +395,24 @@ public class CourseList extends CourseBlock {
 			toDate = new IWTimestamp(IWDatePickerHandler.getParsedDateByCurrentLocale(iwc.getParameter(PARAMETER_TO_DATE))).getDate();
 		}
 
-		List courses = new ArrayList();
+		List<Course> courses = new ArrayList<Course>();
 		if (true/* iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK) */) {
 			if (isSchoolUser() || getSession().getProvider() != null) {
-				courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), schoolTypePK, courseTypePK, fromDate, toDate));
+				courses = new ArrayList<Course>(getBusiness().getCourses(-1, getSession().getProvider().getPrimaryKey(), schoolTypePK, courseTypePK, fromDate, toDate));
 			}
 			else {
-				courses = new ArrayList(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK, fromDate, toDate));
+				courses = new ArrayList<Course>(getBusiness().getCourses(getBusiness().getProvidersForUser(iwc.getCurrentUser()), schoolTypePK, courseTypePK, fromDate, toDate));
 			}
 			Collections.sort(courses, new CourseComparator(iwc.getCurrentLocale(), iwc.isParameterSet(PARAMETER_SORTING) ? Integer.parseInt(iwc.getParameter(PARAMETER_SORTING)) : (useBirthYears ? CourseComparator.DATE_SORT : CourseComparator.ID_SORT)));
 		}
 
 		boolean showID = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
 
-		Iterator iter = courses.iterator();
+		Iterator<Course> iter = courses.iterator();
 		while (iter.hasNext()) {
 			row = group.createRow();
 
-			Course course = (Course) iter.next();
+			Course course = iter.next();
 			CourseType type = course.getCourseType();
 			CourseCategory courseCategory = type.getCourseCategory();
 			CoursePrice price = course.getPrice();
