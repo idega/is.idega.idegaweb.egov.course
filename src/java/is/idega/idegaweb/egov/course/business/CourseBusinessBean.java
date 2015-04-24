@@ -2712,8 +2712,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 							IWTimestamp.SHORT),
 					acceptURL,														//	6: URL
 					choice.getUniqueID(),											//	7: unique id
-					provider.getSchoolEmail(),										//	8: provider email
-					provider.getSchoolWebPage()										//	9: provider web page
+					StringUtil.isEmpty(provider.getSchoolEmail()) ? CoreConstants.EMPTY : provider.getSchoolEmail(),	//	8: provider email
+					StringUtil.isEmpty(provider.getSchoolWebPage()) ? CoreConstants.EMPTY : provider.getSchoolWebPage()	//	9: provider web page
 			};
 
 			User appParent = application.getOwner();
