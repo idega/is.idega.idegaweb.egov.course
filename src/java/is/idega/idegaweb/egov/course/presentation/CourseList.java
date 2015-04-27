@@ -43,6 +43,7 @@ import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
 
@@ -450,7 +451,7 @@ public class CourseList extends CourseBlock {
 
 				cell = row.createCell();
 				cell.setStyleClass("provider");
-				cell.add(new Text(provider.getSchoolName()));
+				cell.add(new Text(provider == null ? CoreConstants.MINUS : provider.getSchoolName()));
 			}
 
 			cell = row.createCell();
