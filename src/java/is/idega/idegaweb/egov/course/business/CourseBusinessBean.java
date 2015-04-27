@@ -1390,10 +1390,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		int numberOfInvitations = getNumberOfInvitations(course);
 		int totalFreeCapacity = freePlaces - numberOfReservations - numberOfInvitations;
 		boolean full = totalFreeCapacity <= 0;
-		getLogger().info("Course (" + course.getName() + ", ID: " + course.getPrimaryKey() + ") can have " + maxPlaces +
-				" students. Currently there are " + applicationsForTheCourse + " applications, " + numberOfReservations +
-				" reservations to this course (the ones residents are currently filling in) and " + numberOfInvitations +
-				" invitation(s) sent to resident(s). Free places: " + totalFreeCapacity);
 		return full;
 	}
 
