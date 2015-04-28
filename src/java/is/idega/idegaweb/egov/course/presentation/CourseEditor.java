@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 import javax.faces.component.UIComponent;
@@ -208,7 +209,7 @@ public class CourseEditor extends CourseBlock {
 			Object provider = getProvider() == null ? null : getProvider().getPrimaryKey();
 			return getCourseBusiness().storeCourse(pk, courseNumber, name, user, courseTypePK, provider, coursePricePK, startDate, endDate, regEnd, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, hasPreCare, hasPostCare);
 		} catch (Exception e) {
-			e.printStackTrace();
+			getLogger().log(Level.WARNING, "Error saving course by ID: " + pk + ", name: " + name + ", start date: " + sStartDate + ", end date: " + sEndDate, e);
 		}
 
 		return null;

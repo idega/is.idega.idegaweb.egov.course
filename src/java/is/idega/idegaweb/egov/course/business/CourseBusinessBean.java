@@ -109,8 +109,7 @@ import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 
-public class CourseBusinessBean extends CaseBusinessBean implements
-		CaseBusiness, CourseBusiness, AccountingBusiness {
+public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness, AccountingBusiness {
 
 	private static final long serialVersionUID = 8639939641556682373L;
 
@@ -124,10 +123,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public void reserveCourse(Course course, User user) {
-		getLogger().info("Reserving course " + course.getName() + ", ID: " + course.getPrimaryKey() + " for " + user.getName());
-
-		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
-				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 		if (courseMap == null) {
 			courseMap = new HashMap<Course, Integer>();
 		}
@@ -145,8 +141,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public void removeReservation(Course course) {
-		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
-				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 
 		if (courseMap != null && courseMap.containsKey(course)) {
 			Integer numberOfChoices = courseMap.get(course);
@@ -168,8 +163,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public int getNumberOfReservations(Course course) {
-		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
-				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 
 		if (courseMap != null && courseMap.containsKey(course)) {
 			Integer numberOfChoices = courseMap.get(course);
@@ -184,8 +178,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 
 	@Override
 	public void printReservations() {
-		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext()
-				.getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
+		Map<Course, Integer> courseMap = (Map<Course, Integer>) getIWApplicationContext().getApplicationAttribute(CourseConstants.APPLICATION_PROPERTY_COURSE_MAP);
 		if (courseMap != null) {
 			getLogger().info("Reservations of courses: " + courseMap);
 		}
@@ -201,8 +194,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public AccountingEntry[] getAccountingEntries(String productCode,
-			String providerCode, Date fromDate, Date toDate) {
+	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {
 		Collection entries = new ArrayList();
 
 		try {
@@ -1431,7 +1423,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 		cDWR.setFrom(Integer.toString(course.getBirthyearFrom()));
 		cDWR.setTo(Integer.toString(course.getBirthyearTo()));
 		cDWR.setDescription(course.getDescription());
-		cDWR.setProvider(course.getProvider().getName());
+		School provider = course.getProvider();
+		cDWR.setProvider(provider == null ? CoreConstants.MINUS : provider.getName());
 		cDWR.setFull(isFull(course));
 
 		IWTimestamp from = new IWTimestamp(course.getStartDate());
@@ -1467,7 +1460,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection getCourses(int birthYear, Object schoolTypePK,
+	public Collection<Course> getCourses(int birthYear, Object schoolTypePK,
 			Object courseTypePK, Date fromDate, Date toDate) {
 		return getCourses(birthYear, null, schoolTypePK, courseTypePK,
 				fromDate, toDate);
@@ -1480,9 +1473,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection getCourses(int birthYear, Object providerPK,
-			Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
-		Collection courses = new ArrayList();
+	public Collection<Course> getCourses(int birthYear, Object providerPK, Object schoolTypePK, Object courseTypePK, Date fromDate, Date toDate) {
+		Collection<Course> courses = new ArrayList<Course>();
 		try {
 			courses = getCourseHome().findAll(providerPK, schoolTypePK,
 					courseTypePK, birthYear, fromDate, toDate);
@@ -1510,9 +1502,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection getCourses(int birthYear, Object providerPK,
+	public Collection<Course> getCourses(int birthYear, Object providerPK,
 			Object schoolTypePK, Object courseTypePK) {
-		Collection courses = new ArrayList();
+		Collection<Course> courses = new ArrayList<Course>();
 		try {
 			courses = getCourseHome().findAll(providerPK, schoolTypePK,
 					courseTypePK, birthYear, null, null);
@@ -1525,9 +1517,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public Collection getCourses(Collection providers, Object schoolTypePK,
+	public Collection<Course> getCourses(Collection<School> providers, Object schoolTypePK,
 			Object courseTypePK) {
-		Collection courses = new ArrayList();
+		Collection<Course> courses = new ArrayList<Course>();
 		try {
 			courses = getCourseHome().findAll(providers, schoolTypePK,
 					courseTypePK, -1, null, null);
@@ -2017,20 +2009,29 @@ public class CourseBusinessBean extends CaseBusinessBean implements
 	}
 
 	@Override
-	public SortedSet calculatePrices(Map applications) {
-		SortedSet<PriceHolder> userPrices = new TreeSet();
+	public SortedSet<PriceHolder> calculatePrices(Map<User, Collection<ApplicationHolder>> applications) {
+		SortedSet<PriceHolder> userPrices = new TreeSet<PriceHolder>();
 
-		Iterator iterator = applications.keySet().iterator();
+		Iterator<User> iterator = applications.keySet().iterator();
 		while (iterator.hasNext()) {
-			User user = (User) iterator.next();
-			Collection userApplications = (Collection) applications.get(user);
-			Iterator iter = userApplications.iterator();
+			User user = iterator.next();
+			Collection<ApplicationHolder> userApplications = applications.get(user);
+			Iterator<ApplicationHolder> iter = userApplications.iterator();
 			int totalPrice = 0;
 			int totalCost = 0;
 			String name = null;
 			while (iter.hasNext()) {
-				ApplicationHolder holder = (ApplicationHolder) iter.next();
-				name = holder.getCourse() == null ? null : holder.getCourse().getProvider().getName();
+				ApplicationHolder holder = iter.next();
+				name = null;
+				Course course = holder.getCourse();
+				if (course != null) {
+					School provider = course.getProvider();
+					if (provider != null) {
+						name = provider.getName();
+					}
+				}
+				name = StringUtil.isEmpty(name) ? CoreConstants.MINUS : name;
+
 				if (!holder.isOnWaitingList()) {
 					totalPrice += holder.getPrice();
 					totalCost += holder.getCourse().getCourseCost() > -1 ? holder

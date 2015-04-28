@@ -982,8 +982,8 @@ public class CourseApplication extends ApplicationForm {
 				}
 			}
 
-			Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
-			schoolTypePK = (Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey();
+			Collection<SchoolType> schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
+			schoolTypePK = (Integer) schoolTypes.iterator().next().getPrimaryKey();
 			DropdownMenu catMenu = new DropdownMenu(schoolTypes, PARAMETER_CATEGORY);
 			catMenu.addMenuElementFirst("", iwrb.getLocalizedString("select_school_type", "Select school type"));
 			catMenu.setId(PARAMETER_CATEGORY);
@@ -1000,10 +1000,10 @@ public class CourseApplication extends ApplicationForm {
 
 		DropdownMenu typeMenu = new DropdownMenu(PARAMETER_COURSE_TYPE);
 		typeMenu.setId(PARAMETER_COURSE_TYPE);
-		Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK, true);
-		Iterator iter = courseTypes.iterator();
-		while (iter.hasNext()) {
-			CourseType courseType = (CourseType) iter.next();
+		Collection<CourseType> courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK, true);
+		Iterator<CourseType> typesIter = courseTypes.iterator();
+		while (typesIter.hasNext()) {
+			CourseType courseType = typesIter.next();
 			if (iUseSessionUser || getCourseBusiness(iwc).hasAvailableCourses(applicant, courseType)) {
 				typeMenu.addMenuElement(courseType.getPrimaryKey().toString(), courseType.getName());
 			}
@@ -1024,16 +1024,16 @@ public class CourseApplication extends ApplicationForm {
 		formItem.add(typeMenu);
 		section.add(formItem);
 
-		Collection providers = getCourseBusiness(iwc).getProviders();
+		Collection<School> providers = getCourseBusiness(iwc).getProviders();
 		CourseType type = null;
 		if (iwc.isParameterSet(PARAMETER_COURSE_TYPE)) {
 			type = getCourseBusiness(iwc).getCourseType(iwc.getParameter(PARAMETER_COURSE_TYPE));
 		}
-		Collection filtered = new ArrayList();
+		Collection<School> filtered = new ArrayList<School>();
 
-		iter = providers.iterator();
-		while (iter.hasNext()) {
-			School provider = (School) iter.next();
+		Iterator<School> providersIter = providers.iterator();
+		while (providersIter.hasNext()) {
+			School provider = providersIter.next();
 			if (getCourseBusiness(iwc).hasAvailableCourses(applicant, provider, type)) {
 				filtered.add(provider);
 			}
@@ -1074,7 +1074,7 @@ public class CourseApplication extends ApplicationForm {
 			}
 		}
 
-		Collection courses = null;
+		Collection<CourseDWR> courses = null;
 		if (courseTypePK != null) {
 			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK.intValue(), courseTypePK.intValue(), ((Integer) getApplicant(iwc).getPrimaryKey()).intValue(), iwc.getCurrentLocale().getCountry(), this.iUseSessionUser);
 		}
@@ -1108,9 +1108,9 @@ public class CourseApplication extends ApplicationForm {
 		group = table.createBodyRowGroup();
 		group.setId(PARAMETER_COURSE_TABLE_ID);
 		if (courses != null) {
-			iter = courses.iterator();
+			Iterator<CourseDWR> courseIter = courses.iterator();
 			int counter = 0;
-			while (iter.hasNext()) {
+			while (courseIter.hasNext()) {
 				row = group.createRow();
 				if (counter++ % 2 == 0) {
 					row.setStyleClass("even");
@@ -1118,7 +1118,7 @@ public class CourseApplication extends ApplicationForm {
 				else {
 					row.setStyleClass("odd");
 				}
-				CourseDWR course = (CourseDWR) iter.next();
+				CourseDWR course = courseIter.next();
 				cell = row.createCell();
 				cell.setStyleClass("column0");
 				CheckBox checker = new CheckBox(PARAMETER_COURSE, course.getPk());
