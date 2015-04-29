@@ -207,7 +207,27 @@ public class CourseEditor extends CourseBlock {
 			boolean hasPreCare = iwc.isParameterSet(PARAMETER_HAS_PRE_CARE) ? BooleanInput.getBooleanReturnValue(iwc.getParameter(PARAMETER_HAS_PRE_CARE)) : true;
 			boolean hasPostCare = iwc.isParameterSet(PARAMETER_HAS_POST_CARE) ? BooleanInput.getBooleanReturnValue(iwc.getParameter(PARAMETER_HAS_POST_CARE)) : true;
 			Object provider = getProvider() == null ? null : getProvider().getPrimaryKey();
-			return getCourseBusiness().storeCourse(pk, courseNumber, name, user, courseTypePK, provider, coursePricePK, startDate, endDate, regEnd, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, hasPreCare, hasPostCare);
+			return getCourseBusiness().storeCourse(
+					pk,
+					courseNumber,
+					name,
+					user,
+					courseTypePK,
+					provider,
+					coursePricePK,
+					startDate,
+					endDate,
+					regEnd,
+					accountingKey,
+					birthYearFrom,
+					birthYearTo,
+					maxPer,
+					price,
+					cost,
+					openForRegistration,
+					hasPreCare,
+					hasPostCare
+			);
 		} catch (Exception e) {
 			getLogger().log(Level.WARNING, "Error saving course by ID: " + pk + ", name: " + name + ", start date: " + sStartDate + ", end date: " + sEndDate, e);
 		}
