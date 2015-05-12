@@ -14,6 +14,7 @@ import is.idega.block.family.data.Relative;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
 import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
@@ -29,6 +30,7 @@ import com.idega.block.school.data.School;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
+import com.idega.data.SimpleQuerier;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Span;
@@ -43,6 +45,7 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
@@ -88,6 +91,28 @@ public class CourseChoiceOverview extends CourseBlock {
 				} catch (FinderException fe) {
 					getLogger().log(Level.WARNING, "Course choice was not find by unique ID: " + identifier, fe);
 				}
+				if (choice == null) {
+					String pk = null;
+					String query = "select " + CourseChoiceBMPBean.ENTITY_NAME + "_ID from " + CourseChoiceBMPBean.ENTITY_NAME + " where " +
+									CourseChoiceBMPBean.COLUMN_UNIQUE_ID + " = '" + identifier + "'";
+					String data[] = null;
+					try {
+						data = SimpleQuerier.executeStringQuery(query);
+					} catch (Exception e) {
+						getLogger().log(Level.WARNING, "Error executing query: " + query, e);
+					}
+					if (!ArrayUtil.isEmpty(data)) {
+						pk = data[0];
+					}
+					try {
+						choice = getBusiness().getCourseChoiceHome().findByPrimaryKey(pk);
+					} catch (FinderException e) {
+						getLogger().log(Level.WARNING, "Course choice was not find by primary key: " + identifier, e);
+					}
+				}
+				if (choice == null) {
+					getLogger().warning("Failed to find course by UUID: " + identifier);
+				}
 			}
 
 			if (choice != null) {
@@ -124,10 +149,15 @@ public class CourseChoiceOverview extends CourseBlock {
 						break;
 
 					case ACTION_PARENT_ACCEPT_FORM:
-						if (iwc.isParameterSet(PARAMETER_UNIQUE_ID) && iwc.getParameter(PARAMETER_UNIQUE_ID).equals(choice.getUniqueID())) {
+						if (iwc.isParameterSet(PARAMETER_UNIQUE_ID) && choice != null && iwc.getParameter(PARAMETER_UNIQUE_ID).equals(choice.getUniqueID())) {
 							getParentAcceptForm(iwc, choice);
-						}
-						else {
+						} else {
+							if (iwc.isParameterSet(PARAMETER_UNIQUE_ID)) {
+								getLogger().warning("Failed to verify if choice (" + choice + ") has UUID: " + iwc.getParameter(PARAMETER_UNIQUE_ID));
+							} else {
+								getLogger().warning("UUID of choice is not provided");
+							}
+
 							getViewerForm(iwc, choice);
 						}
 						break;

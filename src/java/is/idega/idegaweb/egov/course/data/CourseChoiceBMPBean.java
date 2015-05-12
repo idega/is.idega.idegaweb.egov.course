@@ -48,7 +48,7 @@ public class CourseChoiceBMPBean extends GenericEntity implements CourseChoice {
 	private static final String COLUMN_WAITING_LIST = "waiting_list";
 	private static final String COLUMN_NO_PAYMENT = "no_payment";
 	private static final String COLUMN_NOTES = "notes";
-	private static final String COLUMN_UNIQUE_ID = "choice_unique_id",
+	public static final String COLUMN_UNIQUE_ID = "choice_unique_id",
 								COLUMN_INVALIDATED_BY = "invalidated_by",
 								COLUMN_INVALIDATED_AT = "invalidated_at";
 

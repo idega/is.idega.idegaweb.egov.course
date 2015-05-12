@@ -53,6 +53,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -90,6 +91,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
+import com.idega.data.SimpleQuerier;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.Image;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
@@ -2680,35 +2682,48 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	private void sendMessageToParents(CourseApplication application,
 			CourseChoice choice, String subject, String body, Locale locale) {
-		sendMessageToParents(application, choice, subject, body, locale, null);
+		sendMessageToParents(application, choice, subject, body, locale, null, null, null);
 	}
 
-	private void sendMessageToParents(CourseApplication application,
-			CourseChoice choice, String subject, String body, Locale locale, String bcc) {
+	private void sendMessageToParents(
+			CourseApplication application,
+			CourseChoice choice,
+			String subject,
+			String body,
+			Locale locale,
+			String bcc,
+			String uniqueId,
+			Boolean invitation
+	) {
 		try {
 			if (locale == null) {
-				locale = getIWApplicationContext().getApplicationSettings()
-						.getDefaultLocale();
+				locale = getIWApplicationContext().getApplicationSettings().getDefaultLocale();
 			}
 
 			String acceptURL = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_ACCEPT_URL, CoreConstants.EMPTY);
+
+			if (invitation != null && invitation) {
+				if (StringUtil.isEmpty(choice.getUniqueID())) {
+					getLogger().warning("Course application (ID: " + choice.getPrimaryKey() + ") does not have unique ID. Using " + uniqueId);
+				}
+			}
 
 			User applicant = choice.getUser();
 			Course course = choice.getCourse();
 			School provider = course.getProvider();
 			IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 			Object[] arguments = {
-					applicant.getName(),											//	0: name
-					PersonalIDFormatter.format(applicant.getPersonalID(), locale),	//	1: personal id
-					course.getName(),												//	2: course name
-					provider.getName(),												//	3: provider name
-					startDate.getLocaleDate(locale, IWTimestamp.SHORT),				//	4: start date
-					new IWTimestamp(course.getEndDate() != null ? course			//	5: end date
+					applicant.getName(),														//	0: name
+					PersonalIDFormatter.format(applicant.getPersonalID(), locale),				//	1: personal id
+					course.getName(),															//	2: course name
+					provider.getName(),															//	3: provider name
+					startDate.getLocaleDate(locale, IWTimestamp.SHORT),							//	4: start date
+					new IWTimestamp(course.getEndDate() != null ? course						//	5: end date
 							.getEndDate() : getEndDate(course.getPrice(),
 							startDate.getDate())).getLocaleDate(locale,
 							IWTimestamp.SHORT),
-					acceptURL,														//	6: URL
-					choice.getUniqueID(),											//	7: unique id
+					acceptURL,																	//	6: URL
+					StringUtil.isEmpty(choice.getUniqueID()) ? uniqueId : choice.getUniqueID(),	//	7: unique id
 					StringUtil.isEmpty(provider.getSchoolEmail()) ? CoreConstants.EMPTY : provider.getSchoolEmail(),	//	8: provider email
 					StringUtil.isEmpty(provider.getSchoolWebPage()) ? CoreConstants.EMPTY : provider.getSchoolWebPage()	//	9: provider web page
 			};
@@ -2843,9 +2858,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			stamp.addDays(1);
 
 			if (!holidays.isEmpty()) {
-				Iterator iterator = holidays.iterator();
+				Iterator<IWTimestamp> iterator = holidays.iterator();
 				while (iterator.hasNext()) {
-					IWTimestamp holiday = (IWTimestamp) iterator.next();
+					IWTimestamp holiday = iterator.next();
 					if (stamp.isEqualTo(holiday)) {
 						stamp.addDays(1);
 					}
@@ -3364,8 +3379,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) {
-		List info = new ArrayList();
+	public List<AdvancedProperty> getCheckBoxesForCourseParticipants(IWResourceBundle iwrb) {
+		List<AdvancedProperty> info = new ArrayList<AdvancedProperty>();
 
 		info.add(new AdvancedProperty("need_verification_from_goverment_office", CourseChoiceBMPBean.COLUMN_NEED_VERIFICATION_FROM_GOVERMENT_OFFICE));
 		info.add(new AdvancedProperty("verification_from_goverment_office", CourseChoiceBMPBean.COLUMN_VERIFICATION_FROM_GOVERMENT_OFFICE));
@@ -3387,10 +3402,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			return false;
 		}
 
-		if (StringUtil.isEmpty(choice.getUniqueID())) {
-			choice.setUniqueID(IdGeneratorFactory.getUUIDGenerator().generateId());
+		String uniqueId = choice.getUniqueID();
+		if (StringUtil.isEmpty(uniqueId)) {
+			uniqueId = IdGeneratorFactory.getUUIDGenerator().generateId();
+			choice.setUniqueID(uniqueId);
 			choice.store();
 		}
+		if (StringUtil.isEmpty(choice.getUniqueID()) && !StringUtil.isEmpty(uniqueId)) {
+			String update = "update " + CourseChoiceBMPBean.ENTITY_NAME + " set " + CourseChoiceBMPBean.COLUMN_UNIQUE_ID + " = '" + uniqueId +
+							"' where " + CourseChoiceBMPBean.ENTITY_NAME + "_ID = " + choice.getPrimaryKey();
+			try {
+				SimpleQuerier.executeUpdate(update, false);
+				getLogger().info("Executed update: " + update);
+			} catch (Exception e) {
+				getLogger().log(Level.WARNING, "Error executing update", e);
+			}
+		}
+
 		if (choice.isOnWaitingList() && isWaitingListTurnedOn()) {
 			//	Will send email to parents to accept offer
 			if (locale == null) {
@@ -3417,7 +3445,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						CoreConstants.EMPTY
 			);
 
-			sendMessageToParents(application, choice, subject, body, locale, bcc);
+			sendMessageToParents(application, choice, subject, body, locale, bcc, uniqueId, Boolean.TRUE);
 		} else {
 			//	Choice was not on a waiting list, can be accepted without parent's confirmation
 			choice.setWaitingList(false);
@@ -3443,7 +3471,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						CoreConstants.EMPTY
 			);
 
-			sendMessageToParents(application, choice, subject, body, locale, bcc);
+			sendMessageToParents(application, choice, subject, body, locale, bcc, uniqueId, null);
 		}
 
 		return true;
@@ -3514,6 +3542,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		try {
 			Collection<Course> courses = getCourseHome().findAll(null, null, null, -1, fromDate.getDate(), toDate.getDate());
+			getLogger().info("Found courses to remind about: " + courses + " in timeframe: " + fromDate + "-" + toDate);
+
 			int count = 0;
 
 			String locKey = "course_choice.reminder_body";
@@ -3568,8 +3598,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				}
 			}
 
-			System.out.println("[CourseBusiness] "
-					+ IWTimestamp.getTimestampRightNow().toString()
+			getLogger().info(
+					IWTimestamp.getTimestampRightNow().toString()
 					+ " - Done sending reminder messages for courses between "
 					+ fromDate.toSQLDateString() + " and "
 					+ toDate.toSQLDateString() + ": " + count);
