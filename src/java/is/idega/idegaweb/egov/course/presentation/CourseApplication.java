@@ -408,11 +408,20 @@ public class CourseApplication extends ApplicationForm {
 
 		if (allowsAllChildren) {
 			Lists lists = new Lists();
+
+			//	General help
+			String defaultValue = "help.general_help_about_course";
+			String prefix = getPrefix();
+			String key = StringUtil.isEmpty(prefix) ? defaultValue : (prefix + CoreConstants.DOT + defaultValue);
+			String generalHelp = iwrb.getLocalizedString(key, defaultValue);
+			if (!generalHelp.equals(defaultValue)) {
+				lists.add(generalHelp);
+			}
+
 			lists.add(iwrb.getLocalizedString("help.one_applicant_is_registered_at_a_time", "One applicant is registered at a time."));
 			lists.add(iwrb.getLocalizedString("help.select_an_applicant_from_the_dropdown_OR_type_in_a_social_security_number", "Select an applicant from the dropdown OR type in a social security number."));
 			lists.add(iwrb.getLocalizedString("help.when_a_registration_is_complete_you_can_then_register_another_child", "When registration is complete you can go back and register another."));
 			lists.add(iwrb.getLocalizedString("help.when_all_applicants_have_been_registered_you_pay_for_them_all_at_the_same_time", "When all applicants have been registered you pay for them all at the same time."));
-			//lists.add(iwrb.getLocalizedString("help.only_three_weeks_possible", "It is only possible to register each participant to max three courses at a time."));
 			lists.add(iwrb.getLocalizedString(
 					getPhaseOneHelpPrefix() == null ? "help.joined_courses" : getPhaseOneHelpPrefix() + "help.joined_courses",
 					"Courses can be joined to maximize usage.")
