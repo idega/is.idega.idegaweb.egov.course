@@ -126,3 +126,7 @@ table.coursesPhaseSeven tr.subRow td.registered {
 img.creditCardImage[src="/idegaweb/bundles/com.idega.block.creditcard.bundle/resources/logos/ae.gif"] {
 	display: none;
 }
+
+span.general-help-about-course-in-bold {
+	font-weight: bold;
+}

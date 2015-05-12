@@ -115,8 +115,9 @@ public class CourseChoiceOverview extends CourseBlock {
 				}
 			}
 
+			int takenAction = parseAction(iwc);
 			if (choice != null) {
-				switch (parseAction(iwc)) {
+				switch (takenAction) {
 					case ACTION_VIEW:
 						getViewerForm(iwc, choice);
 						break;
@@ -170,10 +171,17 @@ public class CourseChoiceOverview extends CourseBlock {
 						break;
 				}
 			} else {
-				add(new Text(identifier == null ? "Choice can not be found because identifier was not provided!" : "No choice found by provided identifier '" + identifier + "'"));
+				switch (ACTION_PARENT_ACCEPT_FORM) {
+				case ACTION_PARENT_ACCEPT_FORM:
+					add(new Text(getResourceBundle().getLocalizedString("course.invitation_already_accepted", "You already accepted invitation")));
+					break;
+
+				default:
+					add(new Text(identifier == null ? "Choice can not be found because identifier was not provided!" : "No choice found by provided identifier '" + identifier + "'"));
+					break;
+				}
 			}
-		}
-		catch (RemoteException re) {
+		} catch (RemoteException re) {
 			throw new IBORuntimeException(re);
 		}
 	}
