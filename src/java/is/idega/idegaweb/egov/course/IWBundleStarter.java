@@ -8,6 +8,7 @@ import is.idega.idegaweb.egov.course.data.CourseHome;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 
@@ -29,21 +30,25 @@ import com.idega.util.timer.TimerManager;
 
 public class IWBundleStarter implements IWBundleStartable {
 
+	private Logger LOGGER = Logger.getLogger(IWBundleStarter.class.getName());
+
 	private static TimerManager tManager = null;
 	private static TimerEntry courseTimerEntry = null;
 	private static IWApplicationContext iwac = null;
 
-public void start(IWBundle starterBundle) {
+	@Override
+	public void start(IWBundle starterBundle) {
 		CaseCodeManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 		AccountingBusinessManager.getInstance().addCaseBusinessForCode(CourseConstants.CASE_CODE_KEY, CourseBusiness.class);
 
 		GlobalIncludeManager.getInstance().addBundleStyleSheet(CourseConstants.IW_BUNDLE_IDENTIFIER, "/style/course-print.css", PageResourceConstants.MEDIA_PRINT);
-		
+
 		//fixCourseApplicationReferenceStrings();
 		addCourseNumbers();
 		startMessageDaemon(starterBundle);
 	}
 
+	@Override
 	public void stop(IWBundle starterBundle) {
 	}
 
@@ -65,7 +70,7 @@ public void start(IWBundle starterBundle) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void startMessageDaemon(IWBundle iwb) {
 		if (tManager == null) {
 			tManager = new TimerManager();
@@ -73,14 +78,15 @@ public void start(IWBundle starterBundle) {
 		if (iwac == null) {
 			iwac = iwb.getApplication().getIWApplicationContext();
 		}
-		
+
 		int minute = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_MINUTE, String.valueOf(0)));
 		int hour = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_HOUR, String.valueOf(13)));
 		//int dayOfWeek = Integer.parseInt(iwb.getProperty(CourseConstants.PROPERTY_TIMER_DAYOFWEEK, String.valueOf(Calendar.MONDAY)));
-		
+
 		if (courseTimerEntry == null) {
 			try {
 				courseTimerEntry = tManager.addTimer(minute, hour, -1, -1, -1, -1, new TimerListener() {
+					@Override
 					public void handleTimer(TimerEntry entry) {
 						sendMessages();
 					}
@@ -92,11 +98,12 @@ public void start(IWBundle starterBundle) {
 			}
 		}
 	}
-	
+
 	protected void sendMessages() {
 		if (iwac.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SEND_REMINDERS, false)) {
 			try {
-				CourseBusiness business = (CourseBusiness) IBOLookup.getServiceInstance(iwac, CourseBusiness.class);
+				CourseBusiness business = IBOLookup.getServiceInstance(iwac, CourseBusiness.class);
+				LOGGER.info("Sending reminders about next courses");
 				business.sendNextCoursesMessages();
 			}
 			catch (IBOLookupException ile) {
@@ -105,6 +112,8 @@ public void start(IWBundle starterBundle) {
 			catch (RemoteException re) {
 				throw new IBORuntimeException(re);
 			}
+		} else {
+			LOGGER.warning("Not sending reminders");
 		}
 	}
 }
