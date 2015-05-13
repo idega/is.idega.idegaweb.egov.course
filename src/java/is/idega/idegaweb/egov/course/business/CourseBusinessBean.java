@@ -2086,13 +2086,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Map getDiscounts(SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications) {
-		Map discountPrices = new HashMap();
-		Iterator iterator = userPrices.iterator();
+	public Map<User, PriceHolder> getDiscounts(SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications) {
+		Map<User, PriceHolder> discountPrices = new HashMap<User, PriceHolder>();
+		Iterator<PriceHolder> iterator = userPrices.iterator();
 		boolean first = true;
 		boolean firstOnWaitingList = true;
 		while (iterator.hasNext()) {
-			PriceHolder priceHolder = (PriceHolder) iterator.next();
+			PriceHolder priceHolder = iterator.next();
 			User applicant = priceHolder.getUser();
 			float price = priceHolder.getPrice();
 
@@ -2108,7 +2108,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					for (ApplicationHolder applicationHolder : userApplications) {
 						if (!applicationHolder.isOnWaitingList() && !firstOnWaitingList) {
 							getsDiscount = true;
-							name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getProvider().getName();
+							name = applicationHolder.getCourse() == null ? null :
+									applicationHolder.getCourse().getProvider() == null ? null :
+										applicationHolder.getCourse().getProvider().getName();
 						}
 					}
 
@@ -2125,7 +2127,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				for (ApplicationHolder applicationHolder : userApplications) {
 					if (!applicationHolder.isOnWaitingList()) {
 						firstOnWaitingList = false;
-						name = applicationHolder.getCourse() == null ? null : applicationHolder.getCourse().getProvider().getName();
+						name = applicationHolder.getCourse() == null ? null :
+							applicationHolder.getCourse().getProvider() == null ? null :
+								applicationHolder.getCourse().getProvider().getName();
 					}
 				}
 				if (name != null) {
@@ -2139,10 +2143,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return discountPrices;
 	}
 
-	private boolean hasSiblingInSet(Set set, User applicant) {
-		Iterator iter = set.iterator();
+	private boolean hasSiblingInSet(Set<User> set, User applicant) {
+		Iterator<User> iter = set.iterator();
 		while (iter.hasNext()) {
-			User user = (User) iter.next();
+			User user = iter.next();
 			if (!applicant.equals(user)) {
 				try {
 					if (getFamilyLogic().isSiblingOf(applicant, user)) {

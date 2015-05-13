@@ -2051,19 +2051,19 @@ public class CourseApplication extends ApplicationForm {
 		group = table.createBodyRowGroup();
 
 		Map<User, Collection<ApplicationHolder>> applications = getCourseApplicationSession(iwc).getApplications();
-		SortedSet prices = getCourseBusiness(iwc).calculatePrices(applications);
-		Map discounts = getCourseBusiness(iwc).getDiscounts(prices, applications);
+		SortedSet<PriceHolder> prices = getCourseBusiness(iwc).calculatePrices(applications);
+		Map<User, PriceHolder> discounts = getCourseBusiness(iwc).getDiscounts(prices, applications);
 
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
 		float totalPrice = 0;
 		float discount = 0;
 		int counter = 0;
-		Iterator iter = prices.iterator();
+		Iterator<PriceHolder> iter = prices.iterator();
 		while (iter.hasNext()) {
 			row = group.createRow();
-			PriceHolder holder = (PriceHolder) iter.next();
+			PriceHolder holder = iter.next();
 			User user = holder.getUser();
-			PriceHolder discountHolder = (PriceHolder) discounts.get(user);
+			PriceHolder discountHolder = discounts.get(user);
 
 			float totalPricePerApplication = holder.getPrice();
 			totalPrice += totalPricePerApplication;
