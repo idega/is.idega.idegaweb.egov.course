@@ -162,7 +162,20 @@ public class CourseEditor extends CourseBlock {
 
 			case ACTION_DELETE:
 				if (!getCourseBusiness().deleteCourse(iwc.getParameter(PARAMETER_COURSE_PK))) {
-					PresentationUtil.addJavascriptAlertOnLoad(iwc, getResourceBundle().getLocalizedString("course.remove_error", "You can not remove a course that has choices attached to it."));
+					boolean deleted = false;
+					if (iwc.getApplicationSettings().getBoolean("course.set_no_provider_on_delete", true)) {
+						try {
+						Course course = getCourseBusiness().getCourse(iwc.getParameter(PARAMETER_COURSE_PK));
+						course.setProviderId(-1);
+						course.store();
+						deleted = true;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					if (!deleted) {
+						PresentationUtil.addJavascriptAlertOnLoad(iwc, getResourceBundle().getLocalizedString("course.remove_error", "You can not remove a course that has choices attached to it."));
+					}
 				}
 				showList(iwc);
 				break;

@@ -144,6 +144,8 @@ public interface Course extends IDOEntity {
 	 */
 	public void setProvider(School provider);
 
+	public void setProviderId(Integer providerId);
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseType
 	 */

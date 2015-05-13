@@ -263,6 +263,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
+	public void setProviderId(Integer providerId) {
+		setColumn(COLUMN_PROVIDER, providerId);
+	}
+
+	@Override
 	public void setCourseType(CourseType courseType) {
 		setColumn(COLUMN_COURSE_TYPE, courseType);
 	}
