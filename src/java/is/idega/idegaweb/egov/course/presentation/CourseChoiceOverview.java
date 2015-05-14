@@ -26,9 +26,13 @@ import java.util.logging.Level;
 import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
+import com.idega.block.process.business.CaseBusiness;
+import com.idega.block.process.data.Case;
 import com.idega.block.school.data.School;
 import com.idega.builder.bean.AdvancedProperty;
+import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
+import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.builder.data.ICPage;
 import com.idega.data.SimpleQuerier;
 import com.idega.presentation.IWContext;
@@ -49,6 +53,7 @@ import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.TextSoap;
 
@@ -186,6 +191,29 @@ public class CourseChoiceOverview extends CourseBlock {
 		}
 	}
 
+	private void doLoginIn(IWContext iwc, CourseChoice choice) {
+		if (iwc.isLoggedOn() || choice == null) {
+			return;
+		}
+
+		User owner = null;
+		String personalId = null;
+		try {
+			CaseBusiness caseBusiness = IBOLookup.getServiceInstance(iwc, CaseBusiness.class);
+			Case theCase = caseBusiness.getCase(choice.getPrimaryKey());
+			owner = theCase.getOwner();
+			personalId = owner == null ? null : owner.getPersonalID();
+			if (StringUtil.isEmpty(personalId)) {
+				getLogger().warning("Owner (" + owner + ") of application (ID: " + choice.getPrimaryKey() + ") does not have personal ID: can not login");
+			} else {
+				LoginBusinessBean loginBusiness =LoginBusinessBean.getLoginBusinessBean(iwc);
+				loginBusiness.logInByPersonalID(iwc, owner.getPersonalID());
+			}
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error while loging-in in owner (" + owner + ") of application (ID: " + choice.getPrimaryKey() + ")", e);
+		}
+	}
+
 	private int parseAction(IWContext iwc) {
 		int action = ACTION_VIEW;
 		if (iwc.isParameterSet(PARAMETER_ACTION)) {
@@ -212,6 +240,8 @@ public class CourseChoiceOverview extends CourseBlock {
 	}
 
 	protected void getViewerForm(IWContext iwc, CourseChoice choice) throws RemoteException {
+		doLoginIn(iwc, choice);
+
 		Form form = new Form();
 		form.maintainParameter(PARAMETER_CHOICE_PK);
 		form.addParameter(PARAMETER_ACTION, ACTION_VIEW);
