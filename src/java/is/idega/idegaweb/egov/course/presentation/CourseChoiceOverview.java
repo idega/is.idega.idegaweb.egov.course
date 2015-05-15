@@ -26,14 +26,12 @@ import java.util.logging.Level;
 import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
-import com.idega.block.process.business.CaseBusiness;
-import com.idega.block.process.data.Case;
 import com.idega.block.school.data.School;
 import com.idega.builder.bean.AdvancedProperty;
-import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.builder.data.ICPage;
+import com.idega.core.idgenerator.business.IdGeneratorFactory;
 import com.idega.data.SimpleQuerier;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -47,13 +45,17 @@ import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
+import com.idega.user.dao.UserDAO;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.TextSoap;
 
@@ -156,6 +158,7 @@ public class CourseChoiceOverview extends CourseBlock {
 
 					case ACTION_PARENT_ACCEPT_FORM:
 						if (iwc.isParameterSet(PARAMETER_UNIQUE_ID) && choice != null && iwc.getParameter(PARAMETER_UNIQUE_ID).equals(choice.getUniqueID())) {
+							doLoginIn(iwc, choice);
 							getParentAcceptForm(iwc, choice);
 						} else {
 							if (iwc.isParameterSet(PARAMETER_UNIQUE_ID)) {
@@ -170,6 +173,7 @@ public class CourseChoiceOverview extends CourseBlock {
 
 					case ACTION_PARENT_ACCEPT:
 						if (iwc.isParameterSet(PARAMETER_UNIQUE_ID) && iwc.getParameter(PARAMETER_UNIQUE_ID).equals(choice.getUniqueID())) {
+							doLoginIn(iwc, choice);
 							parentAcceptChoice(iwc, choice);
 						}
 						getViewerForm(iwc, choice);
@@ -191,26 +195,44 @@ public class CourseChoiceOverview extends CourseBlock {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void doLoginIn(IWContext iwc, CourseChoice choice) {
-		if (iwc.isLoggedOn() || choice == null) {
+		if (iwc.isLoggedOn()) {
+			return;
+		}
+		if (choice == null) {
+			getLogger().warning("Cource choice is unknown");
 			return;
 		}
 
-		User owner = null;
-		String personalId = null;
+		User applicant = choice.getUser();
+		List<User> parents = getBusiness().getParentsForApplicant(choice.getApplication(), applicant);
+		User toLogin = ListUtil.isEmpty(parents) ? applicant : parents.get(0);
+		if (toLogin == null) {
+			getLogger().warning("Parent or owner is unknown of application (ID: " + choice.getPrimaryKey() + "): can not login");
+			return;
+		}
+
+		String uuid = null;
 		try {
-			CaseBusiness caseBusiness = IBOLookup.getServiceInstance(iwc, CaseBusiness.class);
-			Case theCase = caseBusiness.getCase(choice.getPrimaryKey());
-			owner = theCase.getOwner();
-			personalId = owner == null ? null : owner.getPersonalID();
-			if (StringUtil.isEmpty(personalId)) {
-				getLogger().warning("Owner (" + owner + ") of application (ID: " + choice.getPrimaryKey() + ") does not have personal ID: can not login");
+			uuid = toLogin.getUniqueId();
+			if (StringUtil.isEmpty(uuid)) {
+				uuid = IdGeneratorFactory.getUUIDGenerator().generateId();
+				toLogin.setUniqueId(uuid);
+				toLogin.store();
+				CoreUtil.clearAllCaches();
+			}
+
+			UserDAO userDAO = ELUtil.getInstance().getBean(UserDAO.class);
+			com.idega.user.data.bean.User user = userDAO.getUser(Integer.valueOf(toLogin.getId()));
+			LoginBusinessBean loginBusiness = LoginBusinessBean.getLoginBusinessBean(iwc);
+			if (loginBusiness.logInUser(iwc, user)) {
+				getLogger().info("Succeeded to log-in in owner (" + toLogin + ") of application (ID: " + choice.getPrimaryKey() + ")");
 			} else {
-				LoginBusinessBean loginBusiness =LoginBusinessBean.getLoginBusinessBean(iwc);
-				loginBusiness.logInByPersonalID(iwc, owner.getPersonalID());
+				getLogger().warning("Failed to log-in in owner (" + toLogin + ") of application (ID: " + choice.getPrimaryKey() + ")");
 			}
 		} catch (Exception e) {
-			getLogger().log(Level.WARNING, "Error while loging-in in owner (" + owner + ") of application (ID: " + choice.getPrimaryKey() + ")", e);
+			getLogger().log(Level.WARNING, "Error while loging-in in owner (" + toLogin + ") of application (ID: " + choice.getPrimaryKey() + ")", e);
 		}
 	}
 

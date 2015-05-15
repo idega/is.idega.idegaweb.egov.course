@@ -1,7 +1,6 @@
 package is.idega.idegaweb.egov.course.business;
 
 import is.idega.block.family.business.FamilyLogic;
-import is.idega.block.family.business.NoCustodianFound;
 import is.idega.block.family.data.Child;
 import is.idega.block.family.data.Custodian;
 import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
@@ -41,6 +40,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1581,12 +1581,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Collection getCourseChoices(User user) {
+	public Collection<CourseChoice> getCourseChoices(User user) {
 		try {
 			return getCourseChoiceHome().findAllByUser(user);
 		} catch (FinderException fe) {
 			fe.printStackTrace();
-			return new ArrayList();
+			return new ArrayList<CourseChoice>();
 		}
 	}
 
@@ -1945,13 +1945,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Map getApplicationMap(CourseApplication application) {
+	public Map<User, Collection<ApplicationHolder>> getApplicationMap(CourseApplication application) {
 		return getApplicationMap(application, null);
 	}
 
 	@Override
-	public Map<User, Collection<ApplicationHolder>> getApplicationMap(CourseApplication application,
-			Boolean waitingList) {
+	public Map<User, Collection<ApplicationHolder>> getApplicationMap(CourseApplication application, Boolean waitingList) {
 		Map<User, Collection<ApplicationHolder>> map = new HashMap<User, Collection<ApplicationHolder>>();
 
 		try {
@@ -2100,40 +2099,41 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			discountHolder.setUser(applicant);
 			discountHolder.setPrice(0);
 
-			if (!first) {
-				if (hasSiblingInSet(applications.keySet(), applicant)) {
-					boolean getsDiscount = false;
-					String name = null;
-					Collection<ApplicationHolder> userApplications = applications.get(applicant);
-					for (ApplicationHolder applicationHolder : userApplications) {
-						if (!applicationHolder.isOnWaitingList() && !firstOnWaitingList) {
-							getsDiscount = true;
-							name = applicationHolder.getCourse() == null ? null :
-									applicationHolder.getCourse().getProvider() == null ? null :
-										applicationHolder.getCourse().getProvider().getName();
+			Collection<ApplicationHolder> userApplications = applications.get(applicant);
+			if (!isDiscountDisabled(applicant, userApplications)) {
+				if (!first) {
+					if (hasSiblingInSet(applications.keySet(), applicant)) {
+						boolean getsDiscount = false;
+						String name = null;
+						for (ApplicationHolder applicationHolder : userApplications) {
+							if (!applicationHolder.isOnWaitingList() && !firstOnWaitingList) {
+								getsDiscount = true;
+								name = applicationHolder.getCourse() == null ? null :
+										applicationHolder.getCourse().getProvider() == null ? null :
+											applicationHolder.getCourse().getProvider().getName();
+							}
+						}
+
+						if (getsDiscount) {
+							discountHolder.setPrice(price * 0.2f);
+							discountHolder.setDiscount(0.2f);
+							discountHolder.setName(name);
 						}
 					}
-
-					if (getsDiscount) {
-						discountHolder.setPrice(price * 0.2f);
-						discountHolder.setDiscount(0.2f);
+				} else {
+					first = false;
+					String name = null;
+					for (ApplicationHolder applicationHolder : userApplications) {
+						if (!applicationHolder.isOnWaitingList()) {
+							firstOnWaitingList = false;
+							name = applicationHolder.getCourse() == null ? null :
+								applicationHolder.getCourse().getProvider() == null ? null :
+									applicationHolder.getCourse().getProvider().getName();
+						}
+					}
+					if (name != null) {
 						discountHolder.setName(name);
 					}
-				}
-			} else {
-				first = false;
-				String name = null;
-				Collection<ApplicationHolder> userApplications = applications.get(applicant);
-				for (ApplicationHolder applicationHolder : userApplications) {
-					if (!applicationHolder.isOnWaitingList()) {
-						firstOnWaitingList = false;
-						name = applicationHolder.getCourse() == null ? null :
-							applicationHolder.getCourse().getProvider() == null ? null :
-								applicationHolder.getCourse().getProvider().getName();
-					}
-				}
-				if (name != null) {
-					discountHolder.setName(name);
 				}
 			}
 
@@ -2732,37 +2732,55 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					StringUtil.isEmpty(provider.getSchoolWebPage()) ? CoreConstants.EMPTY : provider.getSchoolWebPage()	//	9: provider web page
 			};
 
-			User appParent = application.getOwner();
-			if (appParent != null) {
-				if (getFamilyLogic().isChildInCustodyOf(applicant, appParent)) {
+			List<User> parents = getParentsForApplicant(application, applicant);
+			if (!ListUtil.isEmpty(parents)) {
+				for (User appParent: parents) {
 					MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, appParent, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
 					msgValue.setBcc(bcc);
 
 					getMessageBusiness().createUserMessage(msgValue);
 				}
+			} else {
+				MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, applicant, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
+				msgValue.setBcc(bcc);
 
-				try {
-					Collection<User> parents = getFamilyLogic().getCustodiansFor(applicant);
-					Iterator<User> iter = parents.iterator();
-					while (iter.hasNext()) {
-						User parent = iter.next();
-						if (!getUserBusiness().haveSameAddress(parent, appParent)) {
-							MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, parent, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
-							msgValue.setBcc(bcc);
-
-							getMessageBusiness().createUserMessage(msgValue);
-						}
-					}
-				} catch (NoCustodianFound ncf) {
-					MessageValue msgValue = getMessageBusiness().createUserMessageValue(application, applicant, null, null, subject, MessageFormat.format(body, arguments), MessageFormat.format(body, arguments), null, false, null, false, true);
-					msgValue.setBcc(bcc);
-
-					getMessageBusiness().createUserMessage(msgValue);
-				}
+				getMessageBusiness().createUserMessage(msgValue);
 			}
 		} catch (RemoteException re) {
 			re.printStackTrace();
 		}
+	}
+
+	public List<User> getParentsForApplicant(CourseApplication application, User applicant) {
+		try {
+			User appParent = application.getOwner();
+			if (appParent != null) {
+				if (getFamilyLogic().isChildInCustodyOf(applicant, appParent)) {
+					return Arrays.asList(appParent);
+				}
+			}
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error getting parents for applicant " + applicant + " and application " + application, e);
+		}
+
+		try {
+			List<User> result = new ArrayList<User>();
+			Collection<User> parents = getFamilyLogic().getCustodiansFor(applicant);
+			Iterator<User> iter = parents.iterator();
+			User appParent = application.getOwner();
+			while (iter.hasNext()) {
+				User parent = iter.next();
+				if (!getUserBusiness().haveSameAddress(parent, appParent)) {
+					result.add(parent);
+				}
+			}
+
+			return result;
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error getting parents for applicant " + applicant + " and application " + application, e);
+		}
+
+		return null;
 	}
 
 	public void sendMessageToProvider(CourseChoice choice,
@@ -3574,29 +3592,31 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 						if (!choice.hasReceivedReminder()) {
 							CourseApplication application = choice.getApplication();
+							String prefix = application.getPrefix();
+							if (!isReminderDisabled(prefix)) {
+								String subject = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + ".course_choice.reminder_subject");
+								if (StringUtil.isEmpty(subject)) {
+									subject = getLocalizedString(
+											(application.getPrefix() != null ? application.getPrefix() + "." : "") + "course_choice.reminder_subject",
+											"A reminder for course choice",
+											locale
+									);
+								}
+								String body = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + CoreConstants.DOT + locKey);
+								if (StringUtil.isEmpty(body)) {
+									body = getLocalizedString(
+											(application.getPrefix() != null ? application.getPrefix() + CoreConstants.DOT : CoreConstants.EMPTY) +	locKey,
+											"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
+											locale
+									);
+								}
 
-							String subject = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + ".course_choice.reminder_subject");
-							if (StringUtil.isEmpty(subject)) {
-								subject = getLocalizedString(
-										(application.getPrefix() != null ? application.getPrefix() + "." : "") + "course_choice.reminder_subject",
-										"A reminder for course choice",
-										locale
-								);
+								sendMessageToParents(application, choice, subject, body, locale);
+
+								choice.setReceivedReminder(true);
+								choice.store();
+								count++;
 							}
-							String body = typePrKey == null ? null : iwrb.getLocalizedString(typePrKey + CoreConstants.DOT + locKey);
-							if (StringUtil.isEmpty(body)) {
-								body = getLocalizedString(
-										(application.getPrefix() != null ? application.getPrefix() + CoreConstants.DOT : CoreConstants.EMPTY) +	locKey,
-										"This is a reminder for your registration to course {2} at {3} for {0}, {1}.",
-										locale
-								);
-							}
-
-							sendMessageToParents(application, choice, subject, body, locale);
-
-							choice.setReceivedReminder(true);
-							choice.store();
-							count++;
 						}
 					}
 				}
@@ -3646,4 +3666,89 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 		return null;
 	}
+
+	private boolean isDiscountDisabled(User user, Collection<ApplicationHolder> applications) {
+		if (user == null || ListUtil.isEmpty(applications)) {
+			return false;
+		}
+
+		Collection<CourseChoice> choices = getCourseChoices(user);
+		if (ListUtil.isEmpty(choices)) {
+			return false;
+		}
+
+		boolean disabled = false;
+
+		for (ApplicationHolder application: applications) {
+			Course course = application.getCourse();
+			if (course == null) {
+				continue;
+			}
+
+			for (CourseChoice choice: choices) {
+				Course choiceCourse = choice.getCourse();
+				if (choiceCourse != null && choiceCourse.getPrimaryKey().toString().equals(course.getPrimaryKey().toString())) {
+					CourseApplication courseApplication = choice.getApplication();
+					if (courseApplication != null && isDiscountDisabled(courseApplication.getPrefix(), null)) {
+						disabled = true;
+						return disabled;
+					}
+				}
+			}
+		}
+
+		return disabled;
+	}
+
+	@Override
+	public boolean isDiscountDisabled(String prefix, String id) {
+		if (!StringUtil.isEmpty(prefix)) {
+			String disabledDiscount = getIWApplicationContext().getApplicationSettings().getProperty("course.disabled_discount_pr", "smithy");
+			if (StringUtil.isEmpty(disabledDiscount)) {
+				return false;
+			}
+
+			List<String> disabledDiscounts = Arrays.asList(disabledDiscount.split(CoreConstants.COMMA));
+			if (disabledDiscounts.contains(prefix)) {
+				return true;
+			}
+
+			return false;
+		}
+
+		if (!StringUtil.isEmpty(id)) {
+			String disabledDiscount = getIWApplicationContext().getApplicationSettings().getProperty("course.disabled_discount_id");
+			if (StringUtil.isEmpty(disabledDiscount)) {
+				return false;
+			}
+
+			List<String> disabledDiscounts = Arrays.asList(disabledDiscount.split(CoreConstants.COMMA));
+			if (disabledDiscounts.contains(id)) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
+	private boolean isReminderDisabled(String prefix) {
+		if (!StringUtil.isEmpty(prefix)) {
+			String disabledReminder = getIWApplicationContext().getApplicationSettings().getProperty("course.disabled_reminder_pr", "smithy");
+			if (StringUtil.isEmpty(disabledReminder)) {
+				return false;
+			}
+
+			List<String> disabledReminders = Arrays.asList(disabledReminder.split(CoreConstants.COMMA));
+			if (disabledReminders.contains(prefix)) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
 }

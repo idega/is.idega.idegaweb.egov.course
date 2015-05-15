@@ -28,7 +28,6 @@ import javax.ejb.FinderException;
 
 import com.idega.block.creditcard.business.CreditCardAuthorizationException;
 import com.idega.block.school.data.School;
-import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.builder.data.ICPage;
 import com.idega.data.IDOLookup;
@@ -215,27 +214,26 @@ public class CourseApplicationOverview extends CourseBlock {
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 
-		Map applications = getBusiness().getApplicationMap(application);
-		SortedSet prices = getBusiness().calculatePrices(applications);
-		Map discounts = getBusiness().getDiscounts(prices, applications);
+		CourseBusiness courseBusiness = getBusiness();
+		Map<User, Collection<ApplicationHolder>> applications = courseBusiness.getApplicationMap(application);
+		SortedSet<PriceHolder> prices = courseBusiness.calculatePrices(applications);
+		Map<User, PriceHolder> discounts = courseBusiness.getDiscounts(prices, applications);
 
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
 		float totalPrice = 0;
 		float discount = 0;
 
-		CourseBusiness courseBusiness = IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
-
-		Iterator iterator = prices.iterator();
+		Iterator<PriceHolder> iterator = prices.iterator();
 		while (iterator.hasNext()) {
-			PriceHolder holder = (PriceHolder) iterator.next();
+			PriceHolder holder = iterator.next();
 			User user = holder.getUser();
-			Collection userApplications = (Collection) applications.get(user);
-			PriceHolder discountHolder = (PriceHolder) discounts.get(user);
+			Collection<ApplicationHolder> userApplications = applications.get(user);
+			PriceHolder discountHolder = discounts.get(user);
 
 			float price = holder.getPrice();
 			totalPrice += price;
-			discount += discountHolder.getPrice();
-			float totalParticipantPrice = price + discountHolder.getPrice();
+			discount += discountHolder == null ? 0 : discountHolder.getPrice();
+			float totalParticipantPrice = price - (discountHolder == null ? 0 : discountHolder.getPrice());
 
 			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
 
@@ -310,7 +308,7 @@ public class CourseApplicationOverview extends CourseBlock {
 				CoursePrice coursePrice = course.getPrice();
 				IWTimestamp startDate = new IWTimestamp(course.getStartDate());
 				IWTimestamp endDate = coursePrice != null ?
-						new IWTimestamp(getBusiness().getEndDate(coursePrice, startDate.getDate())) :
+						new IWTimestamp(courseBusiness.getEndDate(coursePrice, startDate.getDate())) :
 							course.getEndDate() == null ?
 									new IWTimestamp() :
 									new IWTimestamp(course.getEndDate());
@@ -563,12 +561,12 @@ public class CourseApplicationOverview extends CourseBlock {
 
 			Link receipt = getButtonLink(getResourceBundle().getLocalizedString("receipt", "Receipt"));
 			receipt.setWindowToOpen(CourseApplicationOverviewWindow.class);
-			receipt.addParameter(getBusiness().getSelectedCaseParameter(), application.getPrimaryKey().toString());
+			receipt.addParameter(courseBusiness.getSelectedCaseParameter(), application.getPrimaryKey().toString());
 			bottom.add(receipt);
 
 			boolean useDirectPayment = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_DIRECT_PAYMENT, false);
 
-			if (isSchoolAdministrator(iwc) /*&& getBusiness().canInvalidate(application)*/) {
+			if (isSchoolAdministrator(iwc) /*&& courseBusiness.canInvalidate(application)*/) {
 				Link invalidate = getButtonLink(getResourceBundle().getLocalizedString("invalidate", "Invalidate"));
 				if (useDirectPayment && application.getPaymentType().equals(CourseConstants.PAYMENT_TYPE_CARD)) {
 					invalidate.setValueOnClick(PARAMETER_ACTION, String.valueOf(ACTION_REFUND_FORM));
@@ -576,7 +574,7 @@ public class CourseApplicationOverview extends CourseBlock {
 				}
 				else {
 					invalidate.addParameter(PARAMETER_ACTION, String.valueOf(ACTION_REFUND));
-					invalidate.maintainParameter(getBusiness().getSelectedCaseParameter(), iwc);
+					invalidate.maintainParameter(courseBusiness.getSelectedCaseParameter(), iwc);
 					invalidate.setClickConfirmation(getResourceBundle().getLocalizedString("confirm_invalidation", "Are you sure you want to invalidate this registration?"));
 				}
 				bottom.add(invalidate);

@@ -1968,25 +1968,6 @@ public class CourseApplication extends ApplicationForm {
 		section.add(clearLayer);
 	}
 
-	private boolean isDiscountDisabled() {
-		String prefix = getPrefix();
-		if (StringUtil.isEmpty(prefix)) {
-			return false;
-		}
-
-		String disabledDiscount = getIWApplicationContext().getApplicationSettings().getProperty("course.disabled_discount", "smithy");
-		if (StringUtil.isEmpty(disabledDiscount)) {
-			return false;
-		}
-
-		List<String> disabledDiscounts = Arrays.asList(disabledDiscount.split(CoreConstants.COMMA));
-		if (disabledDiscounts.contains(prefix)) {
-			return true;
-		}
-
-		return false;
-	}
-
 	private void showPhaseSeven(IWContext iwc) throws RemoteException {
 		Form form = getForm(ACTION_PHASE_7);
 		form.add(new HiddenInput(PARAMETER_ACTION, String.valueOf(ACTION_SAVE)));
@@ -2072,7 +2053,7 @@ public class CourseApplication extends ApplicationForm {
 		Map<User, Collection<ApplicationHolder>> applications = getCourseApplicationSession(iwc).getApplications();
 		SortedSet<PriceHolder> prices = getCourseBusiness(iwc).calculatePrices(applications);
 		Map<User, PriceHolder> discounts = null;
-		if (isDiscountDisabled()) {
+		if (getCourseBusiness(iwc).isDiscountDisabled(getPrefix(), null)) {
 			discounts = Collections.emptyMap();
 		} else {
 			discounts = getCourseBusiness(iwc).getDiscounts(prices, applications);
