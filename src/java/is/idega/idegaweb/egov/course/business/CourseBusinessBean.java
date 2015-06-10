@@ -198,23 +198,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 	@Override
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {
-		Collection entries = new ArrayList();
+		Collection<AccountingEntry> entries = new ArrayList<AccountingEntry>();
 
 		try {
 			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
 			CourseCategory category = getAccountingSchoolType();
 
 			CaseStatus status = getCaseStatusOpen();
-			Collection applications = getCourseApplicationHome().findAll(status, fromDate, toDate);
+			Collection<CourseApplication> applications = getCourseApplicationHome().findAll(status, fromDate, toDate);
 			if (ListUtil.isEmpty(applications)) {
 				getLogger().warning("Did not find any course applications with status " + status.getStatus() + ", from " + fromDate + ", to " + toDate);
 			} else {
 				getLogger().info("Found course applications with status " + status.getStatus() + ", from " + fromDate + ", to " + toDate + ": " + applications);
 			}
 
-			Iterator iterator = applications.iterator();
+			Iterator<CourseApplication> iterator = applications.iterator();
 			while (iterator.hasNext()) {
-				CourseApplication application = (CourseApplication) iterator
+				CourseApplication application = iterator
 						.next();
 				TPosAuthorisationEntriesBean ccAuthEntry = null;
 				if (application.getPaymentType().equals(
@@ -239,7 +239,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				Map discounts = getDiscounts(prices, applicationMap);
 
 				User owner = application.getOwner();
-				Collection choices = getCourseChoices(application, new Boolean(
+				Collection<CourseChoice> choices = getCourseChoices(application, new Boolean(
 						false));
 				if (ListUtil.isEmpty(choices)) {
 					getLogger().warning("Did not find any course choices for application " + application );
@@ -247,151 +247,80 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					getLogger().info("Found course choices for application " + application + ": " + choices);
 				}
 
-				Iterator iter = choices.iterator();
+				Iterator<CourseChoice> iter = choices.iterator();
 				while (iter.hasNext()) {
-					CourseChoice choice = (CourseChoice) iter.next();
-					boolean noPayment = choice.isNoPayment();
-					Course course = choice.getCourse();
-					School provider = course.getProvider();
-					SchoolArea area = provider.getSchoolArea();
-					CourseType courseType = course.getCourseType();
-					CourseCategory courseCategory = courseType.getCourseCategory();
-					if (category != null && !courseCategory.equals(category)) {
-						getLogger().warning("Pre-set category (" + category + ") and course category (" + courseCategory + ") are not equal for course choice: " + choice + ", application: " + application + ". Skipping it!");
-						continue;
-					}
-
-					User student = choice.getUser();
-					CoursePrice price = course.getPrice();
-					String paymentType = application.getPaymentType();
-					String batchNumber = ccAuthEntry != null ? ccAuthEntry
-							.getBatchNumber() : null;
-					// String cardName = ccAuthEntry != null ?
-					// ccAuthEntry.getBrandName().substring(0, 4) : null;
-					String courseName = course.getName();
-					String uniqueID = application.getPrimaryKey().toString()
-							+ "-" + choice.getPrimaryKey() + "-";
-					Date startDate = new IWTimestamp(course.getStartDate())
-							.getDate();
-					Date endDate = price != null ? getEndDate(price, startDate)
-							: new IWTimestamp(course.getEndDate()).getDate();
-
-					float coursePrice = (price != null ? price.getPrice()
-							: course.getCoursePrice())
-							* (1 - ((PriceHolder) discounts.get(student))
-									.getDiscount());
-
-					String payerPId;
-					if (application.getPayerPersonalID() != null
-							&& application.getPayerPersonalID().length() > 0) {
-						payerPId = application.getPayerPersonalID();
-					} else {
-						payerPId = owner.getPersonalID();
-					}
-					if (payerPId != null && payerPId.length() > 10) {
-						payerPId = payerPId.trim();
-						payerPId = StringHandler.replace(payerPId, "-", "");
-						if (payerPId.length() > 10) {
-							payerPId = payerPId.substring(0, 10);
-						}
-					}
-					if (payerPId == null) {
-						payerPId = "";
-					}
-
-					String studentPId = student.getPersonalID();
-					if (studentPId.length() > 10) {
-						studentPId = studentPId.trim();
-						studentPId = StringHandler.replace(studentPId, "-", "");
-						if (studentPId.length() > 10) {
-							studentPId = studentPId.substring(0, 10);
-						}
-					}
-
-					SchoolCode schoolCode = getAccountingBusiness().getSchoolCode(provider, courseCategory);
-					providerCode = schoolCode != null ? schoolCode
-							.getSchoolCode() : provider.getOrganizationNumber();
-
-					String typeCode = courseType.getAccountingKey() != null ? courseType
-							.getAccountingKey()
-							: "NOTSET";
-					String areaCode = area.getAccountingKey() != null ? area
-							.getAccountingKey() : "NOTSET";
-
+					CourseChoice choice = null;
 					try {
-						Object o = implementor.newInstance();
-						AccountingEntry entry = (AccountingEntry) o;
-						entry
-								.setProductCode(CourseConstants.PRODUCT_CODE_COURSE);
-						entry.setProviderCode(providerCode);
-						entry.setProjectCode(typeCode);
-						entry.setPayerPersonalId(payerPId);
-						entry.setPersonalId(studentPId);
-						entry
-								.setPaymentMethod(paymentType
-										.equals(CourseConstants.PAYMENT_TYPE_CARD) ? application
-										.getCardType().substring(0, 4)
-										.toUpperCase()
-										: "GIRO");
-						if (paymentType
-								.equals(CourseConstants.PAYMENT_TYPE_CARD)
-								&& application.getCardNumber() != null) {
-							entry.setCardExpirationMonth(application
-									.getCardValidMonth());
-							entry.setCardExpirationYear(application
-									.getCardValidYear());
-							entry.setCardNumber(application.getCardNumber());
-							entry.setCardType(application.getCardType());
+						choice = iter.next();
+						boolean noPayment = choice.isNoPayment();
+						Course course = choice.getCourse();
+						School provider = course.getProvider();
+						SchoolArea area = provider == null ? null : provider.getSchoolArea();
+						CourseType courseType = course.getCourseType();
+						CourseCategory courseCategory = courseType.getCourseCategory();
+						if (category != null && !courseCategory.equals(category)) {
+							getLogger().warning("Pre-set category (" + category + ") and course category (" + courseCategory + ") are not equal for course choice: " + choice + ", application: " + application + ". Skipping it!");
+							continue;
 						}
-						entry.setAmount((int) coursePrice);
-						entry.setUnits(1);
-						entry.setStartDate(startDate);
-						entry.setEndDate(endDate);
 
-						AccountingEntry extraEntry = (AccountingEntry) implementor
-								.newInstance();
-						extraEntry.setStartDate(application.getCreated());
-						extraEntry.setProductCode(courseName);
-						extraEntry.setProjectCode(batchNumber);
-						extraEntry.setProviderCode(areaCode);
-						extraEntry.setExtraInformation(uniqueID + "1");
-						entry.setExtraInformation(extraEntry);
+						User student = choice.getUser();
+						CoursePrice price = course.getPrice();
+						String paymentType = application.getPaymentType();
+						String batchNumber = ccAuthEntry != null ? ccAuthEntry
+								.getBatchNumber() : null;
+						// String cardName = ccAuthEntry != null ?
+						// ccAuthEntry.getBrandName().substring(0, 4) : null;
+						String courseName = course.getName();
+						String uniqueID = application.getPrimaryKey().toString()
+								+ "-" + choice.getPrimaryKey() + "-";
+						Date startDate = new IWTimestamp(course.getStartDate())
+								.getDate();
+						Date endDate = price != null ? getEndDate(price, startDate)
+								: new IWTimestamp(course.getEndDate()).getDate();
 
-						if (entry.getAmount() > 0) {
-							entries.add(entry);
-							if (noPayment) {
-								AccountingEntry cloneEntry = getClonedEntry(entry);
-								if (cloneEntry != null) {
-									entries.add(cloneEntry);
-								}
-							}
-						}
-					} catch (InstantiationException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					}
-
-					if (choice.getDayCare() != CourseConstants.DAY_CARE_NONE
-							&& price != null) {
-						float carePrice = 0;
-						if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
-							carePrice = price.getPreCarePrice();
-						} else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
-							carePrice = price.getPostCarePrice();
-						} else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
-							carePrice = price.getPreCarePrice()
-									+ price.getPostCarePrice();
-						}
-						carePrice = carePrice
+						float coursePrice = (price != null ? price.getPrice()
+								: course.getCoursePrice())
 								* (1 - ((PriceHolder) discounts.get(student))
 										.getDiscount());
+
+						String payerPId;
+						if (application.getPayerPersonalID() != null
+								&& application.getPayerPersonalID().length() > 0) {
+							payerPId = application.getPayerPersonalID();
+						} else {
+							payerPId = owner.getPersonalID();
+						}
+						if (payerPId != null && payerPId.length() > 10) {
+							payerPId = payerPId.trim();
+							payerPId = StringHandler.replace(payerPId, "-", "");
+							if (payerPId.length() > 10) {
+								payerPId = payerPId.substring(0, 10);
+							}
+						}
+						if (payerPId == null) {
+							payerPId = "";
+						}
+
+						String studentPId = student.getPersonalID();
+						if (studentPId.length() > 10) {
+							studentPId = studentPId.trim();
+							studentPId = StringHandler.replace(studentPId, "-", "");
+							if (studentPId.length() > 10) {
+								studentPId = studentPId.substring(0, 10);
+							}
+						}
+
+						SchoolCode schoolCode = provider == null ? null : getAccountingBusiness().getSchoolCode(provider, courseCategory);
+						providerCode = schoolCode != null ? schoolCode.getSchoolCode() : provider == null ? null : provider.getOrganizationNumber();
+
+						String typeCode = courseType.getAccountingKey() != null ? courseType.getAccountingKey() : "NOTSET";
+						String areaCode = area == null ? "NOTEST" : area.getAccountingKey() != null ? area .getAccountingKey() : "NOTSET";
 
 						try {
 							Object o = implementor.newInstance();
 							AccountingEntry entry = (AccountingEntry) o;
 							entry
-									.setProductCode(CourseConstants.PRODUCT_CODE_CARE);
+									.setProductCode(CourseConstants.PRODUCT_CODE_COURSE);
 							entry.setProviderCode(providerCode);
 							entry.setProjectCode(typeCode);
 							entry.setPayerPersonalId(payerPId);
@@ -399,7 +328,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							entry
 									.setPaymentMethod(paymentType
 											.equals(CourseConstants.PAYMENT_TYPE_CARD) ? application
-											.getCardType().toUpperCase()
+											.getCardType().substring(0, 4)
+											.toUpperCase()
 											: "GIRO");
 							if (paymentType
 									.equals(CourseConstants.PAYMENT_TYPE_CARD)
@@ -408,12 +338,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 										.getCardValidMonth());
 								entry.setCardExpirationYear(application
 										.getCardValidYear());
-								entry
-										.setCardNumber(application
-												.getCardNumber());
+								entry.setCardNumber(application.getCardNumber());
 								entry.setCardType(application.getCardType());
 							}
-							entry.setAmount((int) carePrice);
+							entry.setAmount((int) coursePrice);
 							entry.setUnits(1);
 							entry.setStartDate(startDate);
 							entry.setEndDate(endDate);
@@ -424,7 +352,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							extraEntry.setProductCode(courseName);
 							extraEntry.setProjectCode(batchNumber);
 							extraEntry.setProviderCode(areaCode);
-							extraEntry.setExtraInformation(uniqueID + "2");
+							extraEntry.setExtraInformation(uniqueID + "1");
 							entry.setExtraInformation(extraEntry);
 
 							if (entry.getAmount() > 0) {
@@ -441,6 +369,79 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						} catch (IllegalAccessException e) {
 							e.printStackTrace();
 						}
+
+						if (choice.getDayCare() != CourseConstants.DAY_CARE_NONE
+								&& price != null) {
+							float carePrice = 0;
+							if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
+								carePrice = price.getPreCarePrice();
+							} else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
+								carePrice = price.getPostCarePrice();
+							} else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+								carePrice = price.getPreCarePrice()
+										+ price.getPostCarePrice();
+							}
+							carePrice = carePrice
+									* (1 - ((PriceHolder) discounts.get(student))
+											.getDiscount());
+
+							try {
+								Object o = implementor.newInstance();
+								AccountingEntry entry = (AccountingEntry) o;
+								entry
+										.setProductCode(CourseConstants.PRODUCT_CODE_CARE);
+								entry.setProviderCode(providerCode);
+								entry.setProjectCode(typeCode);
+								entry.setPayerPersonalId(payerPId);
+								entry.setPersonalId(studentPId);
+								entry
+										.setPaymentMethod(paymentType
+												.equals(CourseConstants.PAYMENT_TYPE_CARD) ? application
+												.getCardType().toUpperCase()
+												: "GIRO");
+								if (paymentType
+										.equals(CourseConstants.PAYMENT_TYPE_CARD)
+										&& application.getCardNumber() != null) {
+									entry.setCardExpirationMonth(application
+											.getCardValidMonth());
+									entry.setCardExpirationYear(application
+											.getCardValidYear());
+									entry
+											.setCardNumber(application
+													.getCardNumber());
+									entry.setCardType(application.getCardType());
+								}
+								entry.setAmount((int) carePrice);
+								entry.setUnits(1);
+								entry.setStartDate(startDate);
+								entry.setEndDate(endDate);
+
+								AccountingEntry extraEntry = (AccountingEntry) implementor
+										.newInstance();
+								extraEntry.setStartDate(application.getCreated());
+								extraEntry.setProductCode(courseName);
+								extraEntry.setProjectCode(batchNumber);
+								extraEntry.setProviderCode(areaCode);
+								extraEntry.setExtraInformation(uniqueID + "2");
+								entry.setExtraInformation(extraEntry);
+
+								if (entry.getAmount() > 0) {
+									entries.add(entry);
+									if (noPayment) {
+										AccountingEntry cloneEntry = getClonedEntry(entry);
+										if (cloneEntry != null) {
+											entries.add(cloneEntry);
+										}
+									}
+								}
+							} catch (InstantiationException e) {
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								e.printStackTrace();
+							}
+						}
+					} catch (Exception e) {
+						getLogger().warning("Error occured whil analyzing data for application " + application + " and choice: " + choice);
 					}
 				}
 			}
@@ -451,7 +452,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 
 		getLogger().info("Found entries: " + entries);
-		return (AccountingEntry[]) entries.toArray(new AccountingEntry[0]);
+		return entries.toArray(new AccountingEntry[0]);
 	}
 
 	private AccountingEntry getClonedEntry(AccountingEntry entry) {
@@ -1579,18 +1580,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Collection getCourseChoices(CourseApplication application) {
+	public Collection<CourseChoice> getCourseChoices(CourseApplication application) {
 		return getCourseChoices(application, null);
 	}
 
-	private Collection getCourseChoices(CourseApplication application,
+	private Collection<CourseChoice> getCourseChoices(CourseApplication application,
 			Boolean waitingList) {
 		try {
 			return getCourseChoiceHome().findAllByApplication(application,
 					waitingList);
 		} catch (FinderException fe) {
 			fe.printStackTrace();
-			return new ArrayList();
+			return new ArrayList<CourseChoice>();
 		}
 	}
 
