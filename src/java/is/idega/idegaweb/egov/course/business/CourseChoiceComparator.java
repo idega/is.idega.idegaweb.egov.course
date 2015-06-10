@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Apr 18, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.business;
@@ -17,26 +17,22 @@ import java.util.Locale;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
 
-public class CourseChoiceComparator implements Comparator {
+public class CourseChoiceComparator implements Comparator<CourseChoice> {
 
 	public static final int NAME_SORT = 1;
 	public static final int DATE_SORT = 2;
 	public static final int ID_SORT = 3;
 
-	private Locale locale;
 	private int compareBy = NAME_SORT;
 	private Collator collator;
 
 	public CourseChoiceComparator(Locale locale, int compareBy) {
-		this.locale = locale;
 		this.compareBy = compareBy;
+		collator = Collator.getInstance(locale);
 	}
 
-	public int compare(Object arg0, Object arg1) {
-		CourseChoice choice1 = (CourseChoice) arg0;
-		CourseChoice choice2 = (CourseChoice) arg1;
-		collator = Collator.getInstance(locale);
-
+	@Override
+	public int compare(CourseChoice choice1, CourseChoice choice2) {
 		int returner = 0;
 		switch (this.compareBy) {
 			case ID_SORT:
@@ -72,7 +68,7 @@ public class CourseChoiceComparator implements Comparator {
 	private int dateSort(CourseChoice choice1, CourseChoice choice2) {
 		CourseApplication application1 = choice1.getApplication();
 		CourseApplication application2 = choice2.getApplication();
-		
+
 		IWTimestamp start1 = new IWTimestamp(application1.getCreated());
 		IWTimestamp start2 = new IWTimestamp(application2.getCreated());
 

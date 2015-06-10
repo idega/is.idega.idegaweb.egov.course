@@ -143,7 +143,7 @@ public class CourseParticipantsList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		List scripts = new ArrayList();
+		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
@@ -183,7 +183,7 @@ public class CourseParticipantsList extends CourseBlock {
 		else {
 			script4.append("function changeCourseValues() {\n").append("\tCourseDWRUtil.getCoursesMapDWR('" + (getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey().toString() : "-1") + "', dwr.util.getValue('" + PARAMETER_SCHOOL_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_COURSE_TYPE_PK + "'), dwr.util.getValue('" + PARAMETER_YEAR + "'), '" + iwc.getCurrentLocale().getCountry() + "', setCourseOptions);\n").append("}");
 		}
-		List functions = new ArrayList();
+		List<String> functions = new ArrayList<String>();
 		functions.add(script2.toString());
 		functions.add(script.toString());
 		functions.add(script3.toString());
@@ -198,10 +198,10 @@ public class CourseParticipantsList extends CourseBlock {
 
 		boolean showTypes = true;
 		if (getSession().getProvider() != null) {
-			Collection schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
+			Collection<SchoolType> schoolTypes = getBusiness().getSchoolTypes(getSession().getProvider());
 			if (schoolTypes.size() == 1) {
 				showTypes = false;
-				type = (SchoolType) schoolTypes.iterator().next();
+				type = schoolTypes.iterator().next();
 				schoolType.setSelectedElement(type.getPrimaryKey().toString());
 			}
 			schoolType.addMenuElements(schoolTypes);
@@ -216,12 +216,12 @@ public class CourseParticipantsList extends CourseBlock {
 		Integer typePK = null;
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
 			typePK = new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK));
-			Collection courseTypes = getBusiness().getCourseTypes(typePK, true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(typePK, true);
 			courseType.addMenuElements(courseTypes);
 		}
 		else if (type != null) {
 			typePK = new Integer(type.getPrimaryKey().toString());
-			Collection courseTypes = getBusiness().getCourseTypes(typePK, true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(typePK, true);
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -258,15 +258,15 @@ public class CourseParticipantsList extends CourseBlock {
 
 		if ((getSession().getProvider() != null && typePK != null) || showAllCourses) {
 			boolean showIDInName = getIWApplicationContext().getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-			List courses = new ArrayList(getBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
+			List<Course> courses = new ArrayList<Course>(getBusiness().getCourses(-1, getSession().getProvider() != null ? getSession().getProvider().getPrimaryKey() : null, typePK, iwc.isParameterSet(PARAMETER_COURSE_TYPE_PK) ? iwc.getParameter(PARAMETER_COURSE_TYPE_PK) : null, fromDate, toDate));
 
 			if (showAllCourses) {
 				Collections.reverse(courses);
 			}
 
-			Iterator iter = courses.iterator();
+			Iterator<Course> iter = courses.iterator();
 			while (iter.hasNext()) {
-				Course element = (Course) iter.next();
+				Course element = iter.next();
 				String name = "";
 				if (showIDInName) {
 					CourseType type = element.getCourseType();
@@ -502,10 +502,10 @@ public class CourseParticipantsList extends CourseBlock {
 
 		Course course = null;
 		CourseType type = null;
-		List choices = new ArrayList();
+		List<CourseChoice> choices = new ArrayList<CourseChoice>();
 		if (iwc.isParameterSet(PARAMETER_COURSE_PK)) {
 			String courseId = iwc.getParameter(PARAMETER_COURSE_PK);
-			choices = new ArrayList(getBusiness().getCourseChoices(courseId, false));
+			choices = new ArrayList<CourseChoice>(getBusiness().getCourseChoices(courseId, false));
 			course = getBusiness().getCourse(courseId);
 			if (course == null) {
 				add(new Heading3(getLocalizedString("course_not_found", "Course not found", iwc)));
@@ -532,12 +532,12 @@ public class CourseParticipantsList extends CourseBlock {
 		}
 		String schoolTypeId = iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK);
 		String courseTypeId = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
-		Iterator iter = choices.iterator();
+		Iterator<CourseChoice> iter = choices.iterator();
 		String loadingMessage = getResourceBundle().getLocalizedString("loading", "Loading");
 		while (iter.hasNext()) {
 			row = group.createRow();
 
-			CourseChoice choice = (CourseChoice) iter.next();
+			CourseChoice choice = iter.next();
 			User user = choice.getUser();
 			Address address = getUserBusiness().getUsersMainAddress(user);
 			PostalCode postalCode = null;
