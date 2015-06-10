@@ -69,6 +69,7 @@ import com.idega.block.creditcard.data.TPosAuthorisationEntriesBean;
 import com.idega.block.process.business.CaseBusiness;
 import com.idega.block.process.business.CaseBusinessBean;
 import com.idega.block.process.data.Case;
+import com.idega.block.process.data.CaseStatus;
 import com.idega.block.school.business.SchoolBusiness;
 import com.idega.block.school.business.SchoolUserBusiness;
 import com.idega.block.school.data.School;
@@ -200,12 +201,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		Collection entries = new ArrayList();
 
 		try {
-			Class implementor = ImplementorRepository.getInstance()
-					.getAnyClassImpl(AccountingEntry.class, this.getClass());
+			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
 			CourseCategory category = getAccountingSchoolType();
 
-			Collection applications = getCourseApplicationHome().findAll(
-					getCaseStatusOpen(), fromDate, toDate);
+			CaseStatus status = getCaseStatusOpen();
+			Collection applications = getCourseApplicationHome().findAll(status, fromDate, toDate);
+			if (ListUtil.isEmpty(applications)) {
+				getLogger().warning("Did not find any course applications with status " + status.getStatus() + ", from " + fromDate + ", to " + toDate);
+			} else {
+				getLogger().info("Found course applications with status " + status.getStatus() + ", from " + fromDate + ", to " + toDate + ": " + applications);
+			}
+
 			Iterator iterator = applications.iterator();
 			while (iterator.hasNext()) {
 				CourseApplication application = (CourseApplication) iterator
@@ -235,6 +241,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 				User owner = application.getOwner();
 				Collection choices = getCourseChoices(application, new Boolean(
 						false));
+				if (ListUtil.isEmpty(choices)) {
+					getLogger().warning("Did not find any course choices for application " + application );
+				} else {
+					getLogger().info("Found course choices for application " + application + ": " + choices);
+				}
+
 				Iterator iter = choices.iterator();
 				while (iter.hasNext()) {
 					CourseChoice choice = (CourseChoice) iter.next();
@@ -243,10 +255,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					School provider = course.getProvider();
 					SchoolArea area = provider.getSchoolArea();
 					CourseType courseType = course.getCourseType();
-					CourseCategory schoolType = courseType.getCourseCategory();
-					if (category != null && !schoolType.equals(category)) {
+					CourseCategory courseCategory = courseType.getCourseCategory();
+					if (category != null && !courseCategory.equals(category)) {
+						getLogger().warning("Pre-set category (" + category + ") and course category (" + courseCategory + ") are not equal for course choice: " + choice + ", application: " + application + ". Skipping it!");
 						continue;
 					}
+
 					User student = choice.getUser();
 					CoursePrice price = course.getPrice();
 					String paymentType = application.getPaymentType();
@@ -294,8 +308,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						}
 					}
 
-					SchoolCode schoolCode = getAccountingBusiness()
-							.getSchoolCode(provider, schoolType);
+					SchoolCode schoolCode = getAccountingBusiness().getSchoolCode(provider, courseCategory);
 					providerCode = schoolCode != null ? schoolCode
 							.getSchoolCode() : provider.getOrganizationNumber();
 
@@ -437,6 +450,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			e.printStackTrace();
 		}
 
+		getLogger().info("Found entries: " + entries);
 		return (AccountingEntry[]) entries.toArray(new AccountingEntry[0]);
 	}
 
@@ -2751,6 +2765,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+	@Override
 	public List<User> getParentsForApplicant(CourseApplication application, User applicant) {
 		try {
 			User appParent = application.getOwner();
