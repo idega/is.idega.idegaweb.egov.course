@@ -206,11 +206,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 			CaseStatus status = getCaseStatusOpen();
 			Collection<CourseApplication> applications = getCourseApplicationHome().findAll(status, fromDate, toDate);
-			if (ListUtil.isEmpty(applications)) {
-				getLogger().warning("Did not find any course applications with status " + status.getStatus() + ", from " + fromDate + ", to " + toDate);
-			} else {
-				getLogger().info("Found course applications with status " + status.getStatus() + ", from " + fromDate + ", to " + toDate + ": " + applications);
-			}
 
 			Iterator<CourseApplication> iterator = applications.iterator();
 			while (iterator.hasNext()) {
@@ -233,19 +228,12 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					}
 				}
 
-				Map<User, Collection<ApplicationHolder>> applicationMap = getApplicationMap(application,
-						new Boolean(false));
+				Map<User, Collection<ApplicationHolder>> applicationMap = getApplicationMap(application, new Boolean(false));
 				SortedSet<PriceHolder> prices = calculatePrices(applicationMap);
 				Map discounts = getDiscounts(prices, applicationMap);
 
 				User owner = application.getOwner();
-				Collection<CourseChoice> choices = getCourseChoices(application, new Boolean(
-						false));
-				if (ListUtil.isEmpty(choices)) {
-					getLogger().warning("Did not find any course choices for application " + application );
-				} else {
-					getLogger().info("Found course choices for application " + application + ": " + choices);
-				}
+				Collection<CourseChoice> choices = getCourseChoices(application, new Boolean(false));
 
 				Iterator<CourseChoice> iter = choices.iterator();
 				while (iter.hasNext()) {
@@ -451,7 +439,6 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			e.printStackTrace();
 		}
 
-		getLogger().info("Found entries: " + entries);
 		return entries.toArray(new AccountingEntry[0]);
 	}
 
