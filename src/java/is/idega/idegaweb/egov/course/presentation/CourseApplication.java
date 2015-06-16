@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
@@ -2546,17 +2547,14 @@ public class CourseApplication extends ApplicationForm {
 		else if (!payerOption.booleanValue()) {
 			if (!iwc.isParameterSet(PARAMETER_PAYER_PERSONAL_ID)) {
 				setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_personal_id_empty", "Payer personal ID is empty"));
-			}
-			else if (!SocialSecurityNumber.isValidSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale()) || !SocialSecurityNumber.isIndividualSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
+			} else if (!SocialSecurityNumber.isValidSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale()) || !SocialSecurityNumber.isIndividualSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID), iwc.getCurrentLocale())) {
 				setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("invalid_personal_id", "Invalid personal ID"));
-			}
-			else {
+			} else {
 				Date dateOfBirth = SocialSecurityNumber.getDateFromSocialSecurityNumber(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
 				Age age = new Age(dateOfBirth);
 				if (age.getYears() < 18) {
 					setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_be_at_least_18_years_old", "The payer you have selected is younger than 18 years old. Payers must be at least 18 years old or older."));
-				}
-				else {
+				} else {
 					try {
 						User currentUser = getUser(iwc);
 						User paymentUser = getUserBusiness(iwc).getUser(iwc.getParameter(PARAMETER_PAYER_PERSONAL_ID));
@@ -2564,11 +2562,14 @@ public class CourseApplication extends ApplicationForm {
 						Address address1 = currentUser.getUsersMainAddress();
 						Address address2 = paymentUser.getUsersMainAddress();
 
-						if (!address1.getStreetName().equals(address2.getStreetName()) || !address1.getStreetNumber().equals(address2.getStreetNumber()) || address1.getPostalCodeID() != address2.getPostalCodeID()) {
+						if (address1 == null || address2 == null || !address1.getStreetName().equals(address2.getStreetName()) || !address1.getStreetNumber().equals(address2.getStreetNumber()) || address1.getPostalCodeID() != address2.getPostalCodeID()) {
 							setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));
 						}
-					} catch(FinderException fe) {
+					} catch (FinderException fe) {
 						setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("application_error.no_user_found_with_personal_id", "No user found with the personal ID you entered."));
+					} catch (Exception e) {
+						getLogger().log(Level.WARNING, "Error while checking if addresses of payer and current user are the same", e);
+						setError(ACTION_PHASE_7, PARAMETER_PAYER_PERSONAL_ID, this.iwrb.getLocalizedString("payer_must_have_same_address", "The payer you select must live in the same building as you."));
 					}
 				}
 			}
