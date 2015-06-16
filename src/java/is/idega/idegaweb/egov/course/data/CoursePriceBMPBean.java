@@ -232,4 +232,10 @@ public class CoursePriceBMPBean extends GenericEntity implements CoursePrice {
 	public void setSchoolSeason(SchoolSeason season) {
 		setColumn(COLUMN_SCHOOL_SEASON, season);
 	}
+
+	@Override
+	public String toString() {
+		return "Course price ID: " + getPrimaryKey() + ", price: " + getPrice();
+	}
+
 }

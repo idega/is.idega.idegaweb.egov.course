@@ -116,6 +116,6 @@ public class ApplicationHolder {
 
 	@Override
 	public String toString() {
-		return user + " : " + course + " : " + daycare + " : " + pickedUp;
+		return user + ": " + course + ", daycare: " + daycare + ", picked-up: " + pickedUp + ", waiting list: " + isOnWaitingList;
 	}
 }
