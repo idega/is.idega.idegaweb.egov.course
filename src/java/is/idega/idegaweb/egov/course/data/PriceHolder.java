@@ -84,6 +84,6 @@ public class PriceHolder implements Comparable<PriceHolder> {
 
 	@Override
 	public String toString() {
-		return getUser().getName() + " - " + getPrice();
+		return getUser().getName() + ". Price: " + getPrice() + ", discount: " + getDiscount();
 	}
 }

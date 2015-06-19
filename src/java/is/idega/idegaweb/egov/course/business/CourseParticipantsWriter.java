@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
@@ -688,79 +689,84 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		CourseApplication application;
 
 		Iterator iter = choices.iterator();
-		while (iter.hasNext()) {
-			row = sheet.createRow(cellRow++);
-			choice = (CourseChoice) iter.next();
-			application = choice.getApplication();
-			user = choice.getUser();
-			address = this.userBusiness.getUsersMainAddress(user);
-			if (address != null) {
-				postalCode = address.getPostalCode();
-			}
-			phone = this.userBusiness.getChildHomePhone(user);
-			Course course = choice.getCourse();
-			User owner = application.getOwner();
-			if (application.getPayerPersonalID() != null) {
-				try{
-					User payer = getUserBusiness(iwc).getUser(application.getPayerPersonalID());
-					if (payer != null) {
-						owner = payer;
+		String uuid = UUID.randomUUID().toString();
+		try {
+			while (iter.hasNext()) {
+				row = sheet.createRow(cellRow++);
+				choice = (CourseChoice) iter.next();
+				application = choice.getApplication();
+				user = choice.getUser();
+				address = this.userBusiness.getUsersMainAddress(user);
+				if (address != null) {
+					postalCode = address.getPostalCode();
+				}
+				phone = this.userBusiness.getChildHomePhone(user);
+				Course course = choice.getCourse();
+				User owner = application.getOwner();
+				if (application.getPayerPersonalID() != null) {
+					try{
+						User payer = getUserBusiness(iwc).getUser(application.getPayerPersonalID());
+						if (payer != null) {
+							owner = payer;
+						}
+					}catch (Exception e) {
+						getLogger().info("Failed getting payer by personal id: '"+application.getPayerPersonalID()+"'");
+						owner = null;
 					}
-				}catch (Exception e) {
-					getLogger().info("Failed getting payer by personal id: '"+application.getPayerPersonalID()+"'");
-					owner = null;
+				}
+
+				application = choice.getApplication();
+				float userPrice = 0;
+				if (choice.isNoPayment()) {
+					userPrice = 0;
+				}
+				else {
+					Map applicationMap = getCourseBusiness(iwc).getApplicationMap(application, new Boolean(false));
+					SortedSet prices = getCourseBusiness(iwc).calculatePrices(applicationMap);
+					Map discounts = getCourseBusiness(iwc).getDiscounts(uuid, prices, applicationMap);
+					CoursePrice price = course.getPrice();
+
+					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+
+					float carePrice = 0;
+					if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
+						carePrice = price.getPreCarePrice();
+					}
+					else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
+						carePrice = price.getPostCarePrice();
+					}
+					else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+						carePrice = price.getPreCarePrice() + price.getPostCarePrice();
+					}
+					carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+
+					userPrice = carePrice + coursePrice;
+				}
+
+				Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
+				row.createCell(0).setCellValue(name.getName(this.locale, true));
+				row.createCell(1).setCellValue(PersonalIDFormatter.format(user.getPersonalID(), this.locale));
+				if (address != null) {
+					row.createCell(2).setCellValue(address.getStreetAddress());
+					if (postalCode != null) {
+						row.createCell(3).setCellValue(postalCode.getPostalAddress());
+					}
+				}
+				if (phone != null) {
+					row.createCell(4).setCellValue(phone.getNumber());
+				}
+				row.createCell(5).setCellValue(userPrice);
+
+				if (owner != null) {
+					row.createCell(6).setCellValue(owner.getPersonalID());
+					row.createCell(7).setCellValue(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(this.locale, true));
+				}else{
+					row.createCell(6).setCellValue(application.getPayerPersonalID());
+					row.createCell(7).setCellValue(application.getPayerName());
 				}
 			}
-
-			application = choice.getApplication();
-			float userPrice = 0;
-			if (choice.isNoPayment()) {
-				userPrice = 0;
-			}
-			else {
-				Map applicationMap = getCourseBusiness(iwc).getApplicationMap(application, new Boolean(false));
-				SortedSet prices = getCourseBusiness(iwc).calculatePrices(applicationMap);
-				Map discounts = getCourseBusiness(iwc).getDiscounts(prices, applicationMap);
-				CoursePrice price = course.getPrice();
-
-				float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
-
-				float carePrice = 0;
-				if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
-					carePrice = price.getPreCarePrice();
-				}
-				else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
-					carePrice = price.getPostCarePrice();
-				}
-				else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
-					carePrice = price.getPreCarePrice() + price.getPostCarePrice();
-				}
-				carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
-
-				userPrice = carePrice + coursePrice;
-			}
-
-			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
-			row.createCell(0).setCellValue(name.getName(this.locale, true));
-			row.createCell(1).setCellValue(PersonalIDFormatter.format(user.getPersonalID(), this.locale));
-			if (address != null) {
-				row.createCell(2).setCellValue(address.getStreetAddress());
-				if (postalCode != null) {
-					row.createCell(3).setCellValue(postalCode.getPostalAddress());
-				}
-			}
-			if (phone != null) {
-				row.createCell(4).setCellValue(phone.getNumber());
-			}
-			row.createCell(5).setCellValue(userPrice);
-
-			if (owner != null) {
-				row.createCell(6).setCellValue(owner.getPersonalID());
-				row.createCell(7).setCellValue(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(this.locale, true));
-			}else{
-				row.createCell(6).setCellValue(application.getPayerPersonalID());
-				row.createCell(7).setCellValue(application.getPayerName());
-			}
+		} finally {
+			getCourseBusiness(iwc).doResetCourseDiscountInformationHolder(uuid);
 		}
 		for(int i = 0;i<8;i++){
 			sheet.autoSizeColumn(i);

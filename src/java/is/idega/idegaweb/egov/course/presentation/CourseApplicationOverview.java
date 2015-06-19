@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.UUID;
 
 import javax.ejb.FinderException;
 
@@ -217,7 +218,9 @@ public class CourseApplicationOverview extends CourseBlock {
 		CourseBusiness courseBusiness = getBusiness();
 		Map<User, Collection<ApplicationHolder>> applications = courseBusiness.getApplicationMap(application);
 		SortedSet<PriceHolder> prices = courseBusiness.calculatePrices(applications);
-		Map<User, PriceHolder> discounts = courseBusiness.getDiscounts(prices, applications);
+		String uuid = UUID.randomUUID().toString();
+		Map<User, PriceHolder> discounts = courseBusiness.getDiscounts(uuid, prices, applications);
+		courseBusiness.doResetCourseDiscountInformationHolder(uuid);
 
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
 		float totalPrice = 0;
@@ -630,7 +633,9 @@ public class CourseApplicationOverview extends CourseBlock {
 
 		Map applications = getBusiness().getApplicationMap(application);
 		SortedSet prices = getBusiness().calculatePrices(applications);
-		Map discounts = getBusiness().getDiscounts(prices, applications);
+		String uuid = UUID.randomUUID().toString();
+		Map discounts = getBusiness().getDiscounts(uuid, prices, applications);
+		getBusiness().doResetCourseDiscountInformationHolder(uuid);
 		float certificateFees = getBusiness().getCalculatedCourseCertificateFees(applications);
 
 		float totalPrice = certificateFees;

@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.UUID;
 
 import com.ibm.icu.text.NumberFormat;
 import com.idega.block.school.data.School;
@@ -534,289 +535,294 @@ public class CourseParticipantsList extends CourseBlock {
 		String courseTypeId = iwc.getParameter(PARAMETER_COURSE_TYPE_PK);
 		Iterator<CourseChoice> iter = choices.iterator();
 		String loadingMessage = getResourceBundle().getLocalizedString("loading", "Loading");
-		while (iter.hasNext()) {
-			row = group.createRow();
+		String uuid = UUID.randomUUID().toString();
+		try {
+			while (iter.hasNext()) {
+				row = group.createRow();
 
-			CourseChoice choice = iter.next();
-			User user = choice.getUser();
-			Address address = getUserBusiness().getUsersMainAddress(user);
-			PostalCode postalCode = null;
-			if (address != null) {
-				postalCode = address.getPostalCode();
-			}
-			Phone phone = getUserBusiness().getChildHomePhone(user);
-
-			if (iRow == course.getMax()) {
-				row.setStyleClass("lastAvailable");
-			}
-			else if (iRow == (course.getMax() + 1)) {
-				row.setStyleClass("firstExceedingParticipant");
-			}
-
-			if (iRow > course.getMax()) {
-				row.setStyleClass("exceedingParticipant");
-			}
-
-			cell = row.createCell();
-			cell.setStyleClass("firstColumn");
-			cell.setStyleClass("number");
-			cell.add(new Text(String.valueOf(iRow)));
-			cell.add(new HiddenInput(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString()));
-
-			Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
-
-			cell = row.createCell();
-			cell.setStyleClass("name");
-			if (getResponsePage() != null) {
-				Link link = new Link(name.getName(iwc.getCurrentLocale()));
-				link.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
-				link.setPage(getResponsePage());
-
-				cell.add(link);
-			}
-			else if (addViewParticipantLink) {
-				Link view = new Link(name.getName(iwc.getCurrentLocale()));
-				if (courseId != null) {
-					view.addParameter(PARAMETER_COURSE_PK, courseId);
-				}
-				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
-				if (schoolId != null) {
-					view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
-				}
-				if (schoolTypeId != null) {
-					view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
-				}
-				if (courseTypeId != null) {
-					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
-				}
-				view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
-				view.addParameter(PARAMETER_ACTION, 1);
-				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
-				cell.add(view);
-			}
-			else {
-				cell.add(new Text(name.getName(iwc.getCurrentLocale())));
-			}
-
-			cell = row.createCell();
-			cell.setStyleClass("personalID");
-			if (getChangeEmailResponsePage() != null) {
-				Link link = new Link(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale()));
-				link.setEventListener(CitizenFinder.class);
-				if (user.getUniqueId() != null) {
-					link.addParameter(PARAMETER_USER_UNIQUE_ID, user.getUniqueId());
-				}
-				else {
-					link.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
-				}
-				link.setPage(getChangeEmailResponsePage());
-
-				cell.add(link);
-			} else {
-				cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
-			}
-
-			if (!addCheckboxes) {
-				cell = row.createCell();
-				cell.setStyleClass("address");
+				CourseChoice choice = iter.next();
+				User user = choice.getUser();
+				Address address = getUserBusiness().getUsersMainAddress(user);
+				PostalCode postalCode = null;
 				if (address != null) {
-					cell.add(new Text(address.getStreetAddress()));
+					postalCode = address.getPostalCode();
 				}
-				else {
-					cell.add(new Text(CoreConstants.MINUS));
+				Phone phone = getUserBusiness().getChildHomePhone(user);
+
+				if (iRow == course.getMax()) {
+					row.setStyleClass("lastAvailable");
+				}
+				else if (iRow == (course.getMax() + 1)) {
+					row.setStyleClass("firstExceedingParticipant");
+				}
+
+				if (iRow > course.getMax()) {
+					row.setStyleClass("exceedingParticipant");
 				}
 
 				cell = row.createCell();
-				cell.setStyleClass("postalCode");
-				if (postalCode != null) {
-					cell.add(new Text(postalCode.getPostalAddress()));
+				cell.setStyleClass("firstColumn");
+				cell.setStyleClass("number");
+				cell.add(new Text(String.valueOf(iRow)));
+				cell.add(new HiddenInput(PARAMETER_COURSE_PARTICIPANT_PK, choice.getPrimaryKey().toString()));
+
+				Name name = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName());
+
+				cell = row.createCell();
+				cell.setStyleClass("name");
+				if (getResponsePage() != null) {
+					Link link = new Link(name.getName(iwc.getCurrentLocale()));
+					link.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+					link.setPage(getResponsePage());
+
+					cell.add(link);
+				}
+				else if (addViewParticipantLink) {
+					Link view = new Link(name.getName(iwc.getCurrentLocale()));
+					if (courseId != null) {
+						view.addParameter(PARAMETER_COURSE_PK, courseId);
+					}
+					view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
+					if (schoolId != null) {
+						view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
+					}
+					if (schoolTypeId != null) {
+						view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
+					}
+					if (courseTypeId != null) {
+						view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
+					}
+					view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+					view.addParameter(PARAMETER_ACTION, 1);
+					view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
+					cell.add(view);
 				}
 				else {
-					cell.add(new Text(CoreConstants.MINUS));
+					cell.add(new Text(name.getName(iwc.getCurrentLocale())));
 				}
 
 				cell = row.createCell();
-				if (!addViewParticipantLink && !showCertificates && !showNoPayment) {
-					cell.setStyleClass("lastColumn");
-				}
-				cell.setStyleClass("homePhone");
-				if (phone != null) {
-					cell.add(new Text(phone.getNumber()));
-				}
-				else {
-					cell.add(new Text(CoreConstants.MINUS));
-				}
-
-				if (showNoPayment) {
-					cell = row.createCell();
-					if (!addViewParticipantLink && !showCertificates) {
-						cell.setStyleClass("lastColumn");
-					}
-					cell.setStyleClass("noPayment");
-
-					CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PAYMENT + choice.getPrimaryKey().toString());
-					box.setChecked(choice.isNoPayment());
-					cell.add(box);
-				}
-
-				if (showCertificates) {
-					cell = row.createCell();
-					cell.setStyleClass("created");
-					cell.add(new Text(new IWTimestamp(choice.getApplication().getCreated()).getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT)));
-
-					cell = row.createCell();
-					if (!addViewParticipantLink) {
-						cell.setStyleClass("lastColumn");
-					}
-					cell.setStyleClass("certificate");
-
-					ICFile file = null;
-					CourseCertificate certificate = getBusiness().getUserCertificate(user, course);
-					if (certificate != null) {
-						file = certificate.getCertificateFile();
-					}
-
-					if (file == null) {
-						cell.add(new Text("-"));
+				cell.setStyleClass("personalID");
+				if (getChangeEmailResponsePage() != null) {
+					Link link = new Link(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale()));
+					link.setEventListener(CitizenFinder.class);
+					if (user.getUniqueId() != null) {
+						link.addParameter(PARAMETER_USER_UNIQUE_ID, user.getUniqueId());
 					}
 					else {
-						Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
-						printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
-						printCertificate.setFile(file);
-						cell.add(printCertificate);
+						link.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
 					}
-				}
-			}
-			if (addCheckboxes) {
-				cell = row.createCell();
-				cell.setStyleClass("created");
-				cell.add(new Text(new IWTimestamp(choice.getApplication().getCreated()).getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT)));
+					link.setPage(getChangeEmailResponsePage());
 
-				AdvancedProperty info = null;
-				CheckBox box = null;
-				boolean disabled = false;
-				boolean show = true;
-				List rowData = getBusiness().getCourseParticipantListRowData(choice, getResourceBundle());
-				if (rowData == null || checkboxesInfo.size() != rowData.size()) {
-					throw new RemoteException("Can not add checkboxes to list!");
+					cell.add(link);
+				} else {
+					cell.add(new Text(PersonalIDFormatter.format(user.getPersonalID(), iwc.getCurrentLocale())));
 				}
-				CourseParticipantListRowData data = null;
-				for (int i = 0; i < checkboxesInfo.size(); i++) {
-					info = (AdvancedProperty) checkboxesInfo.get(i);
-					data = (CourseParticipantListRowData) rowData.get(i);
 
+				if (!addCheckboxes) {
 					cell = row.createCell();
-					cell.setStyleClass("courseChoiceManagement");
-					cell.setStyleClass(info.getValue());
-
-					disabled = data.isDisabled();
-					show = data.isShow();
-
-					box = getCourseChoiseManagementCheckbox(info, choice, loadingMessage, disabled);
-
-					if (data.isForceToCheck()) {
-						box.setChecked(true);
-					}
-
-					if (show) {
-						cell.add(box);
+					cell.setStyleClass("address");
+					if (address != null) {
+						cell.add(new Text(address.getStreetAddress()));
 					}
 					else {
 						cell.add(new Text(CoreConstants.MINUS));
 					}
-				}
 
-				if (showCertificates) {
 					cell = row.createCell();
-					if (!addViewParticipantLink) {
-						cell.setStyleClass("lastColumn");
-					}
-					cell.setStyleClass("certificate");
-
-					ICFile file = null;
-					CourseCertificate certificate = getBusiness().getUserCertificate(user, course);
-					if (certificate != null) {
-						file = certificate.getCertificateFile();
-					}
-
-					if (file == null) {
-						cell.add(new Text("-"));
+					cell.setStyleClass("postalCode");
+					if (postalCode != null) {
+						cell.add(new Text(postalCode.getPostalAddress()));
 					}
 					else {
-						Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
-						printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
-						printCertificate.setFile(file);
-						cell.add(printCertificate);
+						cell.add(new Text(CoreConstants.MINUS));
+					}
+
+					cell = row.createCell();
+					if (!addViewParticipantLink && !showCertificates && !showNoPayment) {
+						cell.setStyleClass("lastColumn");
+					}
+					cell.setStyleClass("homePhone");
+					if (phone != null) {
+						cell.add(new Text(phone.getNumber()));
+					}
+					else {
+						cell.add(new Text(CoreConstants.MINUS));
+					}
+
+					if (showNoPayment) {
+						cell = row.createCell();
+						if (!addViewParticipantLink && !showCertificates) {
+							cell.setStyleClass("lastColumn");
+						}
+						cell.setStyleClass("noPayment");
+
+						CheckBox box = new CheckBox(PARAMETER_COURSE_PARTICIPANT_PAYMENT + choice.getPrimaryKey().toString());
+						box.setChecked(choice.isNoPayment());
+						cell.add(box);
+					}
+
+					if (showCertificates) {
+						cell = row.createCell();
+						cell.setStyleClass("created");
+						cell.add(new Text(new IWTimestamp(choice.getApplication().getCreated()).getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT)));
+
+						cell = row.createCell();
+						if (!addViewParticipantLink) {
+							cell.setStyleClass("lastColumn");
+						}
+						cell.setStyleClass("certificate");
+
+						ICFile file = null;
+						CourseCertificate certificate = getBusiness().getUserCertificate(user, course);
+						if (certificate != null) {
+							file = certificate.getCertificateFile();
+						}
+
+						if (file == null) {
+							cell.add(new Text("-"));
+						}
+						else {
+							Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
+							printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
+							printCertificate.setFile(file);
+							cell.add(printCertificate);
+						}
 					}
 				}
-			}
+				if (addCheckboxes) {
+					cell = row.createCell();
+					cell.setStyleClass("created");
+					cell.add(new Text(new IWTimestamp(choice.getApplication().getCreated()).getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT)));
 
-			if (showPrice) {
-				is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
-				float userPrice = 0;
-				if (choice.isNoPayment()) {
-					userPrice = 0;
+					AdvancedProperty info = null;
+					CheckBox box = null;
+					boolean disabled = false;
+					boolean show = true;
+					List rowData = getBusiness().getCourseParticipantListRowData(choice, getResourceBundle());
+					if (rowData == null || checkboxesInfo.size() != rowData.size()) {
+						throw new RemoteException("Can not add checkboxes to list!");
+					}
+					CourseParticipantListRowData data = null;
+					for (int i = 0; i < checkboxesInfo.size(); i++) {
+						info = (AdvancedProperty) checkboxesInfo.get(i);
+						data = (CourseParticipantListRowData) rowData.get(i);
+
+						cell = row.createCell();
+						cell.setStyleClass("courseChoiceManagement");
+						cell.setStyleClass(info.getValue());
+
+						disabled = data.isDisabled();
+						show = data.isShow();
+
+						box = getCourseChoiseManagementCheckbox(info, choice, loadingMessage, disabled);
+
+						if (data.isForceToCheck()) {
+							box.setChecked(true);
+						}
+
+						if (show) {
+							cell.add(box);
+						}
+						else {
+							cell.add(new Text(CoreConstants.MINUS));
+						}
+					}
+
+					if (showCertificates) {
+						cell = row.createCell();
+						if (!addViewParticipantLink) {
+							cell.setStyleClass("lastColumn");
+						}
+						cell.setStyleClass("certificate");
+
+						ICFile file = null;
+						CourseCertificate certificate = getBusiness().getUserCertificate(user, course);
+						if (certificate != null) {
+							file = certificate.getCertificateFile();
+						}
+
+						if (file == null) {
+							cell.add(new Text("-"));
+						}
+						else {
+							Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
+							printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
+							printCertificate.setFile(file);
+							cell.add(printCertificate);
+						}
+					}
+				}
+
+				if (showPrice) {
+					is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
+					float userPrice = 0;
+					if (choice.isNoPayment()) {
+						userPrice = 0;
+					}
+					else {
+						Map applicationMap = getBusiness().getApplicationMap(application, new Boolean(false));
+						SortedSet prices = getBusiness().calculatePrices(applicationMap);
+						Map discounts = getBusiness().getDiscounts(uuid, prices, applicationMap);
+						CoursePrice price = course.getPrice();
+
+						float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+
+						float carePrice = 0;
+						if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
+							carePrice = price.getPreCarePrice();
+						}
+						else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
+							carePrice = price.getPostCarePrice();
+						}
+						else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
+							carePrice = price.getPreCarePrice() + price.getPostCarePrice();
+						}
+						carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+
+						userPrice = carePrice + coursePrice;
+					}
+
+					cell = row.createCell();
+					cell.setStyleClass("price");
+					cell.setStyleClass("lastColumn");
+					cell.add(new Text(format.format(userPrice)));
+
+					totalPrice += userPrice;
+				}
+
+				if (addViewParticipantLink) {
+					cell = row.createCell();
+					Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
+					if (courseId != null) {
+						view.addParameter(PARAMETER_COURSE_PK, courseId);
+					}
+					view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
+					if (schoolId != null) {
+						view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
+					}
+					if (schoolTypeId != null) {
+						view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
+					}
+					if (courseTypeId != null) {
+						view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
+					}
+					view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
+					view.addParameter(PARAMETER_ACTION, 1);
+					view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
+					cell.add(view);
+				}
+
+				if (iRow % 2 == 0) {
+					row.setStyleClass("evenRow");
 				}
 				else {
-					Map applicationMap = getBusiness().getApplicationMap(application, new Boolean(false));
-					SortedSet prices = getBusiness().calculatePrices(applicationMap);
-					Map discounts = getBusiness().getDiscounts(prices, applicationMap);
-					CoursePrice price = course.getPrice();
-
-					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
-
-					float carePrice = 0;
-					if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
-						carePrice = price.getPreCarePrice();
-					}
-					else if (choice.getDayCare() == CourseConstants.DAY_CARE_POST) {
-						carePrice = price.getPostCarePrice();
-					}
-					else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
-						carePrice = price.getPreCarePrice() + price.getPostCarePrice();
-					}
-					carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
-
-					userPrice = carePrice + coursePrice;
+					row.setStyleClass("oddRow");
 				}
-
-				cell = row.createCell();
-				cell.setStyleClass("price");
-				cell.setStyleClass("lastColumn");
-				cell.add(new Text(format.format(userPrice)));
-
-				totalPrice += userPrice;
+				iRow++;
 			}
-
-			if (addViewParticipantLink) {
-				cell = row.createCell();
-				Link view = new Link(getBundle().getImage("images/edit.png", getResourceBundle().getLocalizedString("view", "View")));
-				if (courseId != null) {
-					view.addParameter(PARAMETER_COURSE_PK, courseId);
-				}
-				view.addParameter(PARAMETER_COURSE_PARTICIPANT_PK, user.getId());
-				if (schoolId != null) {
-					view.addParameter(PARAMETER_PROVIDER_PK, schoolId);
-				}
-				if (schoolTypeId != null) {
-					view.addParameter(PARAMETER_SCHOOL_TYPE_PK, schoolTypeId);
-				}
-				if (courseTypeId != null) {
-					view.addParameter(PARAMETER_COURSE_TYPE_PK, courseTypeId);
-				}
-				view.addParameter(PARAMETER_CHOICE_PK, choice.getPrimaryKey().toString());
-				view.addParameter(PARAMETER_ACTION, 1);
-				view.addParameter(PARAMETER_SHOW_COURSE_PARTICIPANT_INFO, Boolean.TRUE.toString());
-				cell.add(view);
-			}
-
-			if (iRow % 2 == 0) {
-				row.setStyleClass("evenRow");
-			}
-			else {
-				row.setStyleClass("oddRow");
-			}
-			iRow++;
+		} finally {
+			getBusiness().doResetCourseDiscountInformationHolder(uuid);
 		}
 
 		group = table.createFooterRowGroup();

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.ejb.FinderException;
@@ -2057,7 +2058,9 @@ public class CourseApplication extends ApplicationForm {
 		if (getCourseBusiness(iwc).isDiscountDisabled(getPrefix(), null)) {
 			discounts = Collections.emptyMap();
 		} else {
-			discounts = getCourseBusiness(iwc).getDiscounts(prices, applications);
+			String uuid = UUID.randomUUID().toString();
+			discounts = getCourseBusiness(iwc).getDiscounts(uuid, prices, applications);
+			getCourseBusiness(iwc).doResetCourseDiscountInformationHolder(uuid);
 		}
 
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());

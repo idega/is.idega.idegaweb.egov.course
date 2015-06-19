@@ -558,8 +558,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getDiscounts
 	 */
-	public Map<User, PriceHolder> getDiscounts(SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications)
-			throws RemoteException;
+	public Map<User, PriceHolder> getDiscounts(String uuid, SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications) throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#hasAvailableCourses
@@ -823,5 +822,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public boolean isDiscountDisabled(String prefix, String id);
 
 	public List<User> getParentsForApplicant(CourseApplication application, User applicant);
+
+	public void doResetCourseDiscountInformationHolder(String uuid);
 
 }

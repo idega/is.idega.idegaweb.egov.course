@@ -3,12 +3,15 @@ package is.idega.idegaweb.egov.course.business;
 import is.idega.block.family.business.FamilyLogic;
 import is.idega.block.family.data.Child;
 import is.idega.block.family.data.Custodian;
+import is.idega.block.family.data.FamilyMember;
 import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
 import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
 import is.idega.idegaweb.egov.accounting.business.AccountingKeyBusiness;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
 import is.idega.idegaweb.egov.accounting.data.SchoolCode;
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.bean.AttendanceInformation;
+import is.idega.idegaweb.egov.course.bean.CourseDiscountInformationHolder;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
@@ -53,6 +56,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.ejb.CreateException;
@@ -102,6 +106,7 @@ import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
@@ -109,6 +114,8 @@ import com.idega.util.ListUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
+import com.idega.util.expression.ELUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 
@@ -199,7 +206,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	@Override
 	public AccountingEntry[] getAccountingEntries(String productCode, String providerCode, Date fromDate, Date toDate) {
 		Collection<AccountingEntry> entries = new ArrayList<AccountingEntry>();
-
+		String uuid = UUID.randomUUID().toString();
 		try {
 			Class implementor = ImplementorRepository.getInstance().getAnyClassImpl(AccountingEntry.class, this.getClass());
 			CourseCategory category = getAccountingSchoolType();
@@ -230,7 +237,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 
 				Map<User, Collection<ApplicationHolder>> applicationMap = getApplicationMap(application, new Boolean(false));
 				SortedSet<PriceHolder> prices = calculatePrices(applicationMap);
-				Map discounts = getDiscounts(prices, applicationMap);
+				Map discounts = getDiscounts(uuid, prices, applicationMap);
 
 				User owner = application.getOwner();
 				Collection<CourseChoice> choices = getCourseChoices(application, new Boolean(false));
@@ -437,9 +444,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			e.printStackTrace();
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} finally {
+			doResetCourseDiscountInformationHolder(uuid);
 		}
 
 		return entries.toArray(new AccountingEntry[0]);
+	}
+
+	@Override
+	public void doResetCourseDiscountInformationHolder(String uuid) {
+		try {
+			CourseDiscountInformationHolder holder = ELUtil.getInstance().getBean(CourseDiscountInformationHolder.BEAN_NAME);
+			holder.reset(uuid);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private AccountingEntry getClonedEntry(AccountingEntry entry) {
@@ -1861,7 +1880,11 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public int getNumberOfFreePlaces(Course course) {
 		try {
 			int freePlaces = course.getMax() - getCourseChoiceHome().getCountByCourse(course);
-			freePlaces = freePlaces - getNumberOfInvitations(course);
+
+			if (getIWMainApplication().getSettings().getBoolean("course.free_places_check_invitations", false)) {
+				freePlaces = freePlaces - getNumberOfInvitations(course);
+			}
+
 			return freePlaces;
 		} catch (IDOException e) {
 			e.printStackTrace();
@@ -2087,12 +2110,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Map<User, PriceHolder> getDiscounts(SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications) {
-		Map<User, PriceHolder> discountPrices = new HashMap<User, PriceHolder>();
-		Iterator<PriceHolder> iterator = userPrices.iterator();
+	public Map<User, PriceHolder> getDiscounts(String uuid, SortedSet<PriceHolder> userPrices, Map<User, Collection<ApplicationHolder>> applications) {
 		boolean first = true;
+		boolean gotDiscount = false;
+		boolean discountDisabled = false;
 		boolean firstOnWaitingList = true;
-		while (iterator.hasNext()) {
+		CourseDiscountInformationHolder infoHolder = ELUtil.getInstance().getBean(CourseDiscountInformationHolder.BEAN_NAME);
+		Map<User, PriceHolder> discountPrices = new HashMap<User, PriceHolder>();
+		for (Iterator<PriceHolder> iterator = userPrices.iterator(); iterator.hasNext();) {
 			PriceHolder priceHolder = iterator.next();
 			User applicant = priceHolder.getUser();
 			float price = priceHolder.getPrice();
@@ -2102,8 +2127,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			discountHolder.setPrice(0);
 
 			Collection<ApplicationHolder> userApplications = applications.get(applicant);
-			if (!isDiscountDisabled(applicant, userApplications)) {
-				if (!first) {
+			discountDisabled = isDiscountDisabled(applicant, userApplications);
+			if (!discountDisabled) {
+				if (!first && !infoHolder.isDiscountApplied(uuid, applicant.getPersonalID())) {
 					if (hasSiblingInSet(applications.keySet(), applicant)) {
 						boolean getsDiscount = false;
 						String name = null;
@@ -2117,9 +2143,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 						}
 
 						if (getsDiscount) {
-							discountHolder.setPrice(price * 0.2f);
-							discountHolder.setDiscount(0.2f);
-							discountHolder.setName(name);
+							gotDiscount = true;
+							setDiscount(discountHolder, price, name, uuid, infoHolder);
 						}
 					}
 				} else {
@@ -2140,9 +2165,178 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			}
 
 			discountPrices.put(applicant, discountHolder);
+			if (!first && !discountDisabled && !gotDiscount && getIWMainApplication().getSettings().getBoolean("course.double_check_discount", true)) {
+				doApplyDiscount(applications, discountHolder, price, uuid, infoHolder);
+			}
 		}
 
 		return discountPrices;
+	}
+
+	private void setDiscount(PriceHolder discount, float price, String name, String uuid, CourseDiscountInformationHolder infoHolder) {
+		discount.setPrice(price * 0.2f);
+		discount.setDiscount(0.2f);
+
+		if (name == null) {
+			if (StringUtil.isEmpty(discount.getName())) {
+				discount.setName(CoreConstants.MINUS);
+			}
+		} else {
+			discount.setName(name);
+		}
+
+		if (infoHolder == null) {
+			infoHolder = ELUtil.getInstance().getBean(CourseDiscountInformationHolder.BEAN_NAME);
+		}
+		infoHolder.markDiscountApplied(uuid, discount.getUser().getPersonalID());
+
+		getLogger().info("Set discount " + discount);	//	TODO
+	}
+
+	private void doApplyDiscount(Map<User, Collection<ApplicationHolder>> applications, PriceHolder discount, float price, String uuid, CourseDiscountInformationHolder infoHolder) {
+		if (MapUtil.isEmpty(applications) || discount == null) {
+			getLogger().warning("Either applications (" + applications + ") or discount not provided");
+			return;
+		}
+
+		Map<String, AttendanceInformation> usersInfo = new HashMap<String, AttendanceInformation>();
+		for (User applicant: applications.keySet()) {
+			try {
+				PriceHolder priceHolder = discount.getUser().getId().equals(applicant.getId()) ? discount : null;
+				if (priceHolder == null) {
+					getLogger().warning("Discount is not for " + applicant + " but for " + discount + ". Skipping it");
+					continue;
+				}
+
+				if (priceHolder.getDiscount() > 0) {
+					getLogger().info("Discount (" + priceHolder.getDiscount() + ") already issued for " + applicant);
+					continue;
+				}
+
+				if (infoHolder.isDiscountApplied(uuid, applicant.getPersonalID())) {
+					getLogger().info("Discount (" + priceHolder.getDiscount() + ") already applied for " + applicant);
+					continue;
+				}
+
+				Collection<ApplicationHolder> userApplications = applications.get(applicant);
+				if (ListUtil.isEmpty(userApplications)) {
+					getLogger().warning("No applications available for " + applicant);
+					continue;
+				}
+
+				FamilyMember familyMember = getFamilyLogic().getFamilyMember(applicant);
+				if (familyMember == null) {
+					getLogger().warning("Family member not known for " + applicant);
+					continue;
+				}
+
+				String familyNr = familyMember.getFamilyNr();
+				if (StringUtil.isEmpty(familyNr)) {
+					getLogger().warning("Family nr not known for " + applicant);
+					continue;
+				}
+
+				if (!infoHolder.isFamilyMemberSkipped(uuid, familyNr)) {
+					infoHolder.skipFamilyMember(uuid, familyNr, applicant.getPersonalID());
+					infoHolder.markDiscountDoesNotApply(uuid, applicant.getPersonalID());
+					continue;
+				}
+				if (infoHolder.isSkipped(uuid, familyNr, applicant.getPersonalID())) {
+					getLogger().info(applicant + " was already skipped (nr: " + familyNr + "), can not get discount");
+					continue;
+				}
+
+				if (!infoHolder.canApplyDiscount(uuid, familyNr, applicant.getPersonalID())) {
+					getLogger().info("Can not apply discount for " + applicant);
+					continue;
+				}
+
+				AttendanceInformation info = usersInfo.get(familyNr);
+				if (info == null) {
+					info = new AttendanceInformation(familyNr);
+					usersInfo.put(familyNr, info);
+				}
+				info.setFamilyNr(applicant.getPersonalID());
+
+				Map<User, Map<String, Course>> usersCourses = info.getUserCourses();
+				for (ApplicationHolder application: userApplications) {
+					if (application.isOnWaitingList()) {
+						getLogger().warning(application + " is on waiting list");
+						continue;
+					}
+
+					Course course = application.getCourse();
+					Map<String, Course> userCourses = usersCourses.get(applicant);
+					if (userCourses == null) {
+						userCourses = new HashMap<String, Course>();
+						usersCourses.put(applicant, userCourses);
+					}
+					userCourses.put(course.getPrimaryKey().toString(), course);
+				}
+			} catch (Exception e) {
+				getLogger().log(Level.WARNING, "Error getting information about attendance in courses for family members. Applications: " + applications + ", discount: " + discount, e);
+			}
+
+			if (MapUtil.isEmpty(usersInfo)) {
+				getLogger().warning("No information found on family members applications for " + applicant);
+				return;
+			}
+
+			String query = null;
+			try {
+				query = "select distinct c.USER_ID from cou_course_choice c, fam_family_member m where m.family_nr in (";
+				for (Iterator<String> familyNrIter = usersInfo.keySet().iterator(); familyNrIter.hasNext();) {
+					query += "'" + familyNrIter.next() + "'";
+					if (familyNrIter.hasNext()) {
+						query += ", ";
+					}
+				}
+				query += ") and c.course_id in (";
+				Map<String, Boolean> addedCourses = new HashMap<String, Boolean>();
+				for (AttendanceInformation allInfo: usersInfo.values()) {
+					for (User user: allInfo.getUserCourses().keySet()) {
+						Map<String, Course> courses = allInfo.getUserCourses().get(user);
+						if (MapUtil.isEmpty(courses)) {
+							continue;
+						}
+
+						for (Iterator<String> coursesIter = courses.keySet().iterator(); coursesIter.hasNext();) {
+							String courseId = coursesIter.next();
+							if (!addedCourses.containsKey(courseId)) {
+								addedCourses.put(courseId, Boolean.TRUE);
+							}
+						}
+					}
+				}
+				for (Iterator<String> coursesIter = addedCourses.keySet().iterator(); coursesIter.hasNext();) {
+					query += coursesIter.next();
+					if (coursesIter.hasNext()) {
+						query += ", ";
+					}
+				}
+				query += ") and c.user_id = m.ic_user_id group by c.USER_ID";
+
+				String[] usersIds = null;
+				try {
+					usersIds = SimpleQuerier.executeStringQuery(query);
+				} catch (Exception e) {
+					getLogger().log(Level.WARNING, "Error executing query: " + query, e);
+				}
+				if (ArrayUtil.isEmpty(usersIds) || usersIds.length == 1) {
+					getLogger().info("None or one user found by query: " + query);
+					return;
+				}
+
+				List<String> ids = new ArrayList<String>(Arrays.asList(usersIds));
+				if (ids.contains(discount.getUser().getId())) {
+					if (discount.getDiscount() <= 0) {
+						setDiscount(discount, price, null, uuid, infoHolder);
+					}
+				}
+			} catch (Exception e) {
+				getLogger().log(Level.WARNING, "Error while checking how much family members attend same courses. Query: " + query, e);
+			}
+		}
 	}
 
 	private boolean hasSiblingInSet(Set<User> set, User applicant) {
