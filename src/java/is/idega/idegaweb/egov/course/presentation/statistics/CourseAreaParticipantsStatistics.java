@@ -1,16 +1,11 @@
 /*
  * $Id$ Created on Apr 20, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
-
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 import java.rmi.RemoteException;
 import java.sql.Date;
@@ -48,6 +43,11 @@ import com.idega.user.business.GenderBusiness;
 import com.idega.user.data.Gender;
 import com.idega.util.IWTimestamp;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.presentation.CourseBlock;
+
 public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 	private static final String PARAMETER_AREA = "prm_area";
@@ -56,6 +56,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 	private Object schoolTypePK;
 
+	@Override
 	public void present(IWContext iwc) {
 		try {
 			if (schoolTypePK == null) {
@@ -142,11 +143,13 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 		schoolArea.addMenuElements(areas);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
+		fromDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		fromDate.setShowYearChange(true);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
+		toDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		toDate.setShowYearChange(true);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
@@ -320,7 +323,7 @@ public class CourseAreaParticipantsStatistics extends CourseBlock {
 
 	private GenderBusiness getGenderBusiness(IWApplicationContext iwac) {
 		try {
-			return (GenderBusiness) IBOLookup.getServiceInstance(iwac, GenderBusiness.class);
+			return IBOLookup.getServiceInstance(iwac, GenderBusiness.class);
 		}
 		catch (RemoteException e) {
 			throw new IBORuntimeException(e.getMessage());

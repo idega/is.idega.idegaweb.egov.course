@@ -1,10 +1,5 @@
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.idegaweb.egov.course.business.CourseBusiness;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CourseType;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -42,6 +37,11 @@ import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
+
+import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 public class CoursePriceEditor extends CourseBlock {
 
@@ -335,11 +335,13 @@ public class CoursePriceEditor extends CourseBlock {
 		to.addDays(-1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
+		fromDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		fromDate.setShowYearChange(true);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
+		toDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		toDate.setShowYearChange(true);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);
@@ -410,8 +412,10 @@ public class CoursePriceEditor extends CourseBlock {
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		TextInput inputLength = new TextInput(PARAMETER_DAYS);
 		IWDatePicker inputFrom = new IWDatePicker(PARAMETER_VALID_FROM);
+		inputFrom.setVersion(IWDatePicker.VERSION_1_8_17);
 		inputFrom.setShowYearChange(true);
 		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
+		inputTo.setVersion(IWDatePicker.VERSION_1_8_17);
 		inputTo.setShowYearChange(true);
 		TextInput inputPrice = new TextInput(PARAMETER_PRICE);
 		TextInput inputPreCarePrice = new TextInput(PARAMETER_PRE_CARE_PRICE);
@@ -571,7 +575,7 @@ public class CoursePriceEditor extends CourseBlock {
 
 	public CourseBusiness getCourseBusiness(IWContext iwc) {
 		try {
-			return (CourseBusiness) IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
+			return IBOLookup.getServiceInstance(iwc, CourseBusiness.class);
 		}
 		catch (IBOLookupException e) {
 			throw new IBORuntimeException(e);

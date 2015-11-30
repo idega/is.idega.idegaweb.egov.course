@@ -7,14 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseComparator;
-import is.idega.idegaweb.egov.course.business.CourseWriter;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CourseType;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -46,6 +38,14 @@ import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
+
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseComparator;
+import is.idega.idegaweb.egov.course.business.CourseWriter;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 public class CourseList extends CourseBlock {
 
@@ -189,11 +189,13 @@ public class CourseList extends CourseBlock {
 		stamp.addYears(1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM_DATE);
+		fromDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		fromDate.setShowYearChange(true);
 		fromDate.setStyleClass("dateInput");
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO_DATE);
+		toDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		toDate.setShowYearChange(true);
 		toDate.setStyleClass("dateInput");
 		toDate.keepStatusOnAction(true);

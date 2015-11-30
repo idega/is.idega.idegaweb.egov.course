@@ -1,15 +1,11 @@
 /*
  * $Id$ Created on Apr 20, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation.statistics;
-
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 import java.rmi.RemoteException;
 import java.sql.Date;
@@ -40,6 +36,10 @@ import com.idega.presentation.ui.SubmitButton;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.util.IWTimestamp;
 
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.presentation.CourseBlock;
+
 public class CourseStatistics extends CourseBlock {
 
 	private static final String PARAMETER_FROM = "prm_from";
@@ -47,6 +47,7 @@ public class CourseStatistics extends CourseBlock {
 
 	private Object schoolTypePK;
 
+	@Override
 	public void present(IWContext iwc) {
 		try {
 			if (schoolTypePK == null) {
@@ -87,7 +88,7 @@ public class CourseStatistics extends CourseBlock {
 				if (userProviders != null) {
 					providers.retainAll(userProviders);
 				}
-				
+
 				addResults(iwc, iwrb, type, providers, courseTypes, section, area.getName());
 
 				Layer clearLayer = new Layer(Layer.DIV);
@@ -125,11 +126,13 @@ public class CourseStatistics extends CourseBlock {
 		to.addDays(-1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM);
+		fromDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		fromDate.setShowYearChange(true);
 		fromDate.setDate(from.getDate());
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO);
+		toDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		toDate.setShowYearChange(true);
 		toDate.setDate(to.getDate());
 		toDate.keepStatusOnAction(true);

@@ -1,13 +1,5 @@
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseBusiness;
-import is.idega.idegaweb.egov.course.business.CourseSession;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CourseType;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -67,6 +59,14 @@ import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
+
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.business.CourseSession;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 public class CourseEditor extends CourseBlock {
 
@@ -325,10 +325,10 @@ public class CourseEditor extends CourseBlock {
 		courseType.keepStatusOnAction(true);
 
 		if (iwc.isParameterSet(PARAMETER_SCHOOL_TYPE_PK)) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(iwc.getParameter(PARAMETER_SCHOOL_TYPE_PK)), true);
 			courseType.addMenuElements(courseTypes);
 		} else if (type != null) {
-			Collection courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
+			Collection<CourseType> courseTypes = getBusiness().getCourseTypes(new Integer(type.getPrimaryKey().toString()), true);
 			courseType.addMenuElements(courseTypes);
 		}
 
@@ -336,10 +336,12 @@ public class CourseEditor extends CourseBlock {
 		stamp.addYears(1);
 
 		IWDatePicker fromDate = new IWDatePicker(PARAMETER_FROM_DATE);
+		fromDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		fromDate.setShowYearChange(true);
 		fromDate.keepStatusOnAction(true);
 
 		IWDatePicker toDate = new IWDatePicker(PARAMETER_TO_DATE);
+		toDate.setVersion(IWDatePicker.VERSION_1_8_17);
 		toDate.setShowYearChange(true);
 		toDate.keepStatusOnAction(true);
 		toDate.setDate(stamp.getDate());
@@ -795,8 +797,10 @@ public class CourseEditor extends CourseBlock {
 		TextInput inputCourseNumber = new TextInput(PARAMETER_COURSE_NUMBER);
 		TextInput inputName = new TextInput(PARAMETER_NAME);
 		IWDatePicker inputFrom = new IWDatePicker(PARAMETER_VALID_FROM);
+		inputFrom.setVersion(IWDatePicker.VERSION_1_8_17);
 		inputFrom.setShowYearChange(true);
 		IWDatePicker inputTo = new IWDatePicker(PARAMETER_VALID_TO);
+		inputTo.setVersion(IWDatePicker.VERSION_1_8_17);
 		inputTo.setShowYearChange(true);
 		inputTo.setOnSelectAction("EGovCoursesHelper.validateCourseEndDate('#" + inputTo.getId() + "');");
 		TextInput inputAccounting = new TextInput(PARAMETER_ACCOUNTING_KEY);
@@ -807,6 +811,7 @@ public class CourseEditor extends CourseBlock {
 		IntegerInput inputMaxPer = new IntegerInput(PARAMETER_MAX_PER);
 		InterfaceObject inputUser = getUserInput(iwc, course);
 		IWDatePicker registrationEnd = new IWDatePicker(PARAMETER_REGISTRATION_END);
+		registrationEnd.setVersion(IWDatePicker.VERSION_1_8_17);
 		registrationEnd.setShowTime(true);
 		registrationEnd.setUseCurrentDateIfNotSet(false);
 
@@ -854,14 +859,14 @@ public class CourseEditor extends CourseBlock {
 		boolean showTypes = true;
 		Object schoolTypePK = null;
 
-		Collection cargoTypes = null;
+		Collection<CourseType> cargoTypes = null;
 		School provider = getProvider();
-		Collection schoolTypes = provider == null ? null : getCourseBusiness().getSchoolTypes(provider);
+		Collection<SchoolType> schoolTypes = provider == null ? null : getCourseBusiness().getSchoolTypes(provider);
 		if (schoolTypes != null) {
 			if (schoolTypeID != null && schoolTypes.size() > 1) {
 				schoolTypeID.addMenuElements(schoolTypes);
 			} else if (schoolTypes.size() == 1) {
-				SchoolType type = (SchoolType) schoolTypes.iterator().next();
+				SchoolType type = schoolTypes.iterator().next();
 				showTypes = false;
 				form.add(new HiddenInput(PARAMETER_SCHOOL_TYPE_PK, type.getPrimaryKey().toString()));
 				schoolTypePK = type.getPrimaryKey();
@@ -930,7 +935,7 @@ public class CourseEditor extends CourseBlock {
 						postCarePrice.setContent(coursePrice.getPostCarePrice() > 0 ? Integer.toString(coursePrice.getPostCarePrice()) : "0");
 
 						try {
-							Collection prices = getCourseBusiness().getCoursePriceHome().findAll(providerFromCourse.getSchoolArea(), type);
+							Collection<CoursePrice> prices = getCourseBusiness().getCoursePriceHome().findAll(providerFromCourse.getSchoolArea(), type);
 							priceDrop.addMenuElements(prices);
 							priceDrop.setSelectedElement(course.getPrice().getPrimaryKey().toString());
 						} catch (IDORelationshipException e) {
@@ -955,7 +960,7 @@ public class CourseEditor extends CourseBlock {
 			form.add(new HiddenInput(PARAMETER_COURSE_PK, coursePK.toString()));
 		} else {
 			if (isShowCourseType() && schoolTypes != null && schoolTypes.iterator().hasNext()) {
-				cargoTypes = getCourseBusiness().getCourseTypes((Integer) ((SchoolType) schoolTypes.iterator().next()).getPrimaryKey(), true);
+				cargoTypes = getCourseBusiness().getCourseTypes((Integer) schoolTypes.iterator().next().getPrimaryKey(), true);
 				courseTypeID.addMenuElements(cargoTypes);
 			}
 
