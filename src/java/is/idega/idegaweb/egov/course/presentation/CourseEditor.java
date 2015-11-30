@@ -25,6 +25,7 @@ import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
 import com.idega.data.IDORelationshipException;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.presentation.CSSSpacer;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -253,9 +254,9 @@ public class CourseEditor extends CourseBlock {
 		layer.setStyleClass("formSection");
 
 		List<String> scriptFiles = new ArrayList<String>();
-		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
 		scriptFiles.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scriptFiles.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scriptFiles);
 
 		StringBuffer script2 = new StringBuffer();
@@ -736,10 +737,11 @@ public class CourseEditor extends CourseBlock {
 
 	protected Form getEditorForm(IWContext iwc, Object coursePK) throws RemoteException {
 		boolean useFixedPrices = isUseFixedPrices();
-		boolean useBirthYears = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
-		boolean showIDInput = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
-		boolean showOpenForRegistration = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false);
-		boolean showCareOptions = iwc.getApplicationSettings().getBoolean(CourseConstants.PROPERTY_SHOW_CARE_OPTIONS, false);
+		IWMainApplicationSettings settings = iwc.getApplicationSettings();
+		boolean useBirthYears = settings.getBoolean(CourseConstants.PROPERTY_USE_BIRTHYEARS, true);
+		boolean showIDInput = settings.getBoolean(CourseConstants.PROPERTY_SHOW_ID_IN_NAME, false);
+		boolean showOpenForRegistration = settings.getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false) || settings.getBoolean("egov.course.always.show.open", false);
+		boolean showCareOptions = settings.getBoolean(CourseConstants.PROPERTY_SHOW_CARE_OPTIONS, false);
 
 		Form form = new Form();
 		form.setID("courseEditor");
@@ -750,9 +752,9 @@ public class CourseEditor extends CourseBlock {
 
 		if (!useFixedPrices) {
 			List<String> scripts = new ArrayList<String>();
-			scripts.add("/dwr/interface/CourseDWRUtil.js");
 			scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 			scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+			scripts.add("/dwr/interface/CourseDWRUtil.js");
 			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 			StringBuffer script2 = new StringBuffer();

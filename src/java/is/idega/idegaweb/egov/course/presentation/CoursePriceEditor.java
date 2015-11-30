@@ -376,10 +376,10 @@ public class CoursePriceEditor extends CourseBlock {
 	}
 
 	public void showEditor(IWContext iwc, Object courseTypePK) throws java.rmi.RemoteException {
-		List scripts = new ArrayList();
-		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		List<String> scripts = new ArrayList<String>();
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script2 = new StringBuffer();

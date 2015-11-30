@@ -1,24 +1,5 @@
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.block.family.business.FamilyConstants;
-import is.idega.block.family.business.FamilyLogic;
-import is.idega.block.family.business.NoCustodianFound;
-import is.idega.block.family.data.Child;
-import is.idega.block.family.data.Custodian;
-import is.idega.block.family.data.Relative;
-import is.idega.idegaweb.egov.application.presentation.ApplicationForm;
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseApplicationSession;
-import is.idega.idegaweb.egov.course.business.CourseBusiness;
-import is.idega.idegaweb.egov.course.business.CourseDWR;
-import is.idega.idegaweb.egov.course.business.CourseSession;
-import is.idega.idegaweb.egov.course.data.ApplicationHolder;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.data.PriceHolder;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.text.MessageFormat;
@@ -98,6 +79,25 @@ import com.idega.util.expression.ELUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
 import com.idega.util.text.TextSoap;
+
+import is.idega.block.family.business.FamilyConstants;
+import is.idega.block.family.business.FamilyLogic;
+import is.idega.block.family.business.NoCustodianFound;
+import is.idega.block.family.data.Child;
+import is.idega.block.family.data.Custodian;
+import is.idega.block.family.data.Relative;
+import is.idega.idegaweb.egov.application.presentation.ApplicationForm;
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseApplicationSession;
+import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.business.CourseDWR;
+import is.idega.idegaweb.egov.course.business.CourseSession;
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
 
 public class CourseApplication extends ApplicationForm {
 
@@ -675,9 +675,9 @@ public class CourseApplication extends ApplicationForm {
 		addErrors(iwc, form);
 
 		List<String> scripts = new ArrayList<String>();
-		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script = new StringBuffer();
@@ -872,9 +872,9 @@ public class CourseApplication extends ApplicationForm {
 		Integer applicantPK = (Integer) applicant.getPrimaryKey();
 
 		List<String> scripts = new ArrayList<String>();
-		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(getJQuery().getBundleURIToJQueryLib());
 		scripts.add(getBundle(iwc).getVirtualPathWithFileNameString("javascript/CourseApplicationHelper.js"));
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
@@ -1985,9 +1985,9 @@ public class CourseApplication extends ApplicationForm {
 		addErrors(iwc, form);
 
 		List<String> scripts = new ArrayList<String>();
-		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script = new StringBuffer();

@@ -1,18 +1,11 @@
 /*
  * $Id$ Created on Mar 28, 2007
- * 
+ *
  * Copyright (C) 2007 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.course.presentation;
-
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseAttendanceWriter;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CourseType;
 
 import java.rmi.RemoteException;
 import java.sql.Date;
@@ -46,6 +39,13 @@ import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
+
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseAttendanceWriter;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 public class CourseAttendanceList extends CourseBlock {
 
@@ -89,10 +89,10 @@ public class CourseAttendanceList extends CourseBlock {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("formSection");
 
-		List scripts = new ArrayList();
-		scripts.add("/dwr/interface/CourseDWRUtil.js");
+		List<String> scripts = new ArrayList<String>();
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		if (!isSchoolUser()) {
@@ -104,9 +104,9 @@ public class CourseAttendanceList extends CourseBlock {
 				providers = getProvidersDropdown(iwc);
 			}
 
-			Collection providersList = getBusiness().getProviders();
+			Collection<School> providersList = getBusiness().getProviders();
 			if (providersList.size() == 1) {
-				School school = (School) providersList.iterator().next();
+				School school = providersList.iterator().next();
 				getSession().setProvider(school);
 				layer.add(new HiddenInput(PARAMETER_PROVIDER_PK, school.getPrimaryKey().toString()));
 			}
@@ -180,14 +180,14 @@ public class CourseAttendanceList extends CourseBlock {
 			fromDate = new IWTimestamp(1, 1, year).getDate();
 			toDate = new IWTimestamp(31, 12, year).getDate();
 		}
-		
+
 		DropdownMenu yearMenu = new DropdownMenu(PARAMETER_YEAR);
 		if (inceptionYear > 0) {
 			yearMenu.keepStatusOnAction(true);
 			yearMenu.setID(PARAMETER_YEAR);
 			yearMenu.setOnChange("changeCourseValues();");
 			yearMenu.setSelectedElement(year);
-			
+
 			for (int i = inceptionYear; i <= currentYear; i++) {
 				yearMenu.addMenuElement(i, String.valueOf(i));
 			}

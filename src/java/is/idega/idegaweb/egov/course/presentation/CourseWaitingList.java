@@ -7,13 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
-import is.idega.idegaweb.egov.course.data.CourseType;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -57,6 +50,13 @@ import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
+
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
+import is.idega.idegaweb.egov.course.data.CourseType;
 
 public class CourseWaitingList extends CourseBlock {
 
@@ -190,9 +190,9 @@ public class CourseWaitingList extends CourseBlock {
 		layer.setStyleClass("formSection");
 
 		List<String> scripts = new ArrayList<String>();
-		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		if (!isSchoolUser()) {

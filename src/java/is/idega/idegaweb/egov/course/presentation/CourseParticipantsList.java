@@ -7,19 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.idegaweb.egov.citizen.presentation.CitizenFinder;
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseChoiceComparator;
-import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseCertificate;
-import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.data.PriceHolder;
-import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -66,6 +53,19 @@ import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
+
+import is.idega.idegaweb.egov.citizen.presentation.CitizenFinder;
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseChoiceComparator;
+import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
+import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
+import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
 
 public class CourseParticipantsList extends CourseBlock {
 
@@ -145,9 +145,9 @@ public class CourseParticipantsList extends CourseBlock {
 		layer.setStyleClass("formSection");
 
 		List<String> scripts = new ArrayList<String>();
-		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scripts.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		if (!isSchoolUser()) {

@@ -90,9 +90,9 @@ public class CourseList extends CourseBlock {
 		layer.setStyleClass("formSection");
 
 		List<String> scripts = new ArrayList<String>();
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(CoreConstants.DWR_UTIL_SCRIPT);
 		scripts.add("/dwr/interface/CourseDWRUtil.js");
-		scripts.add("/dwr/engine.js");
-		scripts.add("/dwr/util.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 
 		StringBuffer script2 = new StringBuffer();

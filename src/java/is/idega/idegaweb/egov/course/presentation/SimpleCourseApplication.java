@@ -9,15 +9,6 @@
  */
 package is.idega.idegaweb.egov.course.presentation;
 
-import is.idega.idegaweb.egov.application.presentation.ApplicationForm;
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.business.CourseApplicationSession;
-import is.idega.idegaweb.egov.course.business.CourseBusiness;
-import is.idega.idegaweb.egov.course.business.CourseDWR;
-import is.idega.idegaweb.egov.course.data.ApplicationHolder;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.PriceHolder;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.text.NumberFormat;
@@ -68,6 +59,15 @@ import com.idega.util.PersonalIDFormatter;
 import com.idega.util.PresentationUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
+
+import is.idega.idegaweb.egov.application.presentation.ApplicationForm;
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.business.CourseApplicationSession;
+import is.idega.idegaweb.egov.course.business.CourseBusiness;
+import is.idega.idegaweb.egov.course.business.CourseDWR;
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
 
 public class SimpleCourseApplication extends ApplicationForm {
 
@@ -236,7 +236,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		script5.append("function getRadio(course) { \n").append("\nvar sel = (course.pk == 0);\n");
 		if (iwc.isIE()) {
 			script5.append("\n\t").append("var radio = document.createElement('<input id=\"' + course.pk + '\" value=\"' + course.pk + '\" class=\"checkbox\" type=\"radio\" name=\"" + PARAMETER_COURSE + "\">');");
-			
+
 		}
 		else {
 			script5.append("\n\t").append("var radio = document.createElement(\"input\");");
@@ -448,7 +448,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			showPhaseOne(iwc);
 			return;
 		}
-		
+
 		if (iwc.isParameterSet(PARAMETER_TRIGGER_SAVE)) {
 			addApplication(iwc);
 		}
@@ -476,25 +476,25 @@ public class SimpleCourseApplication extends ApplicationForm {
 			heading.setStyleClass("subHeader");
 			heading.setStyleClass("topSubHeader");
 			form.add(heading);
-	
+
 			Layer section = new Layer(Layer.DIV);
 			section.setStyleClass("formSection");
 			form.add(section);
-	
+
 			Layer helpLayer = new Layer(Layer.DIV);
 			helpLayer.setStyleClass("helperText");
 			helpLayer.add(new Text(this.iwrb.getLocalizedString("application.select_applicant_help", "Please select if you are registering yourself or on behalf of a company.  If you are registering on behalf of a company you will be able to enter company information later.")));
 			section.add(helpLayer);
-			
+
 			RadioButton ownRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.TRUE.toString());
 			ownRegistration.setStyleClass("radiobutton");
 			ownRegistration.setSelected(true);
 			ownRegistration.keepStatusOnAction(true);
-	
+
 			RadioButton companyRegistration = new RadioButton(PARAMETER_APPLICANT_OPTION, Boolean.FALSE.toString());
 			companyRegistration.setStyleClass("radiobutton");
 			companyRegistration.keepStatusOnAction(true);
-	
+
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("radioButtonItem");
@@ -502,7 +502,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			formItem.add(ownRegistration);
 			formItem.add(label);
 			section.add(formItem);
-	
+
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("radioButtonItem");
@@ -514,7 +514,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		else {
 			form.maintainParameter(PARAMETER_APPLICANT_OPTION);
 		}
-		
+
 		heading = new Heading1(iwrb.getLocalizedString("type_social_security_number", "Type in social security number"));
 		heading.setStyleClass("subHeader");
 		form.add(heading);
@@ -815,7 +815,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		formItem.add(agree);
 		formItem.add(label);
 		section.add(formItem);
-		
+
 		Layer bottom = new Layer(Layer.DIV);
 		bottom.setStyleClass("bottom");
 		form.add(bottom);
@@ -837,7 +837,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			newAppl.setToFormSubmit(form);
 			bottom.add(newAppl);
 		}
-		
+
 		add(form);
 	}
 
@@ -1045,7 +1045,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			payerPersonalID.setMaxlength(10);
 			payerPersonalID.setOnKeyUp("readUser();");
 			payerPersonalID.setOnChange("readUser();");
-			
+
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			Label label = new Label(this.iwrb.getLocalizedString("application.payer_personal_id", "Personal ID"), payerPersonalID);
@@ -1091,10 +1091,10 @@ public class SimpleCourseApplication extends ApplicationForm {
 	}
 
 	private void addDefaulScriptFiles(IWContext iwc) {
-		List scriptFiles = new ArrayList();
-		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
+		List<String> scriptFiles = new ArrayList<String>();
 		scriptFiles.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scriptFiles.add(CoreConstants.DWR_UTIL_SCRIPT);
+		scriptFiles.add("/dwr/interface/CourseDWRUtil.js");
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scriptFiles);
 	}
 
@@ -1135,7 +1135,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 			payerPersonalID = user.getPersonalID();
 			payerName = new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(iwc.getCurrentLocale());
 		}
-		
+
 		double amount = Double.parseDouble(iwc.getParameter(PARAMETER_AMOUNT));
 		float certificateFees = Float.parseFloat(iwc.getParameter(PARAMETER_AMOUNT_OF_CERTIFICATE_FEES));
 		String referenceNumber = iwc.getParameter(PARAMETER_REFERENCE_NUMBER);
@@ -1180,7 +1180,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 					fe.printStackTrace();
 				}
 			}
-			
+
 			Link receipt = getButtonLink(this.iwrb.getLocalizedString("receipt", "Receipt"));
 			receipt.setPublicWindowToOpen(CourseApplicationOverviewWindow.class);
 			receipt.addParameter(getCourseBusiness(iwc).getSelectedCaseParameter(), application.getPrimaryKey().toString());
