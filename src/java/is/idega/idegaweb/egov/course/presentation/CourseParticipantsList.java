@@ -58,6 +58,7 @@ import is.idega.idegaweb.egov.citizen.presentation.CitizenFinder;
 import is.idega.idegaweb.egov.course.CourseConstants;
 import is.idega.idegaweb.egov.course.business.CourseChoiceComparator;
 import is.idega.idegaweb.egov.course.business.CourseParticipantsWriter;
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseCertificate;
 import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
@@ -536,6 +537,7 @@ public class CourseParticipantsList extends CourseBlock {
 		Iterator<CourseChoice> iter = choices.iterator();
 		String loadingMessage = getResourceBundle().getLocalizedString("loading", "Loading");
 		String uuid = UUID.randomUUID().toString();
+		boolean checkDiscount = iwc.getApplicationSettings().getBoolean("course_price.check_discount", true);
 		try {
 			while (iter.hasNext()) {
 				row = group.createRow();
@@ -757,16 +759,17 @@ public class CourseParticipantsList extends CourseBlock {
 				if (showPrice) {
 					is.idega.idegaweb.egov.course.data.CourseApplication application = choice.getApplication();
 					float userPrice = 0;
+
+					CoursePrice price = course.getPrice();
+
 					if (choice.isNoPayment()) {
 						userPrice = 0;
-					}
-					else {
-						Map applicationMap = getBusiness().getApplicationMap(application, new Boolean(false));
-						SortedSet prices = getBusiness().calculatePrices(applicationMap);
-						Map discounts = getBusiness().getDiscounts(uuid, prices, applicationMap);
-						CoursePrice price = course.getPrice();
+					} else if (checkDiscount) {
+						Map<User, Collection<ApplicationHolder>> applicationMap = getBusiness().getApplicationMap(application, new Boolean(false));
+						SortedSet<PriceHolder> prices = getBusiness().calculatePrices(applicationMap);
+						Map<User, PriceHolder> discounts = getBusiness().getDiscounts(uuid, prices, applicationMap);
 
-						float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+						float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - discounts.get(user).getDiscount());
 
 						float carePrice = 0;
 						if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
@@ -778,9 +781,11 @@ public class CourseParticipantsList extends CourseBlock {
 						else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
 							carePrice = price.getPreCarePrice() + price.getPostCarePrice();
 						}
-						carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+						carePrice = carePrice * (1 - discounts.get(user).getDiscount());
 
 						userPrice = carePrice + coursePrice;
+					} else {
+						userPrice = price == null ? course.getCoursePrice() : price.getPrice();
 					}
 
 					cell = row.createCell();
