@@ -1,42 +1,5 @@
 package is.idega.idegaweb.egov.course.business;
 
-import is.idega.block.family.business.FamilyLogic;
-import is.idega.block.family.data.Child;
-import is.idega.block.family.data.Custodian;
-import is.idega.block.family.data.FamilyMember;
-import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
-import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
-import is.idega.idegaweb.egov.accounting.business.AccountingKeyBusiness;
-import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
-import is.idega.idegaweb.egov.accounting.data.SchoolCode;
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.bean.AttendanceInformation;
-import is.idega.idegaweb.egov.course.bean.CourseDiscountInformationHolder;
-import is.idega.idegaweb.egov.course.data.ApplicationHolder;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseApplication;
-import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
-import is.idega.idegaweb.egov.course.data.CourseCertificate;
-import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
-import is.idega.idegaweb.egov.course.data.CourseCertificateType;
-import is.idega.idegaweb.egov.course.data.CourseCertificateTypeHome;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
-import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
-import is.idega.idegaweb.egov.course.data.CourseDiscount;
-import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
-import is.idega.idegaweb.egov.course.data.CourseHome;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CoursePriceHome;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.data.CourseTypeHome;
-import is.idega.idegaweb.egov.course.data.PriceHolder;
-import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
-import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
-import is.idega.idegaweb.egov.message.business.MessageValue;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -118,6 +81,43 @@ import com.idega.util.datastructures.map.MapUtil;
 import com.idega.util.expression.ELUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.SocialSecurityNumber;
+
+import is.idega.block.family.business.FamilyLogic;
+import is.idega.block.family.data.Child;
+import is.idega.block.family.data.Custodian;
+import is.idega.block.family.data.FamilyMember;
+import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
+import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
+import is.idega.idegaweb.egov.accounting.business.AccountingKeyBusiness;
+import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
+import is.idega.idegaweb.egov.accounting.data.SchoolCode;
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.bean.AttendanceInformation;
+import is.idega.idegaweb.egov.course.bean.CourseDiscountInformationHolder;
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
+import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
+import is.idega.idegaweb.egov.course.data.CourseCertificateHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificateType;
+import is.idega.idegaweb.egov.course.data.CourseCertificateTypeHome;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceBMPBean;
+import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
+import is.idega.idegaweb.egov.course.data.CourseDiscount;
+import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
+import is.idega.idegaweb.egov.course.data.CourseHome;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CoursePriceHome;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.data.CourseTypeHome;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
+import is.idega.idegaweb.egov.course.presentation.bean.CourseParticipantListRowData;
+import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
+import is.idega.idegaweb.egov.message.business.MessageValue;
 
 public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness, CourseBusiness, AccountingBusiness {
 
@@ -1348,16 +1348,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					IWTimestamp start = getRegistrationTimeoutForCourse(course);
 
 					if (useCourseOpen) {
-						if ((course.isOpenForRegistration() || isAdmin)
-								&& ((applicant != null && !isRegistered(
-										applicant, course)) || applicant == null)) {
+						if ((course.isOpenForRegistration() || isAdmin)	&& ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
 							CourseDWR cDWR = getCourseDWR(locale, course);
 							map.put(course.getPrimaryKey(), cDWR);
 						}
-					} else if (((!isAdmin ? start.isLaterThan(stamp)
-							: (defaultStamp != null ? start
-									.isLaterThan(defaultStamp) : true)) && ((applicant != null && !isRegistered(
-							applicant, course)) || applicant == null))) {
+					} else if (
+							((!isAdmin ? start.isLaterThan(stamp) : (defaultStamp != null ? start.isLaterThan(defaultStamp) : true)) &&
+							((applicant != null && !isRegistered(applicant, course)) || applicant == null))
+					) {
 						CourseDWR cDWR = getCourseDWR(locale, course);
 						map.put(course.getPrimaryKey(), cDWR);
 					}
