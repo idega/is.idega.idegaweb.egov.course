@@ -22,6 +22,7 @@ import java.util.SortedSet;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
+import com.idega.block.school.data.SchoolType;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -67,6 +68,7 @@ import is.idega.idegaweb.egov.course.business.CourseBusiness;
 import is.idega.idegaweb.egov.course.business.CourseDWR;
 import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseType;
 import is.idega.idegaweb.egov.course.data.PriceHolder;
 
 public class SimpleCourseApplication extends ApplicationForm {
@@ -214,16 +216,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		script4.append("function setCourses(data) {\n").append("\tvar isEmpty = true;\n").append("\tfor (var prop in data) { isEmpty = false } \n").append("\tif (isEmpty == true) {\n").append("\t}\n").append("\tdwr.util.removeAllRows(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tdwr.util.addRows(\"" + PARAMETER_COURSE_TABLE_ID + "\", data, [getRadio, getTimeframe, getProvider], { rowCreator:function(options) { var row = document.createElement(\"tr\"); if (options.rowData.isfull) { row.className = \"isfull\" }; return row; }});\n").append("\tvar table = $(\"" + PARAMETER_COURSE_TABLE_ID + "\");\n").append("\tvar trs = table.childNodes;\n").append("\tfor (var rowNum = 0; rowNum < trs.length; rowNum++) {\n").append("\t\tvar currentRow = trs[rowNum];\n").append("\t\tvar tds = currentRow.childNodes;\n").append("\t\tfor (var colNum = 0; colNum < tds.length; colNum++) {\n").append("\t\t\tvar obj = tds[colNum].firstChild;\n").append("\t\t\tif (obj != null && obj.className == 'checkbox') {\n");
 
-		Collection inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
+		Collection<ApplicationHolder> inrepps = getCourseApplicationSession(iwc).getUserApplications(getApplicant(iwc));
 		if (inrepps != null && !inrepps.isEmpty()) {
 			script4.append("\t\t\t\t if (");
-			Iterator iter = inrepps.iterator();
+			Iterator<ApplicationHolder> iter = inrepps.iterator();
 			boolean first = true;
 			while (iter.hasNext()) {
 				if (!first) {
 					script4.append(" || ");
 				}
-				script4.append("obj.id == " + ((ApplicationHolder) iter.next()).getCourse().getPrimaryKey().toString());
+				script4.append("obj.id == " + iter.next().getCourse().getPrimaryKey().toString());
 				first = false;
 			}
 			script4.append(") {obj.disabled=true;obj.checked=true}\n");
@@ -250,7 +252,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		script5.append("\n\t").append("return radio;");
 		script5.append("}\n");
 
-		List jsActions = new ArrayList();
+		List<String> jsActions = new ArrayList<String>();
 		jsActions.add(script2.toString());
 		jsActions.add(script.toString());
 		jsActions.add(script3.toString());
@@ -300,7 +302,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 				}
 			}
 
-			Collection schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
+			Collection<SchoolType> schoolTypes = getCourseBusiness(iwc).getAllSchoolTypes();
 			DropdownMenu catMenu = new DropdownMenu(schoolTypes, PARAMETER_CATEGORY);
 			catMenu.addMenuElementFirst("", iwrb.getLocalizedString("select_school_type", "Select school type"));
 			catMenu.setId(PARAMETER_CATEGORY);
@@ -318,7 +320,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		DropdownMenu typeMenu = new DropdownMenu(PARAMETER_COURSE_TYPE);
 		typeMenu.setId(PARAMETER_COURSE_TYPE);
 		if (schoolTypePK != null) {
-			Collection courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK, true);
+			Collection<CourseType> courseTypes = getCourseBusiness(iwc).getCourseTypes(schoolTypePK, true);
 			typeMenu.addMenuElements(courseTypes);
 		}
 		typeMenu.addMenuElementFirst("-1", iwrb.getLocalizedString("select_course_type", "Select course type"));
@@ -353,9 +355,16 @@ public class SimpleCourseApplication extends ApplicationForm {
 			}
 		}
 
-		Collection courses = null;
+		Collection<CourseDWR> courses = null;
 		if (courseTypePK != null) {
-			courses = getCourseBusiness(iwc).getCoursesDWR(providerPK != null ? providerPK.intValue() : -1, schoolTypePK.intValue(), courseTypePK.intValue(), -1, iwc.getCurrentLocale().getCountry(), this.iUseSessionUser);
+			courses = getCourseBusiness(iwc).getCoursesDWR(
+					providerPK != null ? providerPK.intValue() : -1,
+					schoolTypePK.intValue(),
+					courseTypePK.intValue(),
+					-1,
+					iwc.getCurrentLocale().getCountry(),
+					this.iUseSessionUser
+			);
 		}
 
 		Table2 table = new Table2();
@@ -379,7 +388,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 		group = table.createBodyRowGroup();
 		group.setId(PARAMETER_COURSE_TABLE_ID);
 		if (courses != null) {
-			Iterator iter = courses.iterator();
+			Iterator<CourseDWR> iter = courses.iterator();
 			int counter = 0;
 			while (iter.hasNext()) {
 				row = group.createRow();
@@ -389,7 +398,7 @@ public class SimpleCourseApplication extends ApplicationForm {
 				else {
 					row.setStyleClass("odd");
 				}
-				CourseDWR course = (CourseDWR) iter.next();
+				CourseDWR course = iter.next();
 				cell = row.createCell();
 				cell.setStyleClass("column0");
 
@@ -937,18 +946,18 @@ public class SimpleCourseApplication extends ApplicationForm {
 
 		group = table.createBodyRowGroup();
 
-		Map applications = getCourseApplicationSession(iwc).getApplications();
-		SortedSet prices = getCourseBusiness(iwc).calculatePrices(applications);
+		Map<User, Collection<ApplicationHolder>> applications = getCourseApplicationSession(iwc).getApplications();
+		SortedSet<PriceHolder> prices = getCourseBusiness(iwc).calculatePrices(applications);
 
 		User applicant = null;
 		NumberFormat format = NumberFormat.getInstance(iwc.getCurrentLocale());
 		float totalPrice = 0;
 		int counter = 0;
-		Iterator iter = prices.iterator();
+		Iterator<PriceHolder> iter = prices.iterator();
 		float certificateFees = 0;
 		while (iter.hasNext()) {
 			row = group.createRow();
-			PriceHolder holder = (PriceHolder) iter.next();
+			PriceHolder holder = iter.next();
 			User user = holder.getUser();
 			if (applicant == null) {
 				applicant = user;

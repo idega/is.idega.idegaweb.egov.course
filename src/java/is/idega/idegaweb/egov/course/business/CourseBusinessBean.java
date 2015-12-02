@@ -60,6 +60,7 @@ import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORuntimeException;
 import com.idega.data.SimpleQuerier;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.Image;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
@@ -1334,7 +1335,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			} else {
 				defaultStamp = null;
 			}
-			boolean useCourseOpen = getIWMainApplication().getSettings().getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false);
+			IWMainApplicationSettings settings = getIWMainApplication().getSettings();
+			boolean useCourseOpen = settings.getBoolean(CourseConstants.PROPERTY_MANUALLY_OPEN_COURSES, false);
 
 			IWTimestamp stamp = new IWTimestamp();
 			Map<Object, CourseDWR> map = new LinkedHashMap<Object, CourseDWR>();
@@ -1343,12 +1345,17 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					null);
 			if (courses != null) {
 				Iterator<Course> iter = courses.iterator();
+				IWTimestamp now = IWTimestamp.RightNow();
 				while (iter.hasNext()) {
 					Course course = iter.next();
 					IWTimestamp start = getRegistrationTimeoutForCourse(course);
 
 					if (useCourseOpen) {
-						if ((course.isOpenForRegistration() || isAdmin)	&& ((applicant != null && !isRegistered(applicant, course)) || applicant == null)) {
+						Timestamp endDate = course.getEndDate();
+						if ((course.isOpenForRegistration() || isAdmin)	&&
+							((applicant != null && !isRegistered(applicant, course)) || applicant == null) &&
+							(endDate != null && now.getTimestamp().before(endDate))
+						) {
 							CourseDWR cDWR = getCourseDWR(locale, course);
 							map.put(course.getPrimaryKey(), cDWR);
 						}

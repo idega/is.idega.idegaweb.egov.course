@@ -682,9 +682,9 @@ public class CourseParticipantsList extends CourseBlock {
 						}
 
 						if (file == null) {
+							getLogger().warning("Did not find certificate for " + user + " and course " + course);
 							cell.add(new Text("-"));
-						}
-						else {
+						} else {
 							Link printCertificate = new Link(getBundle().getImage("pdf-small.gif", getResourceBundle().getLocalizedString("print_certificate", "Print certificate")));
 							printCertificate.setTarget(Link.TARGET_BLANK_WINDOW);
 							printCertificate.setFile(file);
