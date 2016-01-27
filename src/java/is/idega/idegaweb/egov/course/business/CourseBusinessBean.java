@@ -3953,4 +3953,15 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return false;
 	}
 
+	@Override
+	public Collection<Course> findAllCoursesByGroupsIdsAndDates(Collection<Integer> groupsIds, Date periodFrom, Date periodTo) {
+		try {
+			return getCourseHome().findAllByGroupsIdsAndDates(groupsIds, periodFrom, periodTo);
+		} catch (FinderException e) {
+		}
+
+		return null;
+	}
+
+
 }

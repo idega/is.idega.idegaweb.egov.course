@@ -1,8 +1,6 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import is.idega.idegaweb.egov.course.data.rent.RentableItem;
-
 import java.sql.Timestamp;
 import java.util.Collection;
 
@@ -11,6 +9,9 @@ import com.idega.block.school.data.SchoolSeason;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDORemoveRelationshipException;
+import com.idega.user.data.Group;
+
+import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
 public interface Course extends IDOEntity {
 
@@ -103,6 +104,16 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCourseNumber
 	 */
 	public int getCourseNumber();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getGroupId
+	 */
+	public int getGroupId();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getGroup
+	 */
+	public Group getGroup();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#isOpenForRegistration
@@ -220,6 +231,16 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setHasPostCare
 	 */
 	public void setHasPostCare(boolean hasPostCare);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setGroup
+	 */
+	public void setGroup(Group group);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setGroupId
+	 */
+	public void setGroupId(int groupId);
 
 	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);

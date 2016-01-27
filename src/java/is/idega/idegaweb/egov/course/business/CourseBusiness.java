@@ -1,27 +1,6 @@
 package is.idega.idegaweb.egov.course.business;
 
 
-import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
-import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
-import is.idega.idegaweb.egov.course.data.ApplicationHolder;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseApplication;
-import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
-import is.idega.idegaweb.egov.course.data.CourseCategory;
-import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
-import is.idega.idegaweb.egov.course.data.CourseCertificate;
-import is.idega.idegaweb.egov.course.data.CourseCertificateType;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
-import is.idega.idegaweb.egov.course.data.CourseDiscount;
-import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
-import is.idega.idegaweb.egov.course.data.CourseHome;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CoursePriceHome;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.data.CourseTypeHome;
-import is.idega.idegaweb.egov.course.data.PriceHolder;
-
 import java.rmi.RemoteException;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -47,6 +26,27 @@ import com.idega.presentation.Image;
 import com.idega.user.data.Gender;
 import com.idega.user.data.User;
 import com.idega.util.IWTimestamp;
+
+import is.idega.idegaweb.egov.accounting.business.AccountingBusiness;
+import is.idega.idegaweb.egov.accounting.business.AccountingEntry;
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
+import is.idega.idegaweb.egov.course.data.CourseApplicationHome;
+import is.idega.idegaweb.egov.course.data.CourseCategory;
+import is.idega.idegaweb.egov.course.data.CourseCategoryHome;
+import is.idega.idegaweb.egov.course.data.CourseCertificate;
+import is.idega.idegaweb.egov.course.data.CourseCertificateType;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CourseChoiceHome;
+import is.idega.idegaweb.egov.course.data.CourseDiscount;
+import is.idega.idegaweb.egov.course.data.CourseDiscountHome;
+import is.idega.idegaweb.egov.course.data.CourseHome;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CoursePriceHome;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.data.CourseTypeHome;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
 
 public interface CourseBusiness extends IBOService, CaseBusiness,
 		AccountingBusiness {
@@ -824,5 +824,10 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	public List<User> getParentsForApplicant(CourseApplication application, User applicant);
 
 	public void doResetCourseDiscountInformationHolder(String uuid);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByGroupsIdsAndDates
+	 */
+	public Collection<Course> findAllCoursesByGroupsIdsAndDates(Collection<Integer> groupsIds, Date periodFrom, Date periodTo);
 
 }

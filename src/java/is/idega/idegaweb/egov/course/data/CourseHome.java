@@ -50,4 +50,6 @@ public interface CourseHome extends IDOHome {
 	public Collection findAllByTypes(Collection<String> typesIds) throws FinderException;
 
 	public Collection<Course> findAllByUser(String user) throws FinderException;
+
+	public java.util.Collection<Course> findAllByGroupsIdsAndDates(java.util.Collection<Integer> groupsIds, Date periodFrom, Date periodTo) throws javax.ejb.FinderException;
 }

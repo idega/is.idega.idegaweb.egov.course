@@ -158,4 +158,12 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
+
+	@Override
+	public java.util.Collection<Course> findAllByGroupsIdsAndDates(java.util.Collection<Integer> groupsIds, Date periodFrom, Date periodTo) throws javax.ejb.FinderException {
+		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByGroupsIdsAndDates(groupsIds, periodFrom, periodTo);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
 }

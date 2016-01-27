@@ -1,7 +1,5 @@
 package is.idega.idegaweb.egov.course.data;
 
-import is.idega.idegaweb.egov.course.data.rent.RentableItem;
-
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -21,6 +19,7 @@ import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
 import com.idega.data.IDOFinderException;
 import com.idega.data.IDOLookupException;
+import com.idega.data.IDOQuery;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.SimpleQuerier;
@@ -34,7 +33,11 @@ import com.idega.data.query.OR;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.user.data.Group;
+import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
+
+import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
 public class CourseBMPBean extends GenericEntity implements Course {
 
@@ -65,6 +68,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	private static final String COLUMN_OPEN_FOR_REGISTRATION = "OPEN_FOR_REGISTRATION",
 								COLUMN_COURSE_PRICES = "COURSE_PRICES",
 								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
+	protected final static String COLUMN_GROUP = "GROUP_ID";
 
 	@Override
 	public String getEntityName() {
@@ -94,6 +98,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
 		addManyToOneRelationship(COLUMN_PROVIDER, School.class);
+		addManyToOneRelationship(COLUMN_GROUP, Group.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
 		addManyToManyRelationShip(SchoolSeason.class, COLUMN_COURSE_SEASONS);
 
@@ -237,6 +242,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
+	public int getGroupId() {
+		return getIntColumnValue(COLUMN_GROUP);
+	}
+
+	@Override
+	public Group getGroup() {
+		return (Group) getColumnValue(COLUMN_GROUP);
+	}
+
+	@Override
 	public boolean hasPreAndPostCare() {
 		return hasPreCare() && hasPostCare();
 	}
@@ -340,6 +355,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public void setHasPostCare(boolean hasPostCare) {
 		setColumn(COLUMN_POST_CARE, hasPostCare);
+	}
+
+	@Override
+	public void setGroupId(int id) {
+		setColumn(COLUMN_GROUP, id);
+	}
+
+	@Override
+	public void setGroup(Group group) {
+		setColumn(COLUMN_GROUP, group);
 	}
 
 	// Finders
@@ -753,4 +778,39 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		store();
 	}
+
+	public Collection<Integer> ejbFindAllByGroupsIdsAndDates(Collection<Integer> groupsIds, java.util.Date periodFrom, java.util.Date periodTo) throws FinderException {
+		IDOQuery sql = idoQuery();
+		sql.appendSelectAllFrom(this);
+
+		sql.appendWhere();
+		sql.append(COLUMN_GROUP);
+		sql.appendInCollection(groupsIds);
+
+		if (periodFrom != null) {
+			IWTimestamp periodFromDate = new IWTimestamp(periodFrom);
+			periodFromDate.setHour(0);
+			periodFromDate.setMinute(0);
+			periodFromDate.setSecond(0);
+			periodFromDate.setMilliSecond(0);
+			sql.appendAnd();
+			sql.append(COLUMN_START_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append(periodFromDate.getDate());
+		}
+		if (periodTo != null) {
+			IWTimestamp periodToDate = new IWTimestamp(periodTo);
+			periodToDate.setHour(0);
+			periodToDate.setMinute(0);
+			periodToDate.setSecond(0);
+			periodToDate.setMilliSecond(0);
+			sql.appendAnd();
+			sql.append(COLUMN_END_DATE);
+			sql.appendLessThanOrEqualsSign();
+			sql.append(periodToDate.getDate());
+		}
+
+		return idoFindPKsByQuery(sql);
+	}
+
 }
