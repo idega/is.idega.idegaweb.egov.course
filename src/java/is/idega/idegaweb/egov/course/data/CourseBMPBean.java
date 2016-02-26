@@ -69,6 +69,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 								COLUMN_COURSE_PRICES = "COURSE_PRICES",
 								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
 	protected final static String COLUMN_GROUP = "GROUP_ID";
+	protected final static String COLUMN_COURSE_TEMPLATE = "TEMPLATE_ID";
 
 	@Override
 	public String getEntityName() {
@@ -95,6 +96,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_PRE_CARE, "Has pre care", Boolean.class);
 		addAttribute(COLUMN_POST_CARE, "Has post care", Boolean.class);
 
+		addManyToOneRelationship(COLUMN_COURSE_TEMPLATE, Course.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
 		addManyToOneRelationship(COLUMN_COURSE_PRICE, CoursePrice.class);
 		addManyToOneRelationship(COLUMN_PROVIDER, School.class);
@@ -256,6 +258,12 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return hasPreCare() && hasPostCare();
 	}
 
+	@Override
+	public Course getTemplate() {
+		return (Course) getColumnValue(COLUMN_COURSE_TEMPLATE);
+	}
+
+
 	// Setters
 	@Override
 	public void setName(String name) {
@@ -366,6 +374,18 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public void setGroup(Group group) {
 		setColumn(COLUMN_GROUP, group);
 	}
+
+	@Override
+	public void setTemplate(Course template) {
+		setColumn(COLUMN_COURSE_TEMPLATE, template);
+	}
+
+	@Override
+	public void setTemplateId(Integer templateId) {
+		setColumn(COLUMN_COURSE_TEMPLATE, templateId);
+	}
+
+
 
 	// Finders
 	public Collection<Integer> ejbFindAll() throws FinderException, IDORelationshipException {
@@ -779,7 +799,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		store();
 	}
 
-	public Collection<Integer> ejbFindAllByGroupsIdsAndDates(Collection<Integer> groupsIds, java.util.Date periodFrom, java.util.Date periodTo) throws FinderException {
+	public Collection<Integer> ejbFindAllByGroupsIdsAndDates(Collection<Integer> groupsIds, java.util.Date periodFrom, java.util.Date periodTo, boolean findTemplates) throws FinderException {
 		IDOQuery sql = idoQuery();
 		sql.appendSelectAllFrom(this);
 
@@ -808,6 +828,15 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			sql.append(COLUMN_END_DATE);
 			sql.appendLessThanOrEqualsSign();
 			sql.append(periodToDate.getDate());
+		}
+
+		//Templates or courses
+		sql.appendAnd();
+		sql.append(COLUMN_COURSE_TEMPLATE);
+		if (findTemplates) {
+			sql.appendIsNull();
+		} else {
+			sql.appendIsNotNull();
 		}
 
 		return idoFindPKsByQuery(sql);

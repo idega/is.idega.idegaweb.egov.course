@@ -116,6 +116,11 @@ public interface Course extends IDOEntity {
 	public Group getGroup();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getTemplate
+	 */
+	public Course getTemplate();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#isOpenForRegistration
 	 */
 	public boolean isOpenForRegistration();
@@ -242,7 +247,17 @@ public interface Course extends IDOEntity {
 	 */
 	public void setGroupId(int groupId);
 
-	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setTemplate
+	 */
+	public void setTemplate(Course template);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setTemplateId
+	 */
+	public void setTemplateId(Integer templateId);
+
+		public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);
 	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException;
 	public void removeRentableItem(RentableItem item) throws IDORemoveRelationshipException;
