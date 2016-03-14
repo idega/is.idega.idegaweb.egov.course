@@ -9,6 +9,8 @@ import java.util.logging.Level;
 
 import javax.ejb.FinderException;
 
+import org.apache.commons.lang.math.NumberUtils;
+import org.hsqldb.lib.StringUtil;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.idega.block.school.data.School;
@@ -34,6 +36,7 @@ import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.Group;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 
@@ -70,6 +73,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
 	protected final static String COLUMN_GROUP = "GROUP_ID";
 	protected final static String COLUMN_COURSE_TEMPLATE = "TEMPLATE_ID";
+	private static final String COLUMN_ALLOW_GIRO_PAYMENTS = "ALLOW_GIRO_PAYMENTS";
+	private static final String COLUMN_ALLOW_CC_PAYMENTS = "ALLOW_CC_PAYMENTS";
 
 	@Override
 	public String getEntityName() {
@@ -95,6 +100,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_OPEN_FOR_REGISTRATION, "Open for registration", Boolean.class);
 		addAttribute(COLUMN_PRE_CARE, "Has pre care", Boolean.class);
 		addAttribute(COLUMN_POST_CARE, "Has post care", Boolean.class);
+		addAttribute(COLUMN_ALLOW_GIRO_PAYMENTS, "Allow giro payments", Boolean.class);
+		addAttribute(COLUMN_ALLOW_CC_PAYMENTS, "Allow credit card payments", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TEMPLATE, Course.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
@@ -244,6 +251,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
+	public boolean allowGiroPayments() {
+		return getBooleanColumnValue(COLUMN_ALLOW_GIRO_PAYMENTS, false);
+	}
+
+	@Override
+	public boolean allowCCPayments() {
+		return getBooleanColumnValue(COLUMN_ALLOW_CC_PAYMENTS, false);
+	}
+
+	@Override
 	public int getGroupId() {
 		return getIntColumnValue(COLUMN_GROUP);
 	}
@@ -363,6 +380,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public void setHasPostCare(boolean hasPostCare) {
 		setColumn(COLUMN_POST_CARE, hasPostCare);
+	}
+
+	@Override
+	public void setAllowGiroPayments(boolean allowGiroPayments) {
+		setColumn(COLUMN_ALLOW_GIRO_PAYMENTS, allowGiroPayments);
+	}
+
+	@Override
+	public void setAllowCCPayments(boolean allowCCPayments) {
+		setColumn(COLUMN_ALLOW_CC_PAYMENTS, allowCCPayments);
 	}
 
 	@Override
@@ -841,5 +868,190 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		return idoFindPKsByQuery(sql);
 	}
+
+
+	public Collection<Integer> ejbFindAllByCriteria(Collection<Integer> groupsIds,
+													Collection<Integer> templateIds,
+													java.util.Date periodFrom,
+													java.util.Date periodTo,
+													Integer birthYear,
+													String sortBy,
+													String nameOrNumber,
+													Boolean openForRegistration,
+													boolean findTemplates) throws FinderException {
+		IDOQuery sql = idoQuery();
+		sql.appendSelectAllFrom(this);
+
+		sql.append(" selected_entity ");
+
+		//Join course template
+		sql.append(CoreConstants.SPACE);
+		sql.appendJoin();
+		sql.append(ENTITY_NAME);
+		sql.append(" template ");
+		sql.appendOnEquals("selected_entity." + COLUMN_COURSE_TEMPLATE, "template." + ENTITY_NAME + "_ID ");
+
+		sql.appendWhere();
+		sql.append(1);
+		sql.appendEqualSign();
+		sql.append(1);
+
+		if (!findTemplates) {
+			//End date is later than today's date
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_END_DATE);
+			sql.appendIsNotNull();
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_END_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append((new IWTimestamp()).getDate());
+
+			//Registration end date is later than today's date
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_REGISTRATION_END);
+			sql.appendIsNotNull();
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_REGISTRATION_END);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append((new IWTimestamp()).getDate());
+		}
+
+		//Group ids
+		if (groupsIds != null && !groupsIds.isEmpty()) {
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_GROUP);
+			sql.appendInCollection(groupsIds);
+		}
+
+		//Template ids
+		if (templateIds != null && !templateIds.isEmpty()) {
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_COURSE_TEMPLATE);
+			sql.appendInCollection(templateIds);
+		}
+
+		//Birth year (ONLY FOR TEMPLATES)
+		if (birthYear != null && birthYear != 0) {
+			sql.appendAnd();
+			sql.append(birthYear);
+			sql.appendLessThanOrEqualsSign();
+			sql.append("template.");
+			sql.append(COLUMN_BIRTHYEAR_TO);
+			sql.appendAnd();
+			sql.append(birthYear);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append("template.");
+			sql.append(COLUMN_BIRTHYEAR_FROM);
+		}
+
+		//Open for registration (ONLY FOR TEMPLATES)
+		if (openForRegistration != null && openForRegistration) {
+			sql.appendAnd();
+			sql.append("template.");
+			sql.appendEquals(COLUMN_OPEN_FOR_REGISTRATION, openForRegistration);
+		}
+
+		//Period from
+		if (periodFrom != null) {
+			IWTimestamp periodFromDate = new IWTimestamp(periodFrom);
+			periodFromDate.setHour(0);
+			periodFromDate.setMinute(0);
+			periodFromDate.setSecond(0);
+			periodFromDate.setMilliSecond(0);
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_START_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append(periodFromDate.getDate());
+		}
+
+		//Period to
+		if (periodTo != null) {
+			IWTimestamp periodToDate = new IWTimestamp(periodTo);
+			periodToDate.setHour(0);
+			periodToDate.setMinute(0);
+			periodToDate.setSecond(0);
+			periodToDate.setMilliSecond(0);
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_END_DATE);
+			sql.appendLessThanOrEqualsSign();
+			sql.append(periodToDate.getDate());
+		}
+
+		//Name or number equals to the given one
+		if (!StringUtil.isEmpty(nameOrNumber)) {
+			sql.appendAnd();
+			sql.appendLeftParenthesis();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_NAME);
+			sql.appendLike();
+			sql.append("'%" + nameOrNumber + "%'");
+			try {
+				if (NumberUtils.isNumber(nameOrNumber)) {
+					sql.appendOr();
+					sql.append("selected_entity.");
+					sql.append(COLUMN_COURSE_NUMBER);
+					sql.appendEqualSign();
+					sql.append(nameOrNumber);
+				}
+			} catch (Exception e) {
+				getLogger().log(Level.WARNING, "Could not check, if search string is number or not: ", e);
+			}
+			sql.appendRightParenthesis();
+		}
+
+		//Templates or courses
+		sql.appendAnd();
+		sql.append("selected_entity.");
+		sql.append(COLUMN_COURSE_TEMPLATE);
+		if (findTemplates) {
+			sql.appendIsNull();
+		} else {
+			sql.appendIsNotNull();
+		}
+
+		//Sort by
+		if (!StringUtil.isEmpty(sortBy)) {
+			if (sortBy.equalsIgnoreCase("name")) {
+				sql.appendOrderBy("selected_entity." + COLUMN_NAME);
+			}
+		}
+
+		return idoFindPKsByQuery(sql);
+	}
+
+
+	public Collection<Integer> ejbFindAllByTemplateIds(Collection<Integer> templateIds) throws FinderException {
+		IDOQuery sql = idoQuery();
+		sql.appendSelectAllFrom(this);
+
+		sql.append(" selected_entity ");
+
+		sql.appendWhere();
+		sql.append(1);
+		sql.appendEqualSign();
+		sql.append(1);
+
+		//Template ids
+		if (templateIds != null && !templateIds.isEmpty()) {
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_COURSE_TEMPLATE);
+			sql.appendInCollection(templateIds);
+		}
+
+		//Sort by
+		sql.appendOrderBy("selected_entity." + COLUMN_NAME);
+
+		return idoFindPKsByQuery(sql);
+	}
+
 
 }

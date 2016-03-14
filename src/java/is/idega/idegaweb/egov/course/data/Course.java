@@ -141,6 +141,16 @@ public interface Course extends IDOEntity {
 	public boolean hasPreAndPostCare();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#allowGiroPayments
+	 */
+	public boolean allowGiroPayments();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#allowCCPayments
+	 */
+	public boolean allowCCPayments();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setName
 	 */
 	public void setName(String name);
@@ -256,6 +266,16 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setTemplateId
 	 */
 	public void setTemplateId(Integer templateId);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setTemplateId
+	 */
+	public void setAllowGiroPayments(boolean allowGiroPayments);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setTemplateId
+	 */
+	public void setAllowCCPayments(boolean allowCCPayments);
 
 		public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);

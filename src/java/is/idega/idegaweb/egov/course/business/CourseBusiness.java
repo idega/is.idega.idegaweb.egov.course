@@ -370,13 +370,13 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
 	 */
-	public Collection<CourseChoice> getCourseChoices(Object coursePK, boolean waitingList)
+	public Collection<CourseChoice> getCourseChoices(Object coursePK, Boolean waitingList)
 			throws RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCourseChoices
 	 */
-	public Collection<CourseChoice> getCourseChoices(Course course, boolean waitingList)
+	public Collection<CourseChoice> getCourseChoices(Course course, Boolean waitingList)
 			throws RemoteException;
 
 	/**
@@ -830,5 +830,40 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 */
 	public Collection<Course> findAllCoursesByGroupsIdsAndDates(Collection<Integer> groupsIds, Date periodFrom, Date periodTo, boolean findTemplates);
 
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByCriteria
+	 */
+	public Collection<Course> findAllCoursesByCriteria(Collection<Integer> groupsIds,
+														Collection<Integer> templateIds,
+														java.util.Date periodFrom,
+														java.util.Date periodTo,
+														Integer birthYear,
+														String sortBy,
+														String nameOrNumber,
+														Boolean openForRegistration,
+														boolean findTemplates);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#makePayment
+	 */
+	public String makePayment(String nameOnCard, String cardNumber,
+			String monthExpires, String yearExpires, String ccVerifyNumber,
+			double amount, String currency, String referenceNumber)
+			throws CreditCardAuthorizationException, RemoteException;
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#createApplication
+	 */
+	public CourseApplication createApplication(Course course, User user, String prefix, User performer, Locale locale);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#createCourseChoice
+	 */
+	public CourseChoice createCourseChoice(Course course, User user);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByTemplateIds
+	 */
+	public Collection<Course> findAllCoursesByTemplateIds(Collection<Integer> templateIds);
 
 }

@@ -166,4 +166,31 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
+
+
+	@Override
+	public java.util.Collection<Course> findAllByCriteria(Collection<Integer> groupsIds,
+															Collection<Integer> templateIds,
+															java.util.Date periodFrom,
+															java.util.Date periodTo,
+															Integer birthYear,
+															String sortBy,
+															String nameOrNumber,
+															Boolean openForRegistration,
+															boolean findTemplates) throws javax.ejb.FinderException {
+		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByCriteria(groupsIds, templateIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, findTemplates);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+	@Override
+	public java.util.Collection<Course> findAllByTemplateIds(Collection<Integer> templateIds) throws javax.ejb.FinderException {
+		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByTemplateIds(templateIds);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+
 }

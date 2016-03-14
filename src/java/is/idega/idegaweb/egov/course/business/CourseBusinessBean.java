@@ -559,6 +559,28 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 	}
 
+
+	@Override
+	public String makePayment(String nameOnCard, String cardNumber,
+			String monthExpires, String yearExpires, String ccVerifyNumber,
+			double amount, String currency, String referenceNumber)
+			throws CreditCardAuthorizationException {
+		try {
+			CreditCardClient client = getCreditCardBusiness()
+					.getCreditCardClient(getCreditCardMerchant());
+			return client.doSale(nameOnCard, cardNumber,
+					monthExpires, yearExpires, ccVerifyNumber, amount,
+					currency, referenceNumber);
+		} catch (CreditCardAuthorizationException ccae) {
+			throw ccae;
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			throw new CreditCardAuthorizationException(
+					"Online payment failed. Unknown error.");
+		}
+	}
+
+
 	@Override
 	public String refundPayment(CourseApplication application,
 			String cardNumber, String monthExpires, String yearExpires,
@@ -603,11 +625,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	private CreditCardMerchant getCreditCardMerchant() throws FinderException {
-		String merchantPK = getIWApplicationContext().getApplicationSettings()
-				.getProperty(CourseConstants.PROPERTY_MERCHANT_PK);
-		String merchantType = getIWApplicationContext()
-				.getApplicationSettings().getProperty(
-						CourseConstants.PROPERTY_MERCHANT_TYPE);
+		String merchantPK = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_PK, "1");
+		String merchantType = getIWApplicationContext().getApplicationSettings().getProperty(CourseConstants.PROPERTY_MERCHANT_TYPE, CreditCardMerchant.MERCHANT_TYPE_DUMMY);
 		if (merchantPK != null && merchantType != null) {
 			try {
 				return getCreditCardBusiness().getCreditCardMerchant(
@@ -1571,7 +1590,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Collection getCourseChoices(Object coursePK, boolean waitingList) {
+	public Collection getCourseChoices(Object coursePK, Boolean waitingList) {
 		Course course = getCourse(coursePK);
 		if (course != null) {
 			return getCourseChoices(course, waitingList);
@@ -1581,7 +1600,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Collection getCourseChoices(Course course, boolean waitingList) {
+	public Collection getCourseChoices(Course course, Boolean waitingList) {
 		try {
 			return getCourseChoiceHome().findAllByCourse(course, waitingList);
 		} catch (FinderException fe) {
@@ -3963,5 +3982,78 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return null;
 	}
 
+	@Override
+	public Collection<Course> findAllCoursesByCriteria(Collection<Integer> groupsIds,
+														Collection<Integer> templateIds,
+														java.util.Date periodFrom,
+														java.util.Date periodTo,
+														Integer birthYear,
+														String sortBy,
+														String nameOrNumber,
+														Boolean openForRegistration,
+														boolean findTemplates) {
+		try {
+			return getCourseHome().findAllByCriteria(groupsIds, templateIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, findTemplates);
+		} catch (FinderException e) {
+		}
+
+		return null;
+	}
+
+	@Override
+	public CourseApplication createApplication(Course course, User user, String prefix, User performer, Locale locale) {
+		try {
+			CourseApplication application = getCourseApplicationHome().create();
+			if (performer == null) {
+				try {
+					performer = getIWApplicationContext().getIWMainApplication().getAccessController().getAdministratorUserLegacy();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			application.setPrefix(prefix);
+			application.setOwner(performer);
+			application.store();
+
+			//changeCaseStatus(application, getCaseStatusOpen(), performer);
+
+			CourseChoice choice = getCourseChoiceHome().create();
+			choice.setApplication(application);
+			choice.setCourse(course);
+			choice.setUser(user);
+			choice.store();
+
+			return application;
+		} catch (CreateException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public CourseChoice createCourseChoice(Course course, User user) {
+		try {
+			CourseChoice choice = getCourseChoiceHome().create();
+			//choice.setApplication(null);
+			choice.setCourse(course);
+			choice.setUser(user);
+			choice.store();
+
+			return choice;
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Could not create the course choice: " + e.getLocalizedMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public Collection<Course> findAllCoursesByTemplateIds(Collection<Integer> templateIds) {
+		try {
+			return getCourseHome().findAllByTemplateIds(templateIds);
+		} catch (FinderException e) {
+		}
+
+		return null;
+	}
 
 }
