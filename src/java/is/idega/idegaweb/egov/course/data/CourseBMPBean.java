@@ -73,8 +73,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
 	protected final static String COLUMN_GROUP = "GROUP_ID";
 	protected final static String COLUMN_COURSE_TEMPLATE = "TEMPLATE_ID";
-	private static final String COLUMN_ALLOW_GIRO_PAYMENTS = "ALLOW_GIRO_PAYMENTS";
-	private static final String COLUMN_ALLOW_CC_PAYMENTS = "ALLOW_CC_PAYMENTS";
 
 	@Override
 	public String getEntityName() {
@@ -100,8 +98,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_OPEN_FOR_REGISTRATION, "Open for registration", Boolean.class);
 		addAttribute(COLUMN_PRE_CARE, "Has pre care", Boolean.class);
 		addAttribute(COLUMN_POST_CARE, "Has post care", Boolean.class);
-		addAttribute(COLUMN_ALLOW_GIRO_PAYMENTS, "Allow giro payments", Boolean.class);
-		addAttribute(COLUMN_ALLOW_CC_PAYMENTS, "Allow credit card payments", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TEMPLATE, Course.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
@@ -251,16 +247,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	public boolean allowGiroPayments() {
-		return getBooleanColumnValue(COLUMN_ALLOW_GIRO_PAYMENTS, false);
-	}
-
-	@Override
-	public boolean allowCCPayments() {
-		return getBooleanColumnValue(COLUMN_ALLOW_CC_PAYMENTS, false);
-	}
-
-	@Override
 	public int getGroupId() {
 		return getIntColumnValue(COLUMN_GROUP);
 	}
@@ -380,16 +366,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public void setHasPostCare(boolean hasPostCare) {
 		setColumn(COLUMN_POST_CARE, hasPostCare);
-	}
-
-	@Override
-	public void setAllowGiroPayments(boolean allowGiroPayments) {
-		setColumn(COLUMN_ALLOW_GIRO_PAYMENTS, allowGiroPayments);
-	}
-
-	@Override
-	public void setAllowCCPayments(boolean allowCCPayments) {
-		setColumn(COLUMN_ALLOW_CC_PAYMENTS, allowCCPayments);
 	}
 
 	@Override
