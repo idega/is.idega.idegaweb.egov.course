@@ -74,6 +74,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	protected final static String COLUMN_GROUP = "GROUP_ID";
 	protected final static String COLUMN_COURSE_TEMPLATE = "TEMPLATE_ID";
 
+	private static final String COLUMN_ALLOW_GIRO_PAYMENTS = "ALLOW_GIRO_PAYMENTS";
+	private static final String COLUMN_ALLOW_CC_PAYMENTS = "ALLOW_CC_PAYMENTS";
+
 	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -98,6 +101,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_OPEN_FOR_REGISTRATION, "Open for registration", Boolean.class);
 		addAttribute(COLUMN_PRE_CARE, "Has pre care", Boolean.class);
 		addAttribute(COLUMN_POST_CARE, "Has post care", Boolean.class);
+
+		addAttribute(COLUMN_ALLOW_GIRO_PAYMENTS, "Allow giro payments", Boolean.class);
+		addAttribute(COLUMN_ALLOW_CC_PAYMENTS, "Allow credit card payments", Boolean.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TEMPLATE, Course.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
@@ -1029,5 +1035,24 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		return idoFindPKsByQuery(sql);
 	}
 
+ 	@Override
+	public boolean allowGiroPayments() {
+		return getBooleanColumnValue(COLUMN_ALLOW_GIRO_PAYMENTS, false);
+	}
+
+	@Override
+	public boolean allowCCPayments() {
+		return getBooleanColumnValue(COLUMN_ALLOW_CC_PAYMENTS, false);
+	}
+
+	@Override
+	public void setAllowGiroPayments(boolean allowGiroPayments) {
+		setColumn(COLUMN_ALLOW_GIRO_PAYMENTS, allowGiroPayments);
+	}
+
+	@Override
+	public void setAllowCCPayments(boolean allowCCPayments) {
+		setColumn(COLUMN_ALLOW_CC_PAYMENTS, allowCCPayments);
+	}
 
 }
