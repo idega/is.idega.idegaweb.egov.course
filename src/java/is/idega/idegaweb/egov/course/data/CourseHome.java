@@ -65,5 +65,7 @@ public interface CourseHome extends IDOHome {
 
 	public java.util.Collection<Course> findAllByTemplateIds(Collection<Integer> templateIds) throws javax.ejb.FinderException;
 
+	public java.util.Collection<Course> findAllWithoutTemplates() throws javax.ejb.FinderException;
+
 
 }

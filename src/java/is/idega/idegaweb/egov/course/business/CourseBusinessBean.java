@@ -4056,4 +4056,14 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		return null;
 	}
 
+	@Override
+	public Collection<Course> getAllCoursesWithoutTemplates() {
+		try {
+			return getCourseHome().findAllWithoutTemplates();
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Could not find any course: " + e.getLocalizedMessage());
+		}
+		return new ArrayList();
+	}
+
 }

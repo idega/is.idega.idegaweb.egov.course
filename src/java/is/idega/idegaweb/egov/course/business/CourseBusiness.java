@@ -866,4 +866,8 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 */
 	public Collection<Course> findAllCoursesByTemplateIds(Collection<Integer> templateIds);
 
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByTemplateIds
+	 */
+	public Collection<Course> getAllCoursesWithoutTemplates();
 }

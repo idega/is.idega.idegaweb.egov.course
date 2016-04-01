@@ -193,4 +193,13 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	}
 
 
+	@Override
+	public java.util.Collection<Course> findAllWithoutTemplates() throws javax.ejb.FinderException {
+		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllWithoutTemplates();
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+
 }

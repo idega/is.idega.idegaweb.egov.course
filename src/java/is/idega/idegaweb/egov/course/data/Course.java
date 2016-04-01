@@ -258,10 +258,6 @@ public interface Course extends IDOEntity {
 	 */
 	public void setTemplateId(Integer templateId);
 
-	public boolean allowGiroPayments();
-	public boolean allowCCPayments();
-	public void setAllowGiroPayments(boolean allowGiroPayments);
-	public void setAllowCCPayments(boolean allowCCPayments);
 
 		public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);
