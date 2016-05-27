@@ -681,6 +681,13 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	public void storeCourseType(Object pk, String name, String description,
 			String localizationKey, Object schoolTypePK, String accountingKey, boolean disabled)
 			throws FinderException, CreateException {
+		storeCourseType(pk, name, description, localizationKey, schoolTypePK, accountingKey, disabled, null);
+	}
+
+	@Override
+	public void storeCourseType(Object pk, String name, String description,
+			String localizationKey, Object schoolTypePK, String accountingKey, boolean disabled, String registrationMethod)
+			throws FinderException, CreateException {
 		CourseType type = null;
 		if (pk == null) {
 			type = getCourseTypeHome().create();
@@ -702,11 +709,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		}
 
 		type.setDisabled(disabled);
-		type.setAccountingKey(accountingKey);
+
+		if (!StringUtil.isEmpty(accountingKey)) {
+			type.setAccountingKey(accountingKey);
+		}
 
 		if (schoolTypePK != null) {
 			CourseCategory courseCategory = getCourseCategory(schoolTypePK);
 			type.setCourseCategory(courseCategory);
+		}
+
+		if (!StringUtil.isEmpty(registrationMethod)) {
+			type.setRegistrationMethod(registrationMethod);
 		}
 
 		type.store();
@@ -766,6 +780,18 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			String accountingKey, int birthYearFrom, int birthYearTo,
 			int maxPer, float price, float cost, boolean openForRegistration, IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare)
 			throws FinderException, CreateException {
+		return createCourse(pk, courseNumber, name, user, courseTypePK, providerPK, coursePricePK, startDate, endDate, accountingKey, birthYearFrom, birthYearTo, maxPer, price, cost, openForRegistration, registrationEnd, hasPreCare, hasPostCare, null);
+	}
+
+	@Override
+	public Course createCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration,
+			IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare,
+			IWTimestamp registrationStart)
+			throws FinderException, CreateException {
 		Course course = null;
 		if (pk != null) {
 			course = getCourseHome().findByPrimaryKey(
@@ -810,6 +836,10 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 			course.setEndDate(endDate.getTimestamp());
 		}
 
+		if (registrationStart != null) {
+			course.setRegistrationStart(registrationStart.getTimestamp());
+		}
+
 		if (registrationEnd != null) {
 			course.setRegistrationEnd(registrationEnd.getTimestamp());
 		}
@@ -839,6 +869,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 		course.setOpenForRegistration(openForRegistration);
 		course.setHasPostCare(hasPostCare);
 		course.setHasPreCare(hasPreCare);
+
 
 		course.store();
 
@@ -3973,9 +4004,9 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 	}
 
 	@Override
-	public Collection<Course> findAllCoursesByGroupsIdsAndDates(Collection<Integer> groupsIds, Date periodFrom, Date periodTo, boolean findTemplates) {
+	public Collection<Course> findAllCoursesByGroupsIdsAndDates(Collection<Integer> groupsIds, Date periodFrom, Date periodTo) {
 		try {
-			return getCourseHome().findAllByGroupsIdsAndDates(groupsIds, periodFrom, periodTo, findTemplates);
+			return getCourseHome().findAllByGroupsIdsAndDates(groupsIds, periodFrom, periodTo);
 		} catch (FinderException e) {
 		}
 
@@ -3994,6 +4025,23 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 														boolean findTemplates) {
 		try {
 			return getCourseHome().findAllByCriteria(groupsIds, templateIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, findTemplates);
+		} catch (FinderException e) {
+		}
+
+		return null;
+	}
+
+	@Override
+	public Collection<Course> findAllCoursesByCriteria(Collection<Integer> groupsIds,
+														java.util.Date periodFrom,
+														java.util.Date periodTo,
+														Integer birthYear,
+														String sortBy,
+														String nameOrNumber,
+														Boolean openForRegistration,
+														Boolean birthYearShouldBeNull) {
+		try {
+			return getCourseHome().findAllByCriteria(groupsIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, birthYearShouldBeNull);
 		} catch (FinderException e) {
 		}
 

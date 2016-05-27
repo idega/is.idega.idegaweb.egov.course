@@ -10,6 +10,7 @@ import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOEntity;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.user.data.Group;
+import com.idega.user.data.User;
 
 import is.idega.idegaweb.egov.course.data.rent.RentableItem;
 
@@ -69,6 +70,11 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getEndDate
 	 */
 	public Timestamp getEndDate();
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getRegistrationStart
+	 */
+	public Timestamp getRegistrationStart();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getRegistrationEnd
@@ -199,6 +205,11 @@ public interface Course extends IDOEntity {
 	public void setEndDate(Timestamp endDate);
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setRegistrationStart
+	 */
+	public void setRegistrationStart(Timestamp registrationStart);
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setRegistrationEnd
 	 */
 	public void setRegistrationEnd(Timestamp registrationEnd);
@@ -258,8 +269,12 @@ public interface Course extends IDOEntity {
 	 */
 	public void setTemplateId(Integer templateId);
 
+	public void addUser(User user) throws IDOAddRelationshipException;
+	public Collection<User> getAllUsers();
+	public void removeUser(User user) throws IDORemoveRelationshipException;
+	public void removeAllUsers() throws IDORemoveRelationshipException;
 
-		public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
+	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);
 	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException;
 	public void removeRentableItem(RentableItem item) throws IDORemoveRelationshipException;

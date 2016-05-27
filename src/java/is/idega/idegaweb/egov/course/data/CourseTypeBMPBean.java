@@ -25,6 +25,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 	private static final String COLUMN_ABBREVIATION = "ABBREVIATION";
 	private static final String COLUMN_SHOW_ABBREVIATION = "SHOW_ABBREVIATION";
 	private static final String COLUMN_DISABLED = "IS_DISABLED";
+	private static final String COLUMN_REGISTRATION_METHOD = "REGISTRATION_METHOD";
 
 	@Override
 	public String getEntityName() {
@@ -42,6 +43,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		addAttribute(COLUMN_ABBREVIATION, "Abbreviation", String.class, 1);
 		addAttribute(COLUMN_SHOW_ABBREVIATION, "Show abbreviation", Boolean.class);
 		addAttribute(COLUMN_DISABLED, "Is disabled", Boolean.class);
+		addAttribute(COLUMN_REGISTRATION_METHOD, "Registration method", String.class, 50);
 
 		addManyToOneRelationship(COLUMN_SCHOOL_TYPE, CourseCategory.class);
 		getEntityDefinition().setBeanCachingActiveByDefault(true);
@@ -53,36 +55,49 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		return getStringColumnValue(COLUMN_NAME);
 	}
 
+	@Override
 	public String getDescription() {
 		return getStringColumnValue(COLUMN_DESCRIPTION);
 	}
 
+	@Override
 	public String getLocalizationKey() {
 		return getStringColumnValue(COLUMN_LOCALIZATION_KEY);
 	}
 
+	@Override
 	public CourseCategory getCourseCategory() {
 		return (CourseCategory) getColumnValue(COLUMN_SCHOOL_TYPE);
 	}
 
+	@Override
 	public String getAccountingKey() {
 		return getStringColumnValue(COLUMN_ACCOUNTING_KEY);
 	}
 
+	@Override
 	public String getAbbreviation() {
 		return getStringColumnValue(COLUMN_ABBREVIATION);
 	}
 
+	@Override
 	public int getOrder() {
 		return getIntColumnValue(COLUMN_ORDER);
 	}
 
+	@Override
 	public boolean showAbbreviation() {
 		return getBooleanColumnValue(COLUMN_SHOW_ABBREVIATION, false);
 	}
 
+	@Override
 	public boolean isDisabled() {
 		return getBooleanColumnValue(COLUMN_DISABLED, false);
+	}
+
+	@Override
+	public String getRegistrationMethod() {
+		return getStringColumnValue(COLUMN_REGISTRATION_METHOD);
 	}
 
 	// Setters
@@ -91,36 +106,49 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 		setColumn(COLUMN_NAME, name);
 	}
 
+	@Override
 	public void setDescription(String description) {
 		setColumn(COLUMN_DESCRIPTION, description);
 	}
 
+	@Override
 	public void setLocalizationKey(String localizationKey) {
 		setColumn(COLUMN_LOCALIZATION_KEY, localizationKey);
 	}
 
+	@Override
 	public void setCourseCategory(CourseCategory category) {
 		setColumn(COLUMN_SCHOOL_TYPE, category);
 	}
 
+	@Override
 	public void setAccountingKey(String key) {
 		setColumn(COLUMN_ACCOUNTING_KEY, key);
 	}
 
+	@Override
 	public void setAbbreviation(String abbreviation) {
 		setColumn(COLUMN_ABBREVIATION, abbreviation);
 	}
 
+	@Override
 	public void setOrder(int order) {
 		setColumn(COLUMN_ORDER, order);
 	}
 
+	@Override
 	public void setShowAbbreviation(boolean showAbbreviation) {
 		setColumn(COLUMN_SHOW_ABBREVIATION, showAbbreviation);
 	}
-	
+
+	@Override
 	public void setDisabled(boolean disabled) {
 		setColumn(COLUMN_DISABLED, disabled);
+	}
+
+	@Override
+	public void setRegistrationMethod(String registrationMethod) {
+		setColumn(COLUMN_REGISTRATION_METHOD, registrationMethod);
 	}
 
 	// Finders
@@ -160,7 +188,7 @@ public class CourseTypeBMPBean extends GenericEntity implements CourseType {
 
 		return this.idoFindOnePKByQuery(query);
 	}
-	
+
 	public Object ejbFindByName(String name) throws FinderException {
 		Table table = new Table(this);
 

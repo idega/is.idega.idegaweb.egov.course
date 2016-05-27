@@ -40,6 +40,8 @@ public interface CourseType extends IDOEntity {
 	 */
 	public int getOrder();
 
+	public String getRegistrationMethod();
+
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#showAbbreviation
 	 */
@@ -94,4 +96,7 @@ public interface CourseType extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseTypeBMPBean#setDisabled
 	 */
 	public void setDisabled(boolean disabled);
+
+	public void setRegistrationMethod(String registrationMethod);
+
 }

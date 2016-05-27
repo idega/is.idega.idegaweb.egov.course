@@ -36,6 +36,7 @@ import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.user.data.Group;
+import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
@@ -64,6 +65,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	private static final String COLUMN_START_DATE = "START_DATE";
 	private static final String COLUMN_END_DATE = "END_DATE";
+	private static final String COLUMN_REGISTRATION_START = "REGISTRATION_START";
 	private static final String COLUMN_REGISTRATION_END = "REGISTRATION_END";
 	private static final String COLUMN_BIRTHYEAR_FROM = "BIRTHYEAR_FROM";
 	private static final String COLUMN_BIRTHYEAR_TO = "BIRTHYEAR_TO";
@@ -73,6 +75,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
 	protected final static String COLUMN_GROUP = "GROUP_ID";
 	protected final static String COLUMN_COURSE_TEMPLATE = "TEMPLATE_ID";
+	private static final String COLUMN_USERS = "USERS";
+
 	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
@@ -87,6 +91,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_DESCRIPTION, "Description", String.class);
 		addAttribute(COLUMN_START_DATE, "Start date", Timestamp.class);
 		addAttribute(COLUMN_END_DATE, "End date", Timestamp.class);
+		addAttribute(COLUMN_REGISTRATION_START, "Registration start", Timestamp.class);
 		addAttribute(COLUMN_REGISTRATION_END, "Registration end", Timestamp.class);
 		addAttribute(COLUMN_ACCOUNTING_KEY, "Accounting key", String.class, 30);
 		addAttribute(COLUMN_BIRTHYEAR_FROM, "Birthyear from", Integer.class);
@@ -105,6 +110,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addManyToOneRelationship(COLUMN_GROUP, Group.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
 		addManyToManyRelationShip(SchoolSeason.class, COLUMN_COURSE_SEASONS);
+		addManyToManyRelationShip(User.class, COLUMN_USERS);
 
 		Map<String, ? extends RentableItem> entities = null;
 		try {
@@ -175,6 +181,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public Timestamp getEndDate() {
 		return getTimestampColumnValue(COLUMN_END_DATE);
+	}
+
+	@Override
+	public Timestamp getRegistrationStart() {
+		return getTimestampColumnValue(COLUMN_REGISTRATION_START);
 	}
 
 	@Override
@@ -330,6 +341,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public void setRegistrationEnd(Timestamp registrationEnd) {
 		setColumn(COLUMN_REGISTRATION_END, registrationEnd);
+	}
+
+	@Override
+	public void setRegistrationStart(Timestamp registrationStart) {
+		setColumn(COLUMN_REGISTRATION_START, registrationStart);
 	}
 
 	@Override
@@ -736,14 +752,14 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	public void addPrice(CoursePrice price) throws IDOAddRelationshipException {
-		this.idoAddTo(price);
+	public void addUser(User user) throws IDOAddRelationshipException {
+		this.idoAddTo(user);
 	}
 
 	@Override
-	public Collection<CoursePrice> getAllPrices() {
+	public Collection<User> getAllUsers() {
 		try {
-			return super.idoGetRelatedEntities(CoursePrice.class);
+			return super.idoGetRelatedEntities(User.class);
 		} catch (IDORelationshipException e) {
 			e.printStackTrace();
 		}
@@ -751,18 +767,18 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	}
 
 	@Override
-	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
-		this.idoRemoveFrom(price);
+	public void removeUser(User user) throws IDORemoveRelationshipException {
+		this.idoRemoveFrom(user);
 	}
 
 	@Override
-	public void removeAllPrices() throws IDORemoveRelationshipException {
-		Collection<CoursePrice> prices = getAllPrices();
-		if (ListUtil.isEmpty(prices))
+	public void removeAllUsers() throws IDORemoveRelationshipException {
+		Collection<User> users = getAllUsers();
+		if (ListUtil.isEmpty(users))
 			return;
 
-		for (CoursePrice price: prices) {
-			removePrice(price);
+		for (User user : users) {
+			removeUser(user);
 		}
 
 		store();
@@ -801,7 +817,40 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		store();
 	}
 
-	public Collection<Integer> ejbFindAllByGroupsIdsAndDates(Collection<Integer> groupsIds, java.util.Date periodFrom, java.util.Date periodTo, boolean findTemplates) throws FinderException {
+	@Override
+	public void addPrice(CoursePrice price) throws IDOAddRelationshipException {
+		this.idoAddTo(price);
+	}
+
+	@Override
+	public Collection<CoursePrice> getAllPrices() {
+		try {
+			return super.idoGetRelatedEntities(CoursePrice.class);
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void removePrice(CoursePrice price) throws IDORemoveRelationshipException {
+		this.idoRemoveFrom(price);
+	}
+
+	@Override
+	public void removeAllPrices() throws IDORemoveRelationshipException {
+		Collection<CoursePrice> prices = getAllPrices();
+		if (ListUtil.isEmpty(prices))
+			return;
+
+		for (CoursePrice price: prices) {
+			removePrice(price);
+		}
+
+		store();
+	}
+
+	public Collection<Integer> ejbFindAllByGroupsIdsAndDates(Collection<Integer> groupsIds, java.util.Date periodFrom, java.util.Date periodTo) throws FinderException {
 		IDOQuery sql = idoQuery();
 		sql.appendSelectAllFrom(this);
 
@@ -809,6 +858,177 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		sql.append(COLUMN_GROUP);
 		sql.appendInCollection(groupsIds);
 
+		if (periodFrom != null && periodTo != null) {
+			IWTimestamp periodFromDate = new IWTimestamp(periodFrom);
+			periodFromDate.setHour(0);
+			periodFromDate.setMinute(0);
+			periodFromDate.setSecond(0);
+			periodFromDate.setMilliSecond(0);
+			IWTimestamp periodToDate = new IWTimestamp(periodTo);
+			periodToDate.setHour(0);
+			periodToDate.setMinute(0);
+			periodToDate.setSecond(0);
+			periodToDate.setMilliSecond(0);
+			sql.appendAnd();
+			sql.append("(");
+			//1 choice
+			sql.append("(");
+			sql.append(COLUMN_START_DATE);
+			sql.appendLessThanOrEqualsSign();
+			sql.append(periodFromDate.getDate());
+			sql.appendAnd();
+			sql.append(COLUMN_END_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append(periodFromDate.getDate());
+			sql.append(")");
+			sql.appendOr();
+			//2 choice
+			sql.append("(");
+			sql.append(COLUMN_START_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append(periodFromDate.getDate());
+			sql.appendAnd();
+			sql.append(COLUMN_END_DATE);
+			sql.appendLessThanOrEqualsSign();
+			sql.append(periodToDate.getDate());
+			sql.append(")");
+			sql.appendOr();
+			//3 choice
+			sql.append("(");
+			sql.append(COLUMN_START_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append(periodFromDate.getDate());
+			sql.appendAnd();
+			sql.append(COLUMN_START_DATE);
+			sql.appendLessThanOrEqualsSign();
+			sql.append(periodToDate.getDate());
+			sql.append(")");
+			sql.append(")");
+		} else if (periodFrom != null) {
+			IWTimestamp periodFromDate = new IWTimestamp(periodFrom);
+			periodFromDate.setHour(0);
+			periodFromDate.setMinute(0);
+			periodFromDate.setSecond(0);
+			periodFromDate.setMilliSecond(0);
+			sql.appendAnd();
+			sql.append(COLUMN_END_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append(periodFromDate.getDate());
+		} else if (periodTo != null) {
+			IWTimestamp periodToDate = new IWTimestamp(periodTo);
+			periodToDate.setHour(0);
+			periodToDate.setMinute(0);
+			periodToDate.setSecond(0);
+			periodToDate.setMilliSecond(0);
+			sql.appendAnd();
+			sql.append(COLUMN_START_DATE);
+			sql.appendLessThanOrEqualsSign();
+			sql.append(periodToDate.getDate());
+		}
+
+//		if (periodFrom != null) {
+//			IWTimestamp periodFromDate = new IWTimestamp(periodFrom);
+//			periodFromDate.setHour(0);
+//			periodFromDate.setMinute(0);
+//			periodFromDate.setSecond(0);
+//			periodFromDate.setMilliSecond(0);
+//			sql.appendAnd();
+//			sql.append(COLUMN_START_DATE);
+//			sql.appendGreaterThanOrEqualsSign();
+//			sql.append(periodFromDate.getDate());
+//		}
+//		if (periodTo != null) {
+//			IWTimestamp periodToDate = new IWTimestamp(periodTo);
+//			periodToDate.setHour(0);
+//			periodToDate.setMinute(0);
+//			periodToDate.setSecond(0);
+//			periodToDate.setMilliSecond(0);
+//			sql.appendAnd();
+//			sql.append(COLUMN_END_DATE);
+//			sql.appendLessThanOrEqualsSign();
+//			sql.append(periodToDate.getDate());
+//		}
+
+		return idoFindPKsByQuery(sql);
+	}
+
+	public Collection<Integer> ejbFindAllByCriteria(Collection<Integer> groupsIds,
+			java.util.Date periodFrom,
+			java.util.Date periodTo,
+			Integer birthYear,
+			String sortBy,
+			String nameOrNumber,
+			Boolean openForRegistration,
+			Boolean birthYearShouldBeNull) throws FinderException {
+		IDOQuery sql = idoQuery();
+		sql.appendSelectAllFrom(this);
+
+		sql.append(" selected_entity ");
+
+		sql.appendWhere();
+		sql.append(1);
+		sql.appendEqualSign();
+		sql.append(1);
+
+		//End date is later than today's date
+		//sql.appendAnd();
+		//sql.append(" selected_entity.");
+		//sql.append(COLUMN_END_DATE);
+		//sql.appendIsNotNull();
+		//sql.appendAnd();
+		//sql.append(" selected_entity.");
+		//sql.append(COLUMN_END_DATE);
+		//sql.appendGreaterThanOrEqualsSign();
+		//sql.append((new IWTimestamp()).getDate());
+
+		//Registration end date is later than today's date
+		//sql.appendAnd();
+		//sql.append(" selected_entity.");
+		//sql.append(COLUMN_REGISTRATION_END);
+		//sql.appendIsNotNull();
+		//sql.appendAnd();
+		//sql.append(" selected_entity.");
+		//sql.append(COLUMN_REGISTRATION_END);
+		//sql.appendGreaterThanOrEqualsSign();
+		//sql.append((new IWTimestamp()).getDate());
+
+		//Group ids
+		if (groupsIds != null && !groupsIds.isEmpty()) {
+			sql.appendAnd();
+			sql.append("selected_entity.");
+			sql.append(COLUMN_GROUP);
+			sql.appendInCollection(groupsIds);
+		}
+
+		//Birth year
+		if (birthYear != null && birthYear != 0) {
+			sql.appendAnd();
+			sql.append(birthYear);
+			sql.appendLessThanOrEqualsSign();
+			sql.append(" selected_entity.");
+			sql.append(COLUMN_BIRTHYEAR_TO);
+			sql.appendAnd();
+			sql.append(birthYear);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append(" selected_entity.");
+			sql.append(COLUMN_BIRTHYEAR_FROM);
+		}
+
+		if (birthYearShouldBeNull) {
+			sql.appendAnd();
+			sql.append(" selected_entity.");
+			sql.append(COLUMN_BIRTHYEAR_TO);
+			sql.appendIsNull();
+		}
+
+		//Open for registration
+		if (openForRegistration != null && openForRegistration) {
+			sql.appendAnd();
+			sql.append(" selected_entity.");
+			sql.appendEquals(COLUMN_OPEN_FOR_REGISTRATION, openForRegistration);
+		}
+
+		//Period from
 		if (periodFrom != null) {
 			IWTimestamp periodFromDate = new IWTimestamp(periodFrom);
 			periodFromDate.setHour(0);
@@ -816,10 +1036,13 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			periodFromDate.setSecond(0);
 			periodFromDate.setMilliSecond(0);
 			sql.appendAnd();
+			sql.append(" selected_entity.");
 			sql.append(COLUMN_START_DATE);
 			sql.appendGreaterThanOrEqualsSign();
 			sql.append(periodFromDate.getDate());
 		}
+
+		//Period to
 		if (periodTo != null) {
 			IWTimestamp periodToDate = new IWTimestamp(periodTo);
 			periodToDate.setHour(0);
@@ -827,23 +1050,43 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			periodToDate.setSecond(0);
 			periodToDate.setMilliSecond(0);
 			sql.appendAnd();
+			sql.append(" selected_entity.");
 			sql.append(COLUMN_END_DATE);
 			sql.appendLessThanOrEqualsSign();
 			sql.append(periodToDate.getDate());
 		}
 
-		//Templates or courses
-		sql.appendAnd();
-		sql.append(COLUMN_COURSE_TEMPLATE);
-		if (findTemplates) {
-			sql.appendIsNull();
-		} else {
-			sql.appendIsNotNull();
+		//Name or number equals to the given one
+		if (!StringUtil.isEmpty(nameOrNumber)) {
+			sql.appendAnd();
+			sql.appendLeftParenthesis();
+			sql.append(" selected_entity.");
+			sql.append(COLUMN_NAME);
+			sql.appendLike();
+			sql.append("'%" + nameOrNumber + "%'");
+			try {
+				if (NumberUtils.isNumber(nameOrNumber)) {
+					sql.appendOr();
+					sql.append(" selected_entity.");
+					sql.append(COLUMN_COURSE_NUMBER);
+					sql.appendEqualSign();
+					sql.append(nameOrNumber);
+				}
+			} catch (Exception e) {
+				getLogger().log(Level.WARNING, "Could not check, if search string is number or not: ", e);
+			}
+			sql.appendRightParenthesis();
+		}
+
+		//Sort by
+		if (!StringUtil.isEmpty(sortBy)) {
+			if (sortBy.equalsIgnoreCase("name")) {
+				sql.appendOrderBy(" selected_entity." + COLUMN_NAME);
+			}
 		}
 
 		return idoFindPKsByQuery(sql);
 	}
-
 
 	public Collection<Integer> ejbFindAllByCriteria(Collection<Integer> groupsIds,
 													Collection<Integer> templateIds,

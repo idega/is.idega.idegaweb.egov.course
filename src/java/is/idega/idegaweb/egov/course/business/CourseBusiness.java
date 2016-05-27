@@ -828,7 +828,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByGroupsIdsAndDates
 	 */
-	public Collection<Course> findAllCoursesByGroupsIdsAndDates(Collection<Integer> groupsIds, Date periodFrom, Date periodTo, boolean findTemplates);
+	public Collection<Course> findAllCoursesByGroupsIdsAndDates(Collection<Integer> groupsIds, Date periodFrom, Date periodTo);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByCriteria
@@ -842,6 +842,18 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 														String nameOrNumber,
 														Boolean openForRegistration,
 														boolean findTemplates);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByCriteria
+	 */
+	public Collection<Course> findAllCoursesByCriteria(Collection<Integer> groupsIds,
+														java.util.Date periodFrom,
+														java.util.Date periodTo,
+														Integer birthYear,
+														String sortBy,
+														String nameOrNumber,
+														Boolean openForRegistration,
+														Boolean birthYearShouldBeNull);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#makePayment
@@ -870,4 +882,17 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByTemplateIds
 	 */
 	public Collection<Course> getAllCoursesWithoutTemplates();
+
+	public void storeCourseType(Object pk, String name, String description,
+			String localizationKey, Object schoolTypePK, String accountingKey, boolean disabled, String registrationMethod)
+			throws FinderException, CreateException;
+
+	public Course createCourse(Object pk, int courseNumber, String name,
+			String user, Object courseTypePK, Object providerPK,
+			Object coursePricePK, IWTimestamp startDate, IWTimestamp endDate,
+			String accountingKey, int birthYearFrom, int birthYearTo,
+			int maxPer, float price, float cost, boolean openForRegistration,
+			IWTimestamp registrationEnd, boolean hasPreCare, boolean hasPostCare,
+			IWTimestamp registrationStart)
+			throws FinderException, CreateException;
 }

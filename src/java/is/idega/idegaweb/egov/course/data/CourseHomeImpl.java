@@ -160,9 +160,9 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 	}
 
 	@Override
-	public java.util.Collection<Course> findAllByGroupsIdsAndDates(java.util.Collection<Integer> groupsIds, Date periodFrom, Date periodTo, boolean findTemplates) throws javax.ejb.FinderException {
+	public java.util.Collection<Course> findAllByGroupsIdsAndDates(java.util.Collection<Integer> groupsIds, Date periodFrom, Date periodTo) throws javax.ejb.FinderException {
 		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
-		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByGroupsIdsAndDates(groupsIds, periodFrom, periodTo, findTemplates);
+		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByGroupsIdsAndDates(groupsIds, periodFrom, periodTo);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
@@ -180,6 +180,21 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 															boolean findTemplates) throws javax.ejb.FinderException {
 		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
 		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByCriteria(groupsIds, templateIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, findTemplates);
+		this.idoCheckInPooledEntity(entity);
+		return this.getEntityCollectionForPrimaryKeys(ids);
+	}
+
+	@Override
+	public java.util.Collection<Course> findAllByCriteria(Collection<Integer> groupsIds,
+															java.util.Date periodFrom,
+															java.util.Date periodTo,
+															Integer birthYear,
+															String sortBy,
+															String nameOrNumber,
+															Boolean openForRegistration,
+															Boolean birthYearShouldBeNull) throws javax.ejb.FinderException {
+		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByCriteria(groupsIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, birthYearShouldBeNull);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}
