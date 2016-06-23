@@ -42,6 +42,11 @@ public interface Course extends IDOEntity {
 	public CourseType getCourseType();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getCourseTypeStr
+	 */
+	public String getCourseTypeStr();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getPrice
 	 */
 	public CoursePrice getPrice();
@@ -127,6 +132,11 @@ public interface Course extends IDOEntity {
 	public Course getTemplate();
 
 	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#getTemplate
+	 */
+	public String getGender();
+
+	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#isOpenForRegistration
 	 */
 	public boolean isOpenForRegistration();
@@ -173,6 +183,11 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseType
 	 */
 	public void setCourseType(CourseType courseType);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setCourseTypeStr
+	 */
+	public void setCourseTypeStr(String courseTypeStr);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setPrice
@@ -268,6 +283,11 @@ public interface Course extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setTemplateId
 	 */
 	public void setTemplateId(Integer templateId);
+
+	/**
+	 * @see is.idega.idegaweb.egov.course.data.CourseBMPBean#setGender
+	 */
+	public void setGender(String gender);
 
 	public void addUser(User user) throws IDOAddRelationshipException;
 	public Collection<User> getAllUsers();

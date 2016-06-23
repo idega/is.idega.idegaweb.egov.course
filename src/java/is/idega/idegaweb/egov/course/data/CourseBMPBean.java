@@ -76,6 +76,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	protected final static String COLUMN_GROUP = "GROUP_ID";
 	protected final static String COLUMN_COURSE_TEMPLATE = "TEMPLATE_ID";
 	private static final String COLUMN_USERS = "USERS";
+	private static final String COLUMN_GENDER = "GENDER";
+	private static final String COLUMN_COURSE_TYPE_STR = "COURSE_TYPE";
 
 	@Override
 	public String getEntityName() {
@@ -102,6 +104,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addAttribute(COLUMN_OPEN_FOR_REGISTRATION, "Open for registration", Boolean.class);
 		addAttribute(COLUMN_PRE_CARE, "Has pre care", Boolean.class);
 		addAttribute(COLUMN_POST_CARE, "Has post care", Boolean.class);
+		addAttribute(COLUMN_GENDER, "Gender", String.class);
+		addAttribute(COLUMN_COURSE_TYPE_STR, "Course type", String.class);
 
 		addManyToOneRelationship(COLUMN_COURSE_TEMPLATE, Course.class);
 		addManyToOneRelationship(COLUMN_COURSE_TYPE, CourseType.class);
@@ -239,6 +243,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public int getCourseNumber() {
 		return getIntColumnValue(COLUMN_COURSE_NUMBER);
+	}
+
+	@Override
+	public String getGender() {
+		return getStringColumnValue(COLUMN_GENDER);
+	}
+
+	@Override
+	public String getCourseTypeStr() {
+		return getStringColumnValue(COLUMN_COURSE_TYPE_STR);
 	}
 
 	@Override
@@ -401,6 +415,16 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	@Override
 	public void setTemplateId(Integer templateId) {
 		setColumn(COLUMN_COURSE_TEMPLATE, templateId);
+	}
+
+	@Override
+	public void setGender(String gender) {
+		setColumn(COLUMN_GENDER, gender);
+	}
+
+	@Override
+	public void setCourseTypeStr(String courseTypeStr) {
+		setColumn(COLUMN_COURSE_TYPE_STR, courseTypeStr);
 	}
 
 
@@ -1084,6 +1108,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 				sql.appendOrderBy(" selected_entity." + COLUMN_NAME);
 			}
 		}
+
+		getLogger().log(Level.INFO, "ejbFindAllByCriteria SQL: " + sql);
 
 		return idoFindPKsByQuery(sql);
 	}
