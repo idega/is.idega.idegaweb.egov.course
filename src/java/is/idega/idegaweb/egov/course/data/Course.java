@@ -294,6 +294,11 @@ public interface Course extends IDOEntity {
 	public void removeUser(User user) throws IDORemoveRelationshipException;
 	public void removeAllUsers() throws IDORemoveRelationshipException;
 
+	public void addParticipant(User user) throws IDOAddRelationshipException;
+	public Collection<User> getAllParticipants();
+	public void removeParticipant(User user) throws IDORemoveRelationshipException;
+	public void removeAllParticipants() throws IDORemoveRelationshipException;
+
 	public void setRentableItems(Collection<? extends RentableItem> items) throws IDOAddRelationshipException;
 	public Collection<? extends RentableItem> getRentableItems(Class<? extends RentableItem> itemClass);
 	public void addRentableItem(RentableItem item) throws IDOAddRelationshipException;

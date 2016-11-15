@@ -49,6 +49,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	public static final String ENTITY_NAME = "COU_COURSE";
 
+	public static final String USERS_LIST = ENTITY_NAME + "_USERS";
+	public static final String PARTICIPANTS_LIST = ENTITY_NAME + "_PARTICIPANTS";
+
 	private static final String COLUMN_COURSE_NUMBER = "COURSE_NUMBER";
 	private static final String COLUMN_NAME = "NAME";
 	private static final String COLUMN_USER = "USER_NAME";
@@ -75,7 +78,6 @@ public class CourseBMPBean extends GenericEntity implements Course {
 								COLUMN_COURSE_SEASONS = "COURSE_SEASONS";
 	protected final static String COLUMN_GROUP = "GROUP_ID";
 	protected final static String COLUMN_COURSE_TEMPLATE = "TEMPLATE_ID";
-	private static final String COLUMN_USERS = "USERS";
 	private static final String COLUMN_GENDER = "GENDER";
 	private static final String COLUMN_COURSE_TYPE_STR = "COURSE_TYPE";
 
@@ -88,7 +90,7 @@ public class CourseBMPBean extends GenericEntity implements Course {
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		addAttribute(COLUMN_COURSE_NUMBER, "Course number", Integer.class);
-		addAttribute(COLUMN_NAME, "Name", String.class, 50);
+		addAttribute(COLUMN_NAME, "Name", String.class, 250);
 		addAttribute(COLUMN_USER, "User", String.class);
 		addAttribute(COLUMN_DESCRIPTION, "Description", String.class);
 		addAttribute(COLUMN_START_DATE, "Start date", Timestamp.class);
@@ -114,7 +116,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		addManyToOneRelationship(COLUMN_GROUP, Group.class);
 		addManyToManyRelationShip(CoursePrice.class, COLUMN_COURSE_PRICES);
 		addManyToManyRelationShip(SchoolSeason.class, COLUMN_COURSE_SEASONS);
-		addManyToManyRelationShip(User.class, COLUMN_USERS);
+		addManyToManyRelationShip(User.class, USERS_LIST);
+		addManyToManyRelationShip(User.class, PARTICIPANTS_LIST);
 
 		Map<String, ? extends RentableItem> entities = null;
 		try {
@@ -777,23 +780,14 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 	@Override
 	public void addUser(User user) throws IDOAddRelationshipException {
-		this.idoAddTo(user);
-	}
-
-	@Override
-	public Collection<User> getAllUsers() {
-		try {
-			return super.idoGetRelatedEntities(User.class);
-		} catch (IDORelationshipException e) {
-			e.printStackTrace();
-		}
-		return null;
+		this.idoAddTo(user, USERS_LIST);
 	}
 
 	@Override
 	public void removeUser(User user) throws IDORemoveRelationshipException {
-		this.idoRemoveFrom(user);
+		this.idoRemoveFrom(user, USERS_LIST);
 	}
+
 
 	@Override
 	public void removeAllUsers() throws IDORemoveRelationshipException {
@@ -803,6 +797,54 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		for (User user : users) {
 			removeUser(user);
+		}
+
+		store();
+	}
+
+	@Override
+	public Collection<User> getAllUsers() {
+		try {
+			return this.idoGetRelatedEntitiesBySQL(User.class, "select users.ic_user_id from " + USERS_LIST + " users, " +
+					ENTITY_NAME + " courses where users." + getIDColumnName() + " = courses." + getIDColumnName() +
+					" and courses." + getIDColumnName() + " = " + getID());
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	@Override
+	public Collection<User> getAllParticipants() {
+		try {
+			return this.idoGetRelatedEntitiesBySQL(User.class, "select participants.ic_user_id from " + PARTICIPANTS_LIST + " participants, " +
+					ENTITY_NAME + " courses where participants." + getIDColumnName() + " = courses." + getIDColumnName() +
+					" and courses." + getIDColumnName() + " = " + getID());
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void addParticipant(User participant) throws IDOAddRelationshipException {
+		this.idoAddTo(participant, PARTICIPANTS_LIST);
+	}
+
+	@Override
+	public void removeParticipant(User participant) throws IDORemoveRelationshipException {
+		this.idoRemoveFrom(participant, PARTICIPANTS_LIST);
+	}
+
+	@Override
+	public void removeAllParticipants() throws IDORemoveRelationshipException {
+		Collection<User> participants = getAllParticipants();
+		if (ListUtil.isEmpty(participants))
+			return;
+
+		for (User user : participants) {
+			removeParticipant(user);
 		}
 
 		store();
