@@ -4040,8 +4040,21 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 														String nameOrNumber,
 														Boolean openForRegistration,
 														Boolean birthYearShouldBeNull) {
+		return findAllCoursesByCriteria(groupsIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, birthYearShouldBeNull, false);
+	}
+
+	@Override
+	public Collection<Course> findAllCoursesByCriteria(Collection<Integer> groupsIds,
+														java.util.Date periodFrom,
+														java.util.Date periodTo,
+														Integer birthYear,
+														String sortBy,
+														String nameOrNumber,
+														Boolean openForRegistration,
+														Boolean birthYearShouldBeNull,
+														Boolean checkByExactCourseName) {
 		try {
-			return getCourseHome().findAllByCriteria(groupsIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, birthYearShouldBeNull);
+			return getCourseHome().findAllByCriteria(groupsIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, birthYearShouldBeNull, checkByExactCourseName);
 		} catch (FinderException e) {
 		}
 

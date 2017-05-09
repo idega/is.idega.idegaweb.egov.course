@@ -192,9 +192,10 @@ public class CourseHomeImpl extends IDOFactory implements CourseHome {
 															String sortBy,
 															String nameOrNumber,
 															Boolean openForRegistration,
-															Boolean birthYearShouldBeNull) throws javax.ejb.FinderException {
+															Boolean birthYearShouldBeNull,
+															Boolean checkByExactCourseName) throws javax.ejb.FinderException {
 		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
-		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByCriteria(groupsIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, birthYearShouldBeNull);
+		java.util.Collection<Integer> ids = ((CourseBMPBean)entity).ejbFindAllByCriteria(groupsIds, periodFrom, periodTo, birthYear, sortBy, nameOrNumber, openForRegistration, birthYearShouldBeNull, checkByExactCourseName);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

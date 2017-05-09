@@ -1025,7 +1025,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			String sortBy,
 			String nameOrNumber,
 			Boolean openForRegistration,
-			Boolean birthYearShouldBeNull) throws FinderException {
+			Boolean birthYearShouldBeNull,
+			Boolean checkByExactCourseName) throws FinderException {
 		IDOQuery sql = idoQuery();
 		sql.appendSelectAllFrom(this);
 
@@ -1129,7 +1130,11 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			sql.append(" selected_entity.");
 			sql.append(COLUMN_NAME);
 			sql.appendLike();
-			sql.append("'%" + nameOrNumber + "%'");
+			if (checkByExactCourseName != null && checkByExactCourseName) {
+				sql.append("'" + nameOrNumber + "'");
+			} else {
+				sql.append("'%" + nameOrNumber + "%'");
+			}
 			try {
 				if (NumberUtils.isNumber(nameOrNumber)) {
 					sql.appendOr();
