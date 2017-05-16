@@ -1125,6 +1125,9 @@ public class CourseBMPBean extends GenericEntity implements Course {
 
 		//Name or number equals to the given one
 		if (!StringUtil.isEmpty(nameOrNumber)) {
+			//Replace single quotes with double single quotes
+			nameOrNumber = nameOrNumber.replaceAll("'", "''");
+			//Query
 			sql.appendAnd();
 			sql.appendLeftParenthesis();
 			sql.append(" selected_entity.");
