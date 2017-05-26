@@ -1026,7 +1026,8 @@ public class CourseBMPBean extends GenericEntity implements Course {
 			String nameOrNumber,
 			Boolean openForRegistration,
 			Boolean birthYearShouldBeNull,
-			Boolean checkByExactCourseName) throws FinderException {
+			Boolean checkByExactCourseName,
+			Boolean onlyNotFinished) throws FinderException {
 		IDOQuery sql = idoQuery();
 		sql.appendSelectAllFrom(this);
 
@@ -1037,16 +1038,18 @@ public class CourseBMPBean extends GenericEntity implements Course {
 		sql.appendEqualSign();
 		sql.append(1);
 
-		//End date is later than today's date
-		//sql.appendAnd();
-		//sql.append(" selected_entity.");
-		//sql.append(COLUMN_END_DATE);
-		//sql.appendIsNotNull();
-		//sql.appendAnd();
-		//sql.append(" selected_entity.");
-		//sql.append(COLUMN_END_DATE);
-		//sql.appendGreaterThanOrEqualsSign();
-		//sql.append((new IWTimestamp()).getDate());
+		//End date is later than today's date / Filter and show only not finished courses
+		if (onlyNotFinished != null && onlyNotFinished) {
+			sql.appendAnd();
+			sql.append(" selected_entity.");
+			sql.append(COLUMN_END_DATE);
+			sql.appendIsNotNull();
+			sql.appendAnd();
+			sql.append(" selected_entity.");
+			sql.append(COLUMN_END_DATE);
+			sql.appendGreaterThanOrEqualsSign();
+			sql.append((new IWTimestamp()).getDate());
+		}
 
 		//Registration end date is later than today's date
 		//sql.appendAnd();

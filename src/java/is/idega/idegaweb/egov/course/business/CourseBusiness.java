@@ -853,19 +853,9 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 														String sortBy,
 														String nameOrNumber,
 														Boolean openForRegistration,
-														Boolean birthYearShouldBeNull);
-	/**
-	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#findAllCoursesByCriteria
-	 */
-	public Collection<Course> findAllCoursesByCriteria(Collection<Integer> groupsIds,
-														java.util.Date periodFrom,
-														java.util.Date periodTo,
-														Integer birthYear,
-														String sortBy,
-														String nameOrNumber,
-														Boolean openForRegistration,
 														Boolean birthYearShouldBeNull,
-														Boolean checkByExactCourseName);
+														Boolean checkByExactCourseName,
+														Boolean onlyNotFinished);
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#makePayment

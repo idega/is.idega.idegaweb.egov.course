@@ -75,7 +75,8 @@ public interface CourseHome extends IDOHome {
 			String nameOrNumber,
 			Boolean openForRegistration,
 			Boolean birthYearShouldBeNull,
-			Boolean checkByExactCourseName) throws javax.ejb.FinderException;
+			Boolean checkByExactCourseName,
+			Boolean onlyNotFinished) throws javax.ejb.FinderException;
 
 
 }
