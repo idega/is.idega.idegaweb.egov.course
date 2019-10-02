@@ -783,7 +783,7 @@ public interface CourseBusiness extends IBOService, CaseBusiness,
 	/**
 	 * @see is.idega.idegaweb.egov.course.business.CourseBusinessBean#getCheckBoxesForCourseParticipants
 	 */
-	public List getCheckBoxesForCourseParticipants(IWResourceBundle iwrb)
+	public List<AdvancedProperty> getCheckBoxesForCourseParticipants(IWResourceBundle iwrb)
 			throws RemoteException;
 
 	/**

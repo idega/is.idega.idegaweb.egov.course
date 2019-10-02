@@ -456,7 +456,7 @@ public class CourseParticipantsList extends CourseBlock {
 			}
 		}
 
-		List checkboxesInfo = null;
+		List<AdvancedProperty> checkboxesInfo = null;
 		if (addCheckboxes) {
 			cell = row.createHeaderCell();
 			cell.setStyleClass("created");
@@ -466,7 +466,7 @@ public class CourseParticipantsList extends CourseBlock {
 			checkboxesInfo = getBusiness().getCheckBoxesForCourseParticipants(getResourceBundle());
 			AdvancedProperty info = null;
 			for (int i = 0; i < checkboxesInfo.size(); i++) {
-				info = (AdvancedProperty) checkboxesInfo.get(i);
+				info = checkboxesInfo.get(i);
 
 				cell = row.createHeaderCell();
 				if (i + 1 == checkboxesInfo.size()) {
@@ -707,7 +707,7 @@ public class CourseParticipantsList extends CourseBlock {
 					}
 					CourseParticipantListRowData data = null;
 					for (int i = 0; i < checkboxesInfo.size(); i++) {
-						info = (AdvancedProperty) checkboxesInfo.get(i);
+						info = checkboxesInfo.get(i);
 						data = (CourseParticipantListRowData) rowData.get(i);
 
 						cell = row.createCell();
