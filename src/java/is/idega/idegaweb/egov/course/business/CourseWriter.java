@@ -7,12 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.business;
 
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.CourseType;
-import is.idega.idegaweb.egov.course.presentation.CourseBlock;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,6 +15,7 @@ import java.sql.Date;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,9 +39,18 @@ import com.idega.io.MemoryFileBuffer;
 import com.idega.io.MemoryInputStream;
 import com.idega.io.MemoryOutputStream;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.ui.handlers.IWDatePickerHandler;
+import com.idega.util.CoreConstants;
+import com.idega.util.IOUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.StringHandler;
 import com.idega.util.text.TextSoap;
+
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.CourseType;
+import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 public class CourseWriter extends DownloadWriter implements MediaWritable {
 
@@ -75,14 +79,19 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				SchoolType type = getSchoolBusiness(iwc).getSchoolType(iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK));
 				schoolTypeName = type.getSchoolTypeName();
 
-				Date fromDate = iwc.isParameterSet(CourseBlock.PARAMETER_FROM_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_FROM_DATE)).getDate() : null;
-				Date toDate = iwc.isParameterSet(CourseBlock.PARAMETER_TO_DATE) ? new IWTimestamp(iwc.getParameter(CourseBlock.PARAMETER_TO_DATE)).getDate() : null;
+				java.util.Date tmp = iwc.isParameterSet(CourseBlock.PARAMETER_FROM_DATE) ? IWDatePickerHandler.getParsedDate(iwc.getParameter(CourseBlock.PARAMETER_FROM_DATE), this.locale) : null;
+				Date fromDate = tmp == null ? null : new Date(tmp.getTime());
 
-				Collection courses = business.getCourses(-1, getCourseSession(iwc).getProvider().getPrimaryKey(), iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK), fromDate, toDate);
+				tmp = null;
+				tmp = iwc.isParameterSet(CourseBlock.PARAMETER_TO_DATE) ? IWDatePickerHandler.getParsedDate(iwc.getParameter(CourseBlock.PARAMETER_TO_DATE), this.locale) : null;
+				Date toDate = tmp == null ? null : new Date(tmp.getTime());
+
+				Collection<Course> courses = business.getCourses(-1, getCourseSession(iwc).getProvider().getPrimaryKey(), iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK), iwc.getParameter(CourseBlock.PARAMETER_COURSE_TYPE_PK), fromDate, toDate);
 
 				this.buffer = writeXLS(iwc, courses);
 				setAsDownload(iwc, "students.xls", this.buffer.length());
-
+			} else {
+				Logger.getLogger(getClass().getName()).warning("Provider (" + getCourseSession(iwc).getProvider() + ") or provider type's ID (" + iwc.getParameter(CourseBlock.PARAMETER_SCHOOL_TYPE_PK) + ") are unknown");
 			}
 		}
 		catch (Exception e) {
@@ -107,27 +116,29 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				baos.write(mis.read());
 			}
 			baos.writeTo(out);
+			IOUtil.close(mis);
+			IOUtil.close(baos);
 		}
 		else {
 			System.err.println("buffer is null");
 		}
 	}
 
-	public MemoryFileBuffer writeXLS(IWContext iwc, Collection courses) throws Exception {
+	public MemoryFileBuffer writeXLS(IWContext iwc, Collection<Course> courses) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 		if (!courses.isEmpty()) {
 			HSSFWorkbook wb = new HSSFWorkbook();
 			HSSFSheet sheet = wb.createSheet(TextSoap.encodeToValidExcelSheetName(StringHandler.shortenToLength(this.schoolTypeName, 30)));
-			sheet.setColumnWidth((short) 0, (short) (24 * 256));
-			sheet.setColumnWidth((short) 1, (short) (24 * 256));
-			sheet.setColumnWidth((short) 2, (short) (8 * 256));
-			sheet.setColumnWidth((short) 3, (short) (8 * 256));
-			sheet.setColumnWidth((short) 4, (short) (12 * 256));
-			sheet.setColumnWidth((short) 5, (short) (12 * 256));
-			sheet.setColumnWidth((short) 6, (short) (8 * 256));
-			sheet.setColumnWidth((short) 7, (short) (8 * 256));
-			sheet.setColumnWidth((short) 8, (short) (20 * 256));
+			sheet.setColumnWidth(0, (24 * 256));
+			sheet.setColumnWidth(1, (24 * 256));
+			sheet.setColumnWidth(2, (8 * 256));
+			sheet.setColumnWidth(3, (8 * 256));
+			sheet.setColumnWidth(4, (12 * 256));
+			sheet.setColumnWidth(5, (12 * 256));
+			sheet.setColumnWidth(6, (8 * 256));
+			sheet.setColumnWidth(7, (8 * 256));
+			sheet.setColumnWidth(8, (20 * 256));
 			HSSFFont font = wb.createFont();
 			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 			font.setFontHeightInPoints((short) 12);
@@ -142,14 +153,14 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 
 			int cellRow = 0;
 			HSSFRow row = sheet.createRow(cellRow++);
-			HSSFCell cell = row.createCell((short) 0);
+			HSSFCell cell = row.createCell(0);
 			cell.setCellValue(this.schoolTypeName);
 			cell.setCellStyle(bigStyle);
-			cell = row.createCell((short) 1);
+			cell = row.createCell(1);
 
 			row = sheet.createRow(cellRow++);
 
-			short iCell = 0;
+			int iCell = 0;
 			row = sheet.createRow(cellRow++);
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("type", "Type"));
@@ -179,19 +190,21 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 			cell.setCellValue(this.iwrb.getLocalizedString("employee", "Employee"));
 			cell.setCellStyle(style);
 
-			Iterator iter = courses.iterator();
+			Iterator<Course> iter = courses.iterator();
 			while (iter.hasNext()) {
 				row = sheet.createRow(cellRow++);
 				iCell = 0;
 
-				Course course = (Course) iter.next();
+				Course course = iter.next();
 				CourseType type = course.getCourseType();
 				CoursePrice price = course.getPrice();
 				IWTimestamp dateFrom = new IWTimestamp(course.getStartDate());
 				IWTimestamp dateTo = new IWTimestamp(course.getStartDate());
-				dateTo.addDays(price.getNumberOfDays());
+				if (price != null && price.getNumberOfDays() > 0) {
+					dateTo.addDays(price.getNumberOfDays());
+				}
 
-				row.createCell(iCell++).setCellValue(type.getName());
+				row.createCell(iCell++).setCellValue(type == null ? CoreConstants.MINUS : type.getName());
 				row.createCell(iCell++).setCellValue(course.getName());
 				row.createCell(iCell++).setCellValue(String.valueOf(course.getBirthyearFrom()));
 				row.createCell(iCell++).setCellValue(String.valueOf(course.getBirthyearTo()));
@@ -199,9 +212,11 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				row.createCell(iCell++).setCellValue(dateTo.getLocaleDate(iwc.getCurrentLocale(), IWTimestamp.SHORT));
 				row.createCell(iCell++).setCellValue(String.valueOf(course.getMax()));
 				row.createCell(iCell++).setCellValue(String.valueOf(business.getNumberOfFreePlaces(course)));
-				row.createCell(iCell++).setCellValue("-");
+				row.createCell(iCell++).setCellValue(CoreConstants.MINUS);
 			}
 			wb.write(mos);
+		} else {
+			Logger.getLogger(getClass().getName()).warning("No courses provided");
 		}
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
 		return buffer;
