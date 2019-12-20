@@ -2971,7 +2971,7 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 					applicant.getName(),														//	0: name
 					PersonalIDFormatter.format(applicant.getPersonalID(), locale),				//	1: personal id
 					course.getName(),															//	2: course name
-					provider.getName(),															//	3: provider name
+					provider == null ? CoreConstants.EMPTY : provider.getName(),				//	3: provider name
 					startDate.getLocaleDate(locale, IWTimestamp.SHORT),							//	4: start date
 					new IWTimestamp(course.getEndDate() != null ? course						//	5: end date
 							.getEndDate() : getEndDate(course.getPrice(),
@@ -2979,8 +2979,8 @@ public class CourseBusinessBean extends CaseBusinessBean implements CaseBusiness
 							IWTimestamp.SHORT),
 					acceptURL,																	//	6: URL
 					StringUtil.isEmpty(choice.getUniqueID()) ? uniqueId : choice.getUniqueID(),	//	7: unique id
-					StringUtil.isEmpty(provider.getSchoolEmail()) ? CoreConstants.EMPTY : provider.getSchoolEmail(),	//	8: provider email
-					StringUtil.isEmpty(provider.getSchoolWebPage()) ? CoreConstants.EMPTY : provider.getSchoolWebPage()	//	9: provider web page
+					provider == null || StringUtil.isEmpty(provider.getSchoolEmail()) ? CoreConstants.EMPTY : provider.getSchoolEmail(),	//	8: provider email
+					provider == null || StringUtil.isEmpty(provider.getSchoolWebPage()) ? CoreConstants.EMPTY : provider.getSchoolWebPage()	//	9: provider web page
 			};
 
 			List<User> parents = getParentsForApplicant(application, applicant);
