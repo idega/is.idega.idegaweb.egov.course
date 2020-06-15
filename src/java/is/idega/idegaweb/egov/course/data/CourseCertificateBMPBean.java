@@ -31,10 +31,12 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 	private static final String COLUMN_CERTIFICATE_FILE_ID = "cert_file_id";
 	private static final String COLUMN_CERTIFICATE_NUMBER = "certificate_number";
 
+	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
 
+	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 
@@ -49,58 +51,77 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 		addOneToOneRelationship(COLUMN_COURSE_ID, Course.class);
 	}
 
+	@Override
 	public void setCertificateType(CourseCertificateType type) {
 		setColumn(COLUMN_TYPE_OF_CERTIFICATE_ID, type);
 	}
 
+	@Override
 	public void setCertificateFile(ICFile file) {
 		setColumn(COLUMN_CERTIFICATE_FILE_ID, file);
 	}
 
+	@Override
 	public ICFile getCertificateFile() {
 		return (ICFile) getColumnValue(COLUMN_CERTIFICATE_FILE_ID);
 	}
 
+	@Override
 	public CourseCertificateType getCourseCertificateType() {
 		return (CourseCertificateType) getColumnValue(COLUMN_TYPE_OF_CERTIFICATE_ID);
 	}
 
+	@Override
 	public void setParticipant(User participant) {
 		setColumn(COLUMN_PARTICIPANT_ID, participant);
 	}
 
+	@Override
 	public User getParticipant() {
 		return (User) getColumnValue(COLUMN_PARTICIPANT_ID);
 	}
 
+	@Override
+	public int getParticipantId() {
+		return getIntColumnValue(COLUMN_PARTICIPANT_ID);
+	}
+
+	@Override
 	public void setCompany(Company company) {
 		setColumn(COLUMN_COMPANY_ID, company);
 	}
 
+	@Override
 	public Company getCompany() {
 		return (Company) getColumnValue(COLUMN_COMPANY_ID);
 	}
 
+	@Override
 	public void setCourse(Course course) {
 		setColumn(COLUMN_COURSE_ID, course);
 	}
 
+	@Override
 	public Course getCourse() {
 		return (Course) getColumnValue(COLUMN_COURSE_ID);
 	}
 
+	@Override
 	public void setValidFrom(Timestamp validFrom) {
 		setColumn(COLUMN_VALID_FROM, validFrom);
 	}
 
+	@Override
 	public IWTimestamp getValidFrom() {
 		return getIWTimestamp((Timestamp) getColumnValue(COLUMN_VALID_FROM));
 	}
 
+	@Override
 	public void setValidThru(Timestamp validThru) {
 		setColumn(COLUMN_VALID_THRU, validThru);
 	}
 
+	@Override
 	public IWTimestamp getValidThru() {
 		return getIWTimestamp((Timestamp) getColumnValue(COLUMN_VALID_THRU));
 	}
@@ -109,14 +130,16 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 		return time == null ? null : new IWTimestamp(time);
 	}
 
+	@Override
 	public void setNumber(int number) {
 		setColumn(COLUMN_CERTIFICATE_NUMBER, number);
 	}
-	
+
+	@Override
 	public int getNumber() {
 		return getIntColumnValue(COLUMN_CERTIFICATE_NUMBER);
 	}
-	
+
 	public Collection ejbFindAllByUser(User user) throws FinderException {
 		IDOQuery query = idoQueryGetSelect();
 		query.appendWhereEquals(COLUMN_PARTICIPANT_ID, user.getId());
@@ -140,7 +163,7 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 
 	public Collection ejbFindByUsersAndValidityAndType(List usersIds, boolean onlyValidCertificates, String certificateTypeId) throws FinderException {
 		IDOQuery query = idoQueryGetSelect();
-		
+
 		if (usersIds == null || usersIds.size() == 0) {
 			query.appendWhere().append(COLUMN_PARTICIPANT_ID).appendIsNotNull();
 		}
@@ -158,12 +181,12 @@ public class CourseCertificateBMPBean extends GenericEntity implements CourseCer
 
 	public Object ejbFindHighestNumber() throws FinderException {
 		Table table = new Table(this);
-		
+
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(table.getColumn(getIDColumnName()));
 		query.addCriteria(new MatchCriteria(table.getColumn(COLUMN_CERTIFICATE_NUMBER), true));
 		query.addOrder(table, COLUMN_CERTIFICATE_NUMBER, false);
-		
+
 		return idoFindOnePKByQuery(query);
 	}
 }

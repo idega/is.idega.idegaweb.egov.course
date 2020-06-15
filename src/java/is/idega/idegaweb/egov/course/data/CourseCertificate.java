@@ -1,12 +1,13 @@
 package is.idega.idegaweb.egov.course.data;
 
 
-import com.idega.core.file.data.ICFile;
-import com.idega.util.IWTimestamp;
-import com.idega.user.data.User;
-import com.idega.company.data.Company;
 import java.sql.Timestamp;
+
+import com.idega.company.data.Company;
+import com.idega.core.file.data.ICFile;
 import com.idega.data.IDOEntity;
+import com.idega.user.data.User;
+import com.idega.util.IWTimestamp;
 
 public interface CourseCertificate extends IDOEntity {
 
@@ -39,6 +40,8 @@ public interface CourseCertificate extends IDOEntity {
 	 * @see is.idega.idegaweb.egov.course.data.CourseCertificateBMPBean#getParticipant
 	 */
 	public User getParticipant();
+
+	public int getParticipantId();
 
 	/**
 	 * @see is.idega.idegaweb.egov.course.data.CourseCertificateBMPBean#setCompany
