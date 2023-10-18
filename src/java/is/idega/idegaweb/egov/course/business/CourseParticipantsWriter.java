@@ -7,18 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.business;
 
-import is.idega.block.family.data.Child;
-import is.idega.block.family.data.Custodian;
-import is.idega.block.family.data.Relative;
-import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseApplication;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.data.CoursePrice;
-import is.idega.idegaweb.egov.course.data.PriceHolder;
-import is.idega.idegaweb.egov.course.presentation.CourseBlock;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,7 +20,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 import javax.servlet.http.HttpServletRequest;
@@ -62,11 +49,24 @@ import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
+import com.idega.util.IOUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
 import com.idega.util.text.Name;
 import com.idega.util.text.TextSoap;
+
+import is.idega.block.family.data.Child;
+import is.idega.block.family.data.Custodian;
+import is.idega.block.family.data.Relative;
+import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.data.CoursePrice;
+import is.idega.idegaweb.egov.course.data.PriceHolder;
+import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 public class CourseParticipantsWriter extends DownloadWriter implements MediaWritable {
 
@@ -92,7 +92,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				e.printStackTrace();
 			}
 			if (participant == null) {
-				return new ArrayList<CourseChoice>();
+				return new ArrayList<>();
 			}
 
 			CourseChoice choise = null;
@@ -104,7 +104,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				e.printStackTrace();
 			}
 			if (choise == null) {
-				return new ArrayList<CourseChoice>();
+				return new ArrayList<>();
 			}
 			return Arrays.asList(new CourseChoice[] {choise});
 		}
@@ -112,12 +112,16 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			return business.getCourseChoices(course, waitingList);
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			return new ArrayList<CourseChoice>();
+			return new ArrayList<>();
 		}
 	}
 
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
+		if (iwc == null || !iwc.isLoggedOn()) {
+			return;
+		}
+
 		try {
 			this.locale = iwc.getApplicationSettings().getApplicationLocale();
 			this.business = getCourseBusiness(iwc);
@@ -158,7 +162,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 	}
 
 	@Override
-	public void writeTo(OutputStream out) throws IOException {
+	public void writeTo(IWContext iwc, OutputStream out) throws IOException {
 		if (this.buffer != null) {
 			MemoryInputStream mis = new MemoryInputStream(this.buffer);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -166,6 +170,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				baos.write(mis.read());
 			}
 			baos.writeTo(out);
+			IOUtil.close(mis);
 		}
 		else {
 			System.err.println("buffer is null");
@@ -619,9 +624,6 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		return buffer;
 	}
 
-	private Logger getLogger(){
-		return Logger.getLogger(CourseParticipantsWriter.class.getName());
-	}
 	public MemoryFileBuffer writeAccountingXLS(IWContext iwc, Collection choices) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);

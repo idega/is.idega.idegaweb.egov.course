@@ -7,14 +7,6 @@
  */
 package is.idega.idegaweb.egov.course.business;
 
-import is.idega.block.family.data.Child;
-import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
-import is.idega.idegaweb.egov.course.CourseConstants;
-import is.idega.idegaweb.egov.course.data.Course;
-import is.idega.idegaweb.egov.course.data.CourseApplication;
-import is.idega.idegaweb.egov.course.data.CourseChoice;
-import is.idega.idegaweb.egov.course.presentation.CourseBlock;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,10 +35,19 @@ import com.idega.io.MemoryInputStream;
 import com.idega.io.MemoryOutputStream;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
+import com.idega.util.IOUtil;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.StringHandler;
 import com.idega.util.text.Name;
 import com.idega.util.text.TextSoap;
+
+import is.idega.block.family.data.Child;
+import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
+import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.Course;
+import is.idega.idegaweb.egov.course.data.CourseApplication;
+import is.idega.idegaweb.egov.course.data.CourseChoice;
+import is.idega.idegaweb.egov.course.presentation.CourseBlock;
 
 public class CourseAttendanceWriter extends DownloadWriter implements MediaWritable {
 
@@ -63,6 +64,10 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
+		if (iwc == null || !iwc.isLoggedOn()) {
+			return;
+		}
+
 		try {
 			this.locale = iwc.getApplicationSettings().getApplicationLocale();
 			this.business = getCourseBusiness(iwc);
@@ -94,7 +99,7 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 	}
 
 	@Override
-	public void writeTo(OutputStream out) throws IOException {
+	public void writeTo(IWContext iwc, OutputStream out) throws IOException {
 		if (this.buffer != null) {
 			MemoryInputStream mis = new MemoryInputStream(this.buffer);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -102,6 +107,7 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 				baos.write(mis.read());
 			}
 			baos.writeTo(out);
+			IOUtil.close(mis);
 		}
 		else {
 			System.err.println("buffer is null");

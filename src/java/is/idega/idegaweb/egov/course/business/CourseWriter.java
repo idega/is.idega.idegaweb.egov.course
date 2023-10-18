@@ -70,6 +70,10 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
+		if (iwc == null || !iwc.isLoggedOn()) {
+			return;
+		}
+
 		try {
 			this.locale = iwc.getApplicationSettings().getApplicationLocale();
 			this.business = getCourseBusiness(iwc);
@@ -108,7 +112,7 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 	}
 
 	@Override
-	public void writeTo(OutputStream out) throws IOException {
+	public void writeTo(IWContext iwc, OutputStream out) throws IOException {
 		if (this.buffer != null) {
 			MemoryInputStream mis = new MemoryInputStream(this.buffer);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
