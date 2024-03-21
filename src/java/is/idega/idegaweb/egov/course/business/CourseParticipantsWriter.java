@@ -61,6 +61,7 @@ import is.idega.block.family.data.Custodian;
 import is.idega.block.family.data.Relative;
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
 import is.idega.idegaweb.egov.course.CourseConstants;
+import is.idega.idegaweb.egov.course.data.ApplicationHolder;
 import is.idega.idegaweb.egov.course.data.Course;
 import is.idega.idegaweb.egov.course.data.CourseApplication;
 import is.idega.idegaweb.egov.course.data.CourseChoice;
@@ -134,7 +135,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 				boolean waitingList = iwc.isParameterSet(PARAMETER_WAITING_LIST);
 
-				Collection choices = getChoices(course, iwc, waitingList);
+				Collection<CourseChoice> choices = getChoices(course, iwc, waitingList);
 
 				if (iwc.hasRole(CourseConstants.COURSE_ACCOUNTING_ROLE_KEY)) {
 					this.buffer = writeAccountingXLS(iwc, choices);
@@ -177,7 +178,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		}
 	}
 
-	public MemoryFileBuffer writeXLS(IWContext iwc, Collection choices) throws Exception {
+	public MemoryFileBuffer writeXLS(IWContext iwc, Collection<CourseChoice> choices) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 
@@ -191,13 +192,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		sheet.setColumnWidth(3, (14 * 256));
 		sheet.setColumnWidth(4, (14 * 256));
 		HSSFFont font = wb.createFont();
-		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		font.setBold(true);
 		font.setFontHeightInPoints((short) 12);
 		HSSFCellStyle style = wb.createCellStyle();
 		style.setFont(font);
 
 		HSSFFont bigFont = wb.createFont();
-		bigFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		bigFont.setBold(true);
 		bigFont.setFontHeightInPoints((short) 13);
 		HSSFCellStyle bigStyle = wb.createCellStyle();
 		bigStyle.setFont(bigFont);
@@ -253,12 +254,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			cell.setCellValue(this.iwrb.getLocalizedString("child.other_information", "Other information"));
 			cell.setCellStyle(style);
 
-			/* XXX Picked up */
+			/* Picked up */
 			cell = row.createCell(iCell++);
 			cell.setCellValue(this.iwrb.getLocalizedString("picked_up", "Picked up"));
 			cell.setCellStyle(style);
 
-			/* XXX Pre-care and post-care*/
+			/* Pre-care and post-care*/
 			String cellValue = this.iwrb.getLocalizedString("pre_care", "Has pre care");
 			cellValue = cellValue + CoreConstants.SLASH;
 			cellValue = cellValue + this.iwrb.getLocalizedString("post_care", "Has post care");
@@ -354,10 +355,10 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		CourseChoice choice;
 		CourseApplication application;
 
-		Iterator iter = choices.iterator();
+		Iterator<CourseChoice> iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = sheet.createRow(cellRow++);
-			choice = (CourseChoice) iter.next();
+			choice = iter.next();
 			application = choice.getApplication();
 			user = choice.getUser();
 			owner = application.getOwner();
@@ -428,7 +429,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 				iCell = 10;
 
-				Collection custodians = new ArrayList();
+				Collection<Custodian> custodians = new ArrayList<>();
 				try {
 					custodians = child.getCustodians();
 				} catch(Exception e) {}
@@ -437,9 +438,9 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					custodians.add(extraCustodian);
 				}
 
-				Iterator iterator = custodians.iterator();
+				Iterator<Custodian> iterator = custodians.iterator();
 				while (iterator.hasNext()) {
-					Custodian element = (Custodian) iterator.next();
+					Custodian element = iterator.next();
 					address = this.userBusiness.getUsersMainAddress(element);
 					Phone work = null;
 					Phone mobile = null;
@@ -525,7 +526,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 
 				iCell = 40;
 
-				List relatives = new ArrayList();
+				List<Relative> relatives = new ArrayList<>();
 				Relative mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (mainRelative == null) {
 					mainRelative = child.getMainRelative(CourseConstants.COURSE_PREFIX);
@@ -533,14 +534,14 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 				if (mainRelative != null) {
 					relatives.add(mainRelative);
 				}
-				Collection otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
+				Collection<Relative> otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX + owner.getPrimaryKey());
 				if (otherRelatives.isEmpty()) {
 					otherRelatives = child.getRelatives(CourseConstants.COURSE_PREFIX);
 				}
 				relatives.addAll(otherRelatives);
-				iterator = relatives.iterator();
-				while (iterator.hasNext()) {
-					Relative element = (Relative) iterator.next();
+				Iterator<Relative> relativesIterator = relatives.iterator();
+				while (relativesIterator.hasNext()) {
+					Relative element = relativesIterator.next();
 					String relation = this.iwrb.getLocalizedString("relation." + element.getRelation(), "relation." + element.getRelation());
 
 					row.createCell(iCell++).setCellValue(relation);
@@ -620,11 +621,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			}
 		}
 		wb.write(mos);
+		wb.close();
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
 		return buffer;
 	}
 
-	public MemoryFileBuffer writeAccountingXLS(IWContext iwc, Collection choices) throws Exception {
+	public MemoryFileBuffer writeAccountingXLS(IWContext iwc, Collection<CourseChoice> choices) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 
@@ -637,13 +639,13 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		sheet.setColumnWidth(4,  (14 * 256));
 		sheet.setColumnWidth(4,  (10 * 256));
 		HSSFFont font = wb.createFont();
-		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		font.setBold(true);
 		font.setFontHeightInPoints((short) 12);
 		HSSFCellStyle style = wb.createCellStyle();
 		style.setFont(font);
 
 		HSSFFont bigFont = wb.createFont();
-		bigFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		bigFont.setBold(true);
 		bigFont.setFontHeightInPoints((short) 13);
 		HSSFCellStyle bigStyle = wb.createCellStyle();
 		bigStyle.setFont(bigFont);
@@ -690,12 +692,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 		CourseChoice choice;
 		CourseApplication application;
 
-		Iterator iter = choices.iterator();
+		Iterator<CourseChoice> iter = choices.iterator();
 		String uuid = UUID.randomUUID().toString();
 		try {
 			while (iter.hasNext()) {
 				row = sheet.createRow(cellRow++);
-				choice = (CourseChoice) iter.next();
+				choice = iter.next();
 				application = choice.getApplication();
 				user = choice.getUser();
 				address = this.userBusiness.getUsersMainAddress(user);
@@ -723,12 +725,12 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					userPrice = 0;
 				}
 				else {
-					Map applicationMap = getCourseBusiness(iwc).getApplicationMap(application, new Boolean(false));
-					SortedSet prices = getCourseBusiness(iwc).calculatePrices(applicationMap);
-					Map discounts = getCourseBusiness(iwc).getDiscounts(uuid, prices, applicationMap);
+					Map<User, Collection<ApplicationHolder>> applicationMap = getCourseBusiness(iwc).getApplicationMap(application, new Boolean(false));
+					SortedSet<PriceHolder> prices = getCourseBusiness(iwc).calculatePrices(applicationMap);
+					Map<User, PriceHolder> discounts = getCourseBusiness(iwc).getDiscounts(uuid, prices, applicationMap);
 					CoursePrice price = course.getPrice();
 
-					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+					float coursePrice = (price != null ? price.getPrice() : course.getCoursePrice()) * (1 - discounts.get(user).getDiscount());
 
 					float carePrice = 0;
 					if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE) {
@@ -740,7 +742,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 					else if (choice.getDayCare() == CourseConstants.DAY_CARE_PRE_AND_POST) {
 						carePrice = price.getPreCarePrice() + price.getPostCarePrice();
 					}
-					carePrice = carePrice * (1 - ((PriceHolder) discounts.get(user)).getDiscount());
+					carePrice = carePrice * (1 - discounts.get(user).getDiscount());
 
 					userPrice = carePrice + coursePrice;
 				}
@@ -774,6 +776,7 @@ public class CourseParticipantsWriter extends DownloadWriter implements MediaWri
 			sheet.autoSizeColumn(i);
 		}
 		wb.write(mos);
+		wb.close();
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
 		return buffer;
 	}

@@ -78,7 +78,7 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 				Course course = business.getCourse(iwc.getParameter(CourseBlock.PARAMETER_COURSE_PK));
 				courseName = course.getName();
 
-				Collection choices = business.getCourseChoices(course, false);
+				Collection<CourseChoice> choices = business.getCourseChoices(course, false);
 
 				this.buffer = writeXLS(iwc, choices);
 				setAsDownload(iwc, "students.xls", this.buffer.length());
@@ -114,7 +114,7 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 		}
 	}
 
-	public MemoryFileBuffer writeXLS(IWContext iwc, Collection choices) throws Exception {
+	public MemoryFileBuffer writeXLS(IWContext iwc, Collection<CourseChoice> choices) throws Exception {
 		MemoryFileBuffer buffer = new MemoryFileBuffer();
 		MemoryOutputStream mos = new MemoryOutputStream(buffer);
 
@@ -129,13 +129,13 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 		sheet.setColumnWidth((short) 6, (short) (14 * 256));
 		sheet.setColumnWidth((short) 7, (short) (30 * 256));
 		HSSFFont font = wb.createFont();
-		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		font.setBold(true);
 		font.setFontHeightInPoints((short) 12);
 		HSSFCellStyle style = wb.createCellStyle();
 		style.setFont(font);
 
 		HSSFFont bigFont = wb.createFont();
-		bigFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		bigFont.setBold(true);
 		bigFont.setFontHeightInPoints((short) 13);
 		HSSFCellStyle bigStyle = wb.createCellStyle();
 		bigStyle.setFont(bigFont);
@@ -182,10 +182,10 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 		CourseChoice choice;
 		CourseApplication application;
 
-		Iterator iter = choices.iterator();
+		Iterator<CourseChoice> iter = choices.iterator();
 		while (iter.hasNext()) {
 			row = sheet.createRow(cellRow++);
-			choice = (CourseChoice) iter.next();
+			choice = iter.next();
 			application = choice.getApplication();
 			owner = application.getOwner();
 			user = choice.getUser();
@@ -230,6 +230,7 @@ public class CourseAttendanceWriter extends DownloadWriter implements MediaWrita
 			}
 		}
 		wb.write(mos);
+		wb.close();
 
 		buffer.setMimeType(MimeTypeUtil.MIME_TYPE_EXCEL_2);
 		return buffer;

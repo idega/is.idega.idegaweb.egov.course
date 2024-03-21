@@ -144,13 +144,13 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 			sheet.setColumnWidth(7, (8 * 256));
 			sheet.setColumnWidth(8, (20 * 256));
 			HSSFFont font = wb.createFont();
-			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+			font.setBold(true);
 			font.setFontHeightInPoints((short) 12);
 			HSSFCellStyle style = wb.createCellStyle();
 			style.setFont(font);
 
 			HSSFFont bigFont = wb.createFont();
-			bigFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+			bigFont.setBold(true);
 			bigFont.setFontHeightInPoints((short) 13);
 			HSSFCellStyle bigStyle = wb.createCellStyle();
 			bigStyle.setFont(bigFont);
@@ -219,6 +219,7 @@ public class CourseWriter extends DownloadWriter implements MediaWritable {
 				row.createCell(iCell++).setCellValue(CoreConstants.MINUS);
 			}
 			wb.write(mos);
+			wb.close();
 		} else {
 			Logger.getLogger(getClass().getName()).warning("No courses provided");
 		}
